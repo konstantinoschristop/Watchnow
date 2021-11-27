@@ -10,35 +10,48 @@ import Kingfisher
 
 struct TopCard: View {
     
-    let title: String
-    let backdropURL: URL
-    let rating: Double
+    var title: String = ""
+    var backdropURL: URL?
+    var rating: Double = 0.0
  //   let genre: String
+    
+    init(title: String?, backdropPath: String?, rating: Double?) {
+        
+        guard let title = title,
+              let backdropPath = backdropPath,
+              let rating = rating else {
+            return
+        }
+
+        self.title = title
+        self.backdropURL = URL(string: APIKeys().imageKey + backdropPath)!
+        self.rating = rating
+    }
     
     var body: some View {
         
         ZStack {
-        VStack(alignment: .leading) {
-
-                    KFImage.url(self.backdropURL)
-                     // .placeholder(placeholderImage)
-                        .downsampling(size: CGSize.init(width: 250, height: 200))
-                        .loadImmediately()
-                        .loadDiskFileSynchronously()
-                        .fromMemoryCacheOrRefresh()
-                        .cacheOriginalImage()
-                        .fade(duration: 0.25)
-                        .onProgress { receivedSize, totalSize in  }
-                        .onSuccess { result in  }
-                        .onFailure { error in }
-                        .resizable()
-                        .aspectRatio(16/9, contentMode: .fit)
-                        .cornerRadius(8)
-                        .shadow(radius: 4)
+            VStack(alignment: .leading) {
                 
-            Text(title)
-                .font(.system(size: 16, weight: .heavy))
-        }
+                KFImage.url(self.backdropURL)
+                // .placeholder(placeholderImage)
+                    .downsampling(size: CGSize.init(width: 450, height: 200))
+                    .loadImmediately()
+                    .loadDiskFileSynchronously()
+                    .fromMemoryCacheOrRefresh()
+                    .cacheOriginalImage()
+                    .fade(duration: 0.25)
+                    .onProgress { receivedSize, totalSize in  }
+                    .onSuccess { result in  }
+                    .onFailure { error in }
+                    .resizable()
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .cornerRadius(8)
+                    .shadow(radius: 4)
+                
+                Text(title)
+                    .font(.system(size: 16, weight: .heavy))
+            }
             HStack {
                 (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", rating))
                     .foregroundColor(.gray))

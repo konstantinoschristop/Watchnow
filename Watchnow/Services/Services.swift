@@ -14,45 +14,45 @@ class Services: ObservableObject {
     
     //MARK: - Movies API
     
-    func fetchUpcomingMovies(completion: @escaping (UpcomingMoviesViewModel?) -> ()) {
-        
-        guard let url = URL(string: api.upcomingMovies) else {
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let safeData = data {
-                do {
-                    let decodedData = try JSONDecoder().decode(UpcomingMoviesModel.self, from: safeData)
-                    
-                    let upcoming = UpcomingMoviesViewModel.init(dataModel: decodedData)
-                    completion(upcoming)
-                } catch {
-                    completion(nil)
-                }
-            }
-        }.resume()
-    }
+//    func fetchUpcomingMovies(completion: @escaping (UpcomingMoviesViewModel?) -> ()) {
+//        
+//        guard let url = URL(string: api.upcomingMovies) else {
+//            return
+//        }
+//        
+//        URLSession.shared.dataTask(with: url) { (data, response, error) in
+//            if let safeData = data {
+//                do {
+//                    let decodedData = try JSONDecoder().decode(UpcomingMoviesModel.self, from: safeData)
+//                    
+//                    let upcoming = UpcomingMoviesViewModel.init(dataModel: decodedData)
+//                    completion(upcoming)
+//                } catch {
+//                    completion(nil)
+//                }
+//            }
+//        }.resume()
+//    }
     
-    func fetchPopularMovies(completion: @escaping (PopularMoviesViewModel?) -> ()) {
-        
-        guard let url = URL(string: api.popularMovies) else {
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let safeData = data {
-                do {
-                    let decodedData = try JSONDecoder().decode(PopularMoviesModel.self, from: safeData)
-                    
-                    let popular = PopularMoviesViewModel.init(dataModel: decodedData)
-                    completion(popular)
-                } catch {
-                    completion(nil)
-                }
-            }
-        }.resume()
-    }
+//    func fetchPopularMovies(completion: @escaping (PopularMoviesViewModel?) -> ()) {
+//        
+//        guard let url = URL(string: api.popularMovies) else {
+//            return
+//        }
+//        
+//        URLSession.shared.dataTask(with: url) { (data, response, error) in
+//            if let safeData = data {
+//                do {
+//                    let decodedData = try JSONDecoder().decode(PopularMoviesModel.self, from: safeData)
+//                    
+//                    let popular = PopularMoviesViewModel.init(dataModel: decodedData)
+//                    completion(popular)
+//                } catch {
+//                    completion(nil)
+//                }
+//            }
+//        }.resume()
+//    }
     
     func fetchMovieGenres(completion: @escaping (MovieGenresViewModel?) -> ()) {
         

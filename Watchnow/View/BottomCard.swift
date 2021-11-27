@@ -10,10 +10,22 @@ import Kingfisher
 
 struct BottomCard: View {
         
-        let title: String
-        let posterURL: URL
-        let rating: Double
-     //   let genre: String
+    var title: String = ""
+    var posterURL: URL?
+    var rating: Double = 0.0
+    
+    init(title: String?, posterPath: String?, rating: Double?) {
+        
+        guard let title = title,
+              let posterPath = posterPath,
+              let rating = rating else {
+            return
+        }
+
+        self.title = title
+        self.posterURL = URL(string: APIKeys().imageKey + posterPath)!
+        self.rating = rating
+    }
         
         var body: some View {
             

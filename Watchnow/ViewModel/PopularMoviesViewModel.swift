@@ -7,28 +7,23 @@
 
 import Foundation
 
-class PopularMoviesViewModel {
+@MainActor
+class PopularMoviesViewModel: ObservableObject {
     
-    let api = APIKeys()
+    @Published private(set) var popularMovies: PopularMoviesModel = PopularMoviesModel.init(results: [])
     
-    var movieIDs: [String] = []
-    var movieTitles: [String] = []
-    var movieRatings: [Double] = []
-    var moviePosters: [URL] = []
+    private let service: MovieService
     
-    init(dataModel: PopularMoviesModel) {
-        for (index,result) in dataModel.results.enumerated() {
-//            if index > 9 {
-//                break
-//            }
-                movieIDs.append(String(result.id))
-                movieTitles.append(result.title)
-                
-                guard let posterUrl = URL(string: api.imageKey + result.poster_path) else {
-                    return
-                }
-                movieRatings.append(result.vote_average)
-                moviePosters.append(posterUrl)
+    init(service: MovieService) {
+        self.service = service
+    }
+    
+    func getPopularMovies() async {
+        
+        do {
+            self.popularMovies = try await service.fetchPopularMovies()
+        } catch {
+            print(error)
         }
     }
 }

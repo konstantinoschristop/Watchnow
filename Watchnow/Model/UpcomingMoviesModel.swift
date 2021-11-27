@@ -13,7 +13,7 @@ struct UpcomingMoviesModel: Codable {
 
 
 // MARK: - Result
-struct Result: Codable {
+struct Result: Codable, Hashable {
     let backdrop_path: String?
     let genre_ids: [Int]
     let id: Int

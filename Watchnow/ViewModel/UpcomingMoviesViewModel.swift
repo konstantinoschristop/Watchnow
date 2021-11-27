@@ -8,35 +8,23 @@
 import Foundation
 import SwiftUI
 
-class UpcomingMoviesViewModel {
+@MainActor
+class UpcomingMoviesViewModel: ObservableObject {
     
-    let api = APIKeys()
+    @Published private(set) var upcomingMovies: UpcomingMoviesModel = UpcomingMoviesModel.init(results: [])
     
-    var movieIDs: [String] = []
-    var movieTitles: [String] = []
-    var movieRatings: [Double] = []
-    var movieBackdrops: [URL] = []
+    private let service: MovieService
     
-    init(dataModel: UpcomingMoviesModel) {
-            
-        for (index,result) in dataModel.results.enumerated() {
-//            if index > 9 {
-//                break
-//            }
-            
-            if let backdrop = result.backdrop_path {
-                movieIDs.append(String(result.id))
-                movieTitles.append(result.title)
-                
-                guard let backdropUrl = URL(string: api.imageKey + backdrop) else {
-                    return
-                }
-                movieRatings.append(result.vote_average)
-                movieBackdrops.append(backdropUrl)
-            } else {
-                continue
-            }
-            
+    init(service: MovieService) {
+        self.service = service
+    }
+    
+    func getUpcomingMovies() async {
+        
+        do {
+            self.upcomingMovies = try await service.fetchUpcomingMovies()
+        } catch {
+            print(error)
         }
     }
 }

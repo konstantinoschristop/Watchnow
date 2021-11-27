@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ContentDetailsView: View {
-
+    
     let text: String?
-
+    
     var body: some View {
         Text("hi")
         
-                    .navigationTitle("hi")
-            }
+            .navigationTitle("hi")
+    }
     
 }
 
