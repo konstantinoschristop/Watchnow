@@ -25,8 +25,9 @@ struct ContentView: View {
         if upcomingReady == true && popularReady == true && upcomingMoviesModel != nil && popularMoviesModel != nil {
             TabView {
                 MoviesView(upcomingModel: upcomingMoviesModel!, popularModel: popularMoviesModel!)
+                    .background(Color(.systemBackground))
                     .tabItem {
-                        Label("Menu", systemImage: "list.dash")
+                        Label("Movies", systemImage: "film")
                     }
         }
         } else {

@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import URLImage
-import ACarousel
 
 struct MoviesView: View {
     
@@ -41,7 +39,6 @@ struct MoviesView: View {
             HStack {
                 Text("Upcoming Movies")
                     .font(.system(size: 25, weight: .heavy))
-                    .foregroundColor(.black)
                 Spacer()
             }
             .padding(.horizontal)
@@ -63,7 +60,6 @@ struct MoviesView: View {
                             }
                             .scaleEffect(.init(width: scale, height: scale))
                             .animation(.easeOut(duration: 1))
-                            
                             .padding(.vertical)
                         }
                         .frame(width: 350, height: 210)
@@ -79,7 +75,6 @@ struct MoviesView: View {
             HStack {
                 Text("Popular Movies")
                     .font(.system(size: 25, weight: .heavy))
-                    .foregroundColor(.black)
                 Spacer()
             }
             .padding(.horizontal)
