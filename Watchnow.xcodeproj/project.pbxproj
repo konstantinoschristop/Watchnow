@@ -17,7 +17,6 @@
 		8A981D5926B5AF1100993232 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A981D5826B5AF1100993232 /* Assets.xcassets */; };
 		8A981D5C26B5AF1100993232 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A981D5B26B5AF1100993232 /* Preview Assets.xcassets */; };
 		8A981D5F26B5AF1100993232 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A981D5D26B5AF1100993232 /* LaunchScreen.storyboard */; };
-		8A981D6C26B68EF900993232 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A981D6B26B68EF900993232 /* Services.swift */; };
 		8A981D7026B6917A00993232 /* UpcomingMoviesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A981D6F26B6917A00993232 /* UpcomingMoviesModel.swift */; };
 		8A981D7326B6920700993232 /* APIKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A981D7226B6920700993232 /* APIKeys.swift */; };
 		8A981D7626B6929400993232 /* PopularMoviesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A981D7526B6929400993232 /* PopularMoviesModel.swift */; };
@@ -48,7 +47,6 @@
 		8A981D5B26B5AF1100993232 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8A981D5E26B5AF1100993232 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8A981D6026B5AF1100993232 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8A981D6B26B68EF900993232 /* Services.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
 		8A981D6F26B6917A00993232 /* UpcomingMoviesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpcomingMoviesModel.swift; sourceTree = "<group>"; };
 		8A981D7226B6920700993232 /* APIKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeys.swift; sourceTree = "<group>"; };
 		8A981D7526B6929400993232 /* PopularMoviesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopularMoviesModel.swift; sourceTree = "<group>"; };
@@ -162,7 +160,6 @@
 		8A981D6A26B68D8800993232 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				8A981D6B26B68EF900993232 /* Services.swift */,
 				8A981D7226B6920700993232 /* APIKeys.swift */,
 				8AC338FB2752800D00834B46 /* MovieService.swift */,
 			);
@@ -261,7 +258,6 @@
 				8A981D8E26B6A3B100993232 /* MovieDetailsViewModel.swift in Sources */,
 				8A8F4B3E26BC1EF000D87BBB /* BottomCard.swift in Sources */,
 				8AC338FE2752923E00834B46 /* TopView.swift in Sources */,
-				8A981D6C26B68EF900993232 /* Services.swift in Sources */,
 				8A981D8526B6A38100993232 /* PopularMoviesViewModel.swift in Sources */,
 				8A981D7026B6917A00993232 /* UpcomingMoviesModel.swift in Sources */,
 				8A981D9126B6A85F00993232 /* MoviesView.swift in Sources */,

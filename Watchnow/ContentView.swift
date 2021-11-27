@@ -10,7 +10,13 @@ import SwiftUI
 struct ContentView: View {
     
     var body: some View {
-        MoviesView()
+        TabView {
+            MoviesView()
+                .background(Color(.systemBackground))
+                .tabItem {
+                    Label("Movies", systemImage: "film")
+                }
+        }
     }
 }
 
