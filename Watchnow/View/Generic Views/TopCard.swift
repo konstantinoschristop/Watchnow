@@ -35,7 +35,7 @@ struct TopCard: View {
                 
                 KFImage.url(self.backdropURL)
                 // .placeholder(placeholderImage)
-                    .downsampling(size: CGSize.init(width: 450, height: 200))
+                    .downsampling(size: CGSize.init(width: 450, height: 250))
                     .loadImmediately()
                     .loadDiskFileSynchronously()
                     .fromMemoryCacheOrRefresh()

@@ -34,7 +34,7 @@ struct BottomCard: View {
                     
                         KFImage.url(self.posterURL)
                          // .placeholder(placeholderImage)
-                            .downsampling(size: CGSize.init(width: 200, height: 300))
+                            .downsampling(size: CGSize.init(width: 250, height: 450))
                             .loadImmediately()
                             .loadDiskFileSynchronously()
                             .fromMemoryCacheOrRefresh()
