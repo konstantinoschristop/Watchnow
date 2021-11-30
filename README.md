@@ -1,1 +1,3 @@
 # Watchnow
+
+*.xcuserdata
