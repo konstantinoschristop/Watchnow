@@ -33,7 +33,7 @@ struct TopView: View {
                             VStack {
                                 NavigationLink(destination: ContentDetailsView(text: movie.title),
                                        label: {
-                                    TopCard(title: movie.title, backdropPath: movie.backdrop_path, rating: movie.vote_average)
+                                    TopCard(title: movie.title ?? movie.name, backdropPath: movie.backdrop_path ?? movie.poster_path, rating: movie.vote_average)
                                            .frame(width: 300, height: 200, alignment: .center)
                                        })
                             }

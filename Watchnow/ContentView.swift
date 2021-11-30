@@ -11,11 +11,41 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            MoviesView()
-                .background(Color(.systemBackground))
-                .tabItem {
-                    Label("Movies", systemImage: "film")
-                }
+            NavigationView {
+                MoviesView()
+                    .background(Color(.systemBackground))
+                    .navigationBarTitle("Movies")
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .tabItem {
+                Label("Movies", systemImage: "film")
+            }
+            
+            NavigationView {
+                SerieView()
+                    .background(Color(.systemBackground))
+                    .navigationBarTitle("Series")
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .tabItem {
+                Label("Series", systemImage: "tv.inset.filled")
+            }
+            
+            NavigationView {
+               
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .tabItem {
+                Label("Search", systemImage: "magnifyingglass.circle")
+            }
+            
+            NavigationView {
+               
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .tabItem {
+                Label("Profile", systemImage: "person.circle.fill")
+            }
         }
     }
 }

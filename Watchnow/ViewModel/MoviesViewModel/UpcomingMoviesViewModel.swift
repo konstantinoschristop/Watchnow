@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI
 
 @MainActor
 class UpcomingMoviesViewModel: ObservableObject {

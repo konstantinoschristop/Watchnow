@@ -11,6 +11,7 @@ struct MoviesView: View {
     
     @StateObject var upcomingMoviesVM = UpcomingMoviesViewModel(service: MovieService())
     @StateObject var popularMoviesVM = PopularMoviesViewModel(service: MovieService())
+    @StateObject var trendingMoviesVM = TrendingMoviesViewModel(service: MovieService())
     
     var body: some View {
         
@@ -28,6 +29,11 @@ struct MoviesView: View {
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    
+                    BottomView(results: trendingMoviesVM.trendingMovies.results, viewTitle: "Trending Today")
+                        .listRowSeparatorTint(.clear)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 }
                 .listStyle(.plain)
             }
@@ -35,10 +41,12 @@ struct MoviesView: View {
         .task {
             await upcomingMoviesVM.getUpcomingMovies()
             await popularMoviesVM.getPopularMovies()
+            await trendingMoviesVM.getTrendingMovies()
         }
         .refreshable {
             await upcomingMoviesVM.getUpcomingMovies()
             await popularMoviesVM.getPopularMovies()
+            await trendingMoviesVM.getTrendingMovies()
         }
     }
 }

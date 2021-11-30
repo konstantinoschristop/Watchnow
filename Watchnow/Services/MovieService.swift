@@ -22,10 +22,19 @@ class MovieService {
     
     func fetchPopularMovies() async throws -> PopularMoviesModel {
         
-        let url = URL(string: api.upcomingMovies)
+        let url = URL(string: api.popularMovies)
         
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(PopularMoviesModel.self, from: data)
+    }
+    
+    func fetchTrendingMovies() async throws -> TrendingMoviesModel {
+        
+        let url = URL(string: api.trendingMovies)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(TrendingMoviesModel.self, from: data)
     }
 }
