@@ -20,17 +20,17 @@ struct SerieView: View {
                 ProgressView()
             } else {
                 List {
-                    TopView(results: popularSeriesVM.popularSeries.results, viewTitle: "Popular Series")
+                    TopView(results: popularSeriesVM.popularSeries.results, viewTitle: "Popular Series", screenType: .serie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
                     
-                    BottomView(results: airingTodaySeriesVM.airingTodaySeries.results, viewTitle: "On Air Today")
+                    BottomView(results: airingTodaySeriesVM.airingTodaySeries.results, viewTitle: "On Air Today", screenType: .serie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     
-                    BottomView(results: trendingSeriesVM.trendingSeries.results, viewTitle: "Trending Today")
+                    BottomView(results: trendingSeriesVM.trendingSeries.results, viewTitle: "Trending Today", screenType: .serie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))

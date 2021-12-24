@@ -15,7 +15,8 @@ struct TopCard: View {
     var rating: Double = 0.0
     var result: Result
     var screenType: ScreenTypes
-    //   let genre: String
+   
+    @State var isPresented = false
     
     init(title: String?, backdropPath: String?, rating: Double?, result: Result, screenType: ScreenTypes) {
         
@@ -37,11 +38,9 @@ struct TopCard: View {
         
         ZStack {
             VStack(alignment: .leading) {
-                NavigationLink(destination: ContentDetailsView(result: result, screenType: screenType),
-                               label: {
                     KFImage.url(self.backdropURL)
                     // .placeholder(placeholderImage)
-                        .downsampling(size: CGSize.init(width: 450, height: 250))
+                        .downsampling(size: CGSize.init(width: 650, height: 350))
                         .loadImmediately()
                         .loadDiskFileSynchronously()
                         .fromMemoryCacheOrRefresh()
@@ -54,11 +53,16 @@ struct TopCard: View {
                         .aspectRatio(16/9, contentMode: .fit)
                         .cornerRadius(15)
                         .shadow(color: .black, radius: 5)
-                })
-                
+                        .onTapGesture {
+                            isPresented.toggle()
+                        }
                 Text(title)
                     .font(.system(size: 16, weight: .heavy))
             }
+            .sheet(isPresented: $isPresented) {
+                ContentDetailsView(result: result, screenType: screenType)
+            }
+            
             HStack {
                 (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", rating))
                     .foregroundColor(.gray))

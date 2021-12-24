@@ -13,9 +13,16 @@ struct BottomCard: View {
     var title: String = ""
     var posterURL: URL?
     var rating: Double = 0.0
+    var result: Result
+    var screenType: ScreenTypes
     @Environment(\.colorScheme) var colorScheme
     
-    init(title: String?, posterPath: String?, rating: Double?) {
+    @State var isPresented = false
+    
+    init(title: String?, posterPath: String?, rating: Double?, result: Result, screenType: ScreenTypes) {
+        
+        self.screenType = screenType
+        self.result = result
         
         guard let title = title,
               let posterPath = posterPath,
@@ -32,11 +39,11 @@ struct BottomCard: View {
         
         ZStack {
             VStack(alignment: .center) {
-//                NavigationLink(destination: ContentDetailsView(text: self.title),
-//                               label: {
                     KFImage.url(self.posterURL)
-                    // .placeholder(placeholderImage)
-                        .downsampling(size: CGSize.init(width: 250, height: 450))
+//                        .placeholder({
+//                            ProgressView()
+//                        })
+                        .downsampling(size: CGSize.init(width: 350, height: 650))
                         .loadImmediately()
                         .loadDiskFileSynchronously()
                         .fromMemoryCacheOrRefresh()
@@ -49,11 +56,17 @@ struct BottomCard: View {
                         .aspectRatio(contentMode: .fit)
                         .cornerRadius(15)
                         .shadow(color: .black, radius: 5)
-          //      })
+                        .onTapGesture {
+                            isPresented.toggle()
+                        }
                 Text(title)
                     .font(.system(size: 16, weight: .heavy))
                     .multilineTextAlignment(.center)
             }
+            .sheet(isPresented: $isPresented) {
+                ContentDetailsView(result: result, screenType: screenType)
+            }
+            
             HStack {
                 (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", rating))
                     .foregroundColor(.gray))

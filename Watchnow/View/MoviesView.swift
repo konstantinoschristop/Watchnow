@@ -20,17 +20,17 @@ struct MoviesView: View {
                 ProgressView()
             } else {
                 List {
-                    TopView(results: upcomingMoviesVM.upcomingMovies.results, viewTitle: "Upcoming Movies")
+                    TopView(results: upcomingMoviesVM.upcomingMovies.results, viewTitle: "Upcoming Movies", screenType: .movie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
                     
-                    BottomView(results: popularMoviesVM.popularMovies.results, viewTitle: "Popular Movies")
+                    BottomView(results: popularMoviesVM.popularMovies.results, viewTitle: "Popular Movies", screenType: .movie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     
-                    BottomView(results: trendingMoviesVM.trendingMovies.results, viewTitle: "Trending Today")
+                    BottomView(results: trendingMoviesVM.trendingMovies.results, viewTitle: "Trending Today", screenType: .movie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))

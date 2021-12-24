@@ -20,10 +20,10 @@ struct ContentDetailsView: View {
     
     
     var body: some View {
-        VStack {
-            KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? "")!))
+        VStack() {
+            KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
             // .placeholder(placeholderImage)
-                .downsampling(size: CGSize.init(width: 250, height: 450))
+                .downsampling(size: CGSize.init(width: 450, height: 750))
                 .loadImmediately()
                 .loadDiskFileSynchronously()
                 .fromMemoryCacheOrRefresh()
@@ -33,13 +33,25 @@ struct ContentDetailsView: View {
                 .onSuccess { result in  }
                 .onFailure { error in }
                 .resizable()
-                .aspectRatio(contentMode: .fit)
+                .aspectRatio(contentMode: .fill)
                 .ignoresSafeArea()
+                .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .top))
+                .frame(height: 400)
+            
+            Spacer()
+                .frame(height: 70)
+            Text((result.title ?? result.name) ?? "")
+                .font(.system(size: 25, weight: .heavy))
             Spacer()
         }
-       
         
-          //  .navigationTitle((result.title ?? result.name) ?? "")
+//        switch screenType {
+//        case .movie:
+//            // movie details
+//        case .serie:
+//            // serie details
+//        }
+      
     }
     
 }
