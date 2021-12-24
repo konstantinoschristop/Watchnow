@@ -30,11 +30,8 @@ struct BottomView: View {
                         GeometryReader { proxy in
                             let scale = Scale.getScale(proxy: proxy, scaleType: .vertical)
                             VStack {
-                                NavigationLink(destination: ContentDetailsView(text: movie.title),
-                                       label: {
-                                    BottomCard(title: movie.title ?? movie.name, posterPath: movie.poster_path ?? movie.backdrop_path, rating: movie.vote_average)
-                                          .frame(width: 200, height: 300, alignment: .center)
-                                       })
+                                BottomCard(title: movie.title ?? movie.name, posterPath: movie.poster_path ?? movie.backdrop_path, rating: movie.vote_average)
+                                    .frame(width: 200, height: 300, alignment: .center)
                             }
                             .scaleEffect(.init(width: scale, height: scale))
                             .animation(.easeOut, value: 1)

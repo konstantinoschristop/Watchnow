@@ -13,16 +13,21 @@ struct TopCard: View {
     var title: String = ""
     var backdropURL: URL?
     var rating: Double = 0.0
- //   let genre: String
+    var result: Result
+    var screenType: ScreenTypes
+    //   let genre: String
     
-    init(title: String?, backdropPath: String?, rating: Double?) {
+    init(title: String?, backdropPath: String?, rating: Double?, result: Result, screenType: ScreenTypes) {
+        
+        self.screenType = screenType
+        self.result = result
         
         guard let title = title,
               let backdropPath = backdropPath,
               let rating = rating else {
-            return
-        }
-
+                  return
+              }
+        
         self.title = title
         self.backdropURL = URL(string: APIKeys().imageKey + backdropPath)!
         self.rating = rating
@@ -32,22 +37,24 @@ struct TopCard: View {
         
         ZStack {
             VStack(alignment: .leading) {
-                
-                KFImage.url(self.backdropURL)
-                // .placeholder(placeholderImage)
-                    .downsampling(size: CGSize.init(width: 450, height: 250))
-                    .loadImmediately()
-                    .loadDiskFileSynchronously()
-                    .fromMemoryCacheOrRefresh()
-                    .cacheOriginalImage()
-                    .fade(duration: 0.25)
-                    .onProgress { receivedSize, totalSize in  }
-                    .onSuccess { result in  }
-                    .onFailure { error in }
-                    .resizable()
-                    .aspectRatio(16/9, contentMode: .fit)
-                    .cornerRadius(8)
-                    .shadow(radius: 4)
+                NavigationLink(destination: ContentDetailsView(result: result, screenType: screenType),
+                               label: {
+                    KFImage.url(self.backdropURL)
+                    // .placeholder(placeholderImage)
+                        .downsampling(size: CGSize.init(width: 450, height: 250))
+                        .loadImmediately()
+                        .loadDiskFileSynchronously()
+                        .fromMemoryCacheOrRefresh()
+                        .cacheOriginalImage()
+                        .fade(duration: 0.25)
+                        .onProgress { receivedSize, totalSize in  }
+                        .onSuccess { result in  }
+                        .onFailure { error in }
+                        .resizable()
+                        .aspectRatio(16/9, contentMode: .fit)
+                        .cornerRadius(15)
+                        .shadow(color: .black, radius: 5)
+                })
                 
                 Text(title)
                     .font(.system(size: 16, weight: .heavy))

@@ -31,11 +31,8 @@ struct TopView: View {
                         GeometryReader { proxy in
                             let scale = Scale.getScale(proxy: proxy, scaleType: .horizontal)
                             VStack {
-                                NavigationLink(destination: ContentDetailsView(text: movie.title),
-                                       label: {
-                                    TopCard(title: movie.title ?? movie.name, backdropPath: movie.backdrop_path ?? movie.poster_path, rating: movie.vote_average)
+                                TopCard(title: movie.title ?? movie.name, backdropPath: movie.backdrop_path ?? movie.poster_path, rating: movie.vote_average, result: movie, screenType: .movie)
                                            .frame(width: 300, height: 200, alignment: .center)
-                                       })
                             }
                             .scaleEffect(.init(width: scale, height: scale))
                             .animation(.easeOut, value: 1)
