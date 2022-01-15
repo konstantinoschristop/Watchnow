@@ -15,8 +15,8 @@ struct ContentView: View {
                 MoviesView()
                     .background(Color(.systemBackground))
                     .navigationBarTitle("Movies")
+                    .navigationBarTitleDisplayMode(.automatic)
             }
-            .navigationBarTitleDisplayMode(.inline)
             .tabItem {
                 Label("Movies", systemImage: "film")
             }
@@ -25,8 +25,8 @@ struct ContentView: View {
                 SerieView()
                     .background(Color(.systemBackground))
                     .navigationBarTitle("Series")
+                    .navigationBarTitleDisplayMode(.automatic)
             }
-            .navigationBarTitleDisplayMode(.inline)
             .tabItem {
                 Label("Series", systemImage: "tv.inset.filled")
             }
@@ -34,7 +34,6 @@ struct ContentView: View {
             NavigationView {
                
             }
-            .navigationBarTitleDisplayMode(.inline)
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass.circle")
             }
@@ -42,7 +41,6 @@ struct ContentView: View {
             NavigationView {
                
             }
-            .navigationBarTitleDisplayMode(.inline)
             .tabItem {
                 Label("Profile", systemImage: "person.circle.fill")
             }

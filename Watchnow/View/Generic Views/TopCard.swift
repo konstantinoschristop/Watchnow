@@ -47,7 +47,6 @@ struct TopCard: View {
                             .colorInvert()
                     }
                 }
-                
             }
             
             HStack {

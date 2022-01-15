@@ -17,7 +17,7 @@ struct ContentDetailsView: View {
     
     let result: Result
     let screenType: ScreenTypes
-    
+    @Environment(\.presentationMode) var presentation
     
     fileprivate func Details() -> some View {
         return VStack(alignment: .center) {
@@ -72,10 +72,10 @@ struct ContentDetailsView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .ignoresSafeArea()
-                            .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .offset(y: geometry.frame(in: .global).minY/9)
                             .clipped()
+                           // .offset(y: geometry.frame(in: .global).minY/9)
+                            .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
                     } else {
                         KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
                             .downsampling(size: CGSize.init(width: 550, height: 850))
@@ -90,25 +90,24 @@ struct ContentDetailsView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .ignoresSafeArea()
-                            .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
                             .frame(width: geometry.size.width, height: geometry.size.height + geometry.frame(in: .global).minY)
                             .clipped()
-                            .offset(y: -geometry.frame(in: .global).minY)
+                            //.offset(y: -geometry.frame(in: .global).minY + 20)
+                            .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
                     }
                 }
             }
-            .frame(height: 600)
-            .padding(.top, -10)
+            .frame(height: 450)
             VStack {
-                Spacer(minLength: -20)
+               // Spacer(minLength: -10)
                 Details()
-                Details()
-                Details()
+               
+                Spacer(minLength: 40)
             }
-
         }
-        .edgesIgnoringSafeArea(.all)
-        
+        .navigationTitle((result.title ?? result.name) ?? "")
+        .navigationBarTitleDisplayMode(.inline)
+      
         
         //        switch screenType {
         //        case .movie:
@@ -118,5 +117,6 @@ struct ContentDetailsView: View {
         //        }
         
     }
+    
     
 }
