@@ -10,61 +10,48 @@ import Kingfisher
 
 struct TopCard: View {
     
-    var title: String = ""
-    var backdropURL: URL?
-    var rating: Double = 0.0
-    var result: Result
+    var content: Result
     var screenType: ScreenTypes
-   
-    @State var isPresented = false
     
-    init(title: String?, backdropPath: String?, rating: Double?, result: Result, screenType: ScreenTypes) {
+    init(content: Result, screenType: ScreenTypes) {
         
         self.screenType = screenType
-        self.result = result
-        
-        guard let title = title,
-              let backdropPath = backdropPath,
-              let rating = rating else {
-                  return
-              }
-        
-        self.title = title
-        self.backdropURL = URL(string: APIKeys().imageKey + backdropPath)!
-        self.rating = rating
+        self.content = content
     }
     
     var body: some View {
         
         ZStack {
             VStack(alignment: .leading) {
-                    KFImage.url(self.backdropURL)
-                    // .placeholder(placeholderImage)
-                        .downsampling(size: CGSize.init(width: 650, height: 350))
-                        .loadImmediately()
-                        .loadDiskFileSynchronously()
-                        .fromMemoryCacheOrRefresh()
-                        .cacheOriginalImage()
-                        .fade(duration: 0.25)
-                        .onProgress { receivedSize, totalSize in  }
-                        .onSuccess { result in  }
-                        .onFailure { error in }
-                        .resizable()
-                        .aspectRatio(16/9, contentMode: .fit)
-                        .cornerRadius(15)
-                        .shadow(color: .black, radius: 5)
-                        .onTapGesture {
-                            isPresented.toggle()
-                        }
-                Text(title)
-                    .font(.system(size: 16, weight: .heavy))
-            }
-            .sheet(isPresented: $isPresented) {
-                ContentDetailsView(result: result, screenType: screenType)
+                NavigationLink {
+                    ContentDetailsView(result: content, screenType: screenType)
+                } label: {
+                    VStack {
+                        KFImage.url(URL(string: APIKeys().imageKey + (content.backdrop_path ?? "")))
+                            .downsampling(size: CGSize.init(width: 650, height: 350))
+                            .loadImmediately()
+                            .loadDiskFileSynchronously()
+                            .fromMemoryCacheOrRefresh()
+                            .cacheOriginalImage()
+                            .fade(duration: 0.25)
+                            .onProgress { receivedSize, totalSize in  }
+                            .onSuccess { result in  }
+                            .onFailure { error in }
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(15)
+                            .shadow(color: .black, radius: 5)
+                        Text((content.title ?? content.name) ?? "")
+                            .font(.system(size: 16, weight: .heavy))
+                            .foregroundColor(Color(.systemBackground))
+                            .colorInvert()
+                    }
+                }
+                
             }
             
             HStack {
-                (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", rating))
+                (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", content.vote_average ?? "-"))
                     .foregroundColor(.gray))
                     .font(.system(size: 14, weight: .regular))
                     .padding(.vertical, 5)

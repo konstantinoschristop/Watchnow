@@ -32,7 +32,7 @@ struct TopView: View {
                         GeometryReader { proxy in
                             let scale = Scale.getScale(proxy: proxy, scaleType: .horizontal)
                             VStack {
-                                TopCard(title: movie.title ?? movie.name, backdropPath: movie.backdrop_path ?? movie.poster_path, rating: movie.vote_average, result: movie, screenType: screenType)
+                                TopCard(content: movie, screenType: screenType)
                                            .frame(width: 300, height: 200, alignment: .center)
                             }
                             .scaleEffect(.init(width: scale, height: scale))

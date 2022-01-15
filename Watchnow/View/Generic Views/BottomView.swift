@@ -31,7 +31,7 @@ struct BottomView: View {
                         GeometryReader { proxy in
                             let scale = Scale.getScale(proxy: proxy, scaleType: .vertical)
                             VStack {
-                                BottomCard(title: movie.title ?? movie.name, posterPath: movie.poster_path ?? movie.backdrop_path, rating: movie.vote_average, result: movie, screenType: screenType)
+                                BottomCard(content: movie, screenType: screenType)
                                     .frame(width: 200, height: 300, alignment: .center)
                             }
                             .scaleEffect(.init(width: scale, height: scale))
