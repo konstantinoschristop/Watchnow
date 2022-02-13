@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 class AiringTodaySeriesViewModel: ObservableObject {
     
-    @Published private(set) var airingTodaySeries: AiringTodaySeriesModel = AiringTodaySeriesModel.init(results: [])
+    @Published private(set) var airingTodaySeries: AiringTodaySeriesModel?
     
     private let service: SerieService
     

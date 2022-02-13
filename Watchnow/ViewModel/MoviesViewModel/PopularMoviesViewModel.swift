@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 class PopularMoviesViewModel: ObservableObject {
     
-    @Published private(set) var popularMovies: PopularMoviesModel = PopularMoviesModel.init(results: [])
+    @Published private(set) var popularMovies: PopularMoviesModel?
     
     private let service: MovieService
     

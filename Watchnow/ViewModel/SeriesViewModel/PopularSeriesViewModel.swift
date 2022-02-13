@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 class PopularSeriesViewModel: ObservableObject {
     
-    @Published private(set) var popularSeries: PopularSeriesModel = PopularSeriesModel.init(results: [])
+    @Published private(set) var popularSeries: PopularSeriesModel?
     
     private let service: SerieService
     

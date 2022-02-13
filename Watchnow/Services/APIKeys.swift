@@ -9,7 +9,11 @@ import Foundation
 
 class APIKeys {
     
+    let baseURL = "https://api.themoviedb.org/3/"
+    
     let imageKey = "https://image.tmdb.org/t/p/original/"
+    
+    let imageCastKey = "https://image.tmdb.org/t/p/original"
     
     let apikey = "?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     
@@ -24,6 +28,8 @@ class APIKeys {
     let airingTodaySeries = "https://api.themoviedb.org/3/tv/on_the_air?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page=1"
     
     let trendingSeries = "https://api.themoviedb.org/3/trending/tv/day?api_key=8a5d569103b429228d23a32db4b9a426"
+    
+    let credits = "credits?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     
     let movieGenres = "https://api.themoviedb.org/3/genre/movie/list?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     

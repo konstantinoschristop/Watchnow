@@ -16,26 +16,30 @@ struct SerieView: View {
     var body: some View {
         
         Group {
-            if popularSeriesVM.popularSeries.results.isEmpty {
-                ProgressView()
-            } else {
+            if let results = popularSeriesVM.popularSeries?.results {
                 List {
-                    TopView(results: popularSeriesVM.popularSeries.results, viewTitle: "Popular Series", screenType: .serie)
+                    TopView(results: results, viewTitle: "Popular Series", screenType: .tv)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
                     
-                    BottomView(results: airingTodaySeriesVM.airingTodaySeries.results, viewTitle: "On Air Today", screenType: .serie)
-                        .listRowSeparatorTint(.clear)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    if let results = airingTodaySeriesVM.airingTodaySeries?.results {
+                        BottomView(results: results, viewTitle: "On Air Today", screenType: .tv)
+                            .listRowSeparatorTint(.clear)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }
                     
-                    BottomView(results: trendingSeriesVM.trendingSeries.results, viewTitle: "Trending Today", screenType: .serie)
-                        .listRowSeparatorTint(.clear)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    if let results =  trendingSeriesVM.trendingSeries?.results {
+                        BottomView(results: results, viewTitle: "Trending Today", screenType: .tv)
+                            .listRowSeparatorTint(.clear)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }
                 }
                 .listStyle(.plain)
+            } else {
+                ProgressView()
             }
         }
         .task {

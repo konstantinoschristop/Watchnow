@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 class TrendingSeriesViewModel: ObservableObject {
     
-    @Published private(set) var trendingSeries: TrendingSeriesModel = TrendingSeriesModel.init(results: [])
+    @Published private(set) var trendingSeries: TrendingSeriesModel?
     
     private let service: SerieService
     
