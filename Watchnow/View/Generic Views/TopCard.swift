@@ -12,6 +12,7 @@ struct TopCard: View {
     
     var content: Result
     var screenType: ScreenTypes
+    @State var isPresented = false
     
     init(content: Result, screenType: ScreenTypes) {
         

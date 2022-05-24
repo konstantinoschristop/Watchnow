@@ -12,7 +12,20 @@ struct CastView: View {
     
     let cast: [Cast]
     
+    init(cast: [Cast]?) {
+        guard let cast = cast else {
+            self.cast = []
+            return
+        }
+
+        self.cast = cast
+    }
+    
+    
     var body: some View {
+        
+        Spacer()
+            .frame(height: 40)
         
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
