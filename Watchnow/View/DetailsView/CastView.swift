@@ -21,7 +21,6 @@ struct CastView: View {
         self.cast = cast
     }
     
-    
     var body: some View {
         
         Spacer()
@@ -44,13 +43,14 @@ struct CastView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .cornerRadius(6)
-                            .shadow(color: .black, radius: 5)
+                            .shadow(color: .black, radius: 1)
                             .frame(width: 80, height: 120)
                         Text((cast.name ?? cast.original_name) ?? "")
                             .font(.system(size: 12, weight: .heavy))
                             .foregroundColor(Color(.systemBackground))
                             .colorInvert()
                             .frame(width: 80, height: 30)
+                            .padding(.leading, 10)
                     }
                 }
             }
