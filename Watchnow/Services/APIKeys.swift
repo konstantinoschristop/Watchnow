@@ -35,5 +35,5 @@ class APIKeys {
     
     let movieDetails = "https://api.themoviedb.org/3/movie/" // + movieID + apikey
     
-    let similarMovie = "https://api.themoviedb.org/3/movie/"  // +  movieID/similar + apikey
+    let similar = "similar?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"  // +  movieID/similar + apikey
 }

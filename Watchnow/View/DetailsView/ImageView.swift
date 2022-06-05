@@ -20,7 +20,7 @@ struct ImageView: View {
             let height = size.height + minY
             
             KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
-                .downsampling(size: CGSize.init(width: 550, height: 400))
+               // .downsampling(size: CGSize.init(width: 550, height: 400))
                 .loadImmediately()
                 .loadDiskFileSynchronously()
                 .fromMemoryCacheOrRefresh()
@@ -32,7 +32,7 @@ struct ImageView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
-                .navigationBarTitle(height < 130 ? (result.title ?? result.name) ?? "" : "")
+                .navigationBarTitle(height < 130 ? (result.title ?? result.name) ?? "- -" : "")
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
@@ -43,8 +43,8 @@ struct ImageView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
                                 Text((result.title ?? result.name) ?? "")
-                                    .font(.custom("AvenirNext-Bold", size: 20))
-                                    .foregroundColor(Color(.systemBackground))
+                                    .font(.custom("AvenirNext-Bold", size: 25))
+                                    .foregroundColor(.white)
                                 Spacer()
                                 VStack {
                                     Button(action: {
@@ -56,8 +56,8 @@ struct ImageView: View {
                                     Spacer()
                                         .frame(height: 10)
                                     Text("Wathclist")
-                                        .font(.custom("AvenirNext-Bold", size: 10))
-                                        .foregroundColor(Color(.systemBackground))
+                                        .font(.custom("AvenirNext-Bold", size: 12))
+                                        .foregroundColor(.white)
                                 }
                             }
                         }

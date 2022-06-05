@@ -22,10 +22,6 @@ struct CastView: View {
     }
     
     var body: some View {
-        
-        Spacer()
-            .frame(height: 40)
-        
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(cast, id: \.self) { cast in

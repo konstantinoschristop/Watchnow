@@ -18,6 +18,7 @@ struct ContentDetailsView: View {
     let result: Result
     let screenType: ScreenTypes
     @StateObject private var creditsVM: CreditsViewModel
+    @StateObject private var similarsVM: GetSimilarViewModel
     @Environment(\.presentationMode) var presentation
     @State var showDetails = false
     
@@ -25,6 +26,7 @@ struct ContentDetailsView: View {
         self.screenType = screenType
         self.result = result
         _creditsVM = StateObject(wrappedValue: CreditsViewModel.init(service: ServiceInvaction.init(), screenType: screenType, id: String(describing: result.id!)))
+        _similarsVM = StateObject(wrappedValue: GetSimilarViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
     }
     
     @ViewBuilder
@@ -67,26 +69,63 @@ struct ContentDetailsView: View {
                     ImageView(result: result)
                 }
                 VStack {
+                    
+                    // scroll categories
+                    
+                    // if series, show seasons and episodes
+                    
                     Details()
-                    CastView(cast: creditsVM.credits?.cast)
+                    
+                    // trailer
+                    
+                    //cast
+                    if let cast = creditsVM.credits?.cast {
+                        HStack{
+                            Text("Cast")
+                                .font(.system(size: 20, weight: .bold))
+                            Spacer()
+                        }
+                        .padding(.top, 10)
+                        .padding(.leading, 10)
+                        CastView(cast: cast)
+                    }
+                   
+                    // similar
+                    if let content = similarsVM.similar?.results {
+                        VStack {
+                            HStack{
+                                Text(screenType == .movie ? "Similar Movies" : "Similar TV Shows")
+                                    .font(.system(size: 20, weight: .bold))
+                                Spacer()
+                            }
+                            HStack {
+                                Text("You might also like")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(.gray)
+                                Spacer()
+                            }
+                        }
+                        .padding(.top, 10)
+                        .padding(.leading, 10)
+                        SimilarsView(content: content, screenType: screenType)
+                    }
+                    // user reviews
                 }
                 .padding(.top, 25)
                 .padding(.bottom, 100)
             }
-
-            //.ignoresSafeArea(.container, edges: .vertical)
-//            .navigationBarItems(leading: Button(action : {
-//                self.presentation.wrappedValue.dismiss()
-//            }){
-//                Image(systemName: "arrow.backward.circle.fill")
-//                    .resizable()
-//                    .frame(width: 25, height: 25)
-//                    .foregroundColor(Color(.systemBackground))
-//                   // .colorInvert()
-//            })
-        
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(leading: Button(action : {
+                self.presentation.wrappedValue.dismiss()
+            }){
+                Image(systemName: "arrow.backward.circle.fill")
+                    .resizable()
+                    .frame(width: 25, height: 25)
+                    .foregroundColor(.gray)
+            })
         .task {
             await creditsVM.getCredits()
+            await similarsVM.getSimilars()
         }
     }
 }
