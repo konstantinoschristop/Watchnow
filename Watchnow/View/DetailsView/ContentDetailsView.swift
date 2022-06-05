@@ -19,6 +19,8 @@ struct ContentDetailsView: View {
     let screenType: ScreenTypes
     @StateObject private var creditsVM: CreditsViewModel
     @StateObject private var similarsVM: GetSimilarViewModel
+    @StateObject private var reviewsVM: ReviewsViewModel
+    
     @Environment(\.presentationMode) var presentation
     @State var showDetails = false
     
@@ -27,6 +29,7 @@ struct ContentDetailsView: View {
         self.result = result
         _creditsVM = StateObject(wrappedValue: CreditsViewModel.init(service: ServiceInvaction.init(), screenType: screenType, id: String(describing: result.id!)))
         _similarsVM = StateObject(wrappedValue: GetSimilarViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
+        _reviewsVM = StateObject(wrappedValue: ReviewsViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
     }
     
     @ViewBuilder
@@ -34,13 +37,11 @@ struct ContentDetailsView: View {
         VStack(alignment: .center) {
             ZStack {
                 VStack {
-                    
                     if let overview = result.overview {
                         Text(overview)
                     }
                     Spacer()
                         .frame(height: 20)
-                    
                     HStack {
                         if let rating = result.vote_average {
                             Image(systemName: "star.fill")
@@ -110,10 +111,21 @@ struct ContentDetailsView: View {
                         SimilarsView(content: content, screenType: screenType)
                     }
                     // user reviews
+                    if let reviews = reviewsVM.reviews?.results {
+                        HStack{
+                            Text("User Reviews")
+                                .font(.system(size: 20, weight: .bold))
+                            Spacer()
+                        }
+                        .padding(.top, -10)
+                        .padding(.leading, 10)
+                        ReviewsView(reviews: reviews)
+                    }
                 }
                 .padding(.top, 25)
                 .padding(.bottom, 100)
             }
+            .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: Button(action : {
                 self.presentation.wrappedValue.dismiss()
@@ -126,6 +138,7 @@ struct ContentDetailsView: View {
         .task {
             await creditsVM.getCredits()
             await similarsVM.getSimilars()
+            await reviewsVM.getReviews()
         }
     }
 }

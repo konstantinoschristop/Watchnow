@@ -32,8 +32,9 @@ class APIKeys {
     let credits = "credits?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     
     let movieGenres = "https://api.themoviedb.org/3/genre/movie/list?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
+        
+    let similar = "similar?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     
-    let movieDetails = "https://api.themoviedb.org/3/movie/" // + movieID + apikey
-    
-    let similar = "similar?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"  // +  movieID/similar + apikey
+    let reviews = "reviews?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
+
 }

@@ -56,7 +56,7 @@ struct TopCard: View {
                     .font(.system(size: 14, weight: .regular))
                     .padding(.vertical, 5)
                     .padding(.horizontal, 9)
-                    .background(Color.white)
+                    .background(Color(.systemGray5))
                     .foregroundColor(.orange)
                     .cornerRadius(10)
                     .offset(x: 120 , y: -100)

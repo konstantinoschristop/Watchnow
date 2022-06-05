@@ -11,7 +11,7 @@ import Kingfisher
 struct ImageView: View {
     
     let result: Result
-    
+    @State var imageFinishedLoading = false
     var body: some View {
         
         GeometryReader { proxy  in
@@ -27,16 +27,16 @@ struct ImageView: View {
                 .cacheOriginalImage()
                 .fade(duration: 0.25)
                 .onProgress { receivedSize, totalSize in  }
-                .onSuccess { result in  }
+                .onSuccess { result in  self.imageFinishedLoading = true }
                 .onFailure { error in }
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
-                .navigationBarTitle(height < 130 ? (result.title ?? result.name) ?? "- -" : "")
+                .navigationBarTitle(height < 130 && imageFinishedLoading ? (result.title ?? result.name) ?? "- -" : "")
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
-                                                .black.opacity(0.8)],
+                                                Color(.systemBackground).opacity(0.8)],
                                        startPoint: .top,
                                        endPoint: .bottom)
                         
