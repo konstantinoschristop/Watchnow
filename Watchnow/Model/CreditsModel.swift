@@ -23,4 +23,5 @@ struct Cast: Codable, Hashable {
     let character, credit_id: String?
     let order: Int?
     let job: String?
+    let known_for: [Result]?
 }

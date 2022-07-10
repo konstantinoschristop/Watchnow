@@ -72,29 +72,31 @@ struct ReviewSheet: View {
     
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 5) {
-            HStack {
-                if let name = review?.author_details?.username {
-                    Text("Review by " + name)
-                }
-                
-                if let rating = review?.author_details?.rating {
-                    Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    if let name = review?.author_details?.username {
+                        Text("Review by " + name)
+                    }
                     
-                    Text(Image(systemName: "star.fill"))
-                        .foregroundColor(.orange)
-                    + Text(" ") + Text(String(rating) + "/10")
+                    if let rating = review?.author_details?.rating {
+                        Spacer()
+                        
+                        Text(Image(systemName: "star.fill"))
+                            .foregroundColor(.orange)
+                        + Text(" ") + Text(String(rating) + "/10")
+                    }
                 }
+                .padding(.top, 10)
+                .padding(.bottom, 30)
+                .font(.system(size: 20, weight: .heavy))
+                
+                Text(review?.content ?? "- -")
+                    .font(.system(size: 15, weight: .medium))
+                
+                Spacer()
             }
-            .padding(.top, 10)
-            .padding(.bottom, 30)
-            .font(.system(size: 20, weight: .heavy))
-            
-            Text(review?.content ?? "- -")
-                .font(.system(size: 15, weight: .medium))
-            
-            Spacer()
+            .padding()
         }
-        .padding()
     }
 }

@@ -11,6 +11,7 @@ import Kingfisher
 enum ScreenTypes: String {
     case movie
     case tv
+    case person
 }
 
 struct ContentDetailsView: View {
@@ -51,9 +52,7 @@ struct ContentDetailsView: View {
                         if let allRatings = result.vote_count {
                             Text("• " + String(allRatings) + " ratings")
                         }
-                        if let releaseData = result.release_date?.dropLast(6) {
-                            Text("• Release Date: " + releaseData)
-                        }
+                        Text("• Release Date: " + result.getReleaseDate())
                     }
                     .font(.custom("AvenirNext-Regular", size: 15))
                     .foregroundColor(.gray)

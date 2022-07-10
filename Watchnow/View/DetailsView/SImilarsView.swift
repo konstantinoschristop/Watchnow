@@ -30,7 +30,7 @@ struct SimilarsView: View {
                                         .aspectRatio(contentMode: .fit)
                                         .cornerRadius(15)
                                         .shadow(color: .gray, radius: 3)
-                                    Text((content.title ?? content.name) ?? "- -" )
+                                    Text(content.getResultTitle())
                                         .font(.system(size: 15, weight: .heavy))
                                         .foregroundColor(Color(.systemBackground))
                                         .colorInvert()

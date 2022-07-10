@@ -37,4 +37,14 @@ class ServiceInvaction {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(ReviewsModel.self, from: data)
     }
+    
+    func fetchSearchResults(search: String) async throws -> SearchModel {
+        
+        let query = search.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        let url = URL(string: api.searchURL + query!)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(SearchModel.self, from: data)
+    }
 }

@@ -37,4 +37,5 @@ class APIKeys {
     
     let reviews = "reviews?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
 
+    let searchURL = "https://api.themoviedb.org/3/search/multi?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&include_adult=false&query="
 }

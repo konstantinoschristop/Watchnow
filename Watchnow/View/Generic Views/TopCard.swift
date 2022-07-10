@@ -42,7 +42,7 @@ struct TopCard: View {
                             .aspectRatio(contentMode: .fit)
                             .cornerRadius(15)
                             .shadow(color: .black, radius: 5)
-                        Text((content.title ?? content.name) ?? "")
+                        Text(content.getResultTitle())
                             .font(.system(size: 16, weight: .heavy))
                             .foregroundColor(Color(.systemBackground))
                             .colorInvert()

@@ -32,7 +32,7 @@ struct ContentView: View {
             }
             
             NavigationView {
-               
+               SearchView()
             }
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass.circle")
