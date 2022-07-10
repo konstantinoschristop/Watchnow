@@ -47,4 +47,22 @@ class ServiceInvaction {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(SearchModel.self, from: data)
     }
+    
+    func fetchGenres(screenType: ScreenTypes) async throws -> GenreModel {
+        
+        var url: URL?
+        
+        switch screenType {
+        case .movie:
+            url = URL(string: api.movieGenre)
+        case .tv:
+            url = URL(string: api.tvGenre)
+        default:
+            break
+        }
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(GenreModel.self, from: data)
+    }
 }

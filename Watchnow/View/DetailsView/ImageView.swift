@@ -21,6 +21,7 @@ struct ImageView: View {
             
             KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
                // .downsampling(size: CGSize.init(width: 550, height: 400))
+                .placeholder { Image("watchnow") }
                 .loadImmediately()
                 .loadDiskFileSynchronously()
                 .fromMemoryCacheOrRefresh()

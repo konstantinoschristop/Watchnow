@@ -17,32 +17,45 @@ struct SearchView: View {
         VStack {
             ZStack {
                 Rectangle()
+                    .fill(Color(.systemGray6))
                     .foregroundColor(Color(.systemBackground))
-                   
+                    .cornerRadius(13)
                 HStack {
                     Image(systemName: "magnifyingglass")
                     
                     TextField("Search movies and tv series...", text: $searchInput)
                         .onSubmit {
-                                Task {
-                                    if searchInput != "" {
-                                        await searchVM.getResults(search: searchInput)
-                                    }
+                            Task {
+                                if searchInput != "" {
+                                    await searchVM.getResults(search: searchInput)
                                 }
+                            }
                         }
-                        .disableAutocorrection(true)
-                        .textFieldStyle(.roundedBorder)
                 }
+                .padding(.all, 10)
             }
             .padding()
             .frame(height: 40)
-            .cornerRadius(13)
             
             Spacer()
-               
+            
             Group {
-                if let results = searchVM.result?.results {
-                     SearchResults(results: results)
+                if let results = searchVM.result?.results?.filter { $0.poster_path != nil } {
+                    if results == [] {
+                        VStack {
+                            Spacer()
+                            Text("No results found. Try searching again with a different keyword.")
+                                .padding()
+                            Spacer()
+                        }
+                    } else {
+                        List {
+                            SearchResults(results: results)
+                                .listRowSeparatorTint(.clear)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
+                        }
+                    }
                 }
             }
             .refreshable {
@@ -61,18 +74,21 @@ struct SearchResults: View {
     
     var body: some View {
         
-        List {
-            ForEach(results, id: \.self) { result in
-                NavigationLink {
-                    ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
-                } label: {
+        ForEach(results, id: \.self) { result in
+            NavigationLink {
+                ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
+            } label: {
+                ZStack {
+                    Rectangle()
+                        .fill(Color(.systemGray5))
+                        .cornerRadius(10)
                     HStack {
                         if let imageURL = result.poster_path,
                            let url = APIKeys().imageKey + imageURL {
                             
                             GenericImageView(url: url,
-                                            width: 80,
-                                            height: 120)
+                                             width: 80,
+                                             height: 120)
                         }
                         
                         VStack {

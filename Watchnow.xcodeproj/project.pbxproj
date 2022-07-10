@@ -43,6 +43,8 @@
 		EE2732ED287AF11000B066C7 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732EC287AF11000B066C7 /* SearchModel.swift */; };
 		EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */; };
 		EE2732F1287AF4AE00B066C7 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F0287AF4AE00B066C7 /* SearchView.swift */; };
+		EE2732F3287B259E00B066C7 /* GenreModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F2287B259E00B066C7 /* GenreModel.swift */; };
+		EE2732F5287B25FF00B066C7 /* GenreViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F4287B25FF00B066C7 /* GenreViewModel.swift */; };
 		EE27E298284D2A890055E25A /* GenericImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE27E297284D2A890055E25A /* GenericImageView.swift */; };
 		EE4002A9284C98B500374143 /* GetSimilarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4002A8284C98B500374143 /* GetSimilarModel.swift */; };
 		EE4002AB284C990A00374143 /* GetSimilarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4002AA284C990A00374143 /* GetSimilarViewModel.swift */; };
@@ -99,6 +101,8 @@
 		EE2732EC287AF11000B066C7 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 		EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		EE2732F0287AF4AE00B066C7 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		EE2732F2287B259E00B066C7 /* GenreModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenreModel.swift; sourceTree = "<group>"; };
+		EE2732F4287B25FF00B066C7 /* GenreViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenreViewModel.swift; sourceTree = "<group>"; };
 		EE27E297284D2A890055E25A /* GenericImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericImageView.swift; sourceTree = "<group>"; };
 		EE4002A8284C98B500374143 /* GetSimilarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetSimilarModel.swift; sourceTree = "<group>"; };
 		EE4002AA284C990A00374143 /* GetSimilarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetSimilarViewModel.swift; sourceTree = "<group>"; };
@@ -184,6 +188,7 @@
 				EE4002A8284C98B500374143 /* GetSimilarModel.swift */,
 				EE4002AE284CEA8400374143 /* ReviewsModel.swift */,
 				EE2732EC287AF11000B066C7 /* SearchModel.swift */,
+				EE2732F2287B259E00B066C7 /* GenreModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -212,6 +217,7 @@
 				EE4002AA284C990A00374143 /* GetSimilarViewModel.swift */,
 				EE4002B0284CEB2600374143 /* ReviewsViewModel.swift */,
 				EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */,
+				EE2732F4287B25FF00B066C7 /* GenreViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -384,6 +390,7 @@
 				8AB84B8B275693430016D82E /* AiringTodaySeriesViewModel.swift in Sources */,
 				EE67246A27B9240900B8F8E8 /* ServiceInvaction.swift in Sources */,
 				8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */,
+				EE2732F3287B259E00B066C7 /* GenreModel.swift in Sources */,
 				8A981D8226B69F5200993232 /* SimilarMoviesModel.swift in Sources */,
 				8AB84B892756932C0016D82E /* PopularSeriesViewModel.swift in Sources */,
 				8A981D8826B6A39300993232 /* SimilarMoviesViewModel.swift in Sources */,
@@ -407,6 +414,7 @@
 				EE2732F1287AF4AE00B066C7 /* SearchView.swift in Sources */,
 				EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */,
 				8AC339032752957D00834B46 /* BottomView.swift in Sources */,
+				EE2732F5287B25FF00B066C7 /* GenreViewModel.swift in Sources */,
 				8AB84B7C275689D10016D82E /* TrendingMoviesModel.swift in Sources */,
 				8A981D7C26B694E500993232 /* MovieDetailsModel.swift in Sources */,
 				8AC338FC2752800E00834B46 /* MovieService.swift in Sources */,
