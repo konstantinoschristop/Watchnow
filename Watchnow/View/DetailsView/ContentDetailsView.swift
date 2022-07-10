@@ -111,7 +111,8 @@ struct ContentDetailsView: View {
                         SimilarsView(content: content, screenType: screenType)
                     }
                     // user reviews
-                    if let reviews = reviewsVM.reviews?.results {
+                    if let reviews = reviewsVM.reviews?.results,
+                       reviews.isEmpty == false {
                         HStack{
                             Text("User Reviews")
                                 .font(.system(size: 20, weight: .bold))

@@ -36,7 +36,7 @@ struct ImageView: View {
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
-                                                Color(.systemBackground).opacity(0.8)],
+                                                .black.opacity(0.6)],
                                        startPoint: .top,
                                        endPoint: .bottom)
                         
