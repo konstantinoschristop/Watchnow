@@ -19,9 +19,9 @@ struct ImageView: View {
             let size = proxy.size
             let height = size.height + minY
             
-            KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
+            KFImage.url(URL(string: APIKeys().imageKey + result.getResultPosterURL()))
                // .downsampling(size: CGSize.init(width: 550, height: 400))
-                .placeholder { Image("watchnow") }
+                .placeholder { ProgressView() }
                 .loadImmediately()
                 .loadDiskFileSynchronously()
                 .fromMemoryCacheOrRefresh()
@@ -33,12 +33,12 @@ struct ImageView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
-                .navigationBarTitle(height < 130 && imageFinishedLoading ? (result.title ?? result.name) ?? "- -" : "")
+                .navigationBarTitle(height < 130 && imageFinishedLoading ? result.getResultTitle() : "")
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
                                                 .black.opacity(0.6)],
-                                       startPoint: .top,
+                                       startPoint: .center,
                                        endPoint: .bottom)
                         
                         VStack(alignment: .leading, spacing: 12) {
@@ -71,7 +71,7 @@ struct ImageView: View {
                 .cornerRadius(1)
                 .offset(y: -minY)
         }
-        .frame(height: 330)
+        .frame(height: 350)
     }
 }
         

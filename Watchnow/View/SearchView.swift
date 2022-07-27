@@ -37,10 +37,21 @@ struct SearchView: View {
             .padding()
             .frame(height: 40)
             
+            Picker(selection: $searchVM.selectedChooser) {
+                Text(SearchViewModel.SearchChooserOptions.all.getTitle()).tag(SearchViewModel.SearchChooserOptions.all)
+                Text(SearchViewModel.SearchChooserOptions.movies.getTitle()).tag(SearchViewModel.SearchChooserOptions.movies)
+                Text(SearchViewModel.SearchChooserOptions.series.getTitle()).tag(SearchViewModel.SearchChooserOptions.series)
+                Text(SearchViewModel.SearchChooserOptions.actors.getTitle()).tag(SearchViewModel.SearchChooserOptions.actors)
+            } label: {
+                Text("Filter By")
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
+            
             Spacer()
             
             Group {
-                if let results = searchVM.result?.results?.filter { $0.poster_path != nil } {
+                if let results = searchVM.result?.results?.filter { $0.poster_path != nil && $0.media_type != "person" || $0.poster_path == nil && $0.media_type == "person" } {
                     if results == [] {
                         VStack {
                             Spacer()
@@ -49,11 +60,8 @@ struct SearchView: View {
                             Spacer()
                         }
                     } else {
-                        List {
-                            SearchResults(results: results)
-                                .listRowSeparatorTint(.clear)
-                                .listRowBackground(Color.clear)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
+                        ScrollView {
+                            SearchResults(results: results, chooserSelection: $searchVM.selectedChooser)
                         }
                     }
                 }
@@ -70,45 +78,91 @@ struct SearchView: View {
 
 struct SearchResults: View {
     
-    var results: [Result]
+    @Binding var chooserSelection: SearchViewModel.SearchChooserOptions
+    var filtered: [Result] = []
     
-    var body: some View {
+    init(results: [Result],
+         chooserSelection: Binding<SearchViewModel.SearchChooserOptions>) {
         
-        ForEach(results, id: \.self) { result in
-            NavigationLink {
-                ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
-            } label: {
-                ZStack {
-                    Rectangle()
-                        .fill(Color(.systemGray5))
-                        .cornerRadius(10)
-                    HStack {
-                        if let imageURL = result.poster_path,
-                           let url = APIKeys().imageKey + imageURL {
-                            
-                            GenericImageView(url: url,
-                                             width: 80,
-                                             height: 120)
-                        }
-                        
-                        VStack {
-                            Text(result.getResultTitle())
-                                .font(.system(size: 16, weight: .bold))
-                            Spacer()
-                                .frame(height: 20)
-                            
-                            HStack {
-                                Text("Release Date: " + result.getReleaseDate())
-                                Spacer()
-                                Text("Type: " + result.getMediaType())
-                            }
-                            .font(.system(size: 11, weight: .light))
-                        }
-                        .padding()
-                    }
+        self._chooserSelection = chooserSelection
+        
+        if chooserSelection.wrappedValue.rawValue == "All" {
+            self.filtered = results
+        } else {
+            results.forEach { result in
+                if result.getMediaType() == chooserSelection.wrappedValue.rawValue {
+                    self.filtered.append(result)
                 }
             }
         }
+    }
+    
+    var body: some View {
+        
+        if filtered.isEmpty {
+            VStack {
+                Spacer()
+                Text("No results found for this filter.")
+                    .padding()
+                Spacer()
+            }
+        } else {
+            self.getResultView(results: filtered)
+        }
+    }
+    
+    func getResultView(results: [Result]) -> some View {
+        
+        return  Group {
+            ForEach(filtered, id: \.self) { result in
+                NavigationLink {
+                    switch result.getMediaType() {
+                    case "Actor":
+                        ActorDetailsView(actorID: result.id)
+                    default:
+                        ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
+                    }
+                } label: {
+                    self.constructResult(result: result)
+                }
+            }
+        }
+    }
+    
+    func constructResult(result: Result) -> some View {
+        return ZStack {
+            Rectangle()
+                .fill(Color(.systemGray5))
+                .cornerRadius(10)
+            HStack {
+                if let imageURL = result.getResultPosterURL(),
+                   let url = APIKeys().imageKey + imageURL {
+                    
+                    GenericImageView(url: url,
+                                     width: 70,
+                                     height: 90,
+                                     cornerRadius: 10,
+                                     showShadow: false)
+                }
+                
+                VStack(alignment: .leading) {
+                    Text(result.getResultTitle())
+                        .font(.system(size: 16, weight: .bold))
+                    Spacer()
+                        .frame(height: 10)
+                    
+                    HStack {
+                        Text(result.getReleaseDate() + result.getMediaType())
+                        Spacer()
+                    }
+                    .font(.system(size: 12, weight: .light))
+                }
+                .foregroundColor(Color(.systemBackground))
+                .colorInvert()
+                .padding()
+            }
+        }
+        .padding(.init(top: 0, leading: 15, bottom: 0, trailing: 15))
     }
 }
 

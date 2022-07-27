@@ -61,6 +61,7 @@
 		EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247927B9876400B8F8E8 /* CastView.swift */; };
 		EE67247D27B998F700B8F8E8 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247C27B998F700B8F8E8 /* ImageView.swift */; };
 		EE67247F27D00A5100B8F8E8 /* HeaderDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247E27D00A5100B8F8E8 /* HeaderDetailsView.swift */; };
+		EE95E43B2891CB8E00B8C688 /* ActorDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE95E43A2891CB8E00B8C688 /* ActorDetailsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -119,6 +120,7 @@
 		EE67247927B9876400B8F8E8 /* CastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastView.swift; sourceTree = "<group>"; };
 		EE67247C27B998F700B8F8E8 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		EE67247E27D00A5100B8F8E8 /* HeaderDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderDetailsView.swift; sourceTree = "<group>"; };
+		EE95E43A2891CB8E00B8C688 /* ActorDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActorDetailsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -302,6 +304,7 @@
 				EE67247E27D00A5100B8F8E8 /* HeaderDetailsView.swift */,
 				EE4002AC284CDC5600374143 /* SImilarsView.swift */,
 				EE4002B2284CEBA300374143 /* ReviewsView.swift */,
+				EE95E43A2891CB8E00B8C688 /* ActorDetailsView.swift */,
 			);
 			path = DetailsView;
 			sourceTree = "<group>";
@@ -400,6 +403,7 @@
 				8AB84B9327569E030016D82E /* TrendingSeriesViewModel.swift in Sources */,
 				8A8F4B3E26BC1EF000D87BBB /* BottomCard.swift in Sources */,
 				8AC338FE2752923E00834B46 /* TopView.swift in Sources */,
+				EE95E43B2891CB8E00B8C688 /* ActorDetailsView.swift in Sources */,
 				8A981D8526B6A38100993232 /* PopularMoviesViewModel.swift in Sources */,
 				EE27E298284D2A890055E25A /* GenericImageView.swift in Sources */,
 				8A981D7026B6917A00993232 /* UpcomingMoviesModel.swift in Sources */,

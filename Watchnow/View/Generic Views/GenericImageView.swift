@@ -13,10 +13,25 @@ struct GenericImageView: View {
     let url: String
     let width: CGFloat
     let height: CGFloat
+    let cornerRadius: CGFloat
+    let showShadow: Bool
+    
+    init(url: String,
+         width: CGFloat,
+         height: CGFloat,
+         cornerRadius: CGFloat = 0,
+         showShadow: Bool = true) {
+        
+        self.url = url
+        self.width = width
+        self.height = height
+        self.cornerRadius = cornerRadius
+        self.showShadow = showShadow
+    }
     
     var body: some View {
         KFImage.url(URL(string: url.replacingOccurrences(of: "/https", with: "https")))
-            .downsampling(size: CGSize.init(width: width, height: height))
+            .downsampling(size: CGSize.init(width: width * 2, height: height * 2))
             .loadImmediately()
             .loadDiskFileSynchronously()
             .fromMemoryCacheOrRefresh()
@@ -27,6 +42,7 @@ struct GenericImageView: View {
             .onFailure { error in }
             .resizable()
             .frame(width: width, height: height)
-            .shadow(color: .gray, radius: 5)
+            .cornerRadius(cornerRadius)
+            .shadow(color: showShadow ? .gray : .clear, radius: 5)
     }
 }

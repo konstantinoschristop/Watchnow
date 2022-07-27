@@ -29,10 +29,10 @@ struct ContentDetailsView: View {
     init(result: Result, screenType: ScreenTypes) {
         self.screenType = screenType
         self.result = result
+        _genreVM = StateObject(wrappedValue: GenreViewModel.init(service: ServiceInvaction()))
         _creditsVM = StateObject(wrappedValue: CreditsViewModel.init(service: ServiceInvaction.init(), screenType: screenType, id: String(describing: result.id!)))
         _similarsVM = StateObject(wrappedValue: GetSimilarViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
         _reviewsVM = StateObject(wrappedValue: ReviewsViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
-        _genreVM = StateObject(wrappedValue: GenreViewModel.init(service: ServiceInvaction()))
     }
     
     @ViewBuilder
@@ -77,7 +77,7 @@ struct ContentDetailsView: View {
                             Rectangle()
                                 .fill(Color(.systemGray5))
                                 .cornerRadius(20)
-                            Text(genre?.name ?? "- -")
+                            Text(genre.name ?? "- -")
                                 .padding()
                                 .font(.system(size: 11))
                         }
@@ -175,10 +175,10 @@ struct ContentDetailsView: View {
                 .foregroundColor(.gray)
         })
         .task {
+            await genreVM.getGenres(screenType: self.screenType)
             await creditsVM.getCredits()
             await similarsVM.getSimilars()
             await reviewsVM.getReviews()
-            await genreVM.getGenres(screenType: self.screenType)
         }
     }
 }

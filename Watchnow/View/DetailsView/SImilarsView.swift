@@ -26,18 +26,22 @@ struct SimilarsView: View {
                                 if let imageURL = content.poster_path,
                                    let url = APIKeys().imageKey + imageURL {
                                     
-                                    GenericImageView.init(url: url, width: 130, height: 180)
+                                    GenericImageView.init(url: url,
+                                                          width: 130,
+                                                          height: 180,
+                                                          cornerRadius: 10,
+                                                          showShadow: false)
+                                    
                                         .aspectRatio(contentMode: .fit)
-                                        .cornerRadius(15)
-                                        .shadow(color: .gray, radius: 3)
                                     Text(content.getResultTitle())
                                         .font(.system(size: 15, weight: .heavy))
+                                        .multilineTextAlignment(.center)
                                         .foregroundColor(Color(.systemBackground))
                                         .colorInvert()
                                         .frame(width: 130, height: 50, alignment: .top)
                                 }
                             }
-                            .padding(.leading, 10)
+                            .padding(.leading, 15)
                         }
                         HStack {
                             (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", content.vote_average ?? "-"))

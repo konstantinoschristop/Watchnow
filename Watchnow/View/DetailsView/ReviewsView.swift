@@ -22,15 +22,17 @@ struct ReviewsView: View {
                         VStack {
                             if let imageUrl = review.author_details?.avatar_path,
                                imageUrl.contains("https") {
-                                GenericImageView.init(url: imageUrl, width: 40, height: 40)
-                                    .cornerRadius(30)
+                                GenericImageView.init(url: imageUrl,
+                                                      width: 40,
+                                                      height: 40,
+                                                      cornerRadius: 30,
+                                                      showShadow: false)
                                     .aspectRatio(contentMode: .fit)
-                                    .shadow(color: .gray, radius: 5)
                             } else {
-                                Image(systemName: "person")
+                                Image(systemName: "person.fill")
                                     .resizable()
-                                    .cornerRadius(20)
                                     .frame(width: 40, height: 40, alignment: .center)
+                                    .cornerRadius(30)
                                     .aspectRatio(contentMode: .fit)
                             }
                         }
@@ -59,6 +61,7 @@ struct ReviewsView: View {
                     .frame(width: 300, height: 70, alignment: .leading)
                 }
             }
+            .padding(.leading, 10)
         }
         .sheet(isPresented: $isPresented) {
             ReviewSheet(review: self.$selectedReview)

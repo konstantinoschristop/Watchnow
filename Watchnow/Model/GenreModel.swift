@@ -11,19 +11,13 @@ import SwiftUI
 struct GenreModel: Codable {
     var genres: [Genres]?
     
-    func getAvailableGenres(ids: [Int]?) -> [Genres?] {
+    func getAvailableGenres(ids: [Int]?) -> [Genres]? {
         
         guard let ids = ids else {
             return []
         }
 
-        var genres: [Genres?] = []
-        
-        ids.forEach({ id in
-            genres.append(self.genres?.first(where: { $0.id == id }))
-        })
-        
-        return genres
+        return genres?.filter { ids.contains($0.id ?? 0) }
     }
 }
 

@@ -30,10 +30,16 @@ struct Result: Codable, Hashable {
     let vote_average: Double?
     let vote_count: Int?
     let media_type: String?
+    let profile_path: String?
+    let castID: Int?
     
     
     func getResultTitle() -> String {
         return (name ?? title) ?? "- -"
+    }
+    
+    func getResultPosterURL() -> String {
+        return (poster_path ?? backdrop_path ?? profile_path) ?? ""
     }
     
     func getMediaType() -> String {
@@ -42,11 +48,18 @@ struct Result: Codable, Hashable {
         } else if media_type == "tv" {
             return "TV Serie"
         } else {
-            return "Person"
+            return "Actor"
         }
     }
     
     func getReleaseDate() -> String {
-        return String((release_date?.dropLast(6) ?? first_air_date?.dropLast(6)) ?? "- -")
+        
+        if let date = release_date?.dropLast(6) {
+            return date + " - "
+        } else if let date = first_air_date?.dropLast(6) {
+            return date + " - "
+        } else {
+            return ""
+        }
     }
 }
