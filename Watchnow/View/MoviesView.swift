@@ -9,28 +9,26 @@ import SwiftUI
 
 struct MoviesView: View {
     
-    @StateObject var upcomingMoviesVM = UpcomingMoviesViewModel(service: MovieService())
-    @StateObject var popularMoviesVM = PopularMoviesViewModel(service: MovieService())
-    @StateObject var trendingMoviesVM = TrendingMoviesViewModel(service: MovieService())
+    @StateObject var moviesViewModel = MoviesViewModel()
     
     var body: some View {
         
         Group {
-            if let results = upcomingMoviesVM.upcomingMovies?.results {
+            if let results = moviesViewModel.upcomingMovies?.results {
                 List {
                     TopView(results: results, viewTitle: "Upcoming Movies", screenType: .movie)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
                     
-                    if let results = popularMoviesVM.popularMovies?.results {
+                    if let results = moviesViewModel.popularMovies?.results {
                         BottomView(results: results, viewTitle: "Popular Movies", screenType: .movie)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color.clear)
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                     
-                    if let results = trendingMoviesVM.trendingMovies?.results {
+                    if let results = moviesViewModel.trendingMovies?.results {
                         BottomView(results: results, viewTitle: "Trending Today", screenType: .movie)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color.clear)
@@ -43,14 +41,14 @@ struct MoviesView: View {
             }
         }
         .task {
-            await upcomingMoviesVM.getUpcomingMovies()
-            await popularMoviesVM.getPopularMovies()
-            await trendingMoviesVM.getTrendingMovies()
+            await moviesViewModel.getUpcomingMovies()
+            await moviesViewModel.getPopularMovies()
+            await moviesViewModel.getTrendingMovies()
         }
         .refreshable {
-            await upcomingMoviesVM.getUpcomingMovies()
-            await popularMoviesVM.getPopularMovies()
-            await trendingMoviesVM.getTrendingMovies()
+            await moviesViewModel.getUpcomingMovies()
+            await moviesViewModel.getPopularMovies()
+            await moviesViewModel.getTrendingMovies()
         }
     }
 }

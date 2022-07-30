@@ -9,28 +9,26 @@ import SwiftUI
 
 struct SerieView: View {
     
-    @StateObject var airingTodaySeriesVM = AiringTodaySeriesViewModel(service: SerieService())
-    @StateObject var popularSeriesVM = PopularSeriesViewModel(service: SerieService())
-    @StateObject var trendingSeriesVM = TrendingSeriesViewModel(service: SerieService())
+    @StateObject var seriesViewModel = SeriesViewModel()
     
     var body: some View {
         
         Group {
-            if let results = popularSeriesVM.popularSeries?.results {
+            if let results = seriesViewModel.popularSeries?.results {
                 List {
                     TopView(results: results, viewTitle: "Popular Series", screenType: .tv)
                         .listRowSeparatorTint(.clear)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
                     
-                    if let results = airingTodaySeriesVM.airingTodaySeries?.results {
+                    if let results = seriesViewModel.airingTodaySeries?.results {
                         BottomView(results: results, viewTitle: "On Air Today", screenType: .tv)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color.clear)
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                     
-                    if let results =  trendingSeriesVM.trendingSeries?.results {
+                    if let results =  seriesViewModel.trendingSeries?.results {
                         BottomView(results: results, viewTitle: "Trending Today", screenType: .tv)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color.clear)
@@ -43,14 +41,14 @@ struct SerieView: View {
             }
         }
         .task {
-            await airingTodaySeriesVM.getAiringTodaySeries()
-            await popularSeriesVM.getPopularSeries()
-            await trendingSeriesVM.getTrendingSeries()
+            await seriesViewModel.getAiringTodaySeries()
+            await seriesViewModel.getPopularSeries()
+            await seriesViewModel.getTrendingSeries()
         }
         .refreshable {
-            await airingTodaySeriesVM.getAiringTodaySeries()
-            await popularSeriesVM.getPopularSeries()
-            await trendingSeriesVM.getTrendingSeries()
+            await seriesViewModel.getAiringTodaySeries()
+            await seriesViewModel.getPopularSeries()
+            await seriesViewModel.getTrendingSeries()
         }
     }
 }

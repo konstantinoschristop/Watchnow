@@ -52,12 +52,12 @@ struct Result: Codable, Hashable {
         }
     }
     
-    func getReleaseDate() -> String {
+    func getReleaseDate(addSeparator: Bool = true) -> String {
         
         if let date = release_date?.dropLast(6) {
-            return date + " - "
+            return date + (addSeparator ? " - " : "")
         } else if let date = first_air_date?.dropLast(6) {
-            return date + " - "
+            return date + (addSeparator ? " - " : "")
         } else {
             return ""
         }

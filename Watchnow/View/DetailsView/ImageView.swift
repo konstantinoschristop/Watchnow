@@ -11,16 +11,30 @@ import Kingfisher
 struct ImageView: View {
     
     let result: Result
+    @StateObject var detailsViewModel: DetailsViewModel
+    
     @State var imageFinishedLoading = false
+    @State var videoPresented = false
+    
     var body: some View {
         
-        GeometryReader { proxy  in
+        Group {
+            createImageView()
+        }
+        .sheet(isPresented: $videoPresented) {
+            WebView(videoURL: detailsViewModel.videos?.getVideoURL())
+                .ignoresSafeArea()
+        }
+    }
+    
+    fileprivate func createImageView() -> some View {
+        return GeometryReader { proxy  in
             let minY = proxy.frame(in: .named("SCROLL")).minY
             let size = proxy.size
             let height = size.height + minY
             
             KFImage.url(URL(string: APIKeys().imageKey + result.getResultPosterURL()))
-               // .downsampling(size: CGSize.init(width: 550, height: 400))
+            // .downsampling(size: CGSize.init(width: 550, height: 400))
                 .placeholder { ProgressView() }
                 .loadImmediately()
                 .loadDiskFileSynchronously()
@@ -47,18 +61,22 @@ struct ImageView: View {
                                     .font(.custom("AvenirNext-Bold", size: 25))
                                     .foregroundColor(.white)
                                 Spacer()
-                                VStack {
-                                    Button(action: {
-                                        
-                                    }) {
-                                        Image(systemName: "plus.rectangle.on.rectangle")
-                                            .imageScale(.medium)
+                                
+                                if detailsViewModel.videos?.getVideoURL() != nil {
+                                    VStack {
+                                        Button(action: {
+                                            videoPresented.toggle()
+                                        }) {
+                                            Image(systemName: "play.fill")
+                                                .imageScale(SwiftUI.Image.Scale.large)
+                                                .foregroundColor(.red)
+                                        }
+                                        Spacer()
+                                            .frame(height: 12)
+                                        Text("Watch Trailer")
+                                            .font(.custom("AvenirNext-Bold", size: 12))
+                                            .foregroundColor(.white)
                                     }
-                                    Spacer()
-                                        .frame(height: 10)
-                                    Text("Wathclist")
-                                        .font(.custom("AvenirNext-Bold", size: 12))
-                                        .foregroundColor(.white)
                                 }
                             }
                         }
@@ -74,67 +92,3 @@ struct ImageView: View {
         .frame(height: 350)
     }
 }
-        
-//        GeometryReader { geometry in
-//
-//                    KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
-//                        .downsampling(size: CGSize.init(width: 550, height: 850))
-//                        .loadImmediately()
-//                        .loadDiskFileSynchronously()
-//                        .fromMemoryCacheOrRefresh()
-//                        .cacheOriginalImage()
-//                        .fade(duration: 0.25)
-//                        .onProgress { receivedSize, totalSize in  }
-//                        .onSuccess { result in  }
-//                        .onFailure { error in }
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fill)
-//                        .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
-//                        .frame(width: UIScreen.main.bounds.width, height: geometry.frame(in: .global).minY + 450)
-//                        .offset(y: -geometry.frame(in: .global).minY)
-//
-//        }
-//        .frame(height: 450)
-        
-//        GeometryReader { geometry in
-//            ZStack {
-//                if geometry.frame(in: .global).minY <= 0 {
-//                    KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
-//                        .downsampling(size: CGSize.init(width: 550, height: 850))
-//                        .loadImmediately()
-//                        .loadDiskFileSynchronously()
-//                        .fromMemoryCacheOrRefresh()
-//                        .cacheOriginalImage()
-//                        .fade(duration: 0.25)
-//                        .onProgress { receivedSize, totalSize in  }
-//                        .onSuccess { result in  }
-//                        .onFailure { error in }
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fill)
-//                        .ignoresSafeArea()
-//                        .frame(width: geometry.size.width, height: 450)
-//                        .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
-//                       // .offset(y: -geometry.frame(in: .global).minY/1.5)
-//                } else {
-//                    KFImage.url(URL(string: APIKeys().imageKey + (result.poster_path ?? result.backdrop_path ?? "")!))
-//                        .downsampling(size: CGSize.init(width: 550, height: 850))
-//                        .loadImmediately()
-//                        .loadDiskFileSynchronously()
-//                        .fromMemoryCacheOrRefresh()
-//                        .cacheOriginalImage()
-//                        .fade(duration: 0.25)
-//                        .onProgress { receivedSize, totalSize in  }
-//                        .onSuccess { result in  }
-//                        .onFailure { error in }
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fill)
-//                        .ignoresSafeArea()
-//                        .frame(width: geometry.size.width, height: 450 + geometry.frame(in: .global).minY)
-//                    //.offset(y: -geometry.frame(in: .global).minY + 20)
-//                        .mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .bottom, endPoint: .center))
-//                      //  .offset(y: -geometry.frame(in: .global).minY)
-//                }
-//            }
-//        }
-//        .frame(height: 450)
-

@@ -18,10 +18,7 @@ struct ContentDetailsView: View {
     
     let result: Result
     let screenType: ScreenTypes
-    @StateObject private var creditsVM: CreditsViewModel
-    @StateObject private var similarsVM: GetSimilarViewModel
-    @StateObject private var reviewsVM: ReviewsViewModel
-    @StateObject private var genreVM: GenreViewModel
+    @StateObject private var detailsViewModel: DetailsViewModel
     
     @Environment(\.presentationMode) var presentation
     @State var showDetails = false
@@ -29,10 +26,9 @@ struct ContentDetailsView: View {
     init(result: Result, screenType: ScreenTypes) {
         self.screenType = screenType
         self.result = result
-        _genreVM = StateObject(wrappedValue: GenreViewModel.init(service: ServiceInvaction()))
-        _creditsVM = StateObject(wrappedValue: CreditsViewModel.init(service: ServiceInvaction.init(), screenType: screenType, id: String(describing: result.id!)))
-        _similarsVM = StateObject(wrappedValue: GetSimilarViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
-        _reviewsVM = StateObject(wrappedValue: ReviewsViewModel.init(service: ServiceInvaction(), screenType: screenType, id: String(describing: result.id!)))
+        _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvaction.init(),
+                                                                            screenType: screenType,
+                                                                            id: String(describing: result.id!)))
     }
     
     @ViewBuilder
@@ -54,7 +50,7 @@ struct ContentDetailsView: View {
                         if let allRatings = result.vote_count {
                             Text("• " + String(allRatings) + " ratings")
                         }
-                        Text("• Release Date: " + result.getReleaseDate())
+                        Text("• Release Date: " + result.getReleaseDate(addSeparator: false))
                     }
                     .font(.custom("AvenirNext-Regular", size: 15))
                     .foregroundColor(.gray)
@@ -67,7 +63,7 @@ struct ContentDetailsView: View {
     @ViewBuilder
     func GenreView(ids: [Int]?) -> some View {
         
-        if let availableGenres = genreVM.genres?.getAvailableGenres(ids: ids) {
+        if let availableGenres = detailsViewModel.genres?.getAvailableGenres(ids: ids) {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
@@ -92,15 +88,12 @@ struct ContentDetailsView: View {
     func SeasonsView() -> some View {
     }
     
-    @ViewBuilder
-    func TrailerView() -> some View {
-    }
-    
     var body: some View {
         
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 0) {
-                ImageView(result: result)
+                ImageView(result: result,
+                          detailsViewModel: detailsViewModel)
             }
             VStack {
                 // scroll categories
@@ -114,11 +107,8 @@ struct ContentDetailsView: View {
                 //DetailsView
                 Details()
                 
-                // trailer
-                TrailerView()
-                
                 //cast
-                if let cast = creditsVM.credits?.cast {
+                if let cast = detailsViewModel.credits?.cast {
                     HStack{
                         Text("Cast")
                             .font(.system(size: 20, weight: .bold))
@@ -130,7 +120,7 @@ struct ContentDetailsView: View {
                 }
                 
                 // similar
-                if let content = similarsVM.similar?.results {
+                if let content = detailsViewModel.similar?.results {
                     VStack {
                         HStack{
                             Text(screenType == .movie ? "Similar Movies" : "Similar TV Shows")
@@ -149,7 +139,7 @@ struct ContentDetailsView: View {
                     SimilarsView(content: content, screenType: screenType)
                 }
                 // user reviews
-                if let reviews = reviewsVM.reviews?.results,
+                if let reviews = detailsViewModel.reviews?.results,
                    reviews.isEmpty == false {
                     HStack{
                         Text("User Reviews")
@@ -173,19 +163,34 @@ struct ContentDetailsView: View {
                 .resizable()
                 .frame(width: 25, height: 25)
                 .foregroundColor(.gray)
+        },
+                            trailing: Button(action : {
+           
+        }){
+            Image(systemName: "plus.square.fill.on.square.fill")
+                .resizable()
+                .frame(width: 25, height: 25)
+                .foregroundColor(.gray)
         })
+        
         .task {
-            await genreVM.getGenres(screenType: self.screenType)
-            await creditsVM.getCredits()
-            await similarsVM.getSimilars()
-            await reviewsVM.getReviews()
+            await detailsViewModel.getGenres(screenType: self.screenType)
+            await detailsViewModel.getCredits()
+            await detailsViewModel.getVideos()
+            await detailsViewModel.getSimilars()
+            await detailsViewModel.getReviews()
         }
     }
 }
 
-extension UINavigationController {
+extension UINavigationController: UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
-        interactivePopGestureRecognizer?.delegate = nil
+        interactivePopGestureRecognizer?.delegate = self
+    }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return viewControllers.count > 1
     }
 }
+

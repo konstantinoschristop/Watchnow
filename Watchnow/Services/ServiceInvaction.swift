@@ -65,4 +65,13 @@ class ServiceInvaction {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(GenreModel.self, from: data)
     }
+    
+    func fetchVideos(screenType: ScreenTypes, id: String) async throws -> VideoModel {
+        
+        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/" + api.videos)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(VideoModel.self, from: data)
+    }
 }
