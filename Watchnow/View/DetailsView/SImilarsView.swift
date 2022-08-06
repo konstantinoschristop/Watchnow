@@ -30,7 +30,7 @@ struct SimilarsView: View {
                                                           width: 130,
                                                           height: 180,
                                                           cornerRadius: 10,
-                                                          showShadow: false)
+                                                          showShadow: true)
                                     
                                         .aspectRatio(contentMode: .fit)
                                     Text(content.getResultTitle())
@@ -58,6 +58,7 @@ struct SimilarsView: View {
                     .frame(width: 130, height: 270)
                 }
             }
+            .padding(.trailing, 15)
         }
     }
 }

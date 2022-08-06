@@ -43,6 +43,6 @@ struct GenericImageView: View {
             .resizable()
             .frame(width: width, height: height)
             .cornerRadius(cornerRadius)
-            .shadow(color: showShadow ? .gray : .clear, radius: 5)
+            .shadow(color: showShadow ? .black : .clear, radius: 5)
     }
 }

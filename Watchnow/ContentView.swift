@@ -13,7 +13,7 @@ struct ContentView: View {
         TabView {
             NavigationView {
                 MoviesView()
-                    .background(Color(.systemBackground))
+                    .background(Color(.systemGray6))
                     .navigationBarTitle("Movies")
                     .navigationBarTitleDisplayMode(.automatic)
             }
@@ -23,7 +23,7 @@ struct ContentView: View {
             
             NavigationView {
                 SerieView()
-                    .background(Color(.systemBackground))
+                    .background(Color(.systemGray6))
                     .navigationBarTitle("Series")
                     .navigationBarTitleDisplayMode(.automatic)
             }
@@ -33,6 +33,7 @@ struct ContentView: View {
             
             NavigationView {
                SearchView()
+                    .background(Color(.systemGray6))
             }
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass.circle")

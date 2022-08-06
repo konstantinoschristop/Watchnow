@@ -19,7 +19,8 @@ class SeriesViewModel: ObservableObject {
     func getTrendingSeries() async {
         
         do {
-            self.trendingSeries = try await service.fetchTrendingSeries()
+            self.trendingSeries = try await service.fetchTrendingSeries(page: 1)
+            self.trendingSeries?.results.append(contentsOf: try await service.fetchTrendingSeries(page: 2).results)
         } catch {
             print(error)
         }
@@ -28,7 +29,8 @@ class SeriesViewModel: ObservableObject {
     func getPopularSeries() async {
         
         do {
-            self.popularSeries = try await service.fetchPopularSeries()
+            self.popularSeries = try await service.fetchPopularSeries(page: 1)
+            self.popularSeries?.results.append(contentsOf: try await service.fetchPopularSeries(page: 2).results)
         } catch {
             print(error)
         }
@@ -37,7 +39,8 @@ class SeriesViewModel: ObservableObject {
     func getAiringTodaySeries() async {
         
         do {
-            self.airingTodaySeries = try await service.fetchAiringTodaySeries()
+            self.airingTodaySeries = try await service.fetchAiringTodaySeries(page: 1)
+            self.airingTodaySeries?.results.append(contentsOf: try await service.fetchAiringTodaySeries(page: 2).results)
         } catch {
             print(error)
         }

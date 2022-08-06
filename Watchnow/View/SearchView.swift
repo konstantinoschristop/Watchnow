@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchView: View {
     
     @StateObject var searchVM = SearchViewModel.init(service: ServiceInvaction.init())
+    @State var enablePicker = false
     @State var searchInput = ""
     
     var body: some View {
@@ -17,37 +18,40 @@ struct SearchView: View {
         VStack {
             ZStack {
                 Rectangle()
-                    .fill(Color(.systemGray6))
+                    .fill(Color(.systemGray4))
                     .foregroundColor(Color(.systemBackground))
                     .cornerRadius(13)
                 HStack {
                     Image(systemName: "magnifyingglass")
                     
                     TextField("Search movies and tv series...", text: $searchInput)
-                        .onSubmit {
-                            Task {
-                                if searchInput != "" {
-                                    await searchVM.getResults(search: searchInput)
-                                }
+                    .onSubmit {
+                        Task {
+                            if searchInput != "" {
+                                self.enablePicker = true
+                                await searchVM.getResults(search: searchInput)
                             }
                         }
+                    }
                 }
                 .padding(.all, 10)
             }
             .padding()
             .frame(height: 40)
             
-            Picker(selection: $searchVM.selectedChooser) {
-                Text(SearchViewModel.SearchChooserOptions.all.getTitle()).tag(SearchViewModel.SearchChooserOptions.all)
-                Text(SearchViewModel.SearchChooserOptions.movies.getTitle()).tag(SearchViewModel.SearchChooserOptions.movies)
-                Text(SearchViewModel.SearchChooserOptions.series.getTitle()).tag(SearchViewModel.SearchChooserOptions.series)
-                Text(SearchViewModel.SearchChooserOptions.actors.getTitle()).tag(SearchViewModel.SearchChooserOptions.actors)
-            } label: {
-                Text("Filter By")
+            if enablePicker {
+                withAnimation {
+                    Picker(selection: $searchVM.selectedChooser) {
+                        Text(SearchViewModel.SearchChooserOptions.all.getTitle()).tag(SearchViewModel.SearchChooserOptions.all)
+                        Text(SearchViewModel.SearchChooserOptions.movies.getTitle()).tag(SearchViewModel.SearchChooserOptions.movies)
+                        Text(SearchViewModel.SearchChooserOptions.series.getTitle()).tag(SearchViewModel.SearchChooserOptions.series)
+                        Text(SearchViewModel.SearchChooserOptions.actors.getTitle()).tag(SearchViewModel.SearchChooserOptions.actors)
+                    } label: {}
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
+                }
             }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
-            
+  
             Spacer()
             
             Group {

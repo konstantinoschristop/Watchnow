@@ -62,6 +62,7 @@ struct ReviewsView: View {
                 }
             }
             .padding(.leading, 10)
+            .padding(.trailing, 10)
         }
         .sheet(isPresented: $isPresented) {
             ReviewSheet(review: self.$selectedReview)

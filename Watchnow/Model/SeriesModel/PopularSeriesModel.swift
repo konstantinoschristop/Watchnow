@@ -8,5 +8,5 @@
 import Foundation
 
 struct PopularSeriesModel: Codable {
-    let results: [Result]
+    var results: [Result]
 }

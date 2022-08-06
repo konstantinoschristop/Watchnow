@@ -68,18 +68,14 @@ struct ContentDetailsView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
                     ForEach(availableGenres, id: \.self) { genre in
-                        
-                        ZStack {
-                            Rectangle()
-                                .fill(Color(.systemGray5))
-                                .cornerRadius(20)
-                            Text(genre.name ?? "- -")
-                                .padding()
-                                .font(.system(size: 11))
-                        }
-                        .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 0))
+                        Text(genre.name ?? "- -")
+                            .padding()
+                            .font(.system(size: 11))
+                            .background(Color(.systemGray5))
+                            .cornerRadius(20)
                     }
                 }
+                .padding(.init(top: 0, leading: 20, bottom: 10, trailing: 20))
             }
         }
     }
@@ -154,6 +150,7 @@ struct ContentDetailsView: View {
             .padding(.top, 25)
             .padding(.bottom, 100)
         }
+        .background(Color(.systemGray6))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: Button(action : {
@@ -162,15 +159,17 @@ struct ContentDetailsView: View {
             Image(systemName: "arrow.backward.circle.fill")
                 .resizable()
                 .frame(width: 25, height: 25)
-                .foregroundColor(.gray)
+                .foregroundColor(.white)
+                .shadow(color: .black, radius: 3)
         },
                             trailing: Button(action : {
            
         }){
-            Image(systemName: "plus.square.fill.on.square.fill")
+            Image(systemName: "star.circle.fill")
                 .resizable()
                 .frame(width: 25, height: 25)
-                .foregroundColor(.gray)
+                .foregroundColor(.orange)
+                .shadow(color: .black, radius: 3)
         })
         
         .task {

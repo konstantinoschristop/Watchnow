@@ -17,17 +17,17 @@ class APIKeys {
     
     let apikey = "?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     
-    let popularMovies = "https://api.themoviedb.org/3/movie/now_playing?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
+    let popularMovies = "https://api.themoviedb.org/3/movie/now_playing?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page="
     
-    let upcomingMovies = "https://api.themoviedb.org/3/movie/upcoming?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page=2"
+    let upcomingMovies = "https://api.themoviedb.org/3/movie/upcoming?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page="
     
-    let trendingMovies = "https://api.themoviedb.org/3/trending/movie/day?api_key=8a5d569103b429228d23a32db4b9a426"
+    let trendingMovies = "https://api.themoviedb.org/3/trending/movie/day?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page="
     
-    let popularSeries = "https://api.themoviedb.org/3/tv/popular?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page=1"
+    let popularSeries = "https://api.themoviedb.org/3/tv/popular?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page="
     
-    let airingTodaySeries = "https://api.themoviedb.org/3/tv/on_the_air?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page=1"
+    let airingTodaySeries = "https://api.themoviedb.org/3/tv/on_the_air?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page="
     
-    let trendingSeries = "https://api.themoviedb.org/3/trending/tv/day?api_key=8a5d569103b429228d23a32db4b9a426"
+    let trendingSeries = "https://api.themoviedb.org/3/trending/tv/day?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US&page="
     
     let credits = "credits?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     

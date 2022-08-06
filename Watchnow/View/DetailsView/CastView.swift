@@ -36,7 +36,7 @@ struct CastView: View {
                                                       width: 80,
                                                       height: 120,
                                                       cornerRadius: 6,
-                                                      showShadow: false)
+                                                      showShadow: true)
                                 
                                     .aspectRatio(contentMode: .fit)
                                 Text((cast.name ?? cast.original_name) ?? "")
@@ -47,10 +47,11 @@ struct CastView: View {
                                     .frame(width: 80, height: 30)
                             }
                         }
-                        .padding(.leading, 10)
                     }
                 }
             }
+            .padding(.leading, 10)
+            .padding(.trailing, 10)
         }
     }
 }

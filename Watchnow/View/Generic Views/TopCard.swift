@@ -13,6 +13,7 @@ struct TopCard: View {
     var content: Result
     var screenType: ScreenTypes
     @State var isPresented = false
+    @Environment(\.colorScheme) var colorScheme
     
     init(content: Result, screenType: ScreenTypes) {
         

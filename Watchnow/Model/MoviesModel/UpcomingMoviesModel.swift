@@ -8,7 +8,7 @@
 import Foundation
 
 struct UpcomingMoviesModel: Codable {
-    let results: [Result]
+    var results: [Result]
 }
 
 
