@@ -15,6 +15,7 @@ class DetailsViewModel: ObservableObject {
     @Published private(set) var reviews: ReviewsModel?
     @Published private(set) var genres: GenreModel?
     @Published private(set) var videos: VideoModel?
+    @Published var isInWatchList: Bool
     
     private let service: ServiceInvaction
     let screenType: ScreenTypes
@@ -22,11 +23,13 @@ class DetailsViewModel: ObservableObject {
     
     init(service: ServiceInvaction,
          screenType: ScreenTypes,
-         id: String) {
+         id: String,
+         result: Result) {
         
         self.service = service
         self.screenType = screenType
         self.id = id
+        self.isInWatchList = WatchlistManager.watchlist.contains(result)
     }
     
     func getCredits() async {

@@ -11,9 +11,8 @@ struct UpcomingMoviesModel: Codable {
     var results: [Result]
 }
 
-
 // MARK: - Result
-struct Result: Codable, Hashable {
+struct Result: Codable, Hashable, Equatable {
     let backdrop_path: String?
     let first_air_date: String?
     let genre_ids: [Int]?
@@ -29,10 +28,13 @@ struct Result: Codable, Hashable {
     let video: Bool?
     let vote_average: Double?
     let vote_count: Int?
-    let media_type: String?
+    var media_type: String?
     let profile_path: String?
     let castID: Int?
     
+    static func == (lhs: Result, rhs: Result) -> Bool {
+        return lhs.id == rhs.id
+    }
     
     func getResultTitle() -> String {
         return (name ?? title) ?? "- -"

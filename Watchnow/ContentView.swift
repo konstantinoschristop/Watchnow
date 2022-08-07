@@ -34,16 +34,21 @@ struct ContentView: View {
             NavigationView {
                SearchView()
                     .background(Color(.systemGray6))
+                    .navigationBarTitle("Search")
+                    .navigationBarTitleDisplayMode(.automatic)
             }
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass.circle")
             }
             
             NavigationView {
-               
+                WatchlistView()
+                    .background(Color(.systemGray6))
+                     .navigationBarTitle("Watchlist")
+                     .navigationBarTitleDisplayMode(.automatic)
             }
             .tabItem {
-                Label("Profile", systemImage: "person.circle.fill")
+                Label("Watchlist", systemImage: "list.bullet.circle.fill")
             }
         }
     }

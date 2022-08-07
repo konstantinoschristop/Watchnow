@@ -38,6 +38,7 @@ struct MoviesView: View {
                 .listStyle(.plain)
             } else {
                 ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .task {

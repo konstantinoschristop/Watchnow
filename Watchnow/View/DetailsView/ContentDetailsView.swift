@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Kingfisher
+import AlertToast
 
 enum ScreenTypes: String {
     case movie
@@ -16,19 +17,21 @@ enum ScreenTypes: String {
 
 struct ContentDetailsView: View {
     
-    let result: Result
+    var result: Result
     let screenType: ScreenTypes
     @StateObject private var detailsViewModel: DetailsViewModel
-    
     @Environment(\.presentationMode) var presentation
     @State var showDetails = false
+    @State private var showAlert = false
     
     init(result: Result, screenType: ScreenTypes) {
-        self.screenType = screenType
-        self.result = result
         _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvaction.init(),
                                                                             screenType: screenType,
-                                                                            id: String(describing: result.id!)))
+                                                                            id: String(describing: result.id!),
+                                                                            result: result))
+        self.screenType = screenType
+        self.result = result
+        self.result.media_type = screenType == .movie ? "movie" : "tv"
     }
     
     @ViewBuilder
@@ -163,15 +166,26 @@ struct ContentDetailsView: View {
                 .shadow(color: .black, radius: 3)
         },
                             trailing: Button(action : {
-           
+            if detailsViewModel.isInWatchList {
+                WatchlistManager.removeFromWatchList(result: result)
+                detailsViewModel.isInWatchList = false
+            } else {
+                WatchlistManager.addToWatchList(result: result)
+                detailsViewModel.isInWatchList = true
+            }
+            self.showAlert = true
         }){
-            Image(systemName: "star.circle.fill")
+            Image(systemName: detailsViewModel.isInWatchList ?  "bookmark.slash.fill" : "bookmark.fill")
                 .resizable()
-                .frame(width: 25, height: 25)
+                .frame(width: detailsViewModel.isInWatchList ? 25 : 20, height: 25)
                 .foregroundColor(.orange)
                 .shadow(color: .black, radius: 3)
         })
-        
+        .toast(isPresenting: $showAlert, alert: {
+            detailsViewModel.isInWatchList == false ?
+                AlertToast(type: .systemImage("x.circle", .red), title: "Removed from watchlist")  :
+                AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to watchlist")
+        })
         .task {
             await detailsViewModel.getGenres(screenType: self.screenType)
             await detailsViewModel.getCredits()

@@ -76,7 +76,6 @@ struct SearchView: View {
                 }
             }
         }
-        .navigationTitle("Search")
     }
 }
 
@@ -111,62 +110,8 @@ struct SearchResults: View {
                 Spacer()
             }
         } else {
-            self.getResultView(results: filtered)
+           GenericListView(results: filtered)
         }
-    }
-    
-    func getResultView(results: [Result]) -> some View {
-        
-        return  Group {
-            ForEach(filtered, id: \.self) { result in
-                NavigationLink {
-                    switch result.getMediaType() {
-                    case "Actor":
-                        ActorDetailsView(actorID: result.id)
-                    default:
-                        ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
-                    }
-                } label: {
-                    self.constructResult(result: result)
-                }
-            }
-        }
-    }
-    
-    func constructResult(result: Result) -> some View {
-        return ZStack {
-            Rectangle()
-                .fill(Color(.systemGray5))
-                .cornerRadius(10)
-            HStack {
-                if let imageURL = result.getResultPosterURL(),
-                   let url = APIKeys().imageKey + imageURL {
-                    
-                    GenericImageView(url: url,
-                                     width: 70,
-                                     height: 90,
-                                     cornerRadius: 10,
-                                     showShadow: false)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text(result.getResultTitle())
-                        .font(.system(size: 16, weight: .bold))
-                    Spacer()
-                        .frame(height: 10)
-                    
-                    HStack {
-                        Text(result.getReleaseDate() + result.getMediaType())
-                        Spacer()
-                    }
-                    .font(.system(size: 12, weight: .light))
-                }
-                .foregroundColor(Color(.systemBackground))
-                .colorInvert()
-                .padding()
-            }
-        }
-        .padding(.init(top: 0, leading: 15, bottom: 0, trailing: 15))
     }
 }
 

@@ -47,6 +47,11 @@
 		EE67247627B93D1000B8F8E8 /* TrendingSeriesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247527B93D1000B8F8E8 /* TrendingSeriesModel.swift */; };
 		EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247927B9876400B8F8E8 /* CastView.swift */; };
 		EE67247D27B998F700B8F8E8 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247C27B998F700B8F8E8 /* ImageView.swift */; };
+		EE9595C3289EB49B0016EC25 /* WatchlistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9595C2289EB49A0016EC25 /* WatchlistManager.swift */; };
+		EE9595C5289EBA9E0016EC25 /* WatchlistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9595C4289EBA9E0016EC25 /* WatchlistViewModel.swift */; };
+		EE9595C7289EBAAE0016EC25 /* WatchlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9595C6289EBAAE0016EC25 /* WatchlistView.swift */; };
+		EE9595C9289ED46A0016EC25 /* GenericListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9595C8289ED46A0016EC25 /* GenericListView.swift */; };
+		EE9595CC289FB5550016EC25 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = EE9595CB289FB5550016EC25 /* AlertToast */; };
 		EE95E43B2891CB8E00B8C688 /* ActorDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE95E43A2891CB8E00B8C688 /* ActorDetailsView.swift */; };
 		EE95E43D2895B02C00B8C688 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE95E43C2895B02C00B8C688 /* VideoView.swift */; };
 		EE95E43F2895C1B600B8C688 /* DetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE95E43E2895C1B600B8C688 /* DetailsViewModel.swift */; };
@@ -97,6 +102,10 @@
 		EE67247527B93D1000B8F8E8 /* TrendingSeriesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingSeriesModel.swift; sourceTree = "<group>"; };
 		EE67247927B9876400B8F8E8 /* CastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastView.swift; sourceTree = "<group>"; };
 		EE67247C27B998F700B8F8E8 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		EE9595C2289EB49A0016EC25 /* WatchlistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistManager.swift; sourceTree = "<group>"; };
+		EE9595C4289EBA9E0016EC25 /* WatchlistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistViewModel.swift; sourceTree = "<group>"; };
+		EE9595C6289EBAAE0016EC25 /* WatchlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistView.swift; sourceTree = "<group>"; };
+		EE9595C8289ED46A0016EC25 /* GenericListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericListView.swift; sourceTree = "<group>"; };
 		EE95E43A2891CB8E00B8C688 /* ActorDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActorDetailsView.swift; sourceTree = "<group>"; };
 		EE95E43C2895B02C00B8C688 /* VideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView.swift; sourceTree = "<group>"; };
 		EE95E43E2895C1B600B8C688 /* DetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewModel.swift; sourceTree = "<group>"; };
@@ -111,6 +120,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */,
+				EE9595CC289FB5550016EC25 /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,6 +196,7 @@
 				8A981D9026B6A85F00993232 /* MoviesView.swift */,
 				8AB84B8E2756946F0016D82E /* SerieView.swift */,
 				EE2732F0287AF4AE00B066C7 /* SearchView.swift */,
+				EE9595C6289EBAAE0016EC25 /* WatchlistView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -197,6 +208,7 @@
 				EE95E4442895CA6F00B8C688 /* SeriesViewModel.swift */,
 				EE95E4422895CA1000B8C688 /* MoviesViewModel.swift */,
 				EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */,
+				EE9595C4289EBA9E0016EC25 /* WatchlistViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -220,6 +232,7 @@
 				8AC338FD2752923E00834B46 /* TopView.swift */,
 				8AC339022752957D00834B46 /* BottomView.swift */,
 				EE27E297284D2A890055E25A /* GenericImageView.swift */,
+				EE9595C8289ED46A0016EC25 /* GenericListView.swift */,
 			);
 			path = "Generic Views";
 			sourceTree = "<group>";
@@ -248,6 +261,7 @@
 			isa = PBXGroup;
 			children = (
 				8AC339002752932D00834B46 /* Scale.swift */,
+				EE9595C2289EB49A0016EC25 /* WatchlistManager.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -284,6 +298,7 @@
 			name = Watchnow;
 			packageProductDependencies = (
 				8A036A7726BBE23700A3D0FF /* Kingfisher */,
+				EE9595CB289FB5550016EC25 /* AlertToast */,
 			);
 			productName = Watchnow;
 			productReference = 8A981D4F26B5AF1000993232 /* Watchnow.app */;
@@ -314,6 +329,7 @@
 			mainGroup = 8A981D4626B5AF0F00993232;
 			packageReferences = (
 				8A036A7626BBE23700A3D0FF /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */,
 			);
 			productRefGroup = 8A981D5026B5AF1000993232 /* Products */;
 			projectDirPath = "";
@@ -344,9 +360,11 @@
 			files = (
 				8A981D7326B6920700993232 /* APIKeys.swift in Sources */,
 				EE4002B3284CEBA300374143 /* ReviewsView.swift in Sources */,
+				EE9595C5289EBA9E0016EC25 /* WatchlistViewModel.swift in Sources */,
 				EE67247227B93CF500B8F8E8 /* AiringTodaySeriesModel.swift in Sources */,
 				EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */,
 				EE67246A27B9240900B8F8E8 /* ServiceInvaction.swift in Sources */,
+				EE9595C3289EB49B0016EC25 /* WatchlistManager.swift in Sources */,
 				8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */,
 				EE2732F3287B259E00B066C7 /* GenreModel.swift in Sources */,
 				8A981D8226B69F5200993232 /* SimilarMoviesModel.swift in Sources */,
@@ -364,7 +382,9 @@
 				8A981D5526B5AF1000993232 /* SceneDelegate.swift in Sources */,
 				8A981D5726B5AF1000993232 /* ContentView.swift in Sources */,
 				EE4002AD284CDC5600374143 /* SImilarsView.swift in Sources */,
+				EE9595C9289ED46A0016EC25 /* GenericListView.swift in Sources */,
 				EE4002AF284CEA8400374143 /* ReviewsModel.swift in Sources */,
+				EE9595C7289EBAAE0016EC25 /* WatchlistView.swift in Sources */,
 				EE2732F1287AF4AE00B066C7 /* SearchView.swift in Sources */,
 				EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */,
 				EE95E4432895CA1000B8C688 /* MoviesViewModel.swift in Sources */,
@@ -593,6 +613,14 @@
 				minimumVersion = 6.3.1;
 			};
 		};
+		EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/elai950/AlertToast.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -600,6 +628,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8A036A7626BBE23700A3D0FF /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		EE9595CB289FB5550016EC25 /* AlertToast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */;
+			productName = AlertToast;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
