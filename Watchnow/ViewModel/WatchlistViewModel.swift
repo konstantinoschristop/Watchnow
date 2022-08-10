@@ -32,12 +32,12 @@ class WatchlistViewModel: ObservableObject {
     
     private func getSavedMovies() {
         
-        self.savedMovies = WatchlistManager.watchlist.filter({ $0.media_type == "movie" })
+        self.savedMovies = WatchlistManager.watchlist.reversed().filter({ $0.media_type == "movie" })
     }
     
     private func getSavedSeries() {
         
-        self.savedSeries = WatchlistManager.watchlist.filter({ $0.media_type == "tv" })
+        self.savedSeries = WatchlistManager.watchlist.reversed().filter({ $0.media_type == "tv" })
     }
     
     func isWatchListEmpty() -> Bool {

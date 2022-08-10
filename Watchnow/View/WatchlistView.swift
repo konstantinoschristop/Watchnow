@@ -42,7 +42,7 @@ struct WatchlistView: View {
             watchlistViewModel.refreshDataIfNeeded()
         }
         .toast(isPresenting: $watchlistViewModel.showAlert, alert: {
-            AlertToast(type: .systemImage("x.circle", .red), title: "Removed from watchlist")
+            AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
     }
     

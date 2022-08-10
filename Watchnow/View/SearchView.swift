@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct SearchView: View {
     
     @StateObject var searchVM = SearchViewModel.init(service: ServiceInvaction.init())
     @State var enablePicker = false
     @State var searchInput = ""
+    
+    init() {
+        UITextField.appearance().clearButtonMode = .whileEditing
+    }
     
     var body: some View {
         
@@ -57,19 +62,30 @@ struct SearchView: View {
             Group {
                 if let results = searchVM.result?.results?.filter { $0.poster_path != nil && $0.media_type != "person" || $0.poster_path == nil && $0.media_type == "person" } {
                     if results == [] {
-                        VStack {
-                            Spacer()
-                            Text("No results found. Try searching again with a different keyword.")
-                                .padding()
-                            Spacer()
-                        }
+                        Text("No results found. Try searching again with a different keyword.")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        ScrollView {
-                            SearchResults(results: results, chooserSelection: $searchVM.selectedChooser)
+                        List {
+                            if searchVM.listNeedsUpdate {
+                                SearchResults(results: results,
+                                              chooserSelection: $searchVM.selectedChooser,
+                                              viewModel: searchVM)
+                            } else {
+                                SearchResults(results: results,
+                                              chooserSelection: $searchVM.selectedChooser,
+                                              viewModel: searchVM)
+                            }
                         }
+                        .listStyle(.plain)
                     }
                 }
             }
+            .toast(isPresenting: $searchVM.showAddedAlert, alert: {
+                AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            })
+            .toast(isPresenting: $searchVM.showRemovedAlert, alert: {
+                AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
+            })
             .refreshable {
                 if searchInput != "" {
                     await searchVM.getResults(search: searchInput)
@@ -79,15 +95,19 @@ struct SearchView: View {
     }
 }
 
+@MainActor
 struct SearchResults: View {
     
     @Binding var chooserSelection: SearchViewModel.SearchChooserOptions
+    let viewModel: SearchViewModel
     var filtered: [Result] = []
     
     init(results: [Result],
-         chooserSelection: Binding<SearchViewModel.SearchChooserOptions>) {
+         chooserSelection: Binding<SearchViewModel.SearchChooserOptions>,
+         viewModel: SearchViewModel) {
         
         self._chooserSelection = chooserSelection
+        self.viewModel = viewModel
         
         if chooserSelection.wrappedValue.rawValue == "All" {
             self.filtered = results
@@ -103,14 +123,10 @@ struct SearchResults: View {
     var body: some View {
         
         if filtered.isEmpty {
-            VStack {
-                Spacer()
-                Text("No results found for this filter.")
-                    .padding()
-                Spacer()
-            }
+            Text("No results found for this filter.")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-           GenericListView(results: filtered)
+            GenericListView(results: filtered, viewModel: viewModel)
         }
     }
 }

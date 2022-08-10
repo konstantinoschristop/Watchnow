@@ -32,7 +32,22 @@ class SearchViewModel: ObservableObject {
     }
     
     @Published private(set) var result: SearchModel?
-    @Published var selectedChooser: SearchChooserOptions = .all
+    @Published var selectedChooser: SearchChooserOptions = .all {
+        didSet {
+            listNeedsUpdate = false
+        }
+    }
+    @Published var showRemovedAlert = false {
+        didSet {
+            listNeedsUpdate = false
+        }
+    }
+    @Published var showAddedAlert = false {
+        didSet {
+            listNeedsUpdate = false
+        }
+    }
+    @Published var listNeedsUpdate = false
     
     private let service: ServiceInvaction
     

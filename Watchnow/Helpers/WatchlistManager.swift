@@ -54,4 +54,9 @@ enum WatchlistManager {
             }
         }
     }
+    
+    static func existsInWatchList(result: Result) -> Bool {
+         
+         return WatchlistManager.watchlist.contains(result)
+     }
 }

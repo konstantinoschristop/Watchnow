@@ -174,6 +174,7 @@ struct ContentDetailsView: View {
                 detailsViewModel.isInWatchList = true
             }
             self.showAlert = true
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
         }){
             Image(systemName: detailsViewModel.isInWatchList ?  "bookmark.slash.fill" : "bookmark.fill")
                 .resizable()
@@ -183,8 +184,8 @@ struct ContentDetailsView: View {
         })
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
-                AlertToast(type: .systemImage("x.circle", .red), title: "Removed from watchlist")  :
-                AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to watchlist")
+                AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
+                AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
         .task {
             await detailsViewModel.getGenres(screenType: self.screenType)
