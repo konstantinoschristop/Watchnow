@@ -7,6 +7,16 @@
 
 import Foundation
 
+enum ViewSections {
+    case upcomingMovies
+    case popularMovies
+    case trendingMovies
+    
+    case popularSeries
+    case airingTodaySeries
+    case trendingSeries
+}
+
 struct UpcomingMoviesModel: Codable {
     var results: [Result]
 }

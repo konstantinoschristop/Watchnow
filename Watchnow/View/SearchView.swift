@@ -95,7 +95,6 @@ struct SearchView: View {
     }
 }
 
-@MainActor
 struct SearchResults: View {
     
     @Binding var chooserSelection: SearchViewModel.SearchChooserOptions

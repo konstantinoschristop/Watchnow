@@ -10,63 +10,68 @@ import Foundation
 @MainActor
 class MoviesViewModel: ObservableObject {
     
-    enum Sections {
-        case upcomingMovies
-        case popularMovies
-        case trendingMovies
-    }
-    
     @Published private(set) var upcomingMovies: UpcomingMoviesModel?
-    @Published private(set) var popularMovies: PopularMoviesModel?
-    @Published private(set) var trendingMovies: TrendingMoviesModel?
-    @Published var upcomingMoviesCurrentPage = 1
-    private var popularMoviesCurrentPage = 1
-    private var trendingMoviesCurrentPage = 1
+    @Published private var popularMovies: PopularMoviesModel?
+    @Published private var trendingMovies: TrendingMoviesModel?
+    @Published private(set) var upcomingMoviesCurrentPage = 1
+    @Published private(set) var popularMoviesCurrentPage = 1
+    @Published private(set) var trendingMoviesCurrentPage = 1
     
     private let service: MovieService = .init()
     
-    func shouldloadMoreContent(currentItem item: Result?, section: Sections) -> Bool {
-        
-        guard let item = item else {
-            return false
-        }
-        
-        var results: [Result]?
+    func loadMoreContent(section: ViewSections) {
         
         switch section {
         case .upcomingMovies:
-            results = upcomingMovies?.results
-        case .popularMovies:
-            results = popularMovies?.results
-        case .trendingMovies:
-            results = trendingMovies?.results
-        }
-        
-        if let results = results {
-            let thresholdIndex = results.index(results.endIndex, offsetBy: -5)
-            if results.firstIndex(where: { $0.id == item.id }) == thresholdIndex {
-                return true
+            if upcomingMoviesCurrentPage < 20 {
+                upcomingMoviesCurrentPage += 1
             }
+        case .popularMovies:
+            if popularMoviesCurrentPage < 20 {
+                popularMoviesCurrentPage += 1
+            }
+        case .trendingMovies:
+            if trendingMoviesCurrentPage < 20 {
+                trendingMoviesCurrentPage += 1
+            }
+        default:
+            break
         }
-        
-        return false
     }
     
-    func getTrendingMovies() async {
+    func getUpcomingMovieResults() -> [Result]? {
+        return self.upcomingMovies?.results
+    }
+    
+    func getPopularMovieResults() -> [Result]? {
+        return self.popularMovies?.results
+    }
+    
+    func getTrendingMovieResults() -> [Result]? {
+        return self.trendingMovies?.results
+    }
+    
+    func getTrendingMovies(page: Int = 1) async {
         
         do {
-            self.trendingMovies = try await service.fetchTrendingMovies(page: 1)
-            self.trendingMovies?.results.append(contentsOf: try await service.fetchTrendingMovies(page: 2).results)
+            if page == 1 {
+                self.trendingMovies = try await service.fetchTrendingMovies(page: page)
+            } else {
+                self.trendingMovies?.results.append(contentsOf: try await service.fetchTrendingMovies(page: page).results)
+            }
         } catch {
             print(error)
         }
     }
     
-    func getUpcomingMovies() async {
+    func getUpcomingMovies(page: Int = 1) async {
         
         do {
-            self.upcomingMovies = try await service.fetchUpcomingMovies(page: 1)
-            self.upcomingMovies?.results.append(contentsOf: try await service.fetchUpcomingMovies(page: 2).results)
+            if page == 1 {
+                self.upcomingMovies = try await service.fetchUpcomingMovies(page: page)
+            } else {
+                self.upcomingMovies?.results.append(contentsOf: try await service.fetchUpcomingMovies(page: page).results)
+            }
         } catch {
             print(error)
         }
@@ -75,8 +80,11 @@ class MoviesViewModel: ObservableObject {
     func getPopularMovies(page: Int = 1) async {
         
         do {
-            self.popularMovies = try await service.fetchPopularMovies(page: 1)
-            self.popularMovies?.results.append(contentsOf: try await service.fetchPopularMovies(page: 2).results)
+            if page == 1 {
+                self.popularMovies = try await service.fetchPopularMovies(page: page)
+            } else {
+                self.popularMovies?.results.append(contentsOf: try await service.fetchPopularMovies(page: page).results)
+            }
         } catch {
             print(error)
         }

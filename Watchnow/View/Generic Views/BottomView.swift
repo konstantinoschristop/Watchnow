@@ -12,6 +12,8 @@ struct BottomView: View {
     var results: [Result]
     var viewTitle: String
     var screenType: ScreenTypes
+    var viewModel: Any
+    var viewSection: ViewSections
     
     var body: some View {
         VStack(spacing: -5) {
@@ -41,6 +43,24 @@ struct BottomView: View {
                         .frame(width: 200, height: 330)
                         .background(Color.clear)
                         .padding(.vertical, 30)
+                        
+                        Group {
+                            if results.last == movie,
+                               results.count < 320 {
+                                Button {
+                                    if let moviesViewModel = viewModel as? MoviesViewModel {
+                                        moviesViewModel.loadMoreContent(section: viewSection)
+                                    } else if let seriesViewModel = viewModel as? SeriesViewModel {
+                                        seriesViewModel.loadMoreContent(section: viewSection)
+                                    }
+                                } label: {
+                                    Image(systemName: "ellipsis.circle")
+                                        .imageScale(.large)
+                                }
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
             }

@@ -12,6 +12,8 @@ struct TopView: View {
     var results: [Result]
     var viewTitle: String
     var screenType: ScreenTypes
+    var viewModel: Any
+    var viewSection: ViewSections
     
     var body: some View {
         VStack(spacing: -5) {
@@ -33,7 +35,7 @@ struct TopView: View {
                             let scale = Scale.getScale(proxy: proxy, scaleType: .horizontal)
                             VStack {
                                 TopCard(content: movie, screenType: screenType)
-                                           .frame(width: 300, height: 200, alignment: .center)
+                                    .frame(width: 300, height: 200, alignment: .center)
                             }
                             .scaleEffect(.init(width: scale, height: scale))
                             .animation(.easeOut, value: 1)
@@ -42,6 +44,24 @@ struct TopView: View {
                         .frame(width: 350, height: 210)
                         .background(Color.clear)
                         .padding(.vertical, 30)
+                        
+                        Group {
+                            if results.last == movie,
+                               results.count < 320 {
+                                Button {
+                                    if let moviesViewModel = viewModel as? MoviesViewModel {
+                                        moviesViewModel.loadMoreContent(section: viewSection)
+                                    } else if let seriesViewModel = viewModel as? SeriesViewModel {
+                                        seriesViewModel.loadMoreContent(section: viewSection)
+                                    }
+                                } label: {
+                                    Image(systemName: "ellipsis.circle")
+                                        .imageScale(.large)
+                                }
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
             }

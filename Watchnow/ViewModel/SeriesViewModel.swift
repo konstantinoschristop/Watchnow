@@ -13,34 +13,66 @@ class SeriesViewModel: ObservableObject {
     @Published private(set) var popularSeries: PopularSeriesModel?
     @Published private(set) var airingTodaySeries: AiringTodaySeriesModel?
     @Published private(set) var trendingSeries: TrendingSeriesModel?
+    @Published private(set) var popularSeriesCurrentPage = 1
+    @Published private(set) var airingTodaySeriesCurrentPage = 1
+    @Published private(set) var trendingSeriesCurrentPage = 1
     
     private let service: SerieService = .init()
     
-    func getTrendingSeries() async {
+    func loadMoreContent(section: ViewSections) {
+        
+        switch section {
+        case .popularSeries:
+            if popularSeriesCurrentPage < 20 {
+                popularSeriesCurrentPage += 1
+            }
+        case .airingTodaySeries:
+            if airingTodaySeriesCurrentPage < 20 {
+                airingTodaySeriesCurrentPage += 1
+            }
+        case .trendingSeries:
+            if trendingSeriesCurrentPage < 20 {
+                trendingSeriesCurrentPage += 1
+            }
+        default:
+            break
+        }
+    }
+    
+    func getTrendingSeries(page: Int = 1) async {
         
         do {
-            self.trendingSeries = try await service.fetchTrendingSeries(page: 1)
-            self.trendingSeries?.results.append(contentsOf: try await service.fetchTrendingSeries(page: 2).results)
+            if page == 1 {
+                self.trendingSeries = try await service.fetchTrendingSeries(page: page)
+            } else {
+                self.trendingSeries?.results.append(contentsOf: try await service.fetchTrendingSeries(page: page).results)
+            }
         } catch {
             print(error)
         }
     }
     
-    func getPopularSeries() async {
+    func getPopularSeries(page: Int = 1) async {
         
         do {
-            self.popularSeries = try await service.fetchPopularSeries(page: 1)
-            self.popularSeries?.results.append(contentsOf: try await service.fetchPopularSeries(page: 2).results)
+            if page == 1 {
+                self.popularSeries = try await service.fetchPopularSeries(page: page)
+            } else {
+                self.popularSeries?.results.append(contentsOf: try await service.fetchPopularSeries(page: page).results)
+            }
         } catch {
             print(error)
         }
     }
     
-    func getAiringTodaySeries() async {
+    func getAiringTodaySeries(page: Int = 1) async {
         
         do {
-            self.airingTodaySeries = try await service.fetchAiringTodaySeries(page: 1)
-            self.airingTodaySeries?.results.append(contentsOf: try await service.fetchAiringTodaySeries(page: 2).results)
+            if page == 1 {
+                self.airingTodaySeries = try await service.fetchAiringTodaySeries(page: page)
+            } else {
+                self.airingTodaySeries?.results.append(contentsOf: try await service.fetchAiringTodaySeries(page: page).results)
+            }
         } catch {
             print(error)
         }
