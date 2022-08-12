@@ -48,24 +48,6 @@ class ServiceInvaction {
         return try JSONDecoder().decode(SearchModel.self, from: data)
     }
     
-    func fetchGenres(screenType: ScreenTypes) async throws -> GenreModel {
-        
-        var url: URL?
-        
-        switch screenType {
-        case .movie:
-            url = URL(string: api.movieGenre)
-        case .tv:
-            url = URL(string: api.tvGenre)
-        default:
-            break
-        }
-        
-        let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(GenreModel.self, from: data)
-    }
-    
     func fetchVideos(screenType: ScreenTypes, id: String) async throws -> VideoModel {
         
         let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/" + api.videos)
@@ -73,5 +55,14 @@ class ServiceInvaction {
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(VideoModel.self, from: data)
+    }
+    
+    func fetchDetails(screenType: ScreenTypes, id: String) async throws -> ContentDetailsModel {
+        
+        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + api.apikey)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(ContentDetailsModel.self, from: data)
     }
 }

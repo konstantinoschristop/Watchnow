@@ -25,23 +25,23 @@ struct SerieView: View {
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
                     
-                    if let results = seriesViewModel.airingTodaySeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "On Air Today",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .airingTodaySeries)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
-                    
                     if let results =  seriesViewModel.trendingSeries?.results {
                         BottomView(results: results,
                                    viewTitle: "Trending Today",
                                    screenType: .tv,
                                    viewModel: seriesViewModel,
                                    viewSection: .trendingSeries)
+                            .listRowSeparatorTint(.clear)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }
+                    
+                    if let results = seriesViewModel.airingTodaySeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "On Air Today",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .airingTodaySeries)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color.clear)
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))

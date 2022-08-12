@@ -66,7 +66,7 @@ struct ContentDetailsView: View {
     @ViewBuilder
     func GenreView(ids: [Int]?) -> some View {
         
-        if let availableGenres = detailsViewModel.genres?.getAvailableGenres(ids: ids) {
+        if let availableGenres = detailsViewModel.details?.genres {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
@@ -83,10 +83,6 @@ struct ContentDetailsView: View {
         }
     }
     
-    @ViewBuilder
-    func SeasonsView() -> some View {
-    }
-    
     var body: some View {
         
         ScrollView(.vertical, showsIndicators: false) {
@@ -98,13 +94,22 @@ struct ContentDetailsView: View {
                 // scroll categories
                 GenreView(ids: result.genre_ids)
                 
-                // if series, show seasons and episodes
-                if screenType == .tv {
-                    SeasonsView()
-                }
-                
                 //DetailsView
                 Details()
+                
+                // if series, show seasons and episodes
+                if screenType == .tv {
+                    if let seasons = detailsViewModel.details?.getSeasons() {
+                        HStack{
+                            Text("Seasons")
+                                .font(.system(size: 20, weight: .bold))
+                            Spacer()
+                        }
+                        .padding(.top, 10)
+                        .padding(.leading, 10)
+                        SeasonsView(seasons: seasons)
+                    }
+                }
                 
                 //cast
                 if let cast = detailsViewModel.credits?.cast {
@@ -184,11 +189,11 @@ struct ContentDetailsView: View {
         })
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
-                AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
-                AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
+            AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
         .task {
-            await detailsViewModel.getGenres(screenType: self.screenType)
+            await detailsViewModel.getDetails()
             await detailsViewModel.getCredits()
             await detailsViewModel.getVideos()
             await detailsViewModel.getSimilars()
@@ -202,7 +207,7 @@ extension UINavigationController: UIGestureRecognizerDelegate {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = self
     }
-
+    
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         return viewControllers.count > 1
     }

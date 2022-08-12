@@ -13,8 +13,8 @@ class DetailsViewModel: ObservableObject {
     @Published private(set) var credits: CreditsModel?
     @Published private(set) var similar: GetSimilarModel?
     @Published private(set) var reviews: ReviewsModel?
-    @Published private(set) var genres: GenreModel?
     @Published private(set) var videos: VideoModel?
+    @Published private(set) var details: ContentDetailsModel?
     @Published var isInWatchList: Bool
     
     private let service: ServiceInvaction
@@ -59,19 +59,19 @@ class DetailsViewModel: ObservableObject {
         }
     }
     
-    func getGenres(screenType: ScreenTypes) async {
+    func getVideos() async {
         
         do {
-            self.genres = try await service.fetchGenres(screenType: screenType)
+            self.videos = try await service.fetchVideos(screenType: screenType, id: id)
         } catch {
             print(error)
         }
     }
     
-    func getVideos() async {
-        
+    func getDetails() async {
+       
         do {
-            self.videos = try await service.fetchVideos(screenType: screenType, id: id)
+            self.details = try await service.fetchDetails(screenType: screenType, id: id)
         } catch {
             print(error)
         }

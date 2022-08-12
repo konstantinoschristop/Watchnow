@@ -46,12 +46,10 @@ struct GenericListView: View {
     func contructAddSwipeAction(result: Result) -> Button<Label<Text, Image>>? {
         
         return Button (action: {
-            withAnimation {
                 WatchlistManager.addToWatchList(result: result)
                 viewModel.showAddedAlert = true
                 viewModel.listNeedsUpdate = true
                 UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-            }
         }) {
             Label("Add to Watchlist", systemImage: "bookmark.fill")
         }
