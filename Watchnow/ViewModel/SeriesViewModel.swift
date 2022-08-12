@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-class SeriesViewModel: ObservableObject {
+class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     
     @Published private(set) var popularSeries: PopularSeriesModel?
     @Published private(set) var airingTodaySeries: AiringTodaySeriesModel?

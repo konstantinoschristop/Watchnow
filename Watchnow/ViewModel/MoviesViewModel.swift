@@ -8,7 +8,13 @@
 import Foundation
 
 @MainActor
-class MoviesViewModel: ObservableObject {
+protocol BaseViewModelProtocol {
+    
+    func loadMoreContent(section: ViewSections)
+}
+
+@MainActor
+class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     
     @Published private(set) var upcomingMovies: UpcomingMoviesModel?
     @Published private var popularMovies: PopularMoviesModel?

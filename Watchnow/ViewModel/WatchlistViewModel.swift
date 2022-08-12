@@ -8,13 +8,19 @@
 import Foundation
 
 @MainActor
-class WatchlistViewModel: ObservableObject {
+class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {    
     
     @Published var results: [Result]?
     @Published private(set) var savedMovies: [Result]?
     @Published private(set) var savedSeries: [Result]?
     
-    @Published var showAlert = false
+    @Published var showRemovedAlert = false
+    @Published var showAddedAlert = false
+    @Published var listNeedsUpdate = false {
+        didSet {
+            refreshDataIfNeeded()
+        }
+    }
     
     init() {
         self.fetchResultsFromWatchList()

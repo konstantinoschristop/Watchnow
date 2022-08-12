@@ -12,7 +12,7 @@ struct BottomView: View {
     var results: [Result]
     var viewTitle: String
     var screenType: ScreenTypes
-    var viewModel: Any
+    var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
     
     var body: some View {
@@ -48,11 +48,7 @@ struct BottomView: View {
                             if results.last == movie,
                                results.count < 320 {
                                 Button {
-                                    if let moviesViewModel = viewModel as? MoviesViewModel {
-                                        moviesViewModel.loadMoreContent(section: viewSection)
-                                    } else if let seriesViewModel = viewModel as? SeriesViewModel {
-                                        seriesViewModel.loadMoreContent(section: viewSection)
-                                    }
+                                    viewModel.loadMoreContent(section: viewSection)
                                 } label: {
                                     Image(systemName: "ellipsis.circle")
                                         .imageScale(.large)

@@ -8,7 +8,15 @@
 import Foundation
 
 @MainActor
-class SearchViewModel: ObservableObject {
+protocol BaseSwipeActionsProtocol {
+    var showRemovedAlert: Bool { get set }
+    var showAddedAlert: Bool { get set }
+    var listNeedsUpdate: Bool { get set }
+    func refreshDataIfNeeded()
+}
+
+@MainActor
+class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     
     enum SearchChooserOptions: String, CaseIterable {
         case all = "All"
@@ -62,5 +70,8 @@ class SearchViewModel: ObservableObject {
         } catch {
             print(error)
         }
+    }
+    
+    func refreshDataIfNeeded() {
     }
 }
