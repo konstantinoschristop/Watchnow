@@ -99,11 +99,32 @@ struct ContentDetailsView: View {
                 
                 // if series, show seasons and episodes
                 if screenType == .tv {
-                    if let seasons = detailsViewModel.details?.getSeasons() {
-                        HStack{
-                            Text("Seasons")
-                                .font(.system(size: 20, weight: .bold))
-                            Spacer()
+                    if let seasons = detailsViewModel.details?.getSeasons(),
+                       let numberOfSeasons = detailsViewModel.details?.number_of_seasons,
+                       let numberOfEpisodes = detailsViewModel.details?.number_of_episodes {
+                        VStack(spacing: 0) {
+                            HStack {
+                                Text("Seasons")
+                                    .font(.system(size: 20, weight: .bold))
+                                Spacer()
+                            }
+                            
+                            HStack {
+                                Text("Total Seasons: " + String(numberOfSeasons))
+                                Divider()
+                                Text("Total Episodes: " + String(numberOfEpisodes))
+                                Spacer()
+                                Button {
+                                    
+                                } label: {
+                                    Text("See all")
+                                        .foregroundColor(.blue)
+                                        .padding(.trailing, 10)
+                                }
+
+                            }
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.gray)
                         }
                         .padding(.top, 10)
                         .padding(.leading, 10)
@@ -113,7 +134,7 @@ struct ContentDetailsView: View {
                 
                 //cast
                 if let cast = detailsViewModel.credits?.cast {
-                    HStack{
+                    HStack {
                         Text("Cast")
                             .font(.system(size: 20, weight: .bold))
                         Spacer()
@@ -125,8 +146,8 @@ struct ContentDetailsView: View {
                 
                 // similar
                 if let content = detailsViewModel.similar?.results {
-                    VStack {
-                        HStack{
+                    VStack(spacing: 0) {
+                        HStack {
                             Text(screenType == .movie ? "Similar Movies" : "Similar TV Shows")
                                 .font(.system(size: 20, weight: .bold))
                             Spacer()
@@ -183,8 +204,8 @@ struct ContentDetailsView: View {
         }){
             Image(systemName: detailsViewModel.isInWatchList ?  "bookmark.slash.fill" : "bookmark.fill")
                 .resizable()
-                .frame(width: detailsViewModel.isInWatchList ? 25 : 20, height: 25)
-                .foregroundColor(.orange)
+                .frame(width: detailsViewModel.isInWatchList ? 27 : 20, height: 25)
+                .foregroundColor(.white)
                 .shadow(color: .black, radius: 3)
         })
         .toast(isPresenting: $showAlert, alert: {

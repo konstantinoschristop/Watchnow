@@ -23,7 +23,13 @@ struct SeasonsView: View {
     }
     
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        
+       seasonsScrollView()
+    }
+    
+    func seasonsScrollView() -> some View {
+        
+        return ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: calculateRowsForSeasons(), spacing: 10) {
                 ForEach(seasons) { season in
                     
@@ -61,9 +67,11 @@ struct SeasonsView: View {
                         .cornerRadius(20)
                     }
                 }
-                .padding([.top, .bottom], seasons.count > 2 ? 35 : 10)
+                .padding(.top, seasons.count > 2 ? 35 : 5)
+                .padding(.bottom, seasons.count > 2 ? 35 : 0)
             }
             .padding([.leading, .trailing], 20)
         }
     }
 }
+

@@ -79,6 +79,7 @@ struct ImageView: View {
                                     }
                                 }
                             }
+                            .shadow(color: .black, radius: 3)
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 15)

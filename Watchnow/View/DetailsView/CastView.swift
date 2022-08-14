@@ -47,6 +47,7 @@ struct CastView: View {
                                     .frame(width: 80, height: 30)
                             }
                         }
+                        .frame(width: 80, height: 170)
                     }
                 }
             }
