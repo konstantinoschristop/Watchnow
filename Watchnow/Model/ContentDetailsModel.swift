@@ -13,6 +13,8 @@ struct ContentDetailsModel: Codable {
     let seasons: [Season]?
     let number_of_episodes: Int?
     let number_of_seasons: Int?
+    let name: String?
+    let id: Int?
     
     func getSeasons() -> [Season]? {
         return seasons?.filter( { $0.season_number != 0 })

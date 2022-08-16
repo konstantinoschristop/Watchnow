@@ -101,7 +101,9 @@ struct ContentDetailsView: View {
                 if screenType == .tv {
                     if let seasons = detailsViewModel.details?.getSeasons(),
                        let numberOfSeasons = detailsViewModel.details?.number_of_seasons,
-                       let numberOfEpisodes = detailsViewModel.details?.number_of_episodes {
+                       let numberOfEpisodes = detailsViewModel.details?.number_of_episodes,
+                       let name = detailsViewModel.details?.name,
+                       let seriesID = detailsViewModel.details?.id {
                         VStack(spacing: 0) {
                             HStack {
                                 Text("Seasons")
@@ -114,21 +116,19 @@ struct ContentDetailsView: View {
                                 Divider()
                                 Text("Total Episodes: " + String(numberOfEpisodes))
                                 Spacer()
-                                Button {
-                                    
-                                } label: {
-                                    Text("See all")
-                                        .foregroundColor(.blue)
-                                        .padding(.trailing, 10)
+                                
+                                NavigationLink("See all") {
+                                    SeasonsDetailsTabView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                                 }
-
+                                .foregroundColor(.blue)
+                                .padding(.trailing, 10)
                             }
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.gray)
                         }
                         .padding(.top, 10)
                         .padding(.leading, 10)
-                        SeasonsView(seasons: seasons)
+                        SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                     }
                 }
                 

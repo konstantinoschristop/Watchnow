@@ -65,4 +65,13 @@ class ServiceInvaction {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(ContentDetailsModel.self, from: data)
     }
+    
+    func fetchEpisodes(seriesID: Int, seasonNumber: Int) async throws -> EpisodesModel {
+        
+        let url = URL(string: api.baseURL + "tv/" + String(seriesID) + "/season/" + String(seasonNumber) + api.apikey)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(EpisodesModel.self, from: data)
+    }
 }

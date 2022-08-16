@@ -55,13 +55,13 @@ struct SerieView: View {
         }
         .task {
             await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
-            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
             await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
+            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
         }
         .refreshable {
             await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
-            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
             await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
+            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
         }
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {
