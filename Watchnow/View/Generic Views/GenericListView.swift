@@ -19,7 +19,9 @@ struct GenericListView: View {
             NavigationLink {
                 switch result.getMediaType() {
                 case "Actor":
-                    ActorDetailsView(actorID: result.id)
+                    if let personID = result.id {
+                        PersonView(personID: personID)
+                    }
                 default:
                     ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
                 }

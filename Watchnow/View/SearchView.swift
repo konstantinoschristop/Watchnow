@@ -124,6 +124,8 @@ struct SearchResults: View {
         if filtered.isEmpty {
             Text("No results found for this filter.")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .listRowSeparatorTint(.clear)
+                .listRowBackground(Color(.systemGray6))
         } else {
             GenericListView(results: filtered, viewModel: viewModel)
         }

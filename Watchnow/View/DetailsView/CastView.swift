@@ -26,7 +26,9 @@ struct CastView: View {
             HStack {
                 ForEach(cast, id: \.self) { cast in
                     NavigationLink {
-                        ActorDetailsView(actorID: cast.id)
+                        if let personID = cast.id {
+                            PersonView(personID: personID)
+                        }
                     } label: {
                         VStack {
                             if let imageURL = cast.profile_path,
