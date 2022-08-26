@@ -66,6 +66,8 @@
 		EEDC84AC28ABE4DC00F3C171 /* PersonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */; };
 		EEDC84AE28ABE61900F3C171 /* PersonModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AD28ABE61900F3C171 /* PersonModel.swift */; };
 		EEDC84B028ABE76300F3C171 /* PersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */; };
+		EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */ = {isa = PBXBuildFile; productRef = EEDC84B228B7F11200F3C171 /* FancyScrollView */; };
+		EEDC84B528B7FFD300F3C171 /* NavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -128,6 +130,7 @@
 		EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonView.swift; sourceTree = "<group>"; };
 		EEDC84AD28ABE61900F3C171 /* PersonModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonModel.swift; sourceTree = "<group>"; };
 		EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonViewModel.swift; sourceTree = "<group>"; };
+		EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +138,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */,
 				8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */,
 				EE9595CC289FB5550016EC25 /* AlertToast in Frameworks */,
 			);
@@ -298,6 +302,7 @@
 				EE4002B2284CEBA300374143 /* ReviewsView.swift */,
 				EE95E43C2895B02C00B8C688 /* VideoView.swift */,
 				EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */,
+				EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */,
 			);
 			path = DetailsView;
 			sourceTree = "<group>";
@@ -331,6 +336,7 @@
 			packageProductDependencies = (
 				8A036A7726BBE23700A3D0FF /* Kingfisher */,
 				EE9595CB289FB5550016EC25 /* AlertToast */,
+				EEDC84B228B7F11200F3C171 /* FancyScrollView */,
 			);
 			productName = Watchnow;
 			productReference = 8A981D4F26B5AF1000993232 /* Watchnow.app */;
@@ -362,6 +368,7 @@
 			packageReferences = (
 				8A036A7626BBE23700A3D0FF /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */,
+				EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */,
 			);
 			productRefGroup = 8A981D5026B5AF1000993232 /* Products */;
 			projectDirPath = "";
@@ -396,6 +403,7 @@
 				EE94209628A6CB8300577629 /* SeasonsView.swift in Sources */,
 				EE9595C5289EBA9E0016EC25 /* WatchlistViewModel.swift in Sources */,
 				EE67247227B93CF500B8F8E8 /* AiringTodaySeriesModel.swift in Sources */,
+				EEDC84B528B7FFD300F3C171 /* NavigationBar.swift in Sources */,
 				EEDC84AE28ABE61900F3C171 /* PersonModel.swift in Sources */,
 				EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */,
 				EE67246A27B9240900B8F8E8 /* ServiceInvaction.swift in Sources */,
@@ -661,6 +669,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nerdsupremacist/FancyScrollView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -673,6 +689,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */;
 			productName = AlertToast;
+		};
+		EEDC84B228B7F11200F3C171 /* FancyScrollView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */;
+			productName = FancyScrollView;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

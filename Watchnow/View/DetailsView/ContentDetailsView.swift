@@ -8,6 +8,7 @@
 import SwiftUI
 import Kingfisher
 import AlertToast
+import FancyScrollView
 
 enum ScreenTypes: String {
     case movie
@@ -78,19 +79,18 @@ struct ContentDetailsView: View {
                             .cornerRadius(20)
                     }
                 }
-                .padding(.init(top: 0, leading: 20, bottom: 10, trailing: 20))
+                .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
             }
         }
     }
     
-    var body: some View {
+    fileprivate func constructContent() -> some View {
         
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 0) {
-                ImageView(result: result,
-                          detailsViewModel: detailsViewModel)
-            }
-            VStack {
+        return VStack(spacing: 0) {
+            ImageView(result: result,
+                      detailsViewModel: detailsViewModel)
+
+            Group {
                 // scroll categories
                 GenreView(ids: result.genre_ids)
                 
@@ -176,38 +176,42 @@ struct ContentDetailsView: View {
                     ReviewsView(reviews: reviews)
                 }
             }
-            .padding(.top, 25)
-            .padding(.bottom, 100)
         }
-        .background(Color(.systemGray6))
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading: Button(action : {
-            self.presentation.wrappedValue.dismiss()
-        }){
-            Image(systemName: "arrow.backward.circle.fill")
-                .resizable()
-                .frame(width: 25, height: 25)
-                .foregroundColor(.white)
-                .shadow(color: .black, radius: 3)
-        },
-                            trailing: Button(action : {
-            if detailsViewModel.isInWatchList {
-                WatchlistManager.removeFromWatchList(result: result)
-                detailsViewModel.isInWatchList = false
-            } else {
-                WatchlistManager.addToWatchList(result: result)
-                detailsViewModel.isInWatchList = true
+        .padding(.bottom, 50)
+    }
+    
+    fileprivate func constructNavigationBar() -> NavigationBar {
+        return withAnimation(.default) {
+            NavigationBar(leftButtonIcon: "arrow.backward.circle.fill",
+                          leftButtonAction: {
+                self.presentation.wrappedValue.dismiss()
+            },
+                          rightButtonIcon: detailsViewModel.isInWatchList ?  "minus.circle.fill" : "plus.circle.fill",
+                          rightButtonAction: {
+                if detailsViewModel.isInWatchList {
+                    WatchlistManager.removeFromWatchList(result: result)
+                    detailsViewModel.isInWatchList = false
+                } else {
+                    WatchlistManager.addToWatchList(result: result)
+                    detailsViewModel.isInWatchList = true
+                }
+                self.showAlert = true
+                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            },
+                          title: detailsViewModel.imageHeight < 130 ? result.getResultTitle() : "",
+                          opacity: detailsViewModel.imageHeight < 130 ? 1 : 0)
+        }
+    }
+    
+    var body: some View {
+        
+        ZStack(alignment: .top) {
+            ScrollView(.vertical, showsIndicators: false) {
+                self.constructContent()
             }
-            self.showAlert = true
-            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-        }){
-            Image(systemName: detailsViewModel.isInWatchList ?  "bookmark.slash.fill" : "bookmark.fill")
-                .resizable()
-                .frame(width: detailsViewModel.isInWatchList ? 27 : 20, height: 25)
-                .foregroundColor(.white)
-                .shadow(color: .black, radius: 3)
-        })
+            constructNavigationBar()
+        }
+        .navigationBarHidden(true)
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
             AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :

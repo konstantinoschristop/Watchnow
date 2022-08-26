@@ -34,7 +34,6 @@ struct ImageView: View {
             let height = size.height + minY
             
             KFImage.url(URL(string: APIKeys().imageKey + result.getResultPosterURL()))
-            // .downsampling(size: CGSize.init(width: 550, height: 400))
                 .placeholder { ProgressView() }
                 .loadImmediately()
                 .loadDiskFileSynchronously()
@@ -47,7 +46,6 @@ struct ImageView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
-                .navigationBarTitle(height < 130 && imageFinishedLoading ? result.getResultTitle() : "")
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
@@ -89,6 +87,9 @@ struct ImageView: View {
                 .ignoresSafeArea()
                 .cornerRadius(1)
                 .offset(y: -minY)
+                .onChange(of: height) { newValue in
+                    self.detailsViewModel.imageHeight = Float(newValue)
+                }
         }
         .frame(height: 350)
     }

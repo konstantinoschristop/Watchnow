@@ -16,6 +16,7 @@ class DetailsViewModel: ObservableObject {
     @Published private(set) var videos: VideoModel?
     @Published private(set) var details: ContentDetailsModel?
     @Published var isInWatchList: Bool
+    @Published var imageHeight: Float = 350
     
     private let service: ServiceInvaction
     let screenType: ScreenTypes
