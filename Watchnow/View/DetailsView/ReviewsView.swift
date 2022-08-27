@@ -18,20 +18,20 @@ struct ReviewsView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(reviews, id: \.self) { review in
-                    HStack {
-                        VStack {
+                    HStack(alignment: .top) {
+                        Group {
                             if let imageUrl = review.author_details?.avatar_path,
                                imageUrl.contains("https") {
                                 GenericImageView.init(url: imageUrl,
-                                                      width: 40,
-                                                      height: 40,
+                                                      width: 20,
+                                                      height: 20,
                                                       cornerRadius: 30,
                                                       showShadow: false)
                                     .aspectRatio(contentMode: .fit)
                             } else {
                                 Image(systemName: "person.fill")
                                     .resizable()
-                                    .frame(width: 40, height: 40, alignment: .center)
+                                    .frame(width: 20, height: 20, alignment: .top)
                                     .cornerRadius(30)
                                     .aspectRatio(contentMode: .fit)
                             }
@@ -49,23 +49,27 @@ struct ReviewsView: View {
                                     + Text(" ") + Text(String(rating) + "/10")
                                 }
                             }
-                                .font(.system(size: 15, weight: .heavy))
+                                .font(.system(size: 12, weight: .heavy))
                             Text(review.content ?? "- -")
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 11, weight: .medium))
+                            Spacer()
                         }
                     }
+                    .padding(.all, 10)
+                    .frame(width: 200, height: 150, alignment: .leading)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(10)
                     .onTapGesture {
                         self.selectedReview = review
                         self.isPresented.toggle()
                     }
-                    .frame(width: 300, height: 70, alignment: .leading)
                 }
             }
-            .padding(.leading, 10)
-            .padding(.trailing, 10)
+            .padding(.all, 10)
         }
         .sheet(isPresented: $isPresented) {
             ReviewSheet(review: self.$selectedReview)
+                .background(Color(.systemGray5))
         }
     }
 }

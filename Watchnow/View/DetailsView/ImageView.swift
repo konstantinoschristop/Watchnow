@@ -82,7 +82,10 @@ struct ImageView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 15)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                       
                     }
+                    .blur(radius: height < 150 ? 10 : 0)
+                    .animation(.spring())
                 }
                // .ignoresSafeArea()
                 .cornerRadius(1)

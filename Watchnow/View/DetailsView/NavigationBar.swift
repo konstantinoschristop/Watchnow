@@ -47,7 +47,6 @@ struct NavigationBar: View {
         
         ZStack(alignment: .bottom) {
             BlurView()
-               // .frame(maxWidth: .infinity, maxHeight: 70 + getSafeAreaTop())
                 .opacity(opacity ?? 0)
                 .animation(.spring())
             HStack(alignment: .center) {
@@ -85,26 +84,6 @@ struct NavigationBar: View {
                 }
             }
             .padding(.all, 10)
-        }
-    }
-    
-    func getSafeAreaTop() -> CGFloat {
-        
-        let keyWindow = UIApplication.shared.connectedScenes
-            .filter({$0.activationState == .foregroundActive})
-            .map({$0 as? UIWindowScene})
-            .compactMap({$0})
-            .first?.windows
-            .filter({$0.isKeyWindow}).first
-        
-        guard let top = keyWindow?.safeAreaInsets.top else {
-            return 0
-        }
-        
-        if top <= 20.0 {
-            return 0
-        } else {
-            return 20
         }
     }
 }

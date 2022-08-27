@@ -78,7 +78,7 @@ struct ContentDetailsView: View {
                             .cornerRadius(20)
                     }
                 }
-                .padding(.all, 20)
+                .padding(.all, 15)
             }
         }
     }
@@ -203,9 +203,15 @@ struct ContentDetailsView: View {
     var body: some View {
         
         ZStack(alignment: .top) {
-            ScrollView(.vertical, showsIndicators: false) {
-                self.constructContent()
+            if self.detailsViewModel.details != nil {
+                ScrollView(.vertical, showsIndicators: false) {
+                    self.constructContent()
+                }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            
             GeometryReader { geometry in
                 constructNavigationBar()
                     .frame(width: geometry.size.width,

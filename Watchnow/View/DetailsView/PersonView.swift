@@ -140,7 +140,7 @@ struct PersonView: View {
                             .aspectRatio(contentMode: .fill)
                             .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
                     } else {
-                        Image(systemName: "person.fill.questionmark")
+                        Image(systemName: "person.text.rectangle")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .bottom)

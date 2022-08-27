@@ -60,7 +60,7 @@ struct SearchView: View {
             Spacer()
             
             Group {
-                if let results = searchVM.result?.results?.filter { $0.poster_path != nil && $0.media_type != "person" || $0.poster_path == nil && $0.media_type == "person" } {
+                if let results = searchVM.result?.results?.filter { $0.poster_path != nil && $0.media_type != "person" || $0.profile_path != nil && $0.media_type == "person" } {
                     if results == [] {
                         Text("No results found. Try searching again with a different keyword.")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
