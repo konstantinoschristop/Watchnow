@@ -84,13 +84,13 @@ struct ImageView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .ignoresSafeArea()
+               // .ignoresSafeArea()
                 .cornerRadius(1)
                 .offset(y: -minY)
                 .onChange(of: height) { newValue in
                     self.detailsViewModel.imageHeight = Float(newValue)
                 }
         }
-        .frame(height: 350)
+        .frame(height: 400)
     }
 }

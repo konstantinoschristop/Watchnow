@@ -22,27 +22,34 @@ struct PersonView: View {
         
         Group {
             if let person = personViewModel.person {
-                self.constructDetailsView(person: person)
+                ZStack(alignment: .top) {
+                    self.constructDetailsView(person: person)
+                    GeometryReader { geometry in
+                        constructNavigationBar(person: person)
+                            .frame(width: geometry.size.width,
+                                   height: 50 + geometry.safeAreaInsets.top)
+                            .ignoresSafeArea()
+                    }
+                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .background(Color(.systemGray6))
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading: Button(action : {
-            self.presentation.wrappedValue.dismiss()
-        }){
-            Image(systemName: "arrow.backward.circle.fill")
-                .resizable()
-                .frame(width: 25, height: 25)
-                .foregroundColor(.white)
-                .shadow(color: .black, radius: 3)
-        })
+        .navigationBarHidden(true)
         .task {
             await personViewModel.getPersonDetails()
         }
+    }
+    
+    fileprivate func constructNavigationBar(person: PersonModel) -> NavigationBar {
+        return NavigationBar(leftButtonIcon: "arrow.backward.circle.fill",
+                             leftButtonAction: {
+            self.presentation.wrappedValue.dismiss()
+        },
+                             title: personViewModel.imageHeight < 150 ? person.name : "",
+                             opacity: personViewModel.imageHeight < 150 ? 1 : 0)
     }
     
     func constructDetailsView(person: PersonModel) -> some View {
@@ -139,7 +146,7 @@ struct PersonView: View {
                             .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .bottom)
                     }
                 }
-                .navigationBarTitle(height < 130 && imageFinishedLoading ? name : "")
+               // .navigationBarTitle(height < 130 && imageFinishedLoading ? name : "")
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
@@ -164,8 +171,11 @@ struct PersonView: View {
                 .ignoresSafeArea()
                 .cornerRadius(1)
                 .offset(y: -minY)
+                .onChange(of: height) { newValue in
+                    self.personViewModel.imageHeight = Float(newValue)
+                }
             }
         }
-        .frame(height: 350)
+        .frame(height: 400)
     }
 }

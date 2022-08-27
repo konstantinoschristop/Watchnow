@@ -47,8 +47,9 @@ struct NavigationBar: View {
         
         ZStack(alignment: .bottom) {
             BlurView()
-                .frame(maxWidth: .infinity, maxHeight: 70 + getSafeAreaTop())
+               // .frame(maxWidth: .infinity, maxHeight: 70 + getSafeAreaTop())
                 .opacity(opacity ?? 0)
+                .animation(.spring())
             HStack(alignment: .center) {
                 if let leftButtonIcon = leftButtonIcon,
                    let leftButtonAction = leftButtonAction {
@@ -67,6 +68,7 @@ struct NavigationBar: View {
                     Text(title)
                         .font(.system(size: 17))
                         .bold()
+                        .lineLimit(1)
                     Spacer()
                 }
                 if let rightButtonIcon = rightButtonIcon,
@@ -84,7 +86,6 @@ struct NavigationBar: View {
             }
             .padding(.all, 10)
         }
-        .ignoresSafeArea()
     }
     
     func getSafeAreaTop() -> CGFloat {

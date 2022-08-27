@@ -11,6 +11,7 @@ import Foundation
 class PersonViewModel: ObservableObject {
     
     @Published private(set) var person: PersonModel?
+    @Published var imageHeight: Float = 400
     
     private let service: ServiceInvaction
     let personID: Int

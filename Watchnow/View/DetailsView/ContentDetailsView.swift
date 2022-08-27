@@ -68,7 +68,6 @@ struct ContentDetailsView: View {
     func GenreView(ids: [Int]?) -> some View {
         
         if let availableGenres = detailsViewModel.details?.genres {
-            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
                     ForEach(availableGenres, id: \.self) { genre in
@@ -79,7 +78,7 @@ struct ContentDetailsView: View {
                             .cornerRadius(20)
                     }
                 }
-                .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
+                .padding(.all, 20)
             }
         }
     }
@@ -181,26 +180,24 @@ struct ContentDetailsView: View {
     }
     
     fileprivate func constructNavigationBar() -> NavigationBar {
-        return withAnimation(.default) {
-            NavigationBar(leftButtonIcon: "arrow.backward.circle.fill",
-                          leftButtonAction: {
-                self.presentation.wrappedValue.dismiss()
-            },
-                          rightButtonIcon: detailsViewModel.isInWatchList ?  "minus.circle.fill" : "plus.circle.fill",
-                          rightButtonAction: {
-                if detailsViewModel.isInWatchList {
-                    WatchlistManager.removeFromWatchList(result: result)
-                    detailsViewModel.isInWatchList = false
-                } else {
-                    WatchlistManager.addToWatchList(result: result)
-                    detailsViewModel.isInWatchList = true
-                }
-                self.showAlert = true
-                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-            },
-                          title: detailsViewModel.imageHeight < 130 ? result.getResultTitle() : "",
-                          opacity: detailsViewModel.imageHeight < 130 ? 1 : 0)
-        }
+        return NavigationBar(leftButtonIcon: "arrow.backward.circle.fill",
+                             leftButtonAction: {
+            self.presentation.wrappedValue.dismiss()
+        },
+                             rightButtonIcon: detailsViewModel.isInWatchList ?  "minus.circle.fill" : "plus.circle.fill",
+                             rightButtonAction: {
+            if detailsViewModel.isInWatchList {
+                WatchlistManager.removeFromWatchList(result: result)
+                detailsViewModel.isInWatchList = false
+            } else {
+                WatchlistManager.addToWatchList(result: result)
+                detailsViewModel.isInWatchList = true
+            }
+            self.showAlert = true
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+        },
+                             title: detailsViewModel.imageHeight < 150 ? result.getResultTitle() : "",
+                             opacity: detailsViewModel.imageHeight < 150 ? 1 : 0)
     }
     
     var body: some View {
@@ -209,7 +206,12 @@ struct ContentDetailsView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 self.constructContent()
             }
-            constructNavigationBar()
+            GeometryReader { geometry in
+                constructNavigationBar()
+                    .frame(width: geometry.size.width,
+                           height: 50 + geometry.safeAreaInsets.top)
+                    .ignoresSafeArea()
+            }
         }
         .navigationBarHidden(true)
         .toast(isPresenting: $showAlert, alert: {
