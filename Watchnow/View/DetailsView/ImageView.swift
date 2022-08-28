@@ -13,7 +13,6 @@ struct ImageView: View {
     let result: Result
     @StateObject var detailsViewModel: DetailsViewModel
     
-    @State var imageFinishedLoading = false
     @State var videoPresented = false
     
     var body: some View {
@@ -41,7 +40,7 @@ struct ImageView: View {
                 .cacheOriginalImage()
                 .fade(duration: 0.25)
                 .onProgress { receivedSize, totalSize in  }
-                .onSuccess { result in  self.imageFinishedLoading = true }
+                .onSuccess { result in }
                 .onFailure { error in }
                 .resizable()
                 .aspectRatio(contentMode: .fill)

@@ -40,6 +40,8 @@ struct NavigationBar: View {
     var leftButtonAction: (() -> Void)?
     var rightButtonIcon: String?
     var rightButtonAction: (() -> Void)?
+    var secondRightButtonIcon: String?
+    var secondRightButtonAction: (() -> Void)?
     var title: String?
     var opacity: Double?
     
@@ -72,14 +74,31 @@ struct NavigationBar: View {
                 }
                 if let rightButtonIcon = rightButtonIcon,
                    let rightButtonAction = rightButtonAction {
-                    Button {
-                        rightButtonAction()
-                    } label: {
-                        Image(systemName: rightButtonIcon)
-                            .resizable()
-                            .frame(width: 25, height: 25)
-                            .foregroundColor(.white)
-                            .shadow(color: .black, radius: 3)
+                    
+                    HStack {
+                        Button {
+                            rightButtonAction()
+                        } label: {
+                            Image(systemName: rightButtonIcon)
+                                .resizable()
+                                .frame(width: 25, height: 25)
+                                .foregroundColor(.white)
+                                .shadow(color: .black, radius: 3)
+                        }
+                        
+                        if let secondRightButtonIcon = secondRightButtonIcon,
+                           let secondRightButtonAction = secondRightButtonAction {
+                            
+                            Button {
+                                secondRightButtonAction()
+                            } label: {
+                                Image(systemName: secondRightButtonIcon)
+                                    .resizable()
+                                    .frame(width: 25, height: 25)
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black, radius: 3)
+                            }
+                        }
                     }
                 }
             }

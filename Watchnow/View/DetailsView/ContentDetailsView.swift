@@ -35,54 +35,6 @@ struct ContentDetailsView: View {
         self.result.media_type = screenType == .movie ? "movie" : "tv"
     }
     
-    @ViewBuilder
-    func Details() -> some View {
-        VStack(alignment: .center) {
-            ZStack {
-                VStack {
-                    if let overview = result.overview {
-                        Text(overview)
-                    }
-                    Spacer()
-                        .frame(height: 20)
-                    HStack {
-                        if let rating = result.vote_average {
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.orange)
-                            Text(String(format: "%.1f", rating) + "/10")
-                        }
-                        if let allRatings = result.vote_count {
-                            Text("• " + String(allRatings) + " ratings")
-                        }
-                        Text("• Release Date: " + result.getReleaseDate(addSeparator: false))
-                    }
-                    .font(.custom("AvenirNext-Regular", size: 15))
-                    .foregroundColor(.gray)
-                }
-            }
-        }
-        .padding(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
-    }
-    
-    @ViewBuilder
-    func GenreView(ids: [Int]?) -> some View {
-        
-        if let availableGenres = detailsViewModel.details?.genres {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(availableGenres, id: \.self) { genre in
-                        Text(genre.name ?? "- -")
-                            .padding()
-                            .font(.system(size: 11))
-                            .background(Color(.systemGray5))
-                            .cornerRadius(20)
-                    }
-                }
-                .padding(.all, 15)
-            }
-        }
-    }
-    
     fileprivate func constructContent() -> some View {
         
         return VStack(spacing: 0) {
@@ -91,10 +43,12 @@ struct ContentDetailsView: View {
 
             Group {
                 // scroll categories
-                GenreView(ids: result.genre_ids)
-                
+                if let availableGenres = detailsViewModel.details?.genres {
+                    GenresView(genres: availableGenres)
+                }
+    
                 //DetailsView
-                Details()
+                DetailsView(result: result)
                 
                 // if series, show seasons and episodes
                 if screenType == .tv {
@@ -120,13 +74,11 @@ struct ContentDetailsView: View {
                                     SeasonsDetailsTabView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                                 }
                                 .foregroundColor(.blue)
-                                .padding(.trailing, 10)
                             }
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.gray)
                         }
-                        .padding(.top, 10)
-                        .padding(.leading, 10)
+                        .padding(.all, 10)
                         SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                     }
                 }
@@ -202,21 +154,22 @@ struct ContentDetailsView: View {
     
     var body: some View {
         
-        ZStack(alignment: .top) {
-            if self.detailsViewModel.details != nil {
-                ScrollView(.vertical, showsIndicators: false) {
-                    self.constructContent()
+        Group {
+            if detailsViewModel.viewModelFinishedFetching {
+                ZStack(alignment: .top) {
+                    ScrollView(.vertical, showsIndicators: false) {
+                       self.constructContent()
+                    }
+                    GeometryReader { geometry in
+                        constructNavigationBar()
+                            .frame(width: geometry.size.width,
+                                   height: 50 + geometry.safeAreaInsets.top)
+                            .ignoresSafeArea()
+                    }
                 }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            
-            GeometryReader { geometry in
-                constructNavigationBar()
-                    .frame(width: geometry.size.width,
-                           height: 50 + geometry.safeAreaInsets.top)
-                    .ignoresSafeArea()
             }
         }
         .navigationBarHidden(true)

@@ -19,8 +19,7 @@ struct EpisodeView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     if let name = episode.name,
                        let rating = episode.vote_average,
-                       let airDate = episode.air_date,
-                       let overview = episode.overview {
+                       let airDate = episode.air_date {
                         
                         HStack {
                             Text(name)
@@ -41,14 +40,16 @@ struct EpisodeView: View {
                             }
                         }
                         
-                        Text(overview)
+                        if let overview = episode.overview,
+                           overview.isEmpty == false {
+                            Text(overview)
                             //.lineLimit(3)
+                        }
                     }
-                    
                 }
                 .font(.custom("AvenirNext-Regular", size: 13))
                 .padding(.all, 10)
-                .background(Color(.systemGray5))
+                .background(.ultraThinMaterial)
                 .cornerRadius(10)
                 .foregroundColor(.gray)
             Divider()

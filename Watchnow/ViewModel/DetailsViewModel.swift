@@ -17,6 +17,7 @@ class DetailsViewModel: ObservableObject {
     @Published private(set) var details: ContentDetailsModel?
     @Published var isInWatchList: Bool
     @Published var imageHeight: Float = 400
+    @Published private(set) var viewModelFinishedFetching = false
     
     private let service: ServiceInvaction
     let screenType: ScreenTypes
@@ -33,6 +34,13 @@ class DetailsViewModel: ObservableObject {
         self.isInWatchList = WatchlistManager.watchlist.contains(result)
     }
     
+    private func checkIfFetchingIsFinished() {
+        
+        if details != nil && credits != nil {
+            self.viewModelFinishedFetching = true
+        }
+    }
+    
     func getCredits() async {
         
         do {
@@ -40,6 +48,8 @@ class DetailsViewModel: ObservableObject {
         } catch {
             print(error)
         }
+        
+        checkIfFetchingIsFinished()
     }
     
     func getSimilars() async {
@@ -76,5 +86,7 @@ class DetailsViewModel: ObservableObject {
         } catch {
             print(error)
         }
+        
+        checkIfFetchingIsFinished()
     }
 }

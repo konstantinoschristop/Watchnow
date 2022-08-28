@@ -46,9 +46,9 @@ struct SeasonsView: View {
                     }
                 }
                 .padding(.top, seasons.count > 2 ? 35 : 5)
-                .padding(.bottom, seasons.count > 2 ? 35 : 0)
+                .padding(.bottom, seasons.count > 2 ? 35 : 5)
             }
-            .padding([.leading, .trailing], 20)
+            .padding([.leading, .trailing], 10)
         }
     }
     

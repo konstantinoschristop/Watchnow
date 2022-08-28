@@ -13,6 +13,8 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     @Published var results: [Result]?
     @Published private(set) var savedMovies: [Result]?
     @Published private(set) var savedSeries: [Result]?
+    @Published private(set) var showingMovies = true
+    @Published private(set) var showingSeries = true
     
     @Published var showRemovedAlert = false
     @Published var showAddedAlert = false
@@ -48,5 +50,29 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     
     func isWatchListEmpty() -> Bool {
         return WatchlistManager.watchlist.isEmpty == true
+    }
+    
+    func getSectionArrowIcon(screenType: ScreenTypes) -> String {
+        
+        switch screenType {
+        case .movie:
+            return showingMovies ? "arrow.down.right.and.arrow.up.left.circle.fill" : "arrow.up.backward.and.arrow.down.forward.circle.fill"
+        case .tv:
+            return showingSeries ? "arrow.down.right.and.arrow.up.left.circle.fill" : "arrow.up.backward.and.arrow.down.forward.circle.fill"
+        default:
+            return ""
+        }
+    }
+    
+    func sectionArrowAction(screenType: ScreenTypes) {
+        
+        switch screenType {
+        case .movie:
+            showingMovies.toggle()
+        case .tv:
+            showingSeries.toggle()
+        default:
+            return
+        }
     }
 }

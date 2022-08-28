@@ -23,16 +23,22 @@ struct WatchlistView: View {
                 List {
                     if let movies = watchlistViewModel.savedMovies,
                        movies.isEmpty == false {
-
-                        self.getSectionTitle(title: "Movies")
-                        GenericListView(results: movies, viewModel: watchlistViewModel)
+                        
+                        self.getSectionTitle(title: "Movies", sectionType: .movie)
+                        
+                        if watchlistViewModel.showingMovies {
+                            GenericListView(results: movies, viewModel: watchlistViewModel)
+                        }
                     }
-
+                    
                     if let series = watchlistViewModel.savedSeries,
                        series.isEmpty == false {
-
-                        self.getSectionTitle(title: "TV Shows")
-                        GenericListView(results: series, viewModel: watchlistViewModel)
+                        
+                        self.getSectionTitle(title: "TV Shows", sectionType: .tv)
+                        
+                        if watchlistViewModel.showingSeries {
+                            GenericListView(results: series, viewModel: watchlistViewModel)
+                        }
                     }
                 }
                 .listStyle(.plain)
@@ -46,12 +52,21 @@ struct WatchlistView: View {
         })
     }
     
-    func getSectionTitle(title: String) -> some View {
+    func getSectionTitle(title: String, sectionType: ScreenTypes) -> some View {
         
         return HStack {
             Text(title)
                 .font(.system(size: 25, weight: .heavy))
             Spacer()
+            Button {
+                watchlistViewModel.sectionArrowAction(screenType: sectionType)
+            } label: {
+                Image(systemName: watchlistViewModel.getSectionArrowIcon(screenType: sectionType))
+                    .resizable()
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(.white)
+                    .shadow(color: .black, radius: 3)
+            }
         }
         .listRowSeparatorTint(.clear)
         .listRowBackground(Color(.systemGray6))
