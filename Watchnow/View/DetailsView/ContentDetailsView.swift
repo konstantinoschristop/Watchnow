@@ -43,7 +43,9 @@ struct ContentDetailsView: View {
 
             Group {
                 // scroll categories
-                if let availableGenres = detailsViewModel.details?.genres {
+                if let availableGenres = detailsViewModel.details?.genres,
+                   availableGenres.isEmpty == false {
+                    
                     GenresView(genres: availableGenres)
                 }
     
@@ -84,7 +86,9 @@ struct ContentDetailsView: View {
                 }
                 
                 //cast
-                if let cast = detailsViewModel.credits?.cast {
+                if let cast = detailsViewModel.credits?.cast,
+                   cast.isEmpty == false {
+                    
                     HStack {
                         Text("Cast")
                             .font(.system(size: 20, weight: .bold))
@@ -96,7 +100,9 @@ struct ContentDetailsView: View {
                 }
                 
                 // similar
-                if let content = detailsViewModel.similar?.results {
+                if let content = detailsViewModel.similar?.results,
+                   content.isEmpty == false {
+                    
                     VStack(spacing: 0) {
                         HStack {
                             Text(screenType == .movie ? "Similar Movies" : "Similar TV Shows")
@@ -117,7 +123,8 @@ struct ContentDetailsView: View {
                 // user reviews
                 if let reviews = detailsViewModel.reviews?.results,
                    reviews.isEmpty == false {
-                    HStack{
+                    
+                    HStack {
                         Text("User Reviews")
                             .font(.system(size: 20, weight: .bold))
                         Spacer()

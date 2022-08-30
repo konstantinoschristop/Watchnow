@@ -20,7 +20,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Movies", systemImage: "film")
             }
-           // .navigationViewStyle(.stack)
+            .navigationViewStyle(.stack)
             
             NavigationView {
                 SerieView()
@@ -31,6 +31,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Series", systemImage: "tv.inset.filled")
             }
+            .navigationViewStyle(.stack)
             
             NavigationView {
                SearchView()
@@ -41,6 +42,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass.circle")
             }
+            .navigationViewStyle(.stack)
             
             NavigationView {
                 WatchlistView()
@@ -51,6 +53,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Watchlist", systemImage: "list.bullet.circle.fill")
             }
+            .navigationViewStyle(.stack)
         }
     }
 }

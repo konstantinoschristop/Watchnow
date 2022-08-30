@@ -26,14 +26,15 @@ struct ReviewsView: View {
                                 GenericImageView.init(url: imageUrl,
                                                       width: 20,
                                                       height: 20,
-                                                      cornerRadius: 30,
+                                                      cornerRadius: 0,
                                                       showShadow: false)
-                                .aspectRatio(contentMode: .fit)
+                                .clipShape(Circle())
+                                .frame(width: 20, height: 20)
                             } else {
                                 Image(systemName: "person.fill")
                                     .resizable()
+                                    .clipShape(Circle())
                                     .frame(width: 20, height: 20, alignment: .top)
-                                    .cornerRadius(30)
                                     .aspectRatio(contentMode: .fit)
                             }
                             

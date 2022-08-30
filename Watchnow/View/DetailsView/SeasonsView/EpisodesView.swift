@@ -12,49 +12,43 @@ struct EpisodeView: View {
     var episode: Episode
     
     var body: some View {
-        
         VStack(alignment: .leading, spacing: 5) {
-            Text("Episode: " + String(episode.episode_number ?? 0))
-            
-                VStack(alignment: .leading, spacing: 3) {
-                    if let name = episode.name,
-                       let rating = episode.vote_average,
-                       let airDate = episode.air_date {
-                        
-                        HStack {
-                            Text(name)
-                                .bold()
-                                .lineLimit(1)
-                                .foregroundColor(Color(.systemBackground))
-                                .colorInvert()
-                            
-                            Spacer()
-                            
-                            HStack {
-                                Text(airDate)
-                                HStack(spacing: 2) {
-                                    Image(systemName: "star.fill")
-                                        .foregroundColor(.orange)
-                                    Text(String(format: "%.1f", rating))
-                                }
-                            }
-                        }
-                        
-                        if let overview = episode.overview,
-                           overview.isEmpty == false {
-                            Text(overview)
-                            //.lineLimit(3)
+            if let name = episode.name,
+               let rating = episode.vote_average,
+               let airDate = episode.air_date {
+                
+                HStack {
+                    Text("E" + String(episode.episode_number ?? 0) + ": " + name)
+                        .bold()
+                        .lineLimit(1)
+                        .foregroundColor(Color(.systemBackground))
+                        .colorInvert()
+                    
+                    Spacer()
+                    
+                    HStack {
+                        Text(airDate)
+                        HStack(spacing: 2) {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.orange)
+                            Text(String(format: "%.1f", rating))
                         }
                     }
                 }
-                .font(.custom("AvenirNext-Regular", size: 13))
-                .padding(.all, 10)
-                .background(.ultraThinMaterial)
-                .cornerRadius(10)
-                .foregroundColor(.gray)
-            Divider()
+                
+                if let overview = episode.overview,
+                   overview.isEmpty == false {
+                    Text(overview)
+                } else {
+                    Text("Overview not available.")
+                        .italic()
+                }
+            }
         }
-        .padding([.leading, .trailing], 10)
+        .font(.custom("AvenirNext-Regular", size: 15))
+        .padding()
+        .cornerRadius(10)
+        .foregroundColor(.gray)
     }
 }
 

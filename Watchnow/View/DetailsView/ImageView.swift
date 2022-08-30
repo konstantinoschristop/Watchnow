@@ -43,8 +43,8 @@ struct ImageView: View {
                 .onSuccess { result in }
                 .onFailure { error in }
                 .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
+                .scaledToFill()
+                .frame(width: size.width, height: height > 0 ? height : 0)
                 .overlay {
                     ZStack(alignment: .bottom) {
                         LinearGradient(colors: [.clear,
@@ -84,15 +84,13 @@ struct ImageView: View {
                        
                     }
                     .blur(radius: height < 150 ? 10 : 0)
-                    .animation(.spring())
                 }
-               // .ignoresSafeArea()
                 .cornerRadius(1)
                 .offset(y: -minY)
                 .onChange(of: height) { newValue in
                     self.detailsViewModel.imageHeight = Float(newValue)
                 }
         }
-        .frame(height: 400)
+        .frame(height: (UIScreen.main.bounds.size.height) - (UIScreen.main.bounds.size.height / 2.7))
     }
 }

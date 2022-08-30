@@ -34,6 +34,8 @@ class EpisodesViewModel: ObservableObject {
     }
     
     func resetEpisodes() {
-        self.episodes = nil
+        DispatchQueue.main.async {
+            self.episodes = nil
+        }
     }
 }

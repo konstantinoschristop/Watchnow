@@ -36,6 +36,6 @@ struct DetailsView: View {
                 }
             }
         }
-        .padding(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
+        .padding(.init(top: 0, leading: 15, bottom: 0, trailing: 15))
     }
 }

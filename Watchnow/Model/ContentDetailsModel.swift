@@ -15,6 +15,7 @@ struct ContentDetailsModel: Codable {
     let number_of_seasons: Int?
     let name: String?
     let id: Int?
+    let imdb_id: String?
     
     func getSeasons() -> [Season]? {
         return seasons?.filter( { $0.season_number != 0 })

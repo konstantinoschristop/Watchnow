@@ -39,8 +39,9 @@ struct CastView: View {
                                                       height: 120,
                                                       cornerRadius: 6,
                                                       showShadow: true)
-                                
-                                    .aspectRatio(contentMode: .fit)
+
+                                .clipShape(Circle())
+                                .frame(width: 80, height: 80)
                                 Text((cast.name ?? cast.original_name) ?? "")
                                     .font(.system(size: 12, weight: .heavy))
                                     .multilineTextAlignment(.center)
@@ -49,7 +50,7 @@ struct CastView: View {
                                     .frame(width: 80, height: 30)
                             }
                         }
-                        .frame(width: 80, height: 170)
+                        .frame(width: 80, height: 130)
                     }
                 }
             }

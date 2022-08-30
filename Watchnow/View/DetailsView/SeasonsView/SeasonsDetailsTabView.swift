@@ -41,7 +41,6 @@ struct SeasonsDetailsTabView: View {
                                 }
                             }
                             .tag(index)
-                            .padding(.top, 20)
                         }
                     } else {
                         ProgressView()
@@ -98,23 +97,26 @@ struct TabBarView: View {
                         if self.index == index {
                             title.foregroundColor(Color(.systemBackground))
                                 .colorInvert()
+                                .padding(.all, 10)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(20)
                         } else {
                             title.foregroundColor(.gray)
                         }
                     }
                     .font(.custom("AvenirNext-Regular", size: 20))
-                    .padding(.top, 50)
+                    .padding(.top, 20)
                     .padding(.horizontal, 5)
                 }
-                .padding(.leading, 20)
+                .padding([.leading, .trailing], 20)
             }
             .onChange(of: index) { value in
                 withAnimation(.easeInOut) {
-                    proxy.scrollTo(value, anchor: UnitPoint(x: UnitPoint.leading.x + leftOffset, y: UnitPoint.leading.y))
+                    proxy.scrollTo(value, anchor: UnitPoint(x: UnitPoint.leading.x + leftOffset, y: UnitPoint.leading.y + leftOffset))
                 }
             }
             .onAppear {
-                proxy.scrollTo(index, anchor: UnitPoint(x: UnitPoint.leading.x + leftOffset, y: UnitPoint.leading.y))
+                proxy.scrollTo(index, anchor: UnitPoint(x: UnitPoint.leading.x + leftOffset, y: UnitPoint.leading.y + leftOffset))
             }
         }
     }
