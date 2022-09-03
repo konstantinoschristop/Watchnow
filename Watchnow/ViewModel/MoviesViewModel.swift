@@ -11,6 +11,7 @@ import Foundation
 protocol BaseViewModelProtocol {
     
     func loadMoreContent(section: ViewSections)
+    func canLoadMoreContent(section: ViewSections) -> Bool
 }
 
 @MainActor
@@ -29,19 +30,51 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
         
         switch section {
         case .upcomingMovies:
-            if upcomingMoviesCurrentPage < 20 {
-                upcomingMoviesCurrentPage += 1
+            guard let totalPages = upcomingMovies?.total_pages,
+                  upcomingMoviesCurrentPage <= totalPages else {
+                return
             }
+            
+            upcomingMoviesCurrentPage += 1
         case .popularMovies:
-            if popularMoviesCurrentPage < 20 {
-                popularMoviesCurrentPage += 1
+            guard let totalPages = popularMovies?.total_pages,
+                  popularMoviesCurrentPage <= totalPages else {
+                return
             }
+            
+            popularMoviesCurrentPage += 1
         case .trendingMovies:
-            if trendingMoviesCurrentPage < 20 {
-                trendingMoviesCurrentPage += 1
+            guard let totalPages = trendingMovies?.total_pages,
+                  trendingMoviesCurrentPage <= totalPages else {
+                return
             }
+            
+            trendingMoviesCurrentPage += 1
         default:
             break
+        }
+    }
+    
+    func canLoadMoreContent(section: ViewSections) -> Bool {
+        
+        switch section {
+        case .upcomingMovies:
+            guard let totalPages = upcomingMovies?.total_pages else {
+                return false
+            }
+            return upcomingMoviesCurrentPage < totalPages
+        case .popularMovies:
+            guard let totalPages = popularMovies?.total_pages else {
+                return false
+            }
+            return popularMoviesCurrentPage < totalPages
+        case .trendingMovies:
+            guard let totalPages = trendingMovies?.total_pages else {
+                return false
+            }
+            return trendingMoviesCurrentPage < totalPages
+        default:
+            return false
         }
     }
     

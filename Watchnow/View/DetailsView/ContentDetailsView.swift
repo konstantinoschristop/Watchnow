@@ -133,6 +133,40 @@ struct ContentDetailsView: View {
                     .padding(.leading, 10)
                     ReviewsView(reviews: reviews)
                 }
+                // Additional Info
+                if let details = detailsViewModel.details {
+                    
+                    HStack {
+                        Text("Additional Information")
+                            .font(.system(size: 20, weight: .bold))
+                        Spacer()
+                    }
+                    .padding(.top, 10)
+                    .padding(.leading, 10)
+                    AdditionalInfoView(details: details)
+                }
+                // collection
+                if let collection = detailsViewModel.details?.belongs_to_collection,
+                   let collectionName = collection.name,
+                   let imageURL = collection.backdrop_path {
+                    
+                    HStack() {
+                    Text("Belongs to: " + collectionName)
+                            .font(.system(size: 20, weight: .bold))
+                        Spacer()
+                    }
+                    .padding(.top, 10)
+                    .padding(.leading, 10)
+                    HStack() {
+                        GenericImageView(url: APIKeys().imageKey + imageURL,
+                                         width: 270,
+                                         height: 150,
+                                         cornerRadius: 10,
+                                         showShadow: true)
+                        Spacer()
+                    }
+                    .padding()
+                }
             }
         }
         .padding(.bottom, 50)
@@ -195,14 +229,14 @@ struct ContentDetailsView: View {
     }
 }
 
-extension UINavigationController: UIGestureRecognizerDelegate {
-    override open func viewDidLoad() {
-        super.viewDidLoad()
-        interactivePopGestureRecognizer?.delegate = self
-    }
-    
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return viewControllers.count > 1
-    }
-}
+//extension UINavigationController: UIGestureRecognizerDelegate {
+//    override open func viewDidLoad() {
+//        super.viewDidLoad()
+//        interactivePopGestureRecognizer?.delegate = nil
+//    }
+//
+//    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+//        return viewControllers.count > 1
+//    }
+//}
 

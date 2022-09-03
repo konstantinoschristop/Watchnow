@@ -47,7 +47,7 @@ struct TopView: View {
                         
                         Group {
                             if results.last == movie,
-                               results.count < 320 {
+                               viewModel.canLoadMoreContent(section: viewSection) {
                                 Button {
                                     viewModel.loadMoreContent(section: viewSection)
                                 } label: {
@@ -64,5 +64,3 @@ struct TopView: View {
         }
     }
 }
-
-

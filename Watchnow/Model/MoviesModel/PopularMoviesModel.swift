@@ -9,4 +9,5 @@ import Foundation
 
 struct PopularMoviesModel: Codable {
     var results: [Result]
+    var total_pages: Int?
 }

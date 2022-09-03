@@ -19,6 +19,7 @@ enum ViewSections {
 
 struct UpcomingMoviesModel: Codable {
     var results: [Result]
+    var total_pages: Int?
 }
 
 // MARK: - Result
@@ -41,6 +42,7 @@ struct Result: Codable, Hashable, Equatable {
     var media_type: String?
     let profile_path: String?
     let castID: Int?
+    let runtime: Int?
     
     static func == (lhs: Result, rhs: Result) -> Bool {
         return lhs.id == rhs.id

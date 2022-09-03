@@ -24,4 +24,9 @@ struct Cast: Codable, Hashable {
     let order: Int?
     let job: String?
     let known_for: [Result]?
+    
+    func getName() -> String {
+        
+        return name ?? original_name ?? ""
+    }
 }

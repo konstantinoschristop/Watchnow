@@ -23,19 +23,51 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
         
         switch section {
         case .popularSeries:
-            if popularSeriesCurrentPage < 20 {
-                popularSeriesCurrentPage += 1
+            guard let totalPages = popularSeries?.total_pages,
+                  popularSeriesCurrentPage <=  totalPages else {
+                return
             }
+            
+            popularSeriesCurrentPage += 1
         case .airingTodaySeries:
-            if airingTodaySeriesCurrentPage < 20 {
-                airingTodaySeriesCurrentPage += 1
+            guard let totalPages = airingTodaySeries?.total_pages,
+                  airingTodaySeriesCurrentPage <=  totalPages else {
+                return
             }
+            
+            airingTodaySeriesCurrentPage += 1
         case .trendingSeries:
-            if trendingSeriesCurrentPage < 20 {
-                trendingSeriesCurrentPage += 1
+            guard let totalPages = trendingSeries?.total_pages,
+                  trendingSeriesCurrentPage <=  totalPages else {
+                return
             }
+            
+            trendingSeriesCurrentPage += 1
         default:
             break
+        }
+    }
+    
+    func canLoadMoreContent(section: ViewSections) -> Bool {
+        
+        switch section {
+        case .popularSeries:
+            guard let totalPages = popularSeries?.total_pages else {
+                return false
+            }
+            return popularSeriesCurrentPage < totalPages
+        case .airingTodaySeries:
+            guard let totalPages = popularSeries?.total_pages else {
+                return false
+            }
+            return airingTodaySeriesCurrentPage < totalPages
+        case .trendingSeries:
+            guard let totalPages = popularSeries?.total_pages else {
+                return false
+            }
+            return trendingSeriesCurrentPage < totalPages
+        default:
+            return false
         }
     }
     

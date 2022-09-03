@@ -42,7 +42,7 @@ struct CastView: View {
 
                                 .clipShape(Circle())
                                 .frame(width: 80, height: 80)
-                                Text((cast.name ?? cast.original_name) ?? "")
+                                Text(cast.getName())
                                     .font(.system(size: 12, weight: .heavy))
                                     .multilineTextAlignment(.center)
                                     .foregroundColor(Color(.systemBackground))

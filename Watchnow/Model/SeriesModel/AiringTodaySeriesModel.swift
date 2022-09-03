@@ -9,4 +9,5 @@ import Foundation
 
 struct AiringTodaySeriesModel: Codable {
     var results: [Result]
+    var total_pages: Int?
 }
