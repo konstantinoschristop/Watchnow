@@ -8,7 +8,7 @@
 import SwiftUI
 import Kingfisher
 import AlertToast
-import FancyScrollView
+import PartialSheet
 
 enum ScreenTypes: String {
     case movie
@@ -24,6 +24,7 @@ struct ContentDetailsView: View {
     @Environment(\.presentationMode) var presentation
     @State var showDetails = false
     @State private var showAlert = false
+    @State var isSheetPresented = false
     
     init(result: Result, screenType: ScreenTypes) {
         _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvaction.init(),
@@ -133,6 +134,30 @@ struct ContentDetailsView: View {
                     .padding(.leading, 10)
                     ReviewsView(reviews: reviews)
                 }
+                
+                // Multimedia
+                if let images = detailsViewModel.images,
+                   images.posters?.isEmpty == false || images.backdrops?.isEmpty == false {
+                    
+                    VStack(spacing: 0) {
+                        HStack() {
+                            Text("Multimedia")
+                                .font(.system(size: 20, weight: .bold))
+                            Spacer()
+                        }
+                        HStack {
+                            Text("Images")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.gray)
+                            Spacer()
+                        }
+                    }
+                    .padding(.top, 10)
+                    .padding(.leading, 10)
+                    ImagesScrollView(backdrops: images.backdrops,
+                                     posters: images.posters)
+                }
+                
                 // Additional Info
                 if let details = detailsViewModel.details {
                     
@@ -145,27 +170,29 @@ struct ContentDetailsView: View {
                     .padding(.leading, 10)
                     AdditionalInfoView(details: details)
                 }
+                
                 // collection
                 if let collection = detailsViewModel.details?.belongs_to_collection,
                    let collectionName = collection.name,
-                   let imageURL = collection.backdrop_path {
+                   let content = detailsViewModel.collection?.parts,
+                   content.isEmpty == false {
                     
-                    HStack() {
-                    Text("Belongs to: " + collectionName)
-                            .font(.system(size: 20, weight: .bold))
-                        Spacer()
+                    VStack(spacing: 0) {
+                        HStack() {
+                            Text("Belongs to: " + collectionName)
+                                .font(.system(size: 20, weight: .bold))
+                            Spacer()
+                        }
+                        HStack {
+                            Text("Parts of the Collection")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.gray)
+                            Spacer()
+                        }
                     }
                     .padding(.top, 10)
                     .padding(.leading, 10)
-                    HStack() {
-                        GenericImageView(url: APIKeys().imageKey + imageURL,
-                                         width: 270,
-                                         height: 150,
-                                         cornerRadius: 10,
-                                         showShadow: true)
-                        Spacer()
-                    }
-                    .padding()
+                    SimilarsView(content: content, screenType: screenType)
                 }
             }
         }
@@ -224,7 +251,9 @@ struct ContentDetailsView: View {
             await detailsViewModel.getCredits()
             await detailsViewModel.getVideos()
             await detailsViewModel.getSimilars()
+            await detailsViewModel.getImages()
             await detailsViewModel.getReviews()
+            await detailsViewModel.getCollection()
         }
     }
 }

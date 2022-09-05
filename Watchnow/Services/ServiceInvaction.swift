@@ -83,4 +83,22 @@ class ServiceInvaction {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(PersonModel.self, from: data)
     }
+    
+    func fetchCollection(collectionID: Int)  async throws -> CollectionModel {
+        
+        let url = URL(string: api.baseURL + "collection/" + String(collectionID) + api.apikey)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(CollectionModel.self, from: data)
+    }
+    
+    func fetchImages(screenType: ScreenTypes, id: String)  async throws -> ImagesModel {
+        
+        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/images" + api.apikey)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(ImagesModel.self, from: data)
+    }
 }

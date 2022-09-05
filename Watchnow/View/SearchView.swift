@@ -12,6 +12,7 @@ struct SearchView: View {
     
     @StateObject var searchVM = SearchViewModel.init(service: ServiceInvaction.init())
     @State var enablePicker = false
+    @State var showGenres = true
     @State var searchInput = ""
     
     init() {
@@ -58,6 +59,32 @@ struct SearchView: View {
             }
   
             Spacer()
+            
+            if showGenres {
+                let rows = [GridItem(.flexible(), alignment: .leading),
+                            GridItem(.flexible(), alignment: .trailing)]
+                
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVGrid(columns: rows, spacing: 0) {
+                        ForEach(GendreIDs.allCases, id: \.self) { genre in
+                            NavigationLink {
+                                
+                            } label: {
+                                Text(genre.getNameForGenre())
+                                    .frame(width: 150, height: 150, alignment: .center)
+                                    .background(LinearGradient(gradient: Gradient(colors: [.gray.opacity(0.6),
+                                                                                           genre.getBackgroundColorForGenre().opacity(0.6)]),
+                                                               startPoint: .topLeading,
+                                                               endPoint: .bottomTrailing))
+                                    .cornerRadius(10)
+                                    .padding()
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding()
+                }
+            }
             
             Group {
                 if let results = searchVM.result?.results?.filter { $0.poster_path != nil && $0.media_type != "person" || $0.profile_path != nil && $0.media_type == "person" } {

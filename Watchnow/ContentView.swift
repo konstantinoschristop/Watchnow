@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PartialSheet
 
 struct ContentView: View {
     
@@ -17,6 +18,7 @@ struct ContentView: View {
                     .navigationBarTitle("Movies")
                     .navigationBarTitleDisplayMode(.automatic)
             }
+            .attachPartialSheetToRoot()
             .tabItem {
                 Label("Movies", systemImage: "film")
             }
@@ -27,6 +29,7 @@ struct ContentView: View {
                     .navigationBarTitle("Series")
                     .navigationBarTitleDisplayMode(.automatic)
             }
+            .attachPartialSheetToRoot()
             .tabItem {
                 Label("Series", systemImage: "tv.inset.filled")
             }
@@ -37,6 +40,7 @@ struct ContentView: View {
                     .navigationBarTitle("Search")
                     .navigationBarTitleDisplayMode(.automatic)
             }
+            .attachPartialSheetToRoot()
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass.circle")
             }
@@ -47,6 +51,7 @@ struct ContentView: View {
                      .navigationBarTitle("Watchlist")
                      .navigationBarTitleDisplayMode(.automatic)
             }
+            .attachPartialSheetToRoot()
             .tabItem {
                 Label("Watchlist", systemImage: "list.bullet.circle.fill")
             }

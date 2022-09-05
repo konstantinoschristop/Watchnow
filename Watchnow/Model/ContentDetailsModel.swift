@@ -148,6 +148,7 @@ struct Language: Codable, Hashable {
 
 struct Collection: Codable, Hashable {
     
+    var id: Int?
     var name: String?
     var backdrop_path: String?
     var poster_path: String?

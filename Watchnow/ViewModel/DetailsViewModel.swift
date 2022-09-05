@@ -15,6 +15,8 @@ class DetailsViewModel: ObservableObject {
     @Published private(set) var reviews: ReviewsModel?
     @Published private(set) var videos: VideoModel?
     @Published private(set) var details: ContentDetailsModel?
+    @Published private(set) var collection: CollectionModel?
+    @Published private(set) var images: ImagesModel?
     @Published var isInWatchList: Bool
     @Published var imageHeight: Float = 400
     @Published private(set) var viewModelFinishedFetching = false
@@ -88,5 +90,27 @@ class DetailsViewModel: ObservableObject {
         }
         
         checkIfFetchingIsFinished()
+    }
+    
+    func getCollection() async {
+        
+        guard let collectionID = details?.belongs_to_collection?.id else {
+            return
+        }
+       
+        do {
+            self.collection = try await service.fetchCollection(collectionID: collectionID)
+        } catch {
+            print(error)
+        }
+    }
+    
+    func getImages() async {
+       
+        do {
+            self.images = try await service.fetchImages(screenType: screenType, id: id)
+        } catch {
+            print(error)
+        }
     }
 }

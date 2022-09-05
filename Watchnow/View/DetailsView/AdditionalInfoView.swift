@@ -44,18 +44,9 @@ struct AdditionalInfoView: View {
                 getView(title: "Status", subtitle: [status])
             }
             
-            if let homepage = details.homepage {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Homepage")
-                        .font(.system(size: 15, weight: .bold))
-                    Button {
-                        isSheetPresented.toggle()
-                    } label: {
-                        Text(homepage)
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.blue)
-                    }
-                }
+            if let homepage = details.homepage,
+               homepage.isEmpty == false {
+                getLinkView(title: "Homepage", homepage: homepage)
             }
         }
         .padding()
@@ -76,11 +67,28 @@ struct AdditionalInfoView: View {
                 ForEach(subtitle, id: \.self) { sub in
                     Text(sub)
                         .font(.system(size: 15, weight: .medium))
-                    
+                        .multilineTextAlignment(.leading)
                     if sub != subtitle.last {
                         Text(", ")
                     }
                 }
+            }
+        }
+    }
+    
+    func getLinkView(title: String,
+                     homepage: String) -> some View {
+        
+        return VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .font(.system(size: 15, weight: .bold))
+            Button {
+                isSheetPresented.toggle()
+            } label: {
+                Text(homepage)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.blue)
+                    .multilineTextAlignment(.leading)
             }
         }
     }
