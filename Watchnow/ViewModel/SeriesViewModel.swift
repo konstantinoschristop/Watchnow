@@ -21,27 +21,16 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     
     func loadMoreContent(section: ViewSections) {
         
+        guard canLoadMoreContent(section: section) else {
+            return
+        }
+        
         switch section {
         case .popularSeries:
-            guard let totalPages = popularSeries?.total_pages,
-                  popularSeriesCurrentPage <=  totalPages else {
-                return
-            }
-            
             popularSeriesCurrentPage += 1
         case .airingTodaySeries:
-            guard let totalPages = airingTodaySeries?.total_pages,
-                  airingTodaySeriesCurrentPage <=  totalPages else {
-                return
-            }
-            
             airingTodaySeriesCurrentPage += 1
         case .trendingSeries:
-            guard let totalPages = trendingSeries?.total_pages,
-                  trendingSeriesCurrentPage <=  totalPages else {
-                return
-            }
-            
             trendingSeriesCurrentPage += 1
         default:
             break

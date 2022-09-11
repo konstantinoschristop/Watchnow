@@ -43,7 +43,9 @@ class APIKeys {
     
     let movieGenre = "https://api.themoviedb.org/3/genre/movie/list?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
     
-    let videos = "videos?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
+    let videos = "/videos?api_key=8a5d569103b429228d23a32db4b9a426&language=en-US"
+    
+    let images = "/images?api_key=8a5d569103b429228d23a32db4b9a426"
         
     static let youtubeBaseURL = "https://www.youtube.com/watch?v="
 }

@@ -28,28 +28,17 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     
     func loadMoreContent(section: ViewSections) {
         
+        guard canLoadMoreContent(section: section) else {
+            return
+        }
+        
         switch section {
         case .upcomingMovies:
-            guard let totalPages = upcomingMovies?.total_pages,
-                  upcomingMoviesCurrentPage <= totalPages else {
-                return
-            }
-            
             upcomingMoviesCurrentPage += 1
         case .popularMovies:
-            guard let totalPages = popularMovies?.total_pages,
-                  popularMoviesCurrentPage <= totalPages else {
-                return
-            }
-            
             popularMoviesCurrentPage += 1
         case .trendingMovies:
-            guard let totalPages = trendingMovies?.total_pages,
-                  trendingMoviesCurrentPage <= totalPages else {
-                return
-            }
-            
-            trendingMoviesCurrentPage += 1
+           trendingMoviesCurrentPage += 1
         default:
             break
         }

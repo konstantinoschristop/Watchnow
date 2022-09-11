@@ -50,7 +50,7 @@ class ServiceInvaction {
     
     func fetchVideos(screenType: ScreenTypes, id: String) async throws -> VideoModel {
         
-        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/" + api.videos)
+        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + api.videos)
         
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)
@@ -95,7 +95,7 @@ class ServiceInvaction {
     
     func fetchImages(screenType: ScreenTypes, id: String)  async throws -> ImagesModel {
         
-        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/images" + api.apikey)
+        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + api.images)
         
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)

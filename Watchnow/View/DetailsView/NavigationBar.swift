@@ -55,7 +55,9 @@ struct NavigationBar: View {
                 if let leftButtonIcon = leftButtonIcon,
                    let leftButtonAction = leftButtonAction {
                     Button {
-                        leftButtonAction()
+                        DispatchQueue.main.async {
+                            leftButtonAction()
+                        }
                     } label: {
                         Image(systemName: leftButtonIcon)
                             .resizable()

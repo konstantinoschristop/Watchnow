@@ -12,7 +12,7 @@ struct SearchView: View {
     
     @StateObject var searchVM = SearchViewModel.init(service: ServiceInvaction.init())
     @State var enablePicker = false
-    @State var showGenres = true
+    @State var showGenres = false
     @State var searchInput = ""
     
     init() {

@@ -12,6 +12,8 @@ struct SeasonsView: View {
     var seasons: [Season]
     var navBarTitle: String
     var seriesID: Int
+    @State var isSeasonsSheetPresented = false
+    @State var selectedIndex: Int = 0
     
     func calculateRowsForSeasons() -> [GridItem] {
         
@@ -34,11 +36,9 @@ struct SeasonsView: View {
                        let episodes = seasons[index].episode_count,
                        let date = seasons[index].getAirDate() {
                         
-                        NavigationLink {
-                            SeasonsDetailsTabView(index: index,
-                                                  seasons: seasons,
-                                                  navBarTitle: navBarTitle,
-                                                  seriesID: seriesID)
+                        Button {
+                            selectedIndex = index
+                            isSeasonsSheetPresented.toggle()
                         } label: {
                             constructSeason(seasons[index], name, date, episodes)
                         }
@@ -49,6 +49,12 @@ struct SeasonsView: View {
                 .padding(.bottom, seasons.count > 2 ? 35 : 5)
             }
             .padding([.leading, .trailing], 10)
+        }
+        .sheet(isPresented: $isSeasonsSheetPresented) {
+            SeasonsDetailsTabView(index: $selectedIndex,
+                                  seasons: seasons,
+                                  navBarTitle: navBarTitle,
+                                  seriesID: seriesID)
         }
     }
     

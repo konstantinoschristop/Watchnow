@@ -50,7 +50,6 @@
 		EE8B692428C4994200AD6B8D /* PartialSheet in Frameworks */ = {isa = PBXBuildFile; productRef = EE8B692328C4994200AD6B8D /* PartialSheet */; };
 		EE8B692628C4A63700AD6B8D /* CollectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692528C4A63700AD6B8D /* CollectionModel.swift */; };
 		EE8B692828C6889C00AD6B8D /* ImagesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692728C6889C00AD6B8D /* ImagesModel.swift */; };
-		EE8B692A28C68A3A00AD6B8D /* ImagesScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692928C68A3A00AD6B8D /* ImagesScrollView.swift */; };
 		EE93A1E628BFE86300F5B1E6 /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */; };
 		EE94209428A6AFFF00577629 /* ContentDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE94209328A6AFFF00577629 /* ContentDetailsModel.swift */; };
 		EE94209628A6CB8300577629 /* SeasonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE94209528A6CB8300577629 /* SeasonsView.swift */; };
@@ -121,7 +120,6 @@
 		EE67247C27B998F700B8F8E8 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		EE8B692528C4A63700AD6B8D /* CollectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionModel.swift; sourceTree = "<group>"; };
 		EE8B692728C6889C00AD6B8D /* ImagesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesModel.swift; sourceTree = "<group>"; };
-		EE8B692928C68A3A00AD6B8D /* ImagesScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesScrollView.swift; sourceTree = "<group>"; };
 		EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdditionalInfoView.swift; sourceTree = "<group>"; };
 		EE94209328A6AFFF00577629 /* ContentDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsModel.swift; sourceTree = "<group>"; };
 		EE94209528A6CB8300577629 /* SeasonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonsView.swift; sourceTree = "<group>"; };
@@ -322,7 +320,6 @@
 				EE95E43C2895B02C00B8C688 /* VideoView.swift */,
 				EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */,
 				EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */,
-				EE8B692928C68A3A00AD6B8D /* ImagesScrollView.swift */,
 			);
 			path = DetailsView;
 			sourceTree = "<group>";
@@ -440,7 +437,6 @@
 				8AC338FE2752923E00834B46 /* TopView.swift in Sources */,
 				EE27E298284D2A890055E25A /* GenericImageView.swift in Sources */,
 				8A981D7026B6917A00993232 /* UpcomingMoviesModel.swift in Sources */,
-				EE8B692A28C68A3A00AD6B8D /* ImagesScrollView.swift in Sources */,
 				EE67247627B93D1000B8F8E8 /* TrendingSeriesModel.swift in Sources */,
 				EE95E4412895C44700B8C688 /* VideoModel.swift in Sources */,
 				EE67247427B93D0600B8F8E8 /* PopularSeriesModel.swift in Sources */,
@@ -619,6 +615,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
@@ -630,6 +627,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = konstantinoschristop.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -641,6 +639,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
@@ -652,6 +651,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = konstantinoschristop.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

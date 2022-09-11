@@ -25,6 +25,7 @@ struct ContentDetailsView: View {
     @State var showDetails = false
     @State private var showAlert = false
     @State var isSheetPresented = false
+    @State var isSeasonsSheetPresented = false
     
     init(result: Result, screenType: ScreenTypes) {
         _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvaction.init(),
@@ -73,16 +74,21 @@ struct ContentDetailsView: View {
                                 Text("Total Episodes: " + String(numberOfEpisodes))
                                 Spacer()
                                 
-                                NavigationLink("See all") {
-                                    SeasonsDetailsTabView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+                                Button {
+                                    isSeasonsSheetPresented.toggle()
+                                } label: {
+                                    Text("See all")
+                                        .foregroundColor(.blue)
                                 }
-                                .foregroundColor(.blue)
                             }
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.gray)
                         }
                         .padding(.all, 10)
                         SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+                            .sheet(isPresented: $isSeasonsSheetPresented) {
+                                SeasonsDetailsTabView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+                            }
                     }
                 }
                 
@@ -133,29 +139,6 @@ struct ContentDetailsView: View {
                     .padding(.top, -10)
                     .padding(.leading, 10)
                     ReviewsView(reviews: reviews)
-                }
-                
-                // Multimedia
-                if let images = detailsViewModel.images,
-                   images.posters?.isEmpty == false || images.backdrops?.isEmpty == false {
-                    
-                    VStack(spacing: 0) {
-                        HStack() {
-                            Text("Multimedia")
-                                .font(.system(size: 20, weight: .bold))
-                            Spacer()
-                        }
-                        HStack {
-                            Text("Images")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.gray)
-                            Spacer()
-                        }
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    ImagesScrollView(backdrops: images.backdrops,
-                                     posters: images.posters)
                 }
                 
                 // Additional Info
@@ -251,7 +234,6 @@ struct ContentDetailsView: View {
             await detailsViewModel.getCredits()
             await detailsViewModel.getVideos()
             await detailsViewModel.getSimilars()
-            await detailsViewModel.getImages()
             await detailsViewModel.getReviews()
             await detailsViewModel.getCollection()
         }

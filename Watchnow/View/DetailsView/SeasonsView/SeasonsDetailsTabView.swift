@@ -10,19 +10,19 @@ import SwiftUI
 struct SeasonsDetailsTabView: View {
     
     @StateObject private var episodesViewModel: EpisodesViewModel
-    @State var index: Int
+    @Binding var index: Int
     let seasons: [Season]
     let navBarTitle: String
     @Environment(\.presentationMode) var presentation
     
-    init(index: Int = 0,
+    init(index: Binding<Int> = .constant(0),
          seasons: [Season],
          navBarTitle: String,
          seriesID: Int) {
         
         self.seasons = seasons
         self.navBarTitle = navBarTitle
-        _index = State(initialValue: index)
+        _index = index
         _episodesViewModel = StateObject(wrappedValue: EpisodesViewModel.init(service: ServiceInvaction(),
                                                                               seriesID: seriesID))
     }
