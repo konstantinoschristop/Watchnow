@@ -15,7 +15,7 @@ struct GenericListView: View {
     
     var body: some View {
         
-        ForEach(results, id: \.self) { result in
+        ForEach(Array(results.enumerated()), id: \.element) { index, result in
             NavigationLink {
                 switch result.getMediaType() {
                 case "Actor":
@@ -26,21 +26,25 @@ struct GenericListView: View {
                     ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
                 }
             }
-        label: {
-            self.constructResult(result: result)
-        }
-        .listRowSeparatorTint(.clear)
-        .listRowBackground(Color(.systemGray6))
-        .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: -15))
-        .swipeActions {
-            switch WatchlistManager.existsInWatchList(result: result) {
-            case true:
-                self.contructRemoveSwipeAction(result: result)
-            case false:
-                self.contructAddSwipeAction(result: result)
-                    .tint(.green)
+            label: {
+                self.constructResult(result: result)
             }
-        }
+            .listRowSeparatorTint(.clear)
+            .listRowBackground(Color(.systemGray6))
+            .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: -15))
+            .swipeActions {
+                if result.getMediaType() == "Actor" {
+                    EmptyView()
+                } else {
+                    switch WatchlistManager.existsInWatchList(result: result) {
+                    case true:
+                        self.contructRemoveSwipeAction(result: result)
+                    case false:
+                        self.contructAddSwipeAction(result: result)
+                            .tint(.green)
+                    }
+                }
+            }
         }
     }
     

@@ -11,10 +11,12 @@ enum ViewSections {
     case upcomingMovies
     case popularMovies
     case trendingMovies
+    case latestMovies
     
     case popularSeries
     case airingTodaySeries
     case trendingSeries
+    case latestSeries
 }
 
 struct UpcomingMoviesModel: Codable {

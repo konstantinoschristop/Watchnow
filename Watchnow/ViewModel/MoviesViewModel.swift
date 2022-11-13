@@ -20,9 +20,12 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     @Published private(set) var upcomingMovies: UpcomingMoviesModel?
     @Published private var popularMovies: PopularMoviesModel?
     @Published private var trendingMovies: TrendingMoviesModel?
+    @Published private var latestMovies: PopularMoviesModel?
+    
     @Published private(set) var upcomingMoviesCurrentPage = 1
     @Published private(set) var popularMoviesCurrentPage = 1
     @Published private(set) var trendingMoviesCurrentPage = 1
+    @Published private(set) var latestMoviesCurrentPage = 1
     
     private let service: MovieService = .init()
     
@@ -39,6 +42,8 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
             popularMoviesCurrentPage += 1
         case .trendingMovies:
            trendingMoviesCurrentPage += 1
+        case .latestMovies:
+            latestMoviesCurrentPage += 1
         default:
             break
         }
@@ -62,6 +67,11 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
                 return false
             }
             return trendingMoviesCurrentPage < totalPages
+        case .latestMovies:
+            guard let totalPages = latestMovies?.total_pages else {
+                return false
+            }
+            return latestMoviesCurrentPage < totalPages
         default:
             return false
         }
@@ -77,6 +87,10 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     
     func getTrendingMovieResults() -> [Result]? {
         return self.trendingMovies?.results
+    }
+    
+    func getLatestMovieResults() -> [Result]? {
+        return self.latestMovies?.results
     }
     
     func getTrendingMovies(page: Int = 1) async {
@@ -112,6 +126,19 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
                 self.popularMovies = try await service.fetchPopularMovies(page: page)
             } else {
                 self.popularMovies?.results.append(contentsOf: try await service.fetchPopularMovies(page: page).results)
+            }
+        } catch {
+            print(error)
+        }
+    }
+    
+    func getLatestMovies(page: Int = 1) async {
+        
+        do {
+            if page == 1 {
+                self.latestMovies = try await service.fetchLatestMovies(page: page)
+            } else {
+                self.latestMovies?.results.append(contentsOf: try await service.fetchLatestMovies(page: page).results)
             }
         } catch {
             print(error)

@@ -37,4 +37,13 @@ class MovieService {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(TrendingMoviesModel.self, from: data)
     }
+    
+    func fetchLatestMovies(page: Int) async throws -> PopularMoviesModel {
+        
+        let url = URL(string: api.nowPlayingMovies + page.description)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(PopularMoviesModel.self, from: data)
+    }
 }

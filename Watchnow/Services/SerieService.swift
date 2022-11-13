@@ -37,4 +37,13 @@ class SerieService {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(TrendingSeriesModel.self, from: data)
     }
+    
+    func fetchLatestSeries(page: Int) async throws -> PopularSeriesModel {
+        
+        let url = URL(string: api.topRatedSeries + page.description)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(PopularSeriesModel.self, from: data)
+    }
 }

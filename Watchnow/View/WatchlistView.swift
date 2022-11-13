@@ -20,28 +20,30 @@ struct WatchlistView: View {
                 Text("Your watchlist is empty!")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List {
-                    if let movies = watchlistViewModel.savedMovies,
-                       movies.isEmpty == false {
+                ScrollViewReader { proxy in
+                    List {
+                        if let movies = watchlistViewModel.savedMovies,
+                           movies.isEmpty == false {
+                            
+                            self.getSectionTitle(title: "Movies", sectionType: .movie)
+                            
+                            if watchlistViewModel.showingMovies {
+                                GenericListView(results: movies, viewModel: watchlistViewModel)
+                            }
+                        }
                         
-                        self.getSectionTitle(title: "Movies", sectionType: .movie)
-                        
-                        if watchlistViewModel.showingMovies {
-                            GenericListView(results: movies, viewModel: watchlistViewModel)
+                        if let series = watchlistViewModel.savedSeries,
+                           series.isEmpty == false {
+                            
+                            self.getSectionTitle(title: "TV Shows", sectionType: .tv)
+                            
+                            if watchlistViewModel.showingSeries {
+                                GenericListView(results: series, viewModel: watchlistViewModel)
+                            }
                         }
                     }
-                    
-                    if let series = watchlistViewModel.savedSeries,
-                       series.isEmpty == false {
-                        
-                        self.getSectionTitle(title: "TV Shows", sectionType: .tv)
-                        
-                        if watchlistViewModel.showingSeries {
-                            GenericListView(results: series, viewModel: watchlistViewModel)
-                        }
-                    }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
             }
         }
         .onAppear {
@@ -59,7 +61,9 @@ struct WatchlistView: View {
                 .font(.system(size: 25, weight: .heavy))
             Spacer()
             Button {
-                watchlistViewModel.sectionArrowAction(screenType: sectionType)
+                withAnimation(.easeInOut) {
+                    watchlistViewModel.sectionArrowAction(screenType: sectionType)
+                }
             } label: {
                 Image(systemName: watchlistViewModel.getSectionArrowIcon(screenType: sectionType))
                     .resizable()

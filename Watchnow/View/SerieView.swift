@@ -36,6 +36,17 @@ struct SerieView: View {
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                     
+                    if let results = seriesViewModel.latestSeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "Top Rated Series",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .latestSeries)
+                            .listRowSeparatorTint(.clear)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }
+                    
                     if let results = seriesViewModel.airingTodaySeries?.results {
                         BottomView(results: results,
                                    viewTitle: "On Air Today",
@@ -56,13 +67,15 @@ struct SerieView: View {
         .task {
             await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
             await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
+            await seriesViewModel.getLatestSeries(page: seriesViewModel.latestSeriesCurrentPage)
             await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
         }
-        .refreshable {
-            await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
-            await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
-            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
-        }
+//        .refreshable {
+//            await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
+//            await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
+//            await seriesViewModel.getLatestSeries(page: seriesViewModel.latestSeriesCurrentPage)
+//            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
+//        }
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {
                 await seriesViewModel.getPopularSeries(page: newValue)
@@ -76,6 +89,11 @@ struct SerieView: View {
         .onChange(of: seriesViewModel.trendingSeriesCurrentPage) { newValue in
             Task {
                 await seriesViewModel.getTrendingSeries(page: newValue)
+            }
+        }
+        .onChange(of: seriesViewModel.latestSeriesCurrentPage) { newValue in
+            Task {
+                await seriesViewModel.getLatestSeries(page: newValue)
             }
         }
     }

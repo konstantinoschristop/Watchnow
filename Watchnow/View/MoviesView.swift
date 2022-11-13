@@ -14,9 +14,9 @@ struct MoviesView: View {
     var body: some View {
         
         Group {
-            if let results = moviesViewModel.upcomingMovies?.results {
+            if let upcomingMovies = moviesViewModel.upcomingMovies?.results {
                 List {
-                    TopView(results: results,
+                    TopView(results: upcomingMovies,
                             viewTitle: "Upcoming Movies",
                             screenType: .movie,
                             viewModel: moviesViewModel,
@@ -46,6 +46,17 @@ struct MoviesView: View {
                             .listRowBackground(Color.clear)
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
+                    
+                    if let results = moviesViewModel.getLatestMovieResults() {
+                        BottomView(results: results,
+                                   viewTitle: "Now Playing Movies",
+                                   screenType: .movie,
+                                   viewModel: moviesViewModel,
+                                   viewSection: .latestMovies)
+                            .listRowSeparatorTint(.clear)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }
                 }
                 .listStyle(.plain)
             } else {
@@ -57,12 +68,14 @@ struct MoviesView: View {
             await moviesViewModel.getUpcomingMovies(page: moviesViewModel.upcomingMoviesCurrentPage)
             await moviesViewModel.getPopularMovies(page: moviesViewModel.popularMoviesCurrentPage)
             await moviesViewModel.getTrendingMovies(page: moviesViewModel.trendingMoviesCurrentPage)
+            await moviesViewModel.getLatestMovies(page: moviesViewModel.latestMoviesCurrentPage)
         }
-        .refreshable {
-            await moviesViewModel.getUpcomingMovies(page: moviesViewModel.upcomingMoviesCurrentPage)
-            await moviesViewModel.getPopularMovies(page: moviesViewModel.popularMoviesCurrentPage)
-            await moviesViewModel.getTrendingMovies(page: moviesViewModel.trendingMoviesCurrentPage)
-        }
+//        .refreshable {
+//            await moviesViewModel.getUpcomingMovies(page: moviesViewModel.upcomingMoviesCurrentPage)
+//            await moviesViewModel.getPopularMovies(page: moviesViewModel.popularMoviesCurrentPage)
+//            await moviesViewModel.getTrendingMovies(page: moviesViewModel.trendingMoviesCurrentPage)
+//            await moviesViewModel.getLatestMovies(page: moviesViewModel.latestMoviesCurrentPage)
+//        }
         .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getUpcomingMovies(page: newValue)
@@ -76,6 +89,11 @@ struct MoviesView: View {
         .onChange(of: moviesViewModel.trendingMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getTrendingMovies(page: newValue)
+            }
+        }
+        .onChange(of: moviesViewModel.latestMoviesCurrentPage) { newValue in
+            Task {
+                await moviesViewModel.getLatestMovies(page: newValue)
             }
         }
     }

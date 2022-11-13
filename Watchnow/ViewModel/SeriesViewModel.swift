@@ -13,9 +13,12 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     @Published private(set) var popularSeries: PopularSeriesModel?
     @Published private(set) var airingTodaySeries: AiringTodaySeriesModel?
     @Published private(set) var trendingSeries: TrendingSeriesModel?
+    @Published private(set) var latestSeries: PopularSeriesModel?
+    
     @Published private(set) var popularSeriesCurrentPage = 1
     @Published private(set) var airingTodaySeriesCurrentPage = 1
     @Published private(set) var trendingSeriesCurrentPage = 1
+    @Published private(set) var latestSeriesCurrentPage = 1
     
     private let service: SerieService = .init()
     
@@ -32,6 +35,8 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
             airingTodaySeriesCurrentPage += 1
         case .trendingSeries:
             trendingSeriesCurrentPage += 1
+        case .latestSeries:
+            latestSeriesCurrentPage += 1
         default:
             break
         }
@@ -55,6 +60,11 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
                 return false
             }
             return trendingSeriesCurrentPage < totalPages
+        case .latestSeries:
+            guard let totalPages = latestSeries?.total_pages else {
+                return false
+            }
+            return latestSeriesCurrentPage < totalPages
         default:
             return false
         }
@@ -93,6 +103,19 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
                 self.airingTodaySeries = try await service.fetchAiringTodaySeries(page: page)
             } else {
                 self.airingTodaySeries?.results.append(contentsOf: try await service.fetchAiringTodaySeries(page: page).results)
+            }
+        } catch {
+            print(error)
+        }
+    }
+    
+    func getLatestSeries(page: Int = 1) async {
+        
+        do {
+            if page == 1 {
+                self.latestSeries = try await service.fetchLatestSeries(page: page)
+            } else {
+                self.latestSeries?.results.append(contentsOf: try await service.fetchLatestSeries(page: page).results)
             }
         } catch {
             print(error)
