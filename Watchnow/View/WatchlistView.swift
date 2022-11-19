@@ -35,7 +35,7 @@ struct WatchlistView: View {
                         if let series = watchlistViewModel.savedSeries,
                            series.isEmpty == false {
                             
-                            self.getSectionTitle(title: "TV Shows", sectionType: .tv)
+                            self.getSectionTitle(title: "TV Series", sectionType: .tv)
                             
                             if watchlistViewModel.showingSeries {
                                 GenericListView(results: series, viewModel: watchlistViewModel)
