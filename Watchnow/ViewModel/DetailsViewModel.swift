@@ -21,11 +21,11 @@ class DetailsViewModel: ObservableObject {
     @Published var imageHeight: Float = 400
     @Published private(set) var viewModelFinishedFetching = false
     
-    private let service: ServiceInvaction
+    private let service: ServiceInvocation
     let screenType: ScreenTypes
     let id: String
     
-    init(service: ServiceInvaction,
+    init(service: ServiceInvocation,
          screenType: ScreenTypes,
          id: String,
          result: Result) {

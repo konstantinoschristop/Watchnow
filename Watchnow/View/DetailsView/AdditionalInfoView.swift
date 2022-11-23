@@ -16,16 +16,30 @@ struct AdditionalInfoView: View {
         
         VStack(alignment: .leading, spacing: 20) {
             
-            if let createdBy = details.getCreatedBy() {
-                getView(title: "Created By", subtitle: createdBy)
+            if let createdBy = details.getCreatedBy(),
+               createdBy.isEmpty == false {
+                
+                switch createdBy.count {
+                case 1:
+                    getView(title: "Created By", subtitle: createdBy)
+                default:
+                    getBulletListView(title: "Created By", bullets: createdBy)
+                }
             }
             
             if let runtime = details.getRuntime() {
                 getView(title: "Runtime", subtitle: [runtime])
             }
             
-            if let spokenLanguages = details.getLanguages() {
-                getView(title: "Spoken Languages", subtitle: spokenLanguages)
+            if let spokenLanguages = details.getLanguages(),
+               spokenLanguages.isEmpty == false {
+                
+                switch spokenLanguages.count {
+                case 1:
+                    getView(title: "Spoken Languages", subtitle: spokenLanguages)
+                default:
+                    getBulletListView(title: "Spoken Languages", bullets: spokenLanguages)
+                }
             }
             
             if let budget = details.getBudget() {
@@ -66,7 +80,7 @@ struct AdditionalInfoView: View {
             HStack(spacing: 0) {
                 ForEach(subtitle, id: \.self) { sub in
                     Text(sub)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.system(size: 15, weight: .light))
                         .multilineTextAlignment(.leading)
                     if sub != subtitle.last {
                         Text(", ")
@@ -86,9 +100,25 @@ struct AdditionalInfoView: View {
                 isSheetPresented.toggle()
             } label: {
                 Text(homepage)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 15, weight: .light))
                     .foregroundColor(.blue)
                     .multilineTextAlignment(.leading)
+            }
+        }
+    }
+    
+    func getBulletListView(title: String,
+                           bullets: [String]) -> some View {
+        
+        return VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .font(.system(size: 15, weight: .bold))
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(bullets, id: \.self) { bullet in
+                    Text(" • " + bullet)
+                        .font(.system(size: 15, weight: .light))
+                        .multilineTextAlignment(.leading)
+                }
             }
         }
     }

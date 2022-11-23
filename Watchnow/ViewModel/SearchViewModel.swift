@@ -57,9 +57,9 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     }
     @Published var listNeedsUpdate = false
     
-    private let service: ServiceInvaction
+    private let service: ServiceInvocation
     
-    init(service: ServiceInvaction) {
+    init(service: ServiceInvocation) {
         self.service = service
     }
     

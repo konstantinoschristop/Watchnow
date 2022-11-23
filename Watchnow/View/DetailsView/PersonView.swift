@@ -16,7 +16,7 @@ struct PersonView: View {
     
     init(personID: Int) {
         
-        _personViewModel = StateObject(wrappedValue: PersonViewModel.init(service: ServiceInvaction(), personID: personID))
+        _personViewModel = StateObject(wrappedValue: PersonViewModel.init(service: ServiceInvocation(), personID: personID))
     }
     var body: some View {
         
@@ -140,7 +140,7 @@ struct PersonView: View {
                             .aspectRatio(contentMode: .fill)
                             .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .top)
                     } else {
-                        Image(systemName: "person.text.rectangle")
+                        Image(systemName: "person.fill.questionmark")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: size.width, height: height > 0 ? height : 0 , alignment: .bottom)

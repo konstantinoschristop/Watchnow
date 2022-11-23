@@ -28,7 +28,7 @@ struct ContentDetailsView: View {
     @State var isSeasonsSheetPresented = false
     
     init(result: Result, screenType: ScreenTypes) {
-        _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvaction.init(),
+        _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvocation.init(),
                                                                             screenType: screenType,
                                                                             id: String(describing: result.id!),
                                                                             result: result))

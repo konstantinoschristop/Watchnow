@@ -13,10 +13,10 @@ class PersonViewModel: ObservableObject {
     @Published private(set) var person: PersonModel?
     @Published var imageHeight: Float = 400
     
-    private let service: ServiceInvaction
+    private let service: ServiceInvocation
     let personID: Int
     
-    init(service: ServiceInvaction,
+    init(service: ServiceInvocation,
          personID: Int) {
         
         self.service = service

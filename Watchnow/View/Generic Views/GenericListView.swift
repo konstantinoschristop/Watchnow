@@ -31,8 +31,8 @@ struct GenericListView: View {
             }
             .listRowSeparatorTint(.clear)
             .listRowBackground(Color(.systemGray6))
-            .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: -15))
-            .swipeActions {
+            .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 10))
+            .swipeActions(allowsFullSwipe: true, content: {
                 if result.getMediaType() == "Actor" {
                     EmptyView()
                 } else {
@@ -44,7 +44,7 @@ struct GenericListView: View {
                             .tint(.green)
                     }
                 }
-            }
+            })
         }
     }
     

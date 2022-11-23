@@ -41,7 +41,7 @@
 		EE4002AF284CEA8400374143 /* ReviewsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4002AE284CEA8400374143 /* ReviewsModel.swift */; };
 		EE4002B3284CEBA300374143 /* ReviewsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4002B2284CEBA300374143 /* ReviewsView.swift */; };
 		EE67246627B9233800B8F8E8 /* CreditsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246527B9233800B8F8E8 /* CreditsModel.swift */; };
-		EE67246A27B9240900B8F8E8 /* ServiceInvaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246927B9240900B8F8E8 /* ServiceInvaction.swift */; };
+		EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */; };
 		EE67247227B93CF500B8F8E8 /* AiringTodaySeriesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247127B93CF500B8F8E8 /* AiringTodaySeriesModel.swift */; };
 		EE67247427B93D0600B8F8E8 /* PopularSeriesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247327B93D0600B8F8E8 /* PopularSeriesModel.swift */; };
 		EE67247627B93D1000B8F8E8 /* TrendingSeriesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247527B93D1000B8F8E8 /* TrendingSeriesModel.swift */; };
@@ -112,7 +112,7 @@
 		EE4002AE284CEA8400374143 /* ReviewsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsModel.swift; sourceTree = "<group>"; };
 		EE4002B2284CEBA300374143 /* ReviewsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsView.swift; sourceTree = "<group>"; };
 		EE67246527B9233800B8F8E8 /* CreditsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditsModel.swift; sourceTree = "<group>"; };
-		EE67246927B9240900B8F8E8 /* ServiceInvaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceInvaction.swift; sourceTree = "<group>"; };
+		EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceInvocation.swift; sourceTree = "<group>"; };
 		EE67247127B93CF500B8F8E8 /* AiringTodaySeriesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiringTodaySeriesModel.swift; sourceTree = "<group>"; };
 		EE67247327B93D0600B8F8E8 /* PopularSeriesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopularSeriesModel.swift; sourceTree = "<group>"; };
 		EE67247527B93D1000B8F8E8 /* TrendingSeriesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingSeriesModel.swift; sourceTree = "<group>"; };
@@ -258,7 +258,7 @@
 				8A981D7226B6920700993232 /* APIKeys.swift */,
 				8AC338FB2752800D00834B46 /* MovieService.swift */,
 				8AB84B8C275693810016D82E /* SerieService.swift */,
-				EE67246927B9240900B8F8E8 /* ServiceInvaction.swift */,
+				EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -425,7 +425,7 @@
 				EEDC84B528B7FFD300F3C171 /* NavigationBar.swift in Sources */,
 				EEDC84AE28ABE61900F3C171 /* PersonModel.swift in Sources */,
 				EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */,
-				EE67246A27B9240900B8F8E8 /* ServiceInvaction.swift in Sources */,
+				EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */,
 				EE9595C3289EB49B0016EC25 /* WatchlistManager.swift in Sources */,
 				8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */,
 				EE2732F3287B259E00B066C7 /* GenreModel.swift in Sources */,

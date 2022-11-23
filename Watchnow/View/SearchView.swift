@@ -10,7 +10,7 @@ import AlertToast
 
 struct SearchView: View {
     
-    @StateObject var searchVM = SearchViewModel.init(service: ServiceInvaction.init())
+    @StateObject var searchVM = SearchViewModel.init(service: ServiceInvocation.init())
     @State var enablePicker = false
     @State var showGenres = false
     @State var searchInput = ""
@@ -31,14 +31,24 @@ struct SearchView: View {
                     Image(systemName: "magnifyingglass")
                     
                     TextField("Search movies and tv series...", text: $searchInput)
-                    .onSubmit {
-                        Task {
-                            if searchInput != "" {
-                                self.enablePicker = true
-                                await searchVM.getResults(search: searchInput)
-                            }
+                        .submitLabel(.search)
+                        .onSubmit {
+                            self.hideKeyboard()
                         }
-                    }
+                        .onChange(of: searchInput) { newValue in
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: {
+                                guard newValue == searchInput else {
+                                    return
+                                }
+                                
+                                Task {
+                                    if searchInput != "" {
+                                        self.enablePicker = true
+                                        await searchVM.getResults(search: searchInput)
+                                    }
+                                }
+                            })
+                        }
                 }
                 .padding(.all, 10)
             }
@@ -53,11 +63,11 @@ struct SearchView: View {
                         Text(SearchViewModel.SearchChooserOptions.series.getTitle()).tag(SearchViewModel.SearchChooserOptions.series)
                         Text(SearchViewModel.SearchChooserOptions.actors.getTitle()).tag(SearchViewModel.SearchChooserOptions.actors)
                     } label: {}
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
                 }
             }
-  
+            
             Spacer()
             
             if showGenres {
@@ -162,5 +172,9 @@ struct SearchResults: View {
 extension View {
     func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
+    func showKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.becomeFirstResponder), to: nil, from: nil, for: nil)
     }
 }

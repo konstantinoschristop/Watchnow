@@ -25,21 +25,21 @@ struct CastView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(cast, id: \.self) { cast in
-                    NavigationLink {
-                        if let personID = cast.id {
+                    
+                    if let imageURL = cast.profile_path,
+                       let url = APIKeys().imageKey + imageURL,
+                       let personID = cast.id  {
+                        
+                        NavigationLink {
                             PersonView(personID: personID)
-                        }
-                    } label: {
-                        VStack {
-                            if let imageURL = cast.profile_path,
-                               let url = APIKeys().imageKey + imageURL {
-                                
+                        } label: {
+                            VStack {
                                 GenericImageView.init(url: url,
                                                       width: 80,
                                                       height: 120,
                                                       cornerRadius: 6,
                                                       showShadow: true)
-
+                                
                                 .clipShape(Circle())
                                 .frame(width: 80, height: 80)
                                 Text(cast.getName())
@@ -49,8 +49,8 @@ struct CastView: View {
                                     .colorInvert()
                                     .frame(width: 80, height: 30)
                             }
+                            .frame(width: 80, height: 130)
                         }
-                        .frame(width: 80, height: 130)
                     }
                 }
             }

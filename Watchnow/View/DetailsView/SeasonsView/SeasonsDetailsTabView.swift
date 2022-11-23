@@ -23,7 +23,7 @@ struct SeasonsDetailsTabView: View {
         self.seasons = seasons
         self.navBarTitle = navBarTitle
         _index = index
-        _episodesViewModel = StateObject(wrappedValue: EpisodesViewModel.init(service: ServiceInvaction(),
+        _episodesViewModel = StateObject(wrappedValue: EpisodesViewModel.init(service: ServiceInvocation(),
                                                                               seriesID: seriesID))
     }
 
