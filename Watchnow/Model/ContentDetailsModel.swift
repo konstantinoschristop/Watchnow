@@ -25,6 +25,7 @@ struct ContentDetailsModel: Codable {
     let status:  String?
     let homepage: String?
     let created_by: [Collection]?
+    let release_date: String?
     
     func getSeasons() -> [Season]? {
         return seasons?.filter({ $0.season_number != 0 })
@@ -35,7 +36,7 @@ struct ContentDetailsModel: Codable {
         guard let runtime = runtime else {
             return nil
         }
-
+        
         let hours = String(runtime / 60)
         let minutes = String(runtime % 60)
         let runtimeString = String(hours + "h " + minutes + "m")
@@ -49,11 +50,11 @@ struct ContentDetailsModel: Codable {
               budget != 0 else {
             return nil
         }
-
+        
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.locale = Locale.current
-
+        
         if let formattedString = formatter.string(for: budget) {
             return "$" + formattedString
         }
@@ -67,11 +68,11 @@ struct ContentDetailsModel: Codable {
               revenue != 0 else {
             return nil
         }
-
+        
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.locale = Locale.current
-
+        
         if let formattedString = formatter.string(for: revenue) {
             return "$" + formattedString
         }
@@ -84,7 +85,7 @@ struct ContentDetailsModel: Codable {
         guard let spokenLanguages = spoken_languages else {
             return nil
         }
-
+        
         var languages: [String]? = []
         
         spokenLanguages.forEach { language in
@@ -100,7 +101,7 @@ struct ContentDetailsModel: Codable {
               createdBy.isEmpty == false else {
             return nil
         }
-
+        
         var createdByArray: [String]? = []
         
         createdBy.forEach { createdBy in
@@ -116,8 +117,43 @@ struct ContentDetailsModel: Codable {
               tagline.isEmpty == false else {
             return nil
         }
-
-        return "'" + tagline + "'" 
+        
+        return "'" + tagline + "'"
+    }
+    
+    func getDate() -> String? {
+        
+        guard let release_date = release_date,
+              release_date.isEmpty == false else {
+            return nil
+        }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd"
+        guard let date = formatter.date(from: release_date) else {
+            return nil
+        }
+        
+        formatter.dateFormat = "yyyy"
+        let year = formatter.string(from: date)
+        formatter.dateFormat = "MM"
+        let month = monthFromDate(aDate: date)
+        formatter.dateFormat = "dd"
+        let day = formatter.string(from: date)
+        
+        return "\(day) \(month) \(year)"
+    }
+    
+    private func monthFromDate(aDate: Date) -> String {
+        
+        var myCurrentCalendar = Calendar(identifier: .gregorian)
+        myCurrentCalendar.locale = Locale(identifier: "en_GB")
+        let currentComponents = myCurrentCalendar.dateComponents([.day, .month, .year], from: aDate)
+        let monthSymbols = myCurrentCalendar.monthSymbols
+        if let theMonth = currentComponents.month {
+            return monthSymbols[theMonth - 1 ]
+        }
+        return ""
     }
 }
 

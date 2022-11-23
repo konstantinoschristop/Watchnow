@@ -29,7 +29,7 @@ struct DetailsView: View {
                         if let allRatings = result.vote_count {
                             Text("• " + String(allRatings) + " ratings")
                         }
-                        Text("• Release Date: " + result.getReleaseDate(addSeparator: false))
+                        Text("• " + result.getReleaseDate(addSeparator: false))
                     }
                     .font(.custom("AvenirNext-Regular", size: 15))
                     .foregroundColor(.gray)

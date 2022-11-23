@@ -63,7 +63,8 @@ class ServiceInvocation {
         
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(ContentDetailsModel.self, from: data)
+        let response = try JSONDecoder().decode(ContentDetailsModel.self, from: data)
+        return response
     }
     
     func fetchEpisodes(seriesID: Int, seasonNumber: Int) async throws -> EpisodesModel {

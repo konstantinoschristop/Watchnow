@@ -27,6 +27,10 @@ struct AdditionalInfoView: View {
                 }
             }
             
+            if let dateString = details.getDate() {
+                getView(title: "Release Date", subtitle: [dateString])
+            }
+            
             if let runtime = details.getRuntime() {
                 getView(title: "Runtime", subtitle: [runtime])
             }

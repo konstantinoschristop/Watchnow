@@ -36,6 +36,46 @@ struct ContentDetailsView: View {
         self.result = result
         self.result.media_type = screenType == .movie ? "movie" : "tv"
     }
+  
+    var body: some View {
+        
+        Group {
+            if detailsViewModel.viewModelFinishedFetching {
+                ZStack(alignment: .top) {
+                    ScrollView(.vertical, showsIndicators: false) {
+                       self.constructContent()
+                    }
+                    GeometryReader { geometry in
+                        constructNavigationBar()
+                            .frame(width: geometry.size.width,
+                                   height: 50 + geometry.safeAreaInsets.top)
+                            .ignoresSafeArea()
+                    }
+                }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .background(Color(.systemGray6))
+        .navigationBarHidden(true)
+        .toast(isPresenting: $showAlert, alert: {
+            detailsViewModel.isInWatchList == false ?
+            AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
+            AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+        })
+        .task {
+            await detailsViewModel.getDetails()
+            await detailsViewModel.getCredits()
+            await detailsViewModel.getVideos()
+            await detailsViewModel.getSimilars()
+            await detailsViewModel.getReviews()
+            await detailsViewModel.getCollection()
+        }
+    }
+}
+
+extension ContentDetailsView {
     
     fileprivate func constructContent() -> some View {
         
@@ -126,6 +166,7 @@ struct ContentDetailsView: View {
                     .padding(.top, 10)
                     .padding(.leading, 10)
                     SimilarsView(content: content, screenType: screenType)
+                        .padding(.bottom, -30)
                 }
                 // user reviews
                 if let reviews = detailsViewModel.reviews?.results,
@@ -136,7 +177,7 @@ struct ContentDetailsView: View {
                             .font(.system(size: 20, weight: .bold))
                         Spacer()
                     }
-                    .padding(.top, -10)
+                    .padding(.top, 10)
                     .padding(.leading, 10)
                     ReviewsView(reviews: reviews)
                 }
@@ -201,42 +242,6 @@ struct ContentDetailsView: View {
         },
                              title: detailsViewModel.imageHeight < 150 ? result.getResultTitle() : "",
                              opacity: detailsViewModel.imageHeight < 150 ? 1 : 0)
-    }
-    
-    var body: some View {
-        
-        Group {
-            if detailsViewModel.viewModelFinishedFetching {
-                ZStack(alignment: .top) {
-                    ScrollView(.vertical, showsIndicators: false) {
-                       self.constructContent()
-                    }
-                    GeometryReader { geometry in
-                        constructNavigationBar()
-                            .frame(width: geometry.size.width,
-                                   height: 50 + geometry.safeAreaInsets.top)
-                            .ignoresSafeArea()
-                    }
-                }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-        .navigationBarHidden(true)
-        .toast(isPresenting: $showAlert, alert: {
-            detailsViewModel.isInWatchList == false ?
-            AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
-            AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
-        })
-        .task {
-            await detailsViewModel.getDetails()
-            await detailsViewModel.getCredits()
-            await detailsViewModel.getVideos()
-            await detailsViewModel.getSimilars()
-            await detailsViewModel.getReviews()
-            await detailsViewModel.getCollection()
-        }
     }
 }
 
