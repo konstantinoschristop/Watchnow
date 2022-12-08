@@ -69,6 +69,7 @@ struct ReviewsView: View {
         }
         .sheet(isPresented: $isPresented) {
             ReviewSheet(review: self.$selectedReview)
+                .presentationDetents([.medium])
                 .background(Color(.systemGray5))
         }
     }

@@ -128,6 +128,7 @@ extension ContentDetailsView {
                         SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                             .sheet(isPresented: $isSeasonsSheetPresented) {
                                 SeasonsDetailsTabView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+                                    .presentationDetents([.medium, .large])
                             }
                     }
                 }

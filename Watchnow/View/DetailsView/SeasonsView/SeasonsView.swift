@@ -55,6 +55,7 @@ struct SeasonsView: View {
                                   seasons: seasons,
                                   navBarTitle: navBarTitle,
                                   seriesID: seriesID)
+            .presentationDetents([.medium, .large])
         }
     }
     
