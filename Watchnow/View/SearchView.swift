@@ -36,7 +36,7 @@ struct SearchView: View {
                             self.hideKeyboard()
                         }
                         .onChange(of: searchInput) { newValue in
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: {
                                 guard newValue == searchInput else {
                                     return
                                 }

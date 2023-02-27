@@ -92,7 +92,7 @@ extension ContentDetailsView {
                 }
     
                 //DetailsView
-                DetailsView(result: result)
+                DetailsView(details: detailsViewModel.details)
                 
                 // if series, show seasons and episodes
                 if screenType == .tv {

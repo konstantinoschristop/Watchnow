@@ -26,6 +26,10 @@ struct ContentDetailsModel: Codable {
     let homepage: String?
     let created_by: [Collection]?
     let release_date: String?
+    let first_air_date: String?
+    let overview: String?
+    let vote_average: Double?
+    let vote_count: Int?
     
     func getSeasons() -> [Season]? {
         return seasons?.filter({ $0.season_number != 0 })
@@ -154,6 +158,17 @@ struct ContentDetailsModel: Codable {
             return monthSymbols[theMonth - 1 ]
         }
         return ""
+    }
+    
+    func getReleaseDate(addSeparator: Bool = true) -> String {
+        
+        if let date = release_date?.dropLast(6) {
+            return date + (addSeparator ? " - " : "")
+        } else if let date = first_air_date?.dropLast(6) {
+            return date + (addSeparator ? " - " : "")
+        } else {
+            return ""
+        }
     }
 }
 

@@ -95,8 +95,9 @@ struct GenericListView: View {
                 Spacer()
                     .frame(height: 10)
                 
-                HStack {
-                    Text(result.getReleaseDate() + result.getMediaType())
+                HStack(spacing: 2) {
+                    Text(result.getReleaseDate())
+                    Text(result.getMediaType())
                     Spacer()
                 }
                 .font(.system(size: 12, weight: .light))
