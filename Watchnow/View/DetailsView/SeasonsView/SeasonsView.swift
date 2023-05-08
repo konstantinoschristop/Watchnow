@@ -64,8 +64,10 @@ struct SeasonsView: View {
                          _ date: String,
                          _ episodes: Int) -> some View {
         return HStack() {
-            if let imageURL = season.poster_path,
-               let url = APIKeys().imageKey + imageURL {
+            if let imageURL = season.poster_path {
+                
+                let url = APIKeys().imageKey + imageURL
+                
                 GenericImageView.init(url: url,
                                       width: 30,
                                       height: 40,
