@@ -26,6 +26,7 @@ struct ContentDetailsView: View {
     @State private var showAlert = false
     @State var isSheetPresented = false
     @State var isSeasonsSheetPresented = false
+    @State var allSeasonsIndex: Int = 0
     
     init(result: Result, screenType: ScreenTypes) {
         _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvocation.init(),
@@ -127,7 +128,10 @@ extension ContentDetailsView {
                         .padding(.all, 10)
                         SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                             .sheet(isPresented: $isSeasonsSheetPresented) {
-                                SeasonsDetailsTabView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+                                SeasonsDetailsTabView(index: $allSeasonsIndex,
+                                                      seasons: seasons,
+                                                      navBarTitle: name,
+                                                      seriesID: seriesID)
                                     .presentationDetents([.medium, .large])
                             }
                     }

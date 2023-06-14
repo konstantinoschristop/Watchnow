@@ -23,6 +23,7 @@ struct TopView: View {
                 Spacer()
             }
             .padding(.horizontal)
+            .padding(.top)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: -15) {

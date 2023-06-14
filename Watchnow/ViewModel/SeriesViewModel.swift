@@ -12,7 +12,11 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     
     @Published private(set) var popularSeries: PopularSeriesModel?
     @Published private(set) var airingTodaySeries: AiringTodaySeriesModel?
-    @Published private(set) var trendingSeries: TrendingSeriesModel?
+    @Published private(set) var trendingSeries: TrendingSeriesModel? {
+        didSet {
+            self.featuredSerie = trendingSeries?.results[randomFeaturedIndex]
+        }
+    }
     @Published private(set) var latestSeries: PopularSeriesModel?
     
     @Published private(set) var popularSeriesCurrentPage = 1
@@ -21,6 +25,8 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     @Published private(set) var latestSeriesCurrentPage = 1
     
     private let service: SerieService = .init()
+    let randomFeaturedIndex = Int.random(in: 0...19)
+    var featuredSerie: Result?
     
     func loadMoreContent(section: ViewSections) {
         
@@ -120,5 +126,12 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
         } catch {
             print(error)
         }
+    }
+    
+    var finishedLoadingContent: Bool {
+        return (popularSeries?.results.isEmpty == false &&
+                airingTodaySeries?.results.isEmpty == false &&
+                trendingSeries?.results.isEmpty == false &&
+                latestSeries?.results.isEmpty == false)
     }
 }

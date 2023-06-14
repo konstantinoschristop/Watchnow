@@ -17,7 +17,11 @@ protocol BaseViewModelProtocol {
 @MainActor
 class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     
-    @Published private(set) var upcomingMovies: UpcomingMoviesModel?
+    @Published private(set) var upcomingMovies: UpcomingMoviesModel? {
+        didSet {
+            self.featuredMovie = upcomingMovies?.results[randomFeaturedIndex]
+        }
+    }
     @Published private var popularMovies: PopularMoviesModel?
     @Published private var trendingMovies: TrendingMoviesModel?
     @Published private var latestMovies: PopularMoviesModel?
@@ -28,6 +32,8 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     @Published private(set) var latestMoviesCurrentPage = 1
     
     private let service: MovieService = .init()
+    let randomFeaturedIndex = Int.random(in: 0...19)
+    var featuredMovie: Result?
     
     func loadMoreContent(section: ViewSections) {
         
@@ -143,6 +149,13 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
         } catch {
             print(error)
         }
+    }
+    
+    var finishedLoadingContent: Bool {
+        return (upcomingMovies?.results.isEmpty == false &&
+                popularMovies?.results.isEmpty == false &&
+                trendingMovies?.results.isEmpty == false &&
+                latestMovies?.results.isEmpty == false)
     }
 }
 

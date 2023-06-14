@@ -68,6 +68,7 @@ struct NavigationBar: View {
                     Spacer()
                 }
                 if let title = title {
+                    Spacer()
                     Text(title)
                         .font(.system(size: 17))
                         .bold()

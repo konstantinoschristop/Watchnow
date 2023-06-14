@@ -10,58 +10,68 @@ import SwiftUI
 struct MoviesView: View {
     
     @StateObject var moviesViewModel = MoviesViewModel()
+    @State var imageHeight: CGFloat = 200
     
     var body: some View {
         
-        Group {
-            if let upcomingMovies = moviesViewModel.upcomingMovies?.results {
-                List {
-                    TopView(results: upcomingMovies,
-                            viewTitle: "Upcoming Movies",
-                            screenType: .movie,
-                            viewModel: moviesViewModel,
-                            viewSection: .upcomingMovies)
-                        .listRowSeparatorTint(.clear)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
-                    
-                    if let results = moviesViewModel.getPopularMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "Popular Movies",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .popularMovies)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        ZStack(alignment: .top) {
+            Group {
+                if moviesViewModel.finishedLoadingContent {
+                    ScrollView {
+                        if let featuredMovie = moviesViewModel.featuredMovie {
+                            NavigationLink {
+                                ContentDetailsView(result: featuredMovie, screenType: .movie)
+                            } label: {
+                                MenuFeaturedView(content: featuredMovie,
+                                                 heightChanged: { imageHeight in
+                                    self.imageHeight = imageHeight
+                                })
+                            }
+                        }
+                        
+                        if let upcomingMovies = moviesViewModel.upcomingMovies?.results {
+                            TopView(results: upcomingMovies,
+                                    viewTitle: "Upcoming Movies",
+                                    screenType: .movie,
+                                    viewModel: moviesViewModel,
+                                    viewSection: .upcomingMovies)
+                        }
+                        
+                        if let results = moviesViewModel.getPopularMovieResults() {
+                            BottomView(results: results,
+                                       viewTitle: "Popular Movies",
+                                       screenType: .movie,
+                                       viewModel: moviesViewModel,
+                                       viewSection: .popularMovies)
+                        }
+                        
+                        if let results = moviesViewModel.getTrendingMovieResults() {
+                            BottomView(results: results,
+                                       viewTitle: "Trending Today",
+                                       screenType: .movie,
+                                       viewModel: moviesViewModel,
+                                       viewSection: .trendingMovies)
+                        }
+                        
+                        if let results = moviesViewModel.getLatestMovieResults() {
+                            BottomView(results: results,
+                                       viewTitle: "Now Playing Movies",
+                                       screenType: .movie,
+                                       viewModel: moviesViewModel,
+                                       viewSection: .latestMovies)
+                        }
                     }
-                    
-                    if let results = moviesViewModel.getTrendingMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "Trending Today",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .trendingMovies)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
-                    
-                    if let results = moviesViewModel.getLatestMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "Now Playing Movies",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .latestMovies)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .listStyle(.plain)
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            GeometryReader { geometry in
+                NavigationBar(title:  imageHeight < 150 ? "Movies" : "",
+                              opacity: imageHeight < 150 ? 1 : 0)
+                    .frame(width: geometry.size.width,
+                           height: 50 + geometry.safeAreaInsets.top)
+                    .ignoresSafeArea()
             }
         }
         .task {
@@ -70,12 +80,6 @@ struct MoviesView: View {
             await moviesViewModel.getTrendingMovies(page: moviesViewModel.trendingMoviesCurrentPage)
             await moviesViewModel.getLatestMovies(page: moviesViewModel.latestMoviesCurrentPage)
         }
-//        .refreshable {
-//            await moviesViewModel.getUpcomingMovies(page: moviesViewModel.upcomingMoviesCurrentPage)
-//            await moviesViewModel.getPopularMovies(page: moviesViewModel.popularMoviesCurrentPage)
-//            await moviesViewModel.getTrendingMovies(page: moviesViewModel.trendingMoviesCurrentPage)
-//            await moviesViewModel.getLatestMovies(page: moviesViewModel.latestMoviesCurrentPage)
-//        }
         .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getUpcomingMovies(page: newValue)

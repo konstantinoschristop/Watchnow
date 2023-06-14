@@ -69,7 +69,7 @@ struct ReviewsView: View {
         }
         .sheet(isPresented: $isPresented) {
             ReviewSheet(review: self.$selectedReview)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
                 .background(Color(.systemGray5))
         }
     }
@@ -81,31 +81,28 @@ struct ReviewSheet: View {
     
     var body: some View {
         
-        ScrollView {
-            VStack(alignment: .leading, spacing: 5) {
-                HStack {
-                    if let name = review?.author_details?.username {
-                        Text("Review by " + name)
-                    }
-                    
-                    if let rating = review?.author_details?.rating {
-                        Spacer()
-                        
-                        Text(Image(systemName: "star.fill"))
-                            .foregroundColor(.orange)
-                        + Text(" ") + Text(String(rating) + "/10")
-                    }
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                if let name = review?.author_details?.username {
+                    Text("Review by " + name)
                 }
-                .padding(.top, 10)
-                .padding(.bottom, 30)
-                .font(.system(size: 20, weight: .heavy))
                 
-                Text(review?.content ?? "- -")
-                    .font(.system(size: 15, weight: .medium))
-                
-                Spacer()
+                if let rating = review?.author_details?.rating {
+                    Spacer()
+                    
+                    Text(Image(systemName: "star.fill"))
+                        .foregroundColor(.orange)
+                    + Text(" ") + Text(String(rating) + "/10")
+                }
             }
             .padding()
+            .font(.system(size: 20, weight: .heavy))
+            
+            ScrollView {
+                Text(review?.content ?? "- -")
+                    .font(.system(size: 15, weight: .medium))
+                    .padding()
+            }
         }
         .frame(maxWidth: .infinity)
     }

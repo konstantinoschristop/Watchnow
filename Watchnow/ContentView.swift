@@ -15,8 +15,7 @@ struct ContentView: View {
             NavigationView {
                 MoviesView()
                     .background(Color(.systemGray6))
-                    .navigationBarTitle("Movies")
-                    .navigationBarTitleDisplayMode(.automatic)
+                    .navigationBarHidden(true)
             }
             .attachPartialSheetToRoot()
             .tabItem {
@@ -26,8 +25,7 @@ struct ContentView: View {
             NavigationView {
                 SerieView()
                     .background(Color(.systemGray6))
-                    .navigationBarTitle("Series")
-                    .navigationBarTitleDisplayMode(.automatic)
+                    .navigationBarHidden(true)
             }
             .attachPartialSheetToRoot()
             .tabItem {

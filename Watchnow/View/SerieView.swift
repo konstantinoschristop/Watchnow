@@ -10,58 +10,68 @@ import SwiftUI
 struct SerieView: View {
     
     @StateObject var seriesViewModel = SeriesViewModel()
+    @State var imageHeight: CGFloat = 200
     
     var body: some View {
         
-        Group {
-            if let results = seriesViewModel.popularSeries?.results {
-                List {
-                    TopView(results: results,
-                            viewTitle: "Popular Series",
-                            screenType: .tv,
-                            viewModel: seriesViewModel,
-                            viewSection: .popularSeries)
-                        .listRowSeparatorTint(.clear)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
-                    
-                    if let results =  seriesViewModel.trendingSeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Trending Today",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .trendingSeries)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        ZStack(alignment: .top) {
+            Group {
+                if seriesViewModel.finishedLoadingContent {
+                    ScrollView {
+                        if let featuredSerie = seriesViewModel.featuredSerie {
+                            NavigationLink {
+                                ContentDetailsView(result: featuredSerie, screenType: .tv)
+                            } label: {
+                                MenuFeaturedView(content: featuredSerie,
+                                                 heightChanged: { imageHeight in
+                                    self.imageHeight = imageHeight
+                                })
+                            }
+                        }
+                        
+                        if let results = seriesViewModel.popularSeries?.results {
+                            TopView(results: results,
+                                    viewTitle: "Popular Series",
+                                    screenType: .tv,
+                                    viewModel: seriesViewModel,
+                                    viewSection: .popularSeries)
+                        }
+                        
+                        if let results =  seriesViewModel.trendingSeries?.results {
+                            BottomView(results: results,
+                                       viewTitle: "Trending Today",
+                                       screenType: .tv,
+                                       viewModel: seriesViewModel,
+                                       viewSection: .trendingSeries)
+                        }
+                        
+                        if let results = seriesViewModel.latestSeries?.results {
+                            BottomView(results: results,
+                                       viewTitle: "Top Rated Series",
+                                       screenType: .tv,
+                                       viewModel: seriesViewModel,
+                                       viewSection: .latestSeries)
+                        }
+                        
+                        if let results = seriesViewModel.airingTodaySeries?.results {
+                            BottomView(results: results,
+                                       viewTitle: "On Air Today",
+                                       screenType: .tv,
+                                       viewModel: seriesViewModel,
+                                       viewSection: .airingTodaySeries)
+                        }
                     }
-                    
-                    if let results = seriesViewModel.latestSeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Top Rated Series",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .latestSeries)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
-                    
-                    if let results = seriesViewModel.airingTodaySeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "On Air Today",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .airingTodaySeries)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .listStyle(.plain)
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            GeometryReader { geometry in
+                NavigationBar(title:  imageHeight < 150 ? "Series" : "",
+                              opacity: imageHeight < 150 ? 1 : 0)
+                .frame(width: geometry.size.width,
+                       height: 50 + geometry.safeAreaInsets.top)
+                .ignoresSafeArea()
             }
         }
         .task {
@@ -70,12 +80,6 @@ struct SerieView: View {
             await seriesViewModel.getLatestSeries(page: seriesViewModel.latestSeriesCurrentPage)
             await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
         }
-//        .refreshable {
-//            await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
-//            await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
-//            await seriesViewModel.getLatestSeries(page: seriesViewModel.latestSeriesCurrentPage)
-//            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
-//        }
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {
                 await seriesViewModel.getPopularSeries(page: newValue)

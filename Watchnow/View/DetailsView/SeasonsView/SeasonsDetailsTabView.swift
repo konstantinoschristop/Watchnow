@@ -77,7 +77,7 @@ struct SeasonsDetailsTabView: View {
 
 struct TabBarView: View {
     
-    private let leftOffset: CGFloat = 0.15
+    private let leftOffset: CGFloat = -0.1
     @Binding var index: Int
     let seasons: [Season]
     
