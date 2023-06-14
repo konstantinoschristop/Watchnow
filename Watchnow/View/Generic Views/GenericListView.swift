@@ -79,15 +79,15 @@ struct GenericListView: View {
     func constructResult(result: Result) -> some View {
         
         return HStack {
-            if let imageURL = result.getResultPosterURL(),
-               let url = APIKeys().imageKey + imageURL {
-                
-                GenericImageView(url: url,
-                                 width: 70,
-                                 height: 100,
-                                 cornerRadius: 10,
-                                 showShadow: false)
-            }
+            let imageURL = result.getResultPosterURL()
+            let url = APIKeys().imageKey + imageURL
+            
+            GenericImageView(url: url,
+                             width: 70,
+                             height: 100,
+                             cornerRadius: 10,
+                             showShadow: false)
+            
             
             VStack(alignment: .leading) {
                 Text(result.getResultTitle())

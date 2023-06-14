@@ -27,9 +27,10 @@ struct CastView: View {
                 ForEach(cast, id: \.self) { cast in
                     
                     if let imageURL = cast.profile_path,
-                       let url = APIKeys().imageKey + imageURL,
                        let personID = cast.id  {
                         
+                        let url = APIKeys().imageKey + imageURL
+                            
                         NavigationLink {
                             PersonView(personID: personID)
                         } label: {

@@ -23,8 +23,9 @@ struct SimilarsView: View {
                             ContentDetailsView(result: content, screenType: screenType)
                         } label: {
                             VStack {
-                                if let imageURL = content.poster_path,
-                                   let url = APIKeys().imageKey + imageURL {
+                                if let imageURL = content.poster_path {
+                                    
+                                    let url = APIKeys().imageKey + imageURL
                                     
                                     GenericImageView.init(url: url,
                                                           width: 130,
