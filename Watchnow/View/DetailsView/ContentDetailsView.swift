@@ -49,7 +49,7 @@ struct ContentDetailsView: View {
                     GeometryReader { geometry in
                         constructNavigationBar()
                             .frame(width: geometry.size.width,
-                                   height: 50 + geometry.safeAreaInsets.top)
+                                   height: 45 + geometry.safeAreaInsets.top)
                             .ignoresSafeArea()
                     }
                 }

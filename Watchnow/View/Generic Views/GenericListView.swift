@@ -27,11 +27,14 @@ struct GenericListView: View {
                 }
             }
             label: {
-                self.constructResult(result: result)
+                VStack(spacing: 2) {
+                    self.constructResult(result: result)
+                    Divider()
+                }
             }
             .listRowSeparatorTint(.clear)
             .listRowBackground(Color(.systemGray6))
-            .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 10))
+            .listRowInsets(EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10))
             .swipeActions(allowsFullSwipe: true, content: {
                 if result.getMediaType() == "Actor" {
                     EmptyView()
@@ -39,6 +42,7 @@ struct GenericListView: View {
                     switch WatchlistManager.existsInWatchList(result: result) {
                     case true:
                         self.contructRemoveSwipeAction(result: result)
+                            .tint(.red)
                     case false:
                         self.contructAddSwipeAction(result: result)
                             .tint(.green)
@@ -64,7 +68,7 @@ struct GenericListView: View {
     @MainActor
     func contructRemoveSwipeAction(result: Result) -> Button<Label<Text, Image>>? {
         
-        return Button (role: .destructive, action: {
+        return Button (action: {
             withAnimation {
                 WatchlistManager.removeFromWatchList(result: result)
                 viewModel.showRemovedAlert = true
@@ -78,36 +82,32 @@ struct GenericListView: View {
     
     func constructResult(result: Result) -> some View {
         
-        return HStack {
+        return HStack(alignment: .top) {
             let imageURL = result.getResultPosterURL()
             let url = APIKeys().imageKey + imageURL
             
             GenericImageView(url: url,
-                             width: 70,
-                             height: 100,
-                             cornerRadius: 10,
+                             width: 60,
+                             height: 80,
+                             cornerRadius: 5,
                              showShadow: false)
             
-            
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(result.getResultTitle())
                     .font(.system(size: 16, weight: .bold))
-                Spacer()
-                    .frame(height: 10)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
                 
                 HStack(spacing: 2) {
                     Text(result.getReleaseDate())
                     Text(result.getMediaType())
                     Spacer()
                 }
-                .font(.system(size: 12, weight: .light))
+                .font(.system(size: 14, weight: .light))
             }
             .foregroundColor(Color(.systemBackground))
             .colorInvert()
-            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .background(Color(.systemGray5))
-        .cornerRadius(10)
-        .padding(.init(top: 0, leading: 15, bottom: 0, trailing: 15))
     }
 }

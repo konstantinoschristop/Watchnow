@@ -17,7 +17,7 @@ struct SerieView: View {
         ZStack(alignment: .top) {
             Group {
                 if seriesViewModel.finishedLoadingContent {
-                    ScrollView {
+                    ScrollView(showsIndicators: false) {
                         if let featuredSerie = seriesViewModel.featuredSerie {
                             NavigationLink {
                                 ContentDetailsView(result: featuredSerie, screenType: .tv)
@@ -70,7 +70,7 @@ struct SerieView: View {
                 NavigationBar(title:  imageHeight < 150 ? "Series" : "",
                               opacity: imageHeight < 150 ? 1 : 0)
                 .frame(width: geometry.size.width,
-                       height: 50 + geometry.safeAreaInsets.top)
+                       height: 45 + geometry.safeAreaInsets.top)
                 .ignoresSafeArea()
             }
         }

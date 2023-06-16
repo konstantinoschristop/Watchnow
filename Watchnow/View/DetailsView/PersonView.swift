@@ -27,7 +27,7 @@ struct PersonView: View {
                     GeometryReader { geometry in
                         constructNavigationBar(person: person)
                             .frame(width: geometry.size.width,
-                                   height: 50 + geometry.safeAreaInsets.top)
+                                   height: 45 + geometry.safeAreaInsets.top)
                             .ignoresSafeArea()
                     }
                 }

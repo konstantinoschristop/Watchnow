@@ -17,7 +17,7 @@ struct MoviesView: View {
         ZStack(alignment: .top) {
             Group {
                 if moviesViewModel.finishedLoadingContent {
-                    ScrollView {
+                    ScrollView(showsIndicators: false) {
                         if let featuredMovie = moviesViewModel.featuredMovie {
                             NavigationLink {
                                 ContentDetailsView(result: featuredMovie, screenType: .movie)
@@ -70,7 +70,7 @@ struct MoviesView: View {
                 NavigationBar(title:  imageHeight < 150 ? "Movies" : "",
                               opacity: imageHeight < 150 ? 1 : 0)
                     .frame(width: geometry.size.width,
-                           height: 50 + geometry.safeAreaInsets.top)
+                           height: 45 + geometry.safeAreaInsets.top)
                     .ignoresSafeArea()
             }
         }

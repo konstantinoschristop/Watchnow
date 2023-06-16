@@ -64,16 +64,15 @@ struct NavigationBar: View {
                             .frame(width: 25, height: 25)
                             .foregroundColor(.white)
                             .shadow(color: .black, radius: 3)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    Spacer()
                 }
                 if let title = title {
-                    Spacer()
                     Text(title)
                         .font(.system(size: 17))
                         .bold()
                         .lineLimit(1)
-                    Spacer()
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 if let rightButtonIcon = rightButtonIcon,
                    let rightButtonAction = rightButtonAction {
@@ -103,6 +102,7 @@ struct NavigationBar: View {
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
             .padding(.all, 10)

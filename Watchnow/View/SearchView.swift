@@ -30,13 +30,13 @@ struct SearchView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                     
-                    TextField("Search movies and tv series...", text: $searchInput)
+                    TextField("Search Movies, TV Series or Actors", text: $searchInput)
                         .submitLabel(.search)
                         .onSubmit {
                             self.hideKeyboard()
                         }
                         .onChange(of: searchInput) { newValue in
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
                                 guard newValue == searchInput else {
                                     return
                                 }
@@ -115,6 +115,16 @@ struct SearchView: View {
                         }
                         .listStyle(.plain)
                     }
+                } else {
+                    VStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(Color(.systemGray4))
+                        Text("Search Movies, TV Series or Actors")
+                            .font(.system(size: 18, weight: .bold))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
             }
             .toast(isPresenting: $searchVM.showAddedAlert, alert: {
