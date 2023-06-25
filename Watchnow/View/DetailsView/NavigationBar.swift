@@ -64,7 +64,7 @@ struct NavigationBar: View {
                             .frame(width: 25, height: 25)
                             .foregroundColor(.white)
                             .shadow(color: .black, radius: 3)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(alignment: .leading)
                     }
                 }
                 if let title = title {
@@ -102,7 +102,7 @@ struct NavigationBar: View {
                             }
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(alignment: .trailing)
                 }
             }
             .padding(.all, 10)

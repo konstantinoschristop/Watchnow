@@ -35,6 +35,7 @@ struct SearchView: View {
                         .onSubmit {
                             self.hideKeyboard()
                         }
+                        .autocorrectionDisabled()
                         .onChange(of: searchInput) { newValue in
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
                                 guard newValue == searchInput else {
@@ -45,6 +46,7 @@ struct SearchView: View {
                                     if searchInput != "" {
                                         self.enablePicker = true
                                         await searchVM.getResults(search: searchInput)
+                                        self.hideKeyboard()
                                     }
                                 }
                             })
@@ -125,6 +127,9 @@ struct SearchView: View {
                             .font(.system(size: 18, weight: .bold))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .onTapGesture {
+                        self.hideKeyboard()
+                    }
                 }
             }
             .toast(isPresenting: $searchVM.showAddedAlert, alert: {
@@ -136,6 +141,7 @@ struct SearchView: View {
             .refreshable {
                 if searchInput != "" {
                     await searchVM.getResults(search: searchInput)
+                    self.hideKeyboard()
                 }
             }
         }

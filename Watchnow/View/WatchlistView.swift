@@ -74,7 +74,6 @@ struct WatchlistView: View {
         }
         .listRowSeparatorTint(.clear)
         .listRowBackground(Color(.systemGray6))
-        .padding(.horizontal)
         .padding(.init(top: 10, leading: 0, bottom: 5, trailing: 0))
     }
 }
