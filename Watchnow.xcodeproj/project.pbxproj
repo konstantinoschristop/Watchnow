@@ -75,6 +75,8 @@
 		EEDC84B028ABE76300F3C171 /* PersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */; };
 		EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */ = {isa = PBXBuildFile; productRef = EEDC84B228B7F11200F3C171 /* FancyScrollView */; };
 		EEDC84B528B7FFD300F3C171 /* NavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */; };
+		EEF45B1E2A48C4B000D3460E /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = EEF45B1D2A48C4B000D3460E /* GoogleMobileAds */; };
+		EEF45B202A48C4CA00D3460E /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -144,6 +146,7 @@
 		EEDC84AD28ABE61900F3C171 /* PersonModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonModel.swift; sourceTree = "<group>"; };
 		EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonViewModel.swift; sourceTree = "<group>"; };
 		EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBar.swift; sourceTree = "<group>"; };
+		EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBannerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +156,7 @@
 			files = (
 				EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */,
 				8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */,
+				EEF45B1E2A48C4B000D3460E /* GoogleMobileAds in Frameworks */,
 				EE8B692428C4994200AD6B8D /* PartialSheet in Frameworks */,
 				EE9595CC289FB5550016EC25 /* AlertToast in Frameworks */,
 			);
@@ -275,6 +279,7 @@
 				EE27E297284D2A890055E25A /* GenericImageView.swift */,
 				EE9595C8289ED46A0016EC25 /* GenericListView.swift */,
 				EEC797632A38E00B003E7CBD /* MenuFeaturedView.swift */,
+				EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */,
 			);
 			path = "Generic Views";
 			sourceTree = "<group>";
@@ -358,6 +363,7 @@
 				EE9595CB289FB5550016EC25 /* AlertToast */,
 				EEDC84B228B7F11200F3C171 /* FancyScrollView */,
 				EE8B692328C4994200AD6B8D /* PartialSheet */,
+				EEF45B1D2A48C4B000D3460E /* GoogleMobileAds */,
 			);
 			productName = Watchnow;
 			productReference = 8A981D4F26B5AF1000993232 /* Watchnow.app */;
@@ -391,6 +397,7 @@
 				EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */,
 				EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */,
 				EE8B692228C4994200AD6B8D /* XCRemoteSwiftPackageReference "PartialSheet" */,
+				EEF45B1C2A48C4B000D3460E /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			productRefGroup = 8A981D5026B5AF1000993232 /* Products */;
 			projectDirPath = "";
@@ -432,6 +439,7 @@
 				EE9595C3289EB49B0016EC25 /* WatchlistManager.swift in Sources */,
 				8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */,
 				EE2732F3287B259E00B066C7 /* GenreModel.swift in Sources */,
+				EEF45B202A48C4CA00D3460E /* AdBannerView.swift in Sources */,
 				EEDC84A828AAC40300F3C171 /* EpisodesViewModel.swift in Sources */,
 				8A981D8226B69F5200993232 /* SimilarMoviesModel.swift in Sources */,
 				EE95E43D2895B02C00B8C688 /* VideoView.swift in Sources */,
@@ -719,6 +727,14 @@
 				minimumVersion = 0.1.4;
 			};
 		};
+		EEF45B1C2A48C4B000D3460E /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -741,6 +757,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */;
 			productName = FancyScrollView;
+		};
+		EEF45B1D2A48C4B000D3460E /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEF45B1C2A48C4B000D3460E /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

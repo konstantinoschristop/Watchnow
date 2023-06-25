@@ -15,7 +15,7 @@ struct WatchlistView: View {
     
     var body: some View {
         
-        Group {
+        VStack(spacing: 0) {
             if watchlistViewModel.isWatchListEmpty() {
                 Text("Your watchlist is empty!")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,6 +45,9 @@ struct WatchlistView: View {
                     .listStyle(.plain)
                 }
             }
+            AdBannerView()
+                .frame(height: 50)
+                .padding(.bottom)
         }
         .onAppear {
             watchlistViewModel.refreshDataIfNeeded()

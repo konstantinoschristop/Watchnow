@@ -60,6 +60,10 @@ struct SerieView: View {
                                        viewModel: seriesViewModel,
                                        viewSection: .airingTodaySeries)
                         }
+                        
+                        AdBannerView()
+                            .frame(height: 50)
+                            .padding(.bottom)
                     }
                 } else {
                     ProgressView()

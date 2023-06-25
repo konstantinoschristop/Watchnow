@@ -21,7 +21,7 @@ struct SearchView: View {
     
     var body: some View {
         
-        VStack {
+        VStack(spacing: 0) {
             ZStack {
                 Rectangle()
                     .fill(Color(.systemGray4))
@@ -144,6 +144,9 @@ struct SearchView: View {
                     self.hideKeyboard()
                 }
             }
+            AdBannerView()
+                .frame(height: 50)
+                .padding(.bottom)
         }
     }
 }
