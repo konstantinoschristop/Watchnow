@@ -37,17 +37,17 @@ struct SearchView: View {
                         }
                         .autocorrectionDisabled()
                         .onChange(of: searchInput) { newValue in
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
-                                guard newValue == searchInput else {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                                guard newValue == searchInput,
+                                      searchInput.isEmpty == false,
+                                      newValue.count > 2 else {
                                     return
                                 }
                                 
                                 Task {
-                                    if searchInput != "" {
-                                        self.enablePicker = true
-                                        await searchVM.getResults(search: searchInput)
-                                        self.hideKeyboard()
-                                    }
+                                    self.enablePicker = true
+                                    await searchVM.getResults(search: searchInput)
+                                    self.hideKeyboard()
                                 }
                             })
                         }
