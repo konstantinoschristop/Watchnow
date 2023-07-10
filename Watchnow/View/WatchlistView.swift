@@ -19,6 +19,10 @@ struct WatchlistView: View {
             if watchlistViewModel.isWatchListEmpty() {
                 Text("Your watchlist is empty!")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                AdBannerView()
+//                    .background(.blue)
+//                    .frame(height: 50)
+//                    .padding(.bottom)
             } else {
                 ScrollViewReader { proxy in
                     List {
@@ -41,13 +45,14 @@ struct WatchlistView: View {
                                 GenericListView(results: series, viewModel: watchlistViewModel)
                             }
                         }
+//                        
+//                        AdBannerView()
+//                            .frame(height: 50)
+//                            .padding(.bottom)
                     }
                     .listStyle(.plain)
                 }
             }
-            AdBannerView()
-                .frame(height: 50)
-                .padding(.bottom)
         }
         .onAppear {
             watchlistViewModel.refreshDataIfNeeded()

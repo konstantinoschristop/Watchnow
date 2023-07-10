@@ -224,9 +224,9 @@ extension ContentDetailsView {
                     SimilarsView(content: content, screenType: screenType)
                 }
                 
-                AdBannerView()
-                    .frame(height: 50)
-                    .padding(.bottom)
+//                AdBannerView()
+//                    .frame(height: 50)
+//                    .padding(.bottom)
             }
         }
         .padding(.bottom, 50)

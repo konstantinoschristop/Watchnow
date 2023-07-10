@@ -61,9 +61,9 @@ struct MoviesView: View {
                                        viewSection: .latestMovies)
                         }
                         
-                        AdBannerView()
-                            .frame(height: 50)
-                            .padding(.bottom)
+//                        AdBannerView()
+//                            .frame(height: 50)
+//                            .padding(.bottom)
                     }
                 } else {
                     ProgressView()

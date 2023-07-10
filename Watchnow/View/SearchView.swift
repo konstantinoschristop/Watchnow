@@ -144,9 +144,9 @@ struct SearchView: View {
                     self.hideKeyboard()
                 }
             }
-            AdBannerView()
-                .frame(height: 50)
-                .padding(.bottom)
+//            AdBannerView()
+//                .frame(height: 50)
+//                .padding(.bottom)
         }
     }
 }

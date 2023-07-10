@@ -26,7 +26,8 @@ class ServiceInvocation {
         
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(GetSimilarModel.self, from: data)
+        let response = try JSONDecoder().decode(GetSimilarModel.self, from: data)
+        return response
     }
     
     func fetchReviews(screenType: ScreenTypes, id: String) async throws -> ReviewsModel {

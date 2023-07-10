@@ -61,9 +61,9 @@ struct SerieView: View {
                                        viewSection: .airingTodaySeries)
                         }
                         
-                        AdBannerView()
-                            .frame(height: 50)
-                            .padding(.bottom)
+//                        AdBannerView()
+//                            .frame(height: 50)
+//                            .padding(.bottom)
                     }
                 } else {
                     ProgressView()
