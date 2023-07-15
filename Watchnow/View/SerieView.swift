@@ -16,60 +16,56 @@ struct SerieView: View {
         
         ZStack(alignment: .top) {
             Group {
-                if seriesViewModel.finishedLoadingContent {
-                    ScrollView(showsIndicators: false) {
-                        if let featuredSerie = seriesViewModel.featuredSerie {
-                            NavigationLink {
-                                ContentDetailsView(result: featuredSerie, screenType: .tv)
-                            } label: {
-                                MenuFeaturedView(content: featuredSerie,
-                                                 heightChanged: { imageHeight in
-                                    self.imageHeight = imageHeight
-                                })
-                            }
+                ScrollView(showsIndicators: false) {
+                    if let featuredSerie = seriesViewModel.featuredSerie {
+                        NavigationLink {
+                            ContentDetailsView(result: featuredSerie, screenType: .tv)
+                        } label: {
+                            MenuFeaturedView(content: featuredSerie,
+                                             heightChanged: { imageHeight in
+                                self.imageHeight = imageHeight
+                            })
                         }
-                        
-                        if let results = seriesViewModel.popularSeries?.results {
-                            TopView(results: results,
-                                    viewTitle: "Popular Series",
-                                    screenType: .tv,
-                                    viewModel: seriesViewModel,
-                                    viewSection: .popularSeries)
-                        }
-                        
-                        if let results =  seriesViewModel.trendingSeries?.results {
-                            BottomView(results: results,
-                                       viewTitle: "Trending Today",
-                                       screenType: .tv,
-                                       viewModel: seriesViewModel,
-                                       viewSection: .trendingSeries)
-                        }
-                        
-                        if let results = seriesViewModel.latestSeries?.results {
-                            BottomView(results: results,
-                                       viewTitle: "Top Rated Series",
-                                       screenType: .tv,
-                                       viewModel: seriesViewModel,
-                                       viewSection: .latestSeries)
-                        }
-                        
-                        if let results = seriesViewModel.airingTodaySeries?.results {
-                            BottomView(results: results,
-                                       viewTitle: "On Air Today",
-                                       screenType: .tv,
-                                       viewModel: seriesViewModel,
-                                       viewSection: .airingTodaySeries)
-                        }
-                        
-//                        AdBannerView()
-//                            .frame(height: 50)
-//                            .padding(.bottom)
                     }
-                } else {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    if let results = seriesViewModel.popularSeries?.results {
+                        TopView(results: results,
+                                viewTitle: "Popular Series",
+                                screenType: .tv,
+                                viewModel: seriesViewModel,
+                                viewSection: .popularSeries)
+                    }
+                    
+                    if let results =  seriesViewModel.trendingSeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "Trending Today",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .trendingSeries)
+                    }
+                    
+                    if let results = seriesViewModel.latestSeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "Top Rated Series",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .latestSeries)
+                    }
+                    
+                    if let results = seriesViewModel.airingTodaySeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "On Air Today",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .airingTodaySeries)
+                    }
+                    
+                    //                        AdBannerView()
+                    //                            .frame(height: 50)
+                    //                            .padding(.bottom)
                 }
             }
+            .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
             GeometryReader { geometry in
                 NavigationBar(title:  imageHeight < 150 ? "Series" : "",
                               opacity: imageHeight < 150 ? 1 : 0)

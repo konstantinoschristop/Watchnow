@@ -41,22 +41,18 @@ struct ContentDetailsView: View {
     var body: some View {
         
         Group {
-            if detailsViewModel.viewModelFinishedFetching {
-                ZStack(alignment: .top) {
-                    ScrollView(.vertical, showsIndicators: false) {
-                       self.constructContent()
-                    }
-                    GeometryReader { geometry in
-                        constructNavigationBar()
-                            .frame(width: geometry.size.width,
-                                   height: 45 + geometry.safeAreaInsets.top)
-                            .ignoresSafeArea()
-                    }
+            ZStack(alignment: .top) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    self.constructContent()
                 }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                GeometryReader { geometry in
+                    constructNavigationBar()
+                        .frame(width: geometry.size.width,
+                               height: 45 + geometry.safeAreaInsets.top)
+                        .ignoresSafeArea()
+                }
             }
+            .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
         }
         .background(Color(.systemGray6))
         .navigationBarHidden(true)

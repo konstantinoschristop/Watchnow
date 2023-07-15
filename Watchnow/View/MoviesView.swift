@@ -16,7 +16,7 @@ struct MoviesView: View {
         
         ZStack(alignment: .top) {
             Group {
-                if moviesViewModel.finishedLoadingContent {
+               // if moviesViewModel.finishedLoadingContent {
                     ScrollView(showsIndicators: false) {
                         if let featuredMovie = moviesViewModel.featuredMovie {
                             NavigationLink {
@@ -65,11 +65,12 @@ struct MoviesView: View {
 //                            .frame(height: 50)
 //                            .padding(.bottom)
                     }
-                } else {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+//                } else {
+//                    ProgressView()
+//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                }
             }
+            .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)
             GeometryReader { geometry in
                 NavigationBar(title:  imageHeight < 150 ? "Movies" : "",
                               opacity: imageHeight < 150 ? 1 : 0)
