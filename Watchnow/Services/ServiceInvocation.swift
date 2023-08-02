@@ -103,4 +103,13 @@ class ServiceInvocation {
         let (data,_) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(ImagesModel.self, from: data)
     }
+    
+    func fetchWatchProviders(screenType: ScreenTypes, id: String) async throws -> WatchProvidersResponse {
+        
+        let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/watch/providers" + api.apikey)
+        
+        let urlSession = URLSession.shared
+        let (data,_) = try await urlSession.data(from: url!)
+        return try JSONDecoder().decode(WatchProvidersResponse.self, from: data)
+    }
 }

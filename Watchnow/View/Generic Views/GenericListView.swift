@@ -59,7 +59,7 @@ struct GenericListView: View {
                 WatchlistManager.addToWatchList(result: result)
                 viewModel.showAddedAlert = true
                 viewModel.listNeedsUpdate = true
-                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
         }) {
             Label("Add to Watchlist", systemImage: "bookmark.fill")
         }
@@ -73,7 +73,7 @@ struct GenericListView: View {
                 WatchlistManager.removeFromWatchList(result: result)
                 viewModel.showRemovedAlert = true
                 viewModel.listNeedsUpdate = true
-                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
         }) {
             Label("Remove", systemImage: "trash")

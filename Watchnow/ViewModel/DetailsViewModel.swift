@@ -17,6 +17,7 @@ class DetailsViewModel: ObservableObject {
     @Published private(set) var details: ContentDetailsModel?
     @Published private(set) var collection: CollectionModel?
     @Published private(set) var images: ImagesModel?
+    @Published private(set) var watchProviders: WatchProvidersResponse?
     @Published var isInWatchList: Bool
     @Published var imageHeight: Float = 400
     @Published private(set) var viewModelFinishedFetching = false
@@ -112,5 +113,17 @@ class DetailsViewModel: ObservableObject {
         } catch {
             print(error)
         }
+    }
+    
+    func getWatchProviders() async {
+        do {
+            self.watchProviders = try await service.fetchWatchProviders(screenType: screenType, id: id)
+        } catch {
+            print(error)
+        }
+    }
+    
+    func createShareLink() -> String {
+        return "https://www.themoviedb.org/" + screenType.rawValue + "/\(id)"
     }
 }

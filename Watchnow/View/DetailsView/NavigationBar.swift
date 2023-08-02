@@ -74,10 +74,25 @@ struct NavigationBar: View {
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
-                if let rightButtonIcon = rightButtonIcon,
-                   let rightButtonAction = rightButtonAction {
+                
+                HStack(spacing: 25) {
+                    if let secondRightButtonIcon = secondRightButtonIcon,
+                       let secondRightButtonAction = secondRightButtonAction {
+                        
+                        Button {
+                            secondRightButtonAction()
+                        } label: {
+                            Image(systemName: secondRightButtonIcon)
+                                .resizable()
+                                .frame(width: 25, height: 25)
+                                .foregroundColor(.white)
+                                .shadow(color: .black, radius: 3)
+                        }
+                    }
                     
-                    HStack {
+                    if let rightButtonIcon = rightButtonIcon,
+                       let rightButtonAction = rightButtonAction {
+                        
                         Button {
                             rightButtonAction()
                         } label: {
@@ -87,22 +102,7 @@ struct NavigationBar: View {
                                 .foregroundColor(.white)
                                 .shadow(color: .black, radius: 3)
                         }
-                        
-                        if let secondRightButtonIcon = secondRightButtonIcon,
-                           let secondRightButtonAction = secondRightButtonAction {
-                            
-                            Button {
-                                secondRightButtonAction()
-                            } label: {
-                                Image(systemName: secondRightButtonIcon)
-                                    .resizable()
-                                    .frame(width: 25, height: 25)
-                                    .foregroundColor(.white)
-                                    .shadow(color: .black, radius: 3)
-                            }
-                        }
                     }
-                    .frame(alignment: .trailing)
                 }
             }
             .padding(.all, 10)

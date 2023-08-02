@@ -27,6 +27,7 @@ struct ContentDetailsView: View {
     @State var isSheetPresented = false
     @State var isSeasonsSheetPresented = false
     @State var allSeasonsIndex: Int = 0
+    @State var copiedToClipboard = false
     
     init(result: Result, screenType: ScreenTypes) {
         _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvocation.init(),
@@ -58,13 +59,19 @@ struct ContentDetailsView: View {
         .navigationBarHidden(true)
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
-            AlertToast(type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
-            AlertToast(type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
+            AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+        })
+        .toast(isPresenting: $copiedToClipboard, alert: {
+            AlertToast(displayMode: .hud,
+                       type: .systemImage("checkmark.circle", .green),
+                       title: "Link copied to clipboard")
         })
         .task {
             await detailsViewModel.getDetails()
             await detailsViewModel.getCredits()
             await detailsViewModel.getVideos()
+            await detailsViewModel.getWatchProviders()
             await detailsViewModel.getSimilars()
             await detailsViewModel.getReviews()
             await detailsViewModel.getCollection()
@@ -131,6 +138,23 @@ extension ContentDetailsView {
                                     .presentationDetents([.medium, .large])
                             }
                     }
+                }
+                
+                // Watch Providers
+                if let watchProvidersResults = detailsViewModel.watchProviders?.results,
+                   let watchProvider = watchProvidersResults[Locale.current.language.region?.identifier ?? "US"],
+                   watchProvider.flatrate?.isEmpty == false || watchProvider.rent?.isEmpty == false {
+                    
+                    HStack {
+                        Text("Available on")
+                            .font(.system(size: 20, weight: .bold))
+                        Spacer()
+                    }
+                    .padding(.top, 10)
+                    .padding(.leading, 10)
+                    
+                    WatchProviderView(flatrates: watchProvider.flatrate ?? [],
+                                      rent: watchProvider.rent ?? [])
                 }
                 
                 //cast
@@ -243,7 +267,13 @@ extension ContentDetailsView {
                 detailsViewModel.isInWatchList = true
             }
             self.showAlert = true
-            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        },
+                             secondRightButtonIcon: "square.and.arrow.up.circle.fill",
+                             secondRightButtonAction: {
+            UIPasteboard.general.string = detailsViewModel.createShareLink()
+            self.copiedToClipboard = true
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         },
                              title: detailsViewModel.imageHeight < 150 ? result.getResultTitle() : "",
                              opacity: detailsViewModel.imageHeight < 150 ? 1 : 0)
