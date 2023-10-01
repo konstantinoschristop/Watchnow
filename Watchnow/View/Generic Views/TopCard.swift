@@ -14,6 +14,7 @@ struct TopCard: View {
     var screenType: ScreenTypes
     @State var isPresented = false
     @Environment(\.colorScheme) var colorScheme
+    @State var isContextMenuSheetVisible = false
     
     init(content: Result, screenType: ScreenTypes) {
         
@@ -62,6 +63,23 @@ struct TopCard: View {
                     .cornerRadius(10)
                     .offset(x: 120 , y: -100)
             }
+        }
+        .fullScreenCover(isPresented: $isContextMenuSheetVisible) {
+            ContentDetailsView(result: content, screenType: screenType)
+        }
+        .contextMenu {
+            Button {
+                isContextMenuSheetVisible = true
+            } label: {
+                GenericImageView(url: APIKeys().imageKey + content.getResultPosterURL(),
+                                 width: 300,
+                                 height: 300)
+            }
+        } preview: {
+           
+                GenericImageView(url: APIKeys().imageKey + content.getResultPosterURL(),
+                                 width: 300,
+                                 height: 300)
         }
     }
 }

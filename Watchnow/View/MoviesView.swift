@@ -10,7 +10,7 @@ import SwiftUI
 struct MoviesView: View {
     
     @StateObject var moviesViewModel = MoviesViewModel()
-    @State var imageHeight: CGFloat = 200
+    @State var showNavBar: Bool = false
     
     var body: some View {
         
@@ -23,44 +23,42 @@ struct MoviesView: View {
                                 ContentDetailsView(result: featuredMovie, screenType: .movie)
                             } label: {
                                 MenuFeaturedView(content: featuredMovie,
-                                                 heightChanged: { imageHeight in
-                                    self.imageHeight = imageHeight
-                                })
+                                                 showNavBar: $showNavBar)
                             }
                         }
-                        
-                        if let upcomingMovies = moviesViewModel.upcomingMovies?.results {
-                            TopView(results: upcomingMovies,
-                                    viewTitle: "Upcoming Movies",
-                                    screenType: .movie,
-                                    viewModel: moviesViewModel,
-                                    viewSection: .upcomingMovies)
+                        LazyVStack {
+                            if let upcomingMovies = moviesViewModel.upcomingMovies?.results {
+                                TopView(results: upcomingMovies,
+                                        viewTitle: "Upcoming Movies",
+                                        screenType: .movie,
+                                        viewModel: moviesViewModel,
+                                        viewSection: .upcomingMovies)
+                            }
+                            
+                            if let results = moviesViewModel.getPopularMovieResults() {
+                                BottomView(results: results,
+                                           viewTitle: "Popular Movies",
+                                           screenType: .movie,
+                                           viewModel: moviesViewModel,
+                                           viewSection: .popularMovies)
+                            }
+                            
+                            if let results = moviesViewModel.getTrendingMovieResults() {
+                                BottomView(results: results,
+                                           viewTitle: "Trending Today",
+                                           screenType: .movie,
+                                           viewModel: moviesViewModel,
+                                           viewSection: .trendingMovies)
+                            }
+                            
+                            if let results = moviesViewModel.getLatestMovieResults() {
+                                BottomView(results: results,
+                                           viewTitle: "Now Playing Movies",
+                                           screenType: .movie,
+                                           viewModel: moviesViewModel,
+                                           viewSection: .latestMovies)
+                            }
                         }
-                        
-                        if let results = moviesViewModel.getPopularMovieResults() {
-                            BottomView(results: results,
-                                       viewTitle: "Popular Movies",
-                                       screenType: .movie,
-                                       viewModel: moviesViewModel,
-                                       viewSection: .popularMovies)
-                        }
-                        
-                        if let results = moviesViewModel.getTrendingMovieResults() {
-                            BottomView(results: results,
-                                       viewTitle: "Trending Today",
-                                       screenType: .movie,
-                                       viewModel: moviesViewModel,
-                                       viewSection: .trendingMovies)
-                        }
-                        
-                        if let results = moviesViewModel.getLatestMovieResults() {
-                            BottomView(results: results,
-                                       viewTitle: "Now Playing Movies",
-                                       screenType: .movie,
-                                       viewModel: moviesViewModel,
-                                       viewSection: .latestMovies)
-                        }
-                        
 //                        AdBannerView()
 //                            .frame(height: 50)
 //                            .padding(.bottom)
@@ -72,8 +70,8 @@ struct MoviesView: View {
             }
             .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)
             GeometryReader { geometry in
-                NavigationBar(title:  imageHeight < 150 ? "Movies" : "",
-                              opacity: imageHeight < 150 ? 1 : 0)
+                NavigationBar(title: showNavBar ? "Movies" : "",
+                              opacity: showNavBar ? 1 : 0)
                     .frame(width: geometry.size.width,
                            height: 45 + geometry.safeAreaInsets.top)
                     .ignoresSafeArea()

@@ -27,7 +27,6 @@ struct ContentDetailsView: View {
     @State var isSheetPresented = false
     @State var isSeasonsSheetPresented = false
     @State var allSeasonsIndex: Int = 0
-    @State var copiedToClipboard = false
     
     init(result: Result, screenType: ScreenTypes) {
         _detailsViewModel = StateObject(wrappedValue: DetailsViewModel.init(service: ServiceInvocation.init(),
@@ -61,11 +60,6 @@ struct ContentDetailsView: View {
             detailsViewModel.isInWatchList == false ?
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
             AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
-        })
-        .toast(isPresenting: $copiedToClipboard, alert: {
-            AlertToast(displayMode: .hud,
-                       type: .systemImage("checkmark.circle", .green),
-                       title: "Link copied to clipboard")
         })
         .task {
             await detailsViewModel.getDetails()
@@ -271,9 +265,20 @@ extension ContentDetailsView {
         },
                              secondRightButtonIcon: "square.and.arrow.up.circle.fill",
                              secondRightButtonAction: {
-            UIPasteboard.general.string = detailsViewModel.createShareLink()
-            self.copiedToClipboard = true
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            
+            let shareActivity = UIActivityViewController(activityItems: [URL(string: detailsViewModel.createShareLink())],
+                                                         applicationActivities: nil)
+            
+            if let vc = UIApplication.shared.windows.first?.rootViewController {
+                shareActivity.popoverPresentationController?.sourceView = vc.view
+                shareActivity.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2,
+                                                                                 y: UIScreen.main.bounds.height, width: 0, height: 0)
+                
+                shareActivity.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.down
+                vc.present(shareActivity, animated: true, completion: nil)
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            }
+            
         },
                              title: detailsViewModel.imageHeight < 150 ? result.getResultTitle() : "",
                              opacity: detailsViewModel.imageHeight < 150 ? 1 : 0)

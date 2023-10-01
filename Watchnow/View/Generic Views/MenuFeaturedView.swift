@@ -11,7 +11,7 @@ import Kingfisher
 struct MenuFeaturedView: View {
     
     var content: Result
-    var heightChanged: (CGFloat) -> Void
+    @Binding var showNavBar: Bool
     
     var body: some View {
         GeometryReader { proxy  in
@@ -75,7 +75,9 @@ struct MenuFeaturedView: View {
                 .cornerRadius(1)
                 .offset(y: -minY)
                 .onChange(of: height) { _ in
-                    heightChanged(height)
+                    DispatchQueue.main.async {
+                        showNavBar = height < 150
+                    }
                 }
         }
         .frame(height: (UIScreen.main.bounds.size.height) - (UIScreen.main.bounds.size.height / 2.7))
