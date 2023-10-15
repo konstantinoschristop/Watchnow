@@ -13,9 +13,10 @@ struct ContentView: View {
     var body: some View {
         TabView {
             NavigationView {
-                MoviesView()
+                let model = MoviesModel()
+                let vm = MoviesViewModel(model: model)
+                MoviesView(moviesViewModel: vm)
                     .background(Color(.systemGray6))
-                   // .navigationBarHidden(true)
             }
             .attachPartialSheetToRoot()
             .tabItem {
@@ -23,9 +24,10 @@ struct ContentView: View {
             }
             
             NavigationView {
-                SerieView()
+                let model = SeriesModel()
+                let vm = SeriesViewModel(model: model)
+                SeriesView(seriesViewModel: vm)
                     .background(Color(.systemGray6))
-                 //   .navigationBarHidden(true)
             }
             .attachPartialSheetToRoot()
             .tabItem {
