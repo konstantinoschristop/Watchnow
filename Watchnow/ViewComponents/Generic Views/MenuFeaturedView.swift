@@ -8,9 +8,10 @@
 import SwiftUI
 import Kingfisher
 
-struct MenuFeaturedView: View {
+struct MenuFeaturedView<Content: View>: View {
     
     var content: Result
+    var overlayContent: Content
     @Binding var showNavBar: Bool
     
     var body: some View {
@@ -33,44 +34,7 @@ struct MenuFeaturedView: View {
                 .scaledToFill()
                 .frame(width: size.width, height: height > 0 ? height : 0)
                 .overlay {
-                    ZStack {
-                        LinearGradient(colors: [.clear,
-                                                .black.opacity(0.6)],
-                                       startPoint: .center,
-                                       endPoint: .bottom)
-                        
-                        ZStack(alignment: .bottom) {
-                            Rectangle()
-                                .foregroundColor(.black)
-                                .frame(maxWidth: .infinity, maxHeight: 120)
-                                .blur(radius: 20)
-                                .opacity(0.5)
-                            
-                            VStack(alignment: .center, spacing: 3) {
-                                Text("Featured Now")
-                                    .font(.custom("AvenirNext-Regular", size: 20))
-                                
-                                Text(content.getResultTitle())
-                                    .font(.custom("AvenirNext-Bold", size: 25))
-                                    .multilineTextAlignment(.center)
-                                
-                                HStack {
-                                    Text(content.getReleaseDate(addSeparator: false))
-                                    Text(" | ")
-                                    HStack(spacing: 5) {
-                                        Image(systemName: "star.fill")
-                                            .foregroundColor(.orange)
-                                        Text(String(format: "%.1f", content.vote_average ?? "-"))
-                                    }
-                                }
-                                .font(.custom("AvenirNext-Regular", size: 18))
-                            }
-                            .foregroundColor(.white)
-                            .shadow(color: .black, radius: 3)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                            .padding()
-                        }
-                    }
+                    overlayContent
                 }
                 .cornerRadius(1)
                 .offset(y: -minY)

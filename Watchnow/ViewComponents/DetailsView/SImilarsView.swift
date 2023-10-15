@@ -21,7 +21,9 @@ struct SimilarsView: View {
                     if let imageURL = content.poster_path {
                         ZStack {
                             NavigationLink {
-                                ContentDetailsView(result: content, screenType: screenType)
+                                let model = ContentDetailsModel(screenType: screenType, result: content)
+                                let vm = ContentDetailsViewModel(model: model)
+                                ContentDetailsView(detailsViewModel: vm)
                             } label: {
                                 VStack {
                                         let url = APIKeys().imageKey + imageURL

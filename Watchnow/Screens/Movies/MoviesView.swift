@@ -18,9 +18,12 @@ struct MoviesView: View {
             ScrollView(showsIndicators: false) {
                 if let featuredMovie = moviesViewModel.featuredMovie {
                     NavigationLink {
-                        ContentDetailsView(result: featuredMovie, screenType: .movie)
+                        let model = ContentDetailsModel(screenType: .movie, result: featuredMovie)
+                        let vm = ContentDetailsViewModel(model: model)
+                        ContentDetailsView(detailsViewModel: vm)
                     } label: {
                         MenuFeaturedView(content: featuredMovie,
+                                         overlayContent: overlayContent(for: featuredMovie),
                                          showNavBar: $showNavBar)
                     }
                 }
@@ -90,6 +93,51 @@ struct MoviesView: View {
         .onChange(of: moviesViewModel.latestMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getLatestMovies(page: newValue)
+            }
+        }
+    }
+}
+
+extension MoviesView {
+    
+    @ViewBuilder
+    func overlayContent(for content: Result) -> some View {
+        ZStack {
+            LinearGradient(colors: [.clear,
+                                    .black.opacity(0.6)],
+                           startPoint: .center,
+                           endPoint: .bottom)
+            
+            ZStack(alignment: .bottom) {
+                Rectangle()
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, maxHeight: 120)
+                    .blur(radius: 20)
+                    .opacity(0.5)
+                
+                VStack(alignment: .center, spacing: 3) {
+                    Text("Featured Now")
+                        .font(.custom("AvenirNext-Regular", size: 20))
+                    
+                    Text(content.getResultTitle())
+                        .font(.custom("AvenirNext-Bold", size: 25))
+                        .multilineTextAlignment(.center)
+                    
+                    HStack {
+                        Text(content.getReleaseDate(addSeparator: false))
+                        Text(" | ")
+                        HStack(spacing: 5) {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.orange)
+                            Text(String(format: "%.1f", content.vote_average ?? "-"))
+                        }
+                    }
+                    .font(.custom("AvenirNext-Regular", size: 18))
+                }
+                .foregroundColor(.white)
+                .shadow(color: .black, radius: 3)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .padding()
             }
         }
     }

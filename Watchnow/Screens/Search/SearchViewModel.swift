@@ -18,60 +18,68 @@ protocol BaseSwipeActionsProtocol {
 @MainActor
 class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     
-    enum SearchChooserOptions: String, CaseIterable {
-        case all = "All"
-        case movies = "Movie"
-        case series = "TV Serie"
-        case actors = "Actor"
-        
-        func getTitle() -> String {
-            
-            switch self {
-            case .all:
-                return "All"
-            case .movies:
-                return "Movies"
-            case .series:
-                return "TV Series"
-            case .actors:
-                return "Actors"
-            }
-        }
-    }
-    
-    @Published private(set) var result: SearchResponse?
-    @Published var selectedChooser: SearchChooserOptions = .all {
+    @Published private var model: SearchModel
+    @Published var showRemovedAlert = false
+    @Published var showAddedAlert = false
+    @Published var listNeedsUpdate = false {
         didSet {
-            listNeedsUpdate = false
+            refreshDataIfNeeded()
         }
     }
-    @Published var showRemovedAlert = false {
-        didSet {
-            listNeedsUpdate = false
-        }
-    }
-    @Published var showAddedAlert = false {
-        didSet {
-            listNeedsUpdate = false
-        }
-    }
-    @Published var listNeedsUpdate = false
-    
+    @Published var apiError: Bool = false
     private let service: ServiceInvocation
     
-    init(service: ServiceInvocation) {
+    init(model: SearchModel,
+         service: ServiceInvocation = .init()) {
+        
+        self.model = model
         self.service = service
     }
     
     func getResults(search: String) async {
         
         do {
-            self.result = try await service.fetchSearchResults(search: search)
+            searchResponse = try await service.fetchSearchResults(search: search)
+            cleanUpResults(results: searchResponse)
         } catch {
-            print(error)
+            apiError = true
+        }
+    }
+    
+    private func cleanUpResults(results: SearchResponse?) {
+        
+        self.results = results?.results?.filter { $0.poster_path != nil && $0.media_type != "person" ||
+                                                  $0.profile_path != nil && $0.media_type == "person" }
+    }
+    
+    func getFilteredArray() -> [Result] {
+        
+        if selectedChooser == .all {
+            return results ?? []
+        } else {
+            return results?.filter { $0.getMediaType() == selectedChooser.rawValue } ?? []
         }
     }
     
     func refreshDataIfNeeded() {
+        cleanUpResults(results: searchResponse)
+    }
+}
+
+extension SearchViewModel {
+    
+    var searchResponse: SearchResponse? {
+        get { model.searchResponse }
+        set { model.searchResponse = newValue }
+    }
+    
+    var results: [Result]? {
+        get { model.results }
+        set { model.results = newValue }
+    }
+    
+    var selectedChooser: SearchModel.SearchChooserOptions {
+        get { model.selectedChooser }
+        set { model.selectedChooser = newValue }
     }
 }

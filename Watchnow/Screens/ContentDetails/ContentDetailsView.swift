@@ -10,57 +10,44 @@ import Kingfisher
 import AlertToast
 import PartialSheet
 
-enum ScreenTypes: String {
-    case movie
-    case tv
-    case person
-}
-
 struct ContentDetailsView: View {
     
-    var result: Result
-    let screenType: ScreenTypes
-    @StateObject private var detailsViewModel: ContentDetailsViewModel
+    @StateObject var detailsViewModel: ContentDetailsViewModel
     @Environment(\.presentationMode) var presentation
-    @State var showDetails = false
+    @State var showNavBar: Bool = false
+    @State var videoPresented = false
     @State private var showAlert = false
     @State var isSheetPresented = false
     @State var isSeasonsSheetPresented = false
     @State var allSeasonsIndex: Int = 0
-    
-    init(result: Result, screenType: ScreenTypes) {
-        _detailsViewModel = StateObject(wrappedValue: ContentDetailsViewModel.init(service: ServiceInvocation.init(),
-                                                                                   screenType: screenType,
-                                                                                   id: String(describing: result.id!),
-                                                                                   result: result))
-        self.screenType = screenType
-        self.result = result
-        self.result.media_type = screenType == .movie ? "movie" : "tv"
-    }
   
     var body: some View {
         
-        Group {
-            ZStack(alignment: .top) {
-                ScrollView(.vertical, showsIndicators: false) {
-                    self.constructContent()
-                }
-                GeometryReader { geometry in
-                    constructNavigationBar()
-                        .frame(width: geometry.size.width,
-                               height: 45 + geometry.safeAreaInsets.top)
-                        .ignoresSafeArea()
-                }
-            }
-            .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
+        ScrollView(.vertical, showsIndicators: false) {
+            self.constructContent()
         }
+        .overlay(alignment: .top, content: {
+            if !showNavBar {
+                navBarHiddenView
+            }
+        })
+        .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
         .background(Color(.systemGray6))
-        .navigationBarHidden(true)
+        .navigationTitle(detailsViewModel.result.getResultTitle())
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(!showNavBar)
+        .navigationBarBackButtonHidden()
+        .navigationBarItems(leading: navBarLeadingView,
+                            trailing: navBarTrailingView)
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
-            AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
-            AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            AlertToast(displayMode: .banner(.slide), type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
+            AlertToast(displayMode: .banner(.slide), type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
+        .sheet(isPresented: $videoPresented) {
+            WebView(videoURL: detailsViewModel.videos?.getVideoURL())
+                .ignoresSafeArea()
+        }
         .task {
             await detailsViewModel.getDetails()
             await detailsViewModel.getCredits()
@@ -77,9 +64,13 @@ extension ContentDetailsView {
     
     fileprivate func constructContent() -> some View {
         
+        let result = detailsViewModel.result
+        let screenType = detailsViewModel.screenType
+        
         return VStack(spacing: 0) {
-            ImageView(result: result,
-                      detailsViewModel: detailsViewModel)
+            MenuFeaturedView(content: result,
+                             overlayContent: overlayContent(for: result),
+                             showNavBar: $showNavBar)
 
             Group {
                 // scroll categories
@@ -129,7 +120,7 @@ extension ContentDetailsView {
                                                       seasons: seasons,
                                                       navBarTitle: name,
                                                       seriesID: seriesID)
-                                    .presentationDetents([.medium, .large])
+                                .presentationDetents([.medium, .large])
                             }
                     }
                 }
@@ -238,50 +229,115 @@ extension ContentDetailsView {
                     SimilarsView(content: content, screenType: screenType)
                 }
                 
-//                AdBannerView()
-//                    .frame(height: 50)
-//                    .padding(.bottom)
+                //                AdBannerView()
+                //                    .frame(height: 50)
+                //                    .padding(.bottom)
             }
         }
         .padding(.bottom, 50)
     }
     
-    fileprivate func constructNavigationBar() -> NavigationBar {
-        return NavigationBar(leftButtonIcon: "arrow.backward.circle.fill",
-                             leftButtonAction: {
+    @ViewBuilder
+    func overlayContent(for content: Result) -> some View {
+        ZStack(alignment: .bottom) {
+            LinearGradient(colors: [.clear,
+                                    .black.opacity(0.6)],
+                           startPoint: .center,
+                           endPoint: .bottom)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(content.getResultTitle())
+                        .font(.custom("AvenirNext-Bold", size: 25))
+                        .foregroundColor(.white)
+                    Spacer()
+                    
+                    if detailsViewModel.videos?.getVideoURL() != nil {
+                        VStack {
+                            Button(action: {
+                                videoPresented.toggle()
+                            }) {
+                                Image(systemName: "play.fill")
+                                    .imageScale(SwiftUI.Image.Scale.large)
+                                    .foregroundColor(.red)
+                            }
+                            Spacer()
+                                .frame(height: 12)
+                            Text("Watch Trailer")
+                                .font(.custom("AvenirNext-Bold", size: 12))
+                                .foregroundColor(.white)
+                        }
+                    }
+                }
+                .shadow(color: .black, radius: 3)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 15)
+            .frame(maxWidth: .infinity, alignment: .leading)
+           
+        }
+        .blur(radius: showNavBar ? 10 : 0)
+    }
+    
+    var navBarLeadingView: some View {
+        
+        getNavBarButton(imageName: "arrow.backward.circle.fill") {
             self.presentation.wrappedValue.dismiss()
-        },
-                             rightButtonIcon: detailsViewModel.isInWatchList ?  "minus.circle.fill" : "plus.circle.fill",
-                             rightButtonAction: {
-            if detailsViewModel.isInWatchList {
-                WatchlistManager.removeFromWatchList(result: result)
-                detailsViewModel.isInWatchList = false
-            } else {
-                WatchlistManager.addToWatchList(result: result)
-                detailsViewModel.isInWatchList = true
+        }
+    }
+    
+    var navBarTrailingView: some View {
+        
+        HStack(spacing: 20) {
+            getNavBarButton(imageName: detailsViewModel.isInWatchList ?  "minus.circle.fill" : "plus.circle.fill") {
+                if detailsViewModel.isInWatchList {
+                    WatchlistManager.removeFromWatchList(result: detailsViewModel.result)
+                    detailsViewModel.isInWatchList = false
+                } else {
+                    WatchlistManager.addToWatchList(result: detailsViewModel.result)
+                    detailsViewModel.isInWatchList = true
+                }
+                self.showAlert = true
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
-            self.showAlert = true
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-        },
-                             secondRightButtonIcon: "square.and.arrow.up.circle.fill",
-                             secondRightButtonAction: {
             
-            let shareActivity = UIActivityViewController(activityItems: [URL(string: detailsViewModel.createShareLink())],
-                                                         applicationActivities: nil)
-            
-            if let vc = UIApplication.shared.windows.first?.rootViewController {
-                shareActivity.popoverPresentationController?.sourceView = vc.view
-                shareActivity.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2,
-                                                                                 y: UIScreen.main.bounds.height, width: 0, height: 0)
+            getNavBarButton(imageName: "square.and.arrow.up.circle.fill") {
+                let shareActivity = UIActivityViewController(activityItems: [URL(string: detailsViewModel.createShareLink())],
+                                                             applicationActivities: nil)
                 
-                shareActivity.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.down
-                vc.present(shareActivity, animated: true, completion: nil)
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                if let vc = UIApplication.shared.windows.first?.rootViewController {
+                    shareActivity.popoverPresentationController?.sourceView = vc.view
+                    shareActivity.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2,
+                                                                                     y: UIScreen.main.bounds.height, width: 0, height: 0)
+                    
+                    shareActivity.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.down
+                    vc.present(shareActivity, animated: true, completion: nil)
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                }
             }
-            
-        },
-                             title: detailsViewModel.imageHeight < 150 ? result.getResultTitle() : "",
-                             opacity: detailsViewModel.imageHeight < 150 ? 1 : 0)
+        }
+    }
+    
+    private func getNavBarButton(imageName: String,
+                                 action: @escaping () -> Void) -> some View{
+        
+        Button(action: action,
+               label: {
+            Image(systemName: imageName)
+                .resizable()
+                .frame(width: 25, height: 25)
+                .foregroundColor(.white)
+                .shadow(color: .black, radius: 3)
+        })
+    }
+    
+    var navBarHiddenView: some View {
+        HStack {
+            navBarLeadingView
+            Spacer()
+            navBarTrailingView
+        }
+        .padding()
     }
 }
 

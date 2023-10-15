@@ -12,7 +12,7 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            NavigationView {
+            NavigationStack {
                 let model = MoviesModel()
                 let vm = MoviesViewModel(model: model)
                 MoviesView(moviesViewModel: vm)
@@ -23,7 +23,7 @@ struct ContentView: View {
                 Label("Movies", systemImage: "film")
             }
             
-            NavigationView {
+            NavigationStack {
                 let model = SeriesModel()
                 let vm = SeriesViewModel(model: model)
                 SeriesView(seriesViewModel: vm)
@@ -34,8 +34,10 @@ struct ContentView: View {
                 Label("Series", systemImage: "tv.inset.filled")
             }
             
-            NavigationView {
-               SearchView()
+            NavigationStack {
+                let model = SearchModel()
+                let vm = SearchViewModel(model: model)
+                SearchView(searchVM: vm)
                     .background(Color(.systemGray6))
                     .navigationBarTitle("Search")
                     .navigationBarTitleDisplayMode(.automatic)
@@ -45,11 +47,13 @@ struct ContentView: View {
                 Label("Search", systemImage: "magnifyingglass.circle")
             }
             
-            NavigationView {
-                WatchlistView()
+            NavigationStack {
+                let model = WatchlistModel()
+                let vm = WatchlistViewModel(model: model)
+                WatchlistView(watchlistViewModel: vm)
                     .background(Color(.systemGray6))
-                     .navigationBarTitle("Watchlist")
-                     .navigationBarTitleDisplayMode(.automatic)
+                    .navigationBarTitle("Watchlist")
+                    .navigationBarTitleDisplayMode(.automatic)
             }
             .attachPartialSheetToRoot()
             .tabItem {

@@ -25,7 +25,9 @@ struct BottomCard: View {
         ZStack {
             VStack(alignment: .center) {
                 NavigationLink {
-                    ContentDetailsView(result: content, screenType: screenType)
+                    let model = ContentDetailsModel(screenType: screenType, result: content)
+                    let vm = ContentDetailsViewModel(model: model)
+                    ContentDetailsView(detailsViewModel: vm)
                 } label: {
                     VStack {
                         KFImage.url(URL(string: APIKeys().imageKey + (content.poster_path ?? "")))

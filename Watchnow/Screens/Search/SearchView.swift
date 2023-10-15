@@ -10,32 +10,25 @@ import AlertToast
 
 struct SearchView: View {
     
-    @StateObject var searchVM = SearchViewModel.init(service: ServiceInvocation.init())
+    @StateObject var searchVM: SearchViewModel
     @State var enablePicker = false
     @State var showGenres = false
     @State var searchInput = ""
     
-    init() {
-        UITextField.appearance().clearButtonMode = .whileEditing
-    }
-    
     var body: some View {
         
         VStack(spacing: 0) {
-           
-            pickerView
-            Spacer()
-            genresView
+          //  genresView
             searchResultsView
 //            AdBannerView()
 //                .frame(height: 50)
 //                .padding(.bottom)
         }
         .toast(isPresenting: $searchVM.showAddedAlert, alert: {
-            AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            AlertToast(displayMode: .banner(.slide), type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
         .toast(isPresenting: $searchVM.showRemovedAlert, alert: {
-            AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
+            AlertToast(displayMode: .banner(.slide), type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
         .refreshable {
             if searchInput != "" {
@@ -45,7 +38,7 @@ struct SearchView: View {
         }
         .searchable(text: $searchInput)
         .onChange(of: searchInput) { newValue in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
                 guard newValue == searchInput,
                       searchInput.isEmpty == false,
                       newValue.count > 2 else {
@@ -66,19 +59,18 @@ extension SearchView {
     
     @ViewBuilder
     var pickerView: some View {
-        if enablePicker {
-            withAnimation {
-                Picker(selection: $searchVM.selectedChooser) {
-                    Text(SearchViewModel.SearchChooserOptions.all.getTitle()).tag(SearchViewModel.SearchChooserOptions.all)
-                    Text(SearchViewModel.SearchChooserOptions.movies.getTitle()).tag(SearchViewModel.SearchChooserOptions.movies)
-                    Text(SearchViewModel.SearchChooserOptions.series.getTitle()).tag(SearchViewModel.SearchChooserOptions.series)
-                    Text(SearchViewModel.SearchChooserOptions.actors.getTitle()).tag(SearchViewModel.SearchChooserOptions.actors)
-                } label: {}
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
-            }
-        }
+        Picker(selection: $searchVM.selectedChooser) {
+            Text(SearchModel.SearchChooserOptions.all.getTitle()).tag(SearchModel.SearchChooserOptions.all)
+            Text(SearchModel.SearchChooserOptions.movies.getTitle()).tag(SearchModel.SearchChooserOptions.movies)
+            Text(SearchModel.SearchChooserOptions.series.getTitle()).tag(SearchModel.SearchChooserOptions.series)
+            Text(SearchModel.SearchChooserOptions.actors.getTitle()).tag(SearchModel.SearchChooserOptions.actors)
+        } label: {}
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
+            .listRowSeparatorTint(.clear)
+            .listRowBackground(Color(.systemGray6))
     }
+    
     @ViewBuilder
     var genresView: some View {
         if showGenres {
@@ -110,72 +102,43 @@ extension SearchView {
     
     @ViewBuilder
     var searchResultsView: some View {
-        Group {
-            if let results = searchVM.result?.results?.filter { $0.poster_path != nil && $0.media_type != "person" || $0.profile_path != nil && $0.media_type == "person" } {
-                if results == [] {
-                    Text("No results found. Try searching again with a different keyword.")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    List {
+        
+        if let results = searchVM.results {
+            if results.isEmpty == false {
+                let filtered = searchVM.getFilteredArray()
+                List {
+                    pickerView
+                    if filtered.isEmpty {
+                        Text("No results found for this filter.")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .listRowSeparatorTint(.clear)
+                            .listRowBackground(Color(.systemGray6))
+                    } else {
                         if searchVM.listNeedsUpdate {
-                            SearchResults(results: results,
-                                          chooserSelection: $searchVM.selectedChooser,
-                                          viewModel: searchVM)
+                            GenericListView(results: filtered, viewModel: searchVM)
                         } else {
-                            SearchResults(results: results,
-                                          chooserSelection: $searchVM.selectedChooser,
-                                          viewModel: searchVM)
+                            GenericListView(results: filtered, viewModel: searchVM)
                         }
                     }
-                    .listStyle(.plain)
                 }
+                .listStyle(.plain)
             } else {
-                VStack(spacing: 10) {
-                    Image(systemName: "magnifyingglass")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(Color(.systemGray4))
-                    Text("Search Movies, TV Series or Actors")
-                        .font(.system(size: 18, weight: .bold))
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                .onTapGesture {
-                    self.hideKeyboard()
-                }
+                Text("No results found. Try searching again with a different keyword.")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }
-    }
-}
-
-struct SearchResults: View {
-    
-    @Binding var chooserSelection: SearchViewModel.SearchChooserOptions
-    let viewModel: SearchViewModel
-    var filtered: [Result] = []
-    
-    init(results: [Result],
-         chooserSelection: Binding<SearchViewModel.SearchChooserOptions>,
-         viewModel: SearchViewModel) {
-        
-        self._chooserSelection = chooserSelection
-        self.viewModel = viewModel
-        
-        if chooserSelection.wrappedValue.rawValue == "All" {
-            self.filtered = results
         } else {
-            self.filtered = results.filter { $0.getMediaType() == chooserSelection.wrappedValue.rawValue }
-        }
-    }
-    
-    var body: some View {
-        
-        if filtered.isEmpty {
-            Text("No results found for this filter.")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .listRowSeparatorTint(.clear)
-                .listRowBackground(Color(.systemGray6))
-        } else {
-            GenericListView(results: filtered, viewModel: viewModel)
+            VStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .resizable()
+                    .frame(width: 50, height: 50)
+                    .foregroundColor(Color(.systemGray4))
+                Text("Search Movies, TV Series or Actors")
+                    .font(.system(size: 18, weight: .bold))
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .onTapGesture {
+                self.hideKeyboard()
+            }
         }
     }
 }

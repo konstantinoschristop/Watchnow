@@ -23,7 +23,10 @@ struct GenericListView: View {
                         PersonView(personID: personID)
                     }
                 default:
-                    ContentDetailsView(result: result, screenType: result.media_type == "movie" ? .movie : .tv)
+                    let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
+                    let model = ContentDetailsModel(screenType: screenType, result: result)
+                    let vm = ContentDetailsViewModel(model: model)
+                    ContentDetailsView(detailsViewModel: vm)
                 }
             }
             label: {

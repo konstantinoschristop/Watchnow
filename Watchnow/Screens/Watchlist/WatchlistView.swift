@@ -11,7 +11,7 @@ import AlertToast
 
 struct WatchlistView: View {
     
-    @StateObject var watchlistViewModel = WatchlistViewModel.init()
+    @StateObject var watchlistViewModel: WatchlistViewModel
     
     var body: some View {
         
@@ -19,46 +19,44 @@ struct WatchlistView: View {
             if watchlistViewModel.isWatchListEmpty() {
                 Text("Your watchlist is empty!")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                AdBannerView()
-//                    .background(.blue)
-//                    .frame(height: 50)
-//                    .padding(.bottom)
+                //                AdBannerView()
+                //                    .background(.blue)
+                //                    .frame(height: 50)
+                //                    .padding(.bottom)
             } else {
-                ScrollViewReader { proxy in
-                    List {
-                        if let movies = watchlistViewModel.savedMovies,
-                           movies.isEmpty == false {
-                            
-                            self.getSectionTitle(title: "Movies", sectionType: .movie)
-                            
-                            if watchlistViewModel.showingMovies {
-                                GenericListView(results: movies, viewModel: watchlistViewModel)
-                            }
-                        }
+                List {
+                    if let movies = watchlistViewModel.savedMovies,
+                       movies.isEmpty == false {
                         
-                        if let series = watchlistViewModel.savedSeries,
-                           series.isEmpty == false {
-                            
-                            self.getSectionTitle(title: "TV Series", sectionType: .tv)
-                            
-                            if watchlistViewModel.showingSeries {
-                                GenericListView(results: series, viewModel: watchlistViewModel)
-                            }
+                        self.getSectionTitle(title: "Movies", sectionType: .movie)
+                        
+                        if watchlistViewModel.showingMovies {
+                            GenericListView(results: movies, viewModel: watchlistViewModel)
                         }
-//                        
-//                        AdBannerView()
-//                            .frame(height: 50)
-//                            .padding(.bottom)
                     }
-                    .listStyle(.plain)
+                    
+                    if let series = watchlistViewModel.savedSeries,
+                       series.isEmpty == false {
+                        
+                        self.getSectionTitle(title: "TV Series", sectionType: .tv)
+                        
+                        if watchlistViewModel.showingSeries {
+                            GenericListView(results: series, viewModel: watchlistViewModel)
+                        }
+                    }
+                    //
+                    //                        AdBannerView()
+                    //                            .frame(height: 50)
+                    //                            .padding(.bottom)
                 }
+                .listStyle(.plain)
             }
         }
         .onAppear {
             watchlistViewModel.refreshDataIfNeeded()
         }
         .toast(isPresenting: $watchlistViewModel.showRemovedAlert, alert: {
-            AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
+            AlertToast(displayMode: .banner(.slide), type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
     }
     

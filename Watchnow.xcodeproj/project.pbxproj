@@ -10,6 +10,7 @@
 		8A036A7426BBC8C100A3D0FF /* TopCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A036A7326BBC8C100A3D0FF /* TopCard.swift */; };
 		8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 8A036A7726BBE23700A3D0FF /* Kingfisher */; };
 		8A546AB52ADBE8C3007615BF /* ScrollKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8A546AB42ADBE8C3007615BF /* ScrollKit */; };
+		8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */; };
 		8A8F4B3726BC152F00D87BBB /* ContentDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */; };
 		8A8F4B3E26BC1EF000D87BBB /* BottomCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4B3D26BC1EF000D87BBB /* BottomCard.swift */; };
 		8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A981D5226B5AF1000993232 /* AppDelegate.swift */; };
@@ -44,7 +45,6 @@
 		EE67246627B9233800B8F8E8 /* ResultCreditsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246527B9233800B8F8E8 /* ResultCreditsResponse.swift */; };
 		EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */; };
 		EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247927B9876400B8F8E8 /* CastView.swift */; };
-		EE67247D27B998F700B8F8E8 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247C27B998F700B8F8E8 /* ImageView.swift */; };
 		EE8B692428C4994200AD6B8D /* PartialSheet in Frameworks */ = {isa = PBXBuildFile; productRef = EE8B692328C4994200AD6B8D /* PartialSheet */; };
 		EE8B692628C4A63700AD6B8D /* CollectionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */; };
 		EE8B692828C6889C00AD6B8D /* ImagesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692728C6889C00AD6B8D /* ImagesResponse.swift */; };
@@ -72,7 +72,6 @@
 		EEDC84AE28ABE61900F3C171 /* PersonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AD28ABE61900F3C171 /* PersonResponse.swift */; };
 		EEDC84B028ABE76300F3C171 /* PersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */; };
 		EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */ = {isa = PBXBuildFile; productRef = EEDC84B228B7F11200F3C171 /* FancyScrollView */; };
-		EEDC84B528B7FFD300F3C171 /* NavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */; };
 		EEF45B1E2A48C4B000D3460E /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = EEF45B1D2A48C4B000D3460E /* GoogleMobileAds */; };
 		EEF45B202A48C4CA00D3460E /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */; };
 		EEF45B272A79864400D3460E /* WatchProvidersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */; };
@@ -81,6 +80,7 @@
 
 /* Begin PBXFileReference section */
 		8A036A7326BBC8C100A3D0FF /* TopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCard.swift; sourceTree = "<group>"; };
+		8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsModel.swift; sourceTree = "<group>"; };
 		8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsView.swift; sourceTree = "<group>"; };
 		8A8F4B3D26BC1EF000D87BBB /* BottomCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomCard.swift; sourceTree = "<group>"; };
 		8A981D4F26B5AF1000993232 /* Watchnow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Watchnow.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,7 +117,6 @@
 		EE67246527B9233800B8F8E8 /* ResultCreditsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCreditsResponse.swift; sourceTree = "<group>"; };
 		EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceInvocation.swift; sourceTree = "<group>"; };
 		EE67247927B9876400B8F8E8 /* CastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastView.swift; sourceTree = "<group>"; };
-		EE67247C27B998F700B8F8E8 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionResponse.swift; sourceTree = "<group>"; };
 		EE8B692728C6889C00AD6B8D /* ImagesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesResponse.swift; sourceTree = "<group>"; };
 		EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdditionalInfoView.swift; sourceTree = "<group>"; };
@@ -142,7 +141,6 @@
 		EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonView.swift; sourceTree = "<group>"; };
 		EEDC84AD28ABE61900F3C171 /* PersonResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonResponse.swift; sourceTree = "<group>"; };
 		EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonViewModel.swift; sourceTree = "<group>"; };
-		EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBar.swift; sourceTree = "<group>"; };
 		EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBannerView.swift; sourceTree = "<group>"; };
 		EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProvidersResponse.swift; sourceTree = "<group>"; };
 		EEF45B282A7998D600D3460E /* WatchProviderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProviderView.swift; sourceTree = "<group>"; };
@@ -306,6 +304,7 @@
 			children = (
 				8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */,
 				EE95E43E2895C1B600B8C688 /* ContentDetailsViewModel.swift */,
+				8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */,
 				EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */,
 				EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */,
 			);
@@ -344,12 +343,10 @@
 				EE95CF3428BB852C000E97B6 /* GenresView.swift */,
 				EE67247927B9876400B8F8E8 /* CastView.swift */,
 				EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */,
-				EE67247C27B998F700B8F8E8 /* ImageView.swift */,
 				EE4002AC284CDC5600374143 /* SImilarsView.swift */,
 				EE4002B2284CEBA300374143 /* ReviewsView.swift */,
 				EE95E43C2895B02C00B8C688 /* VideoView.swift */,
 				EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */,
-				EEDC84B428B7FFD300F3C171 /* NavigationBar.swift */,
 				EEF45B282A7998D600D3460E /* WatchProviderView.swift */,
 			);
 			path = DetailsView;
@@ -456,7 +453,6 @@
 				EE4002B3284CEBA300374143 /* ReviewsView.swift in Sources */,
 				EE94209628A6CB8300577629 /* SeasonsView.swift in Sources */,
 				EE9595C5289EBA9E0016EC25 /* WatchlistViewModel.swift in Sources */,
-				EEDC84B528B7FFD300F3C171 /* NavigationBar.swift in Sources */,
 				8AA98D852ADB15B5007963E3 /* MoviesModel.swift in Sources */,
 				EEDC84AE28ABE61900F3C171 /* PersonResponse.swift in Sources */,
 				EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */,
@@ -493,11 +489,11 @@
 				EEDC84B028ABE76300F3C171 /* PersonViewModel.swift in Sources */,
 				EEDC84A628AA366600F3C171 /* EpisodesResponse.swift in Sources */,
 				8AC339032752957D00834B46 /* BottomView.swift in Sources */,
+				8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */,
 				EEDC84AA28ABA4E100F3C171 /* EpisodesView.swift in Sources */,
 				EE93A1E628BFE86300F5B1E6 /* AdditionalInfoView.swift in Sources */,
 				8AC338FC2752800E00834B46 /* MovieService.swift in Sources */,
 				8AA98D8B2ADB165D007963E3 /* WatchlistModel.swift in Sources */,
-				EE67247D27B998F700B8F8E8 /* ImageView.swift in Sources */,
 				8A8F4B3726BC152F00D87BBB /* ContentDetailsView.swift in Sources */,
 				EE95E4452895CA6F00B8C688 /* SeriesViewModel.swift in Sources */,
 				EEC797642A38E00B003E7CBD /* MenuFeaturedView.swift in Sources */,

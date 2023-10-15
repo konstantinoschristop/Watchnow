@@ -10,12 +10,7 @@ import Foundation
 @MainActor
 class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {    
     
-    @Published var results: [Result]?
-    @Published private(set) var savedMovies: [Result]?
-    @Published private(set) var savedSeries: [Result]?
-    @Published private(set) var showingMovies = true
-    @Published private(set) var showingSeries = true
-    
+    @Published private var model: WatchlistModel
     @Published var showRemovedAlert = false
     @Published var showAddedAlert = false
     @Published var listNeedsUpdate = false {
@@ -24,7 +19,8 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
         }
     }
     
-    init() {
+    init(model: WatchlistModel) {
+        self.model = model
         self.fetchResultsFromWatchList()
     }
     
@@ -74,5 +70,33 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
         default:
             return
         }
+    }
+}
+
+extension WatchlistViewModel {
+    
+    var results: [Result]? {
+        get { model.results }
+        set { model.results = newValue }
+    }
+    
+    var savedMovies: [Result]? {
+        get { model.savedMovies }
+        set { model.savedMovies = newValue }
+    }
+    
+    var savedSeries: [Result]? {
+        get { model.savedSeries }
+        set { model.savedSeries = newValue }
+    }
+    
+    var showingMovies: Bool {
+        get { model.showingMovies }
+        set { model.showingMovies = newValue }
+    }
+    
+    var showingSeries: Bool {
+        get { model.showingSeries }
+        set { model.showingSeries = newValue }
     }
 }
