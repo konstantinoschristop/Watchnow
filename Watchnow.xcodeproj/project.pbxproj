@@ -305,7 +305,7 @@
 				8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */,
 				EE95E43E2895C1B600B8C688 /* ContentDetailsViewModel.swift */,
 				8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */,
-				EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */,
+				EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */,
 				EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */,
 			);
 			path = ContentDetails;
@@ -346,7 +346,6 @@
 				EE4002AC284CDC5600374143 /* SImilarsView.swift */,
 				EE4002B2284CEBA300374143 /* ReviewsView.swift */,
 				EE95E43C2895B02C00B8C688 /* VideoView.swift */,
-				EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */,
 				EEF45B282A7998D600D3460E /* WatchProviderView.swift */,
 			);
 			path = DetailsView;
@@ -358,6 +357,7 @@
 				EE94209528A6CB8300577629 /* SeasonsView.swift */,
 				EE94209C28A9A59300577629 /* SeasonsDetailsTabView.swift */,
 				EEDC84A928ABA4E100F3C171 /* EpisodesView.swift */,
+				EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */,
 			);
 			path = SeasonsView;
 			sourceTree = "<group>";

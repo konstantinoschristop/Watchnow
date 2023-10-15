@@ -20,7 +20,8 @@ struct GenericListView: View {
                 switch result.getMediaType() {
                 case "Actor":
                     if let personID = result.id {
-                        PersonView(personID: personID)
+                        let vm = PersonViewModel(personID: personID)
+                        PersonView(personViewModel: vm)
                     }
                 default:
                     let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
@@ -87,7 +88,7 @@ struct GenericListView: View {
         
         return HStack(alignment: .top) {
             let imageURL = result.getResultPosterURL()
-            let url = APIKeys().imageKey + imageURL
+            let url = String(describing: imageURL)
             
             GenericImageView(url: url,
                              width: 60,

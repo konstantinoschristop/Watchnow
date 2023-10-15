@@ -10,7 +10,7 @@ import Kingfisher
 
 struct MenuFeaturedView<Content: View>: View {
     
-    var content: Result
+    var imageURL: URL
     var overlayContent: Content
     @Binding var showNavBar: Bool
     
@@ -20,7 +20,7 @@ struct MenuFeaturedView<Content: View>: View {
             let size = proxy.size
             let height = size.height + minY
             
-            KFImage.url(URL(string: APIKeys().imageKey + content.getResultPosterURL()))
+            KFImage.url(imageURL)
                 .placeholder { ProgressView() }
                 .loadImmediately()
                 .loadDiskFileSynchronously()
@@ -43,7 +43,7 @@ struct MenuFeaturedView<Content: View>: View {
                         withAnimation(.easeInOut) {
                             let range = 450...
                             let newMinY = Int(newValue)
-                            showNavBar = range.contains(newMinY) || showNavBar && range.contains(newMinY + 100)
+                            showNavBar = range.contains(newMinY) || showNavBar && range.contains(newMinY + 80)
                         }
                     }
                 }

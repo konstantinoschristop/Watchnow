@@ -32,7 +32,8 @@ struct CastView: View {
                         let url = APIKeys().imageKey + imageURL
                             
                         NavigationLink {
-                            PersonView(personID: personID)
+                            let vm = PersonViewModel(personID: personID)
+                            PersonView(personViewModel: vm)
                         } label: {
                             VStack {
                                 GenericImageView.init(url: url,

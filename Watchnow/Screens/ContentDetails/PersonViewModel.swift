@@ -11,12 +11,11 @@ import Foundation
 class PersonViewModel: ObservableObject {
     
     @Published private(set) var person: PersonResponse?
-    @Published var imageHeight: Float = 400
     
     private let service: ServiceInvocation
     let personID: Int
     
-    init(service: ServiceInvocation,
+    init(service: ServiceInvocation = .init(),
          personID: Int) {
         
         self.service = service

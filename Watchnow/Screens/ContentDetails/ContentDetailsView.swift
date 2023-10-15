@@ -68,7 +68,8 @@ extension ContentDetailsView {
         let screenType = detailsViewModel.screenType
         
         return VStack(spacing: 0) {
-            MenuFeaturedView(content: result,
+    
+            MenuFeaturedView(imageURL: result.getResultPosterURL(),
                              overlayContent: overlayContent(for: result),
                              showNavBar: $showNavBar)
 

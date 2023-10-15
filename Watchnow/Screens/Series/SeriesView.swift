@@ -22,7 +22,7 @@ struct SeriesView: View {
                         let vm = ContentDetailsViewModel(model: model)
                         ContentDetailsView(detailsViewModel: vm)
                     } label: {
-                        MenuFeaturedView(content: featuredSerie,
+                        MenuFeaturedView(imageURL: featuredSerie.getResultPosterURL(),
                                          overlayContent: overlayContent(for: featuredSerie),
                                          showNavBar: $showNavBar)
                     }

@@ -54,8 +54,10 @@ struct Result: Codable, Hashable, Equatable {
         return (name ?? title) ?? "- -"
     }
     
-    func getResultPosterURL() -> String {
-        return (poster_path ?? backdrop_path ?? profile_path) ?? ""
+    func getResultPosterURL() -> URL {
+        
+        let posterURL = (poster_path ?? backdrop_path ?? profile_path) ?? ""
+        return URL(string: APIKeys().imageKey + posterURL)!
     }
     
     func getMediaType() -> String {

@@ -18,4 +18,9 @@ struct PersonResponse: Codable {
     var popularity: Double?
     var place_of_birth: String?
     var profile_path: String?
+    
+    func getResultPosterURL() -> URL {
+        
+        return URL(string: APIKeys().imageKey + (profile_path ?? ""))!
+    }
 }

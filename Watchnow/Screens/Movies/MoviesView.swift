@@ -22,7 +22,7 @@ struct MoviesView: View {
                         let vm = ContentDetailsViewModel(model: model)
                         ContentDetailsView(detailsViewModel: vm)
                     } label: {
-                        MenuFeaturedView(content: featuredMovie,
+                        MenuFeaturedView(imageURL: featuredMovie.getResultPosterURL(),
                                          overlayContent: overlayContent(for: featuredMovie),
                                          showNavBar: $showNavBar)
                     }
