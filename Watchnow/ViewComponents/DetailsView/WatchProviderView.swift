@@ -49,14 +49,13 @@ struct WatchProviderView: View {
                                       cornerRadius: 6,
                                       showShadow: true)
                 .clipShape(Circle())
-                
-                Text(name)
-                    .font(.system(size: 12, weight: .heavy))
-                    .multilineTextAlignment(.center)
-                
-                Text("(\(availableFor))")
-                    .font(.system(size: 12, weight: .regular))
-                    .multilineTextAlignment(.center)
+                    Text(name)
+                        .font(.system(size: 12, weight: .heavy))
+                        .multilineTextAlignment(.center)
+                        .frame(width: 80, height: 30)
+                    Text(availableFor)
+                        .font(.system(size: 12, weight: .regular))
+                        .multilineTextAlignment(.center)
             }
         }
     }

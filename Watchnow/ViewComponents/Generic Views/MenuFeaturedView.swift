@@ -40,10 +40,18 @@ struct MenuFeaturedView<Content: View>: View {
                 .offset(y: -minY)
                 .onChange(of: -minY) { newValue in
                     DispatchQueue.main.async {
-                        withAnimation(.easeInOut) {
-                            let range = 450...
+                        withAnimation(.bouncy) {
+                            let range = 420...
                             let newMinY = Int(newValue)
-                            showNavBar = range.contains(newMinY) || showNavBar && range.contains(newMinY + 80)
+                            if range.contains(newMinY) || showNavBar && range.contains(newMinY + 80) {
+                                if showNavBar == false {
+                                    showNavBar = true
+                                }
+                            } else {
+                                if showNavBar == true {
+                                    showNavBar = false
+                                }
+                            }
                         }
                     }
                 }

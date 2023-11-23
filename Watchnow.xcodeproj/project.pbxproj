@@ -11,6 +11,7 @@
 		8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 8A036A7726BBE23700A3D0FF /* Kingfisher */; };
 		8A546AB52ADBE8C3007615BF /* ScrollKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8A546AB42ADBE8C3007615BF /* ScrollKit */; };
 		8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */; };
+		8A57A8B02AED6EFC002B636A /* TipKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */; };
 		8A8F4B3726BC152F00D87BBB /* ContentDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */; };
 		8A8F4B3E26BC1EF000D87BBB /* BottomCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4B3D26BC1EF000D87BBB /* BottomCard.swift */; };
 		8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A981D5226B5AF1000993232 /* AppDelegate.swift */; };
@@ -81,6 +82,7 @@
 /* Begin PBXFileReference section */
 		8A036A7326BBC8C100A3D0FF /* TopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCard.swift; sourceTree = "<group>"; };
 		8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsModel.swift; sourceTree = "<group>"; };
+		8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipKitManager.swift; sourceTree = "<group>"; };
 		8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsView.swift; sourceTree = "<group>"; };
 		8A8F4B3D26BC1EF000D87BBB /* BottomCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomCard.swift; sourceTree = "<group>"; };
 		8A981D4F26B5AF1000993232 /* Watchnow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Watchnow.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -331,6 +333,7 @@
 			children = (
 				8AC339002752932D00834B46 /* Scale.swift */,
 				EE9595C2289EB49A0016EC25 /* WatchlistManager.swift */,
+				8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -477,6 +480,7 @@
 				EEDC84AC28ABE4DC00F3C171 /* PersonView.swift in Sources */,
 				EE4002AD284CDC5600374143 /* SImilarsView.swift in Sources */,
 				EE95CF3328BB84FD000E97B6 /* DetailsView.swift in Sources */,
+				8A57A8B02AED6EFC002B636A /* TipKitManager.swift in Sources */,
 				EE94209D28A9A59300577629 /* SeasonsDetailsTabView.swift in Sources */,
 				EE9595C9289ED46A0016EC25 /* GenericListView.swift in Sources */,
 				EE4002AF284CEA8400374143 /* ResultReviewsResponse.swift in Sources */,

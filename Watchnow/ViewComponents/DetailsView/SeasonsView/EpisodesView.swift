@@ -49,6 +49,8 @@ struct EpisodeView: View {
         .padding()
         .cornerRadius(10)
         .foregroundColor(.gray)
+        
+        Divider()
     }
 }
 

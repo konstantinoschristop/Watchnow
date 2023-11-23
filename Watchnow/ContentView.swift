@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PartialSheet
+import TipKit
 
 struct ContentView: View {
     
@@ -58,6 +59,16 @@ struct ContentView: View {
             .attachPartialSheetToRoot()
             .tabItem {
                 Label("Watchlist", systemImage: "list.bullet.circle.fill")
+            }
+        }
+        .task {
+            if #available(iOS 17.0, *) {
+                try? Tips.configure([
+                    .displayFrequency(.immediate),
+                    .datastoreLocation(.applicationDefault)
+                ])
+            } else {
+                // Fallback on earlier versions
             }
         }
     }

@@ -30,7 +30,7 @@ struct BottomCard: View {
                     ContentDetailsView(detailsViewModel: vm)
                 } label: {
                     VStack {
-                        KFImage.url(URL(string: APIKeys().imageKey + (content.poster_path ?? "")))
+                        KFImage.url(content.getPosterURL())
                             .downsampling(size: CGSize.init(width: 350, height: 650))
                             .loadImmediately()
                             .loadDiskFileSynchronously()

@@ -60,6 +60,18 @@ struct Result: Codable, Hashable, Equatable {
         return URL(string: APIKeys().imageKey + posterURL)!
     }
     
+    func getPosterURL() -> URL {
+        
+        let posterURL = poster_path ?? ""
+        return URL(string: APIKeys().imageKey + posterURL)!
+    }
+    
+    func getBackdropURL() -> URL {
+        
+        let posterURL = backdrop_path ?? ""
+        return URL(string: APIKeys().imageKey + posterURL)!
+    }
+    
     func getMediaType() -> String {
         if media_type == "movie" {
             return "Movie"

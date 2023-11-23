@@ -27,7 +27,7 @@ struct MoviesView: View {
                                          showNavBar: $showNavBar)
                     }
                 }
-                LazyVStack {
+                VStack {
                     if let upcomingMovies = moviesViewModel.getUpcomingMovieResults() {
                         TopView(results: upcomingMovies,
                                 viewTitle: "Upcoming Movies",
@@ -133,7 +133,10 @@ extension MoviesView {
                         }
                     }
                     .font(.custom("AvenirNext-Regular", size: 18))
+                    
+                    Spacer()
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundColor(.white)
                 .shadow(color: .black, radius: 3)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)

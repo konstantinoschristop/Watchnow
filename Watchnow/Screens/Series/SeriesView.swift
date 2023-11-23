@@ -28,7 +28,7 @@ struct SeriesView: View {
                     }
                 }
                 
-                LazyVStack {
+                VStack {
                     if let results = seriesViewModel.popularSeries?.results {
                         TopView(results: results,
                                 viewTitle: "Popular Series",
@@ -136,6 +136,7 @@ extension SeriesView {
                     }
                     .font(.custom("AvenirNext-Regular", size: 18))
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundColor(.white)
                 .shadow(color: .black, radius: 3)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)

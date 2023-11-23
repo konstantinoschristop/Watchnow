@@ -30,12 +30,12 @@ struct SearchView: View {
         .toast(isPresenting: $searchVM.showRemovedAlert, alert: {
             AlertToast(displayMode: .banner(.slide), type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
-        .refreshable {
-            if searchInput != "" {
-                await searchVM.getResults(search: searchInput)
-                self.hideKeyboard()
-            }
-        }
+//        .refreshable {
+//            if searchInput != "" {
+//                await searchVM.getResults(search: searchInput)
+//                self.hideKeyboard()
+//            }
+//        }
         .searchable(text: $searchInput)
         .onChange(of: searchInput) { newValue in
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
@@ -59,16 +59,15 @@ extension SearchView {
     
     @ViewBuilder
     var pickerView: some View {
-        Picker(selection: $searchVM.selectedChooser) {
-            Text(SearchModel.SearchChooserOptions.all.getTitle()).tag(SearchModel.SearchChooserOptions.all)
-            Text(SearchModel.SearchChooserOptions.movies.getTitle()).tag(SearchModel.SearchChooserOptions.movies)
-            Text(SearchModel.SearchChooserOptions.series.getTitle()).tag(SearchModel.SearchChooserOptions.series)
-            Text(SearchModel.SearchChooserOptions.actors.getTitle()).tag(SearchModel.SearchChooserOptions.actors)
-        } label: {}
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.init(top: 10, leading: 25, bottom: 10, trailing: 25))
-            .listRowSeparatorTint(.clear)
-            .listRowBackground(Color(.systemGray6))
+        let options = SearchModel.SearchChooserOptions.allCases
+        Picker("", selection: $searchVM.selectedChooser) {
+            ForEach(options, id:\.hashValue) { option in
+                Text(option.getTitle())
+                    .tag(option)
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .padding(.horizontal)
     }
     
     @ViewBuilder
@@ -107,7 +106,6 @@ extension SearchView {
             if results.isEmpty == false {
                 let filtered = searchVM.getFilteredArray()
                 List {
-                    pickerView
                     if filtered.isEmpty {
                         Text("No results found for this filter.")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -122,6 +120,11 @@ extension SearchView {
                     }
                 }
                 .listStyle(.plain)
+                .toolbar {
+                    ToolbarItem(placement: .status) {
+                        pickerView
+                    }
+                }
             } else {
                 Text("No results found. Try searching again with a different keyword.")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -45,8 +45,6 @@ struct SeasonsView: View {
                         .buttonStyle(PlainButtonStyle())
                     }
                 }
-                .padding(.top, seasons.count > 2 ? 35 : 5)
-                .padding(.bottom, seasons.count > 2 ? 35 : 5)
             }
             .padding([.leading, .trailing], 10)
         }

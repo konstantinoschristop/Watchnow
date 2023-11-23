@@ -32,7 +32,7 @@ struct TopCard: View {
                     ContentDetailsView(detailsViewModel: vm)
                 } label: {
                     VStack {
-                        KFImage.url(URL(string: APIKeys().imageKey + (content.backdrop_path ?? "")))
+                        KFImage.url(content.getBackdropURL())
                             .downsampling(size: CGSize.init(width: 650, height: 350))
                             .loadImmediately()
                             .loadDiskFileSynchronously()

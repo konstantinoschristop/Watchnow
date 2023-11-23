@@ -9,11 +9,12 @@ import SwiftUI
 import Kingfisher
 import AlertToast
 import PartialSheet
+import TipKit
 
 struct ContentDetailsView: View {
     
     @StateObject var detailsViewModel: ContentDetailsViewModel
-    @Environment(\.presentationMode) var presentation
+    @Environment(\.dismiss) var dismiss
     @State var showNavBar: Bool = false
     @State var videoPresented = false
     @State private var showAlert = false
@@ -78,7 +79,14 @@ extension ContentDetailsView {
                 if let availableGenres = detailsViewModel.details?.genres,
                    availableGenres.isEmpty == false {
                     
-                    GenresView(genres: availableGenres)
+                    
+                    if #available(iOS 17.0, *) {
+                        GenresView(genres: availableGenres)
+                            .popoverTip(MyTip(), arrowEdge: .top)
+                    } else {
+                        // Fallback on earlier versions
+                        GenresView(genres: availableGenres)
+                    }
                 }
     
                 //DetailsView
@@ -283,7 +291,7 @@ extension ContentDetailsView {
     var navBarLeadingView: some View {
         
         getNavBarButton(imageName: "arrow.backward.circle.fill") {
-            self.presentation.wrappedValue.dismiss()
+            self.dismiss()
         }
     }
     
@@ -347,9 +355,8 @@ extension UINavigationController: UIGestureRecognizerDelegate {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = nil
     }
-
+    
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         return viewControllers.count > 1
     }
 }
-
