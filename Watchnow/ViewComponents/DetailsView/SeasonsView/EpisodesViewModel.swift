@@ -23,9 +23,7 @@ class EpisodesViewModel: ObservableObject {
     }
     
     func getEpisodes(seasonNumber: Int) async {
-        
-        self.resetEpisodes()
-        
+                
         do {
             self.episodes = try await service.fetchEpisodes(seriesID: self.seriesID, seasonNumber: seasonNumber)
         } catch {

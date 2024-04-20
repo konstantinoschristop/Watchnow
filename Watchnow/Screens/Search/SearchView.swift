@@ -125,6 +125,7 @@ extension SearchView {
                         pickerView
                     }
                 }
+                .scrollDismissesKeyboard(.interactively)
             } else {
                 Text("No results found. Try searching again with a different keyword.")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

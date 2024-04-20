@@ -12,6 +12,8 @@ class ContentDetailsViewModel: ObservableObject {
     
     @Published private var model: ContentDetailsModel
     @Published var apiError: Bool = false
+    @Published var selectedSeason: Season = Season()
+    
     private let service: ServiceInvocation
     
     init(model: ContentDetailsModel,
@@ -70,6 +72,9 @@ class ContentDetailsViewModel: ObservableObject {
        
         do {
             self.details = try await service.fetchDetails(screenType: screenType, id: id)
+            if let season = details?.seasons?.first {
+                self.selectedSeason = season
+            }
         } catch {
             apiError = true
         }

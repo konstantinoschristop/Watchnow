@@ -8,20 +8,34 @@
 import SwiftUI
 
 struct SeasonsView: View {
-    
+
     var seasons: [Season]
     var navBarTitle: String
     var seriesID: Int
     @State var isSeasonsSheetPresented = false
-    @State var selectedIndex: Int = 0
+    @State var selectedSeason: Season
+    
+    init(seasons: [Season],
+         navBarTitle: String,
+         seriesID: Int) {
+        
+        self.seasons = seasons
+        self.navBarTitle = navBarTitle
+        self.seriesID = seriesID
+        self.selectedSeason = seasons.first ?? .init()
+    }
     
     func calculateRowsForSeasons() -> [GridItem] {
         
         switch seasons.count {
-        case 1, 2:
+        case 1...2:
             return [GridItem(.flexible(), alignment: .leading)]
+        case 3...10:
+            return [GridItem(.flexible(), alignment: .leading),
+                    GridItem(.flexible(), alignment: .leading)]
         default:
             return [GridItem(.flexible(), alignment: .leading),
+                    GridItem(.flexible(), alignment: .leading),
                     GridItem(.flexible(), alignment: .leading)]
         }
     }
@@ -30,17 +44,15 @@ struct SeasonsView: View {
         
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: calculateRowsForSeasons(), spacing: 10) {
-                ForEach(seasons.indices, id: \.self) { index in
+                ForEach(seasons, id: \.self) { season in
                     
-                    if let name = seasons[index].name,
-                       let episodes = seasons[index].episode_count,
-                       let date = seasons[index].getAirDate() {
+                    if let name = season.name {
                         
                         Button {
-                            selectedIndex = index
+                            selectedSeason = season
                             isSeasonsSheetPresented.toggle()
                         } label: {
-                            constructSeason(seasons[index], name, date, episodes)
+                            constructSeason(season)
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -49,18 +61,14 @@ struct SeasonsView: View {
             .padding([.leading, .trailing], 10)
         }
         .sheet(isPresented: $isSeasonsSheetPresented) {
-            SeasonsDetailsTabView(index: $selectedIndex,
-                                  seasons: seasons,
-                                  navBarTitle: navBarTitle,
+            SeasonsDetailsTabView(seasons: seasons,
+                                  selectedSeason: $selectedSeason,
                                   seriesID: seriesID)
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
         }
     }
     
-    func constructSeason(_ season: Season,
-                         _ name: String,
-                         _ date: String,
-                         _ episodes: Int) -> some View {
+    func constructSeason(_ season: Season) -> some View {
         return HStack() {
             if let imageURL = season.poster_path {
                 
@@ -73,18 +81,25 @@ struct SeasonsView: View {
                                       showShadow: false)
                 
                 .aspectRatio(contentMode: .fit)
+            } else {
+                RoundedRectangle(cornerRadius: 0)
+                    .frame(width: 30, height: 40, alignment: .center)
+                    .foregroundStyle(Color.gray)
             }
+            
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
-                    Text(name)
+                    Text(season.name ?? "")
                         .bold()
-                    Text(date)
+                    Text(season.getAirDate() ?? "")
                         .bold()
                 }
                 .font(.system(size: 13))
                 
-                Text("Episodes: " + String(episodes))
-                    .font(.system(size: 11))
+                if let episodes = season.episode_count {
+                    Text("Episodes: " + String(episodes))
+                        .font(.system(size: 11))
+                }
             }
         }
         .padding([.top, .bottom], 10)

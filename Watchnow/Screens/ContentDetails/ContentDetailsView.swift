@@ -20,7 +20,6 @@ struct ContentDetailsView: View {
     @State private var showAlert = false
     @State var isSheetPresented = false
     @State var isSeasonsSheetPresented = false
-    @State var allSeasonsIndex: Int = 0
   
     var body: some View {
         
@@ -78,15 +77,7 @@ extension ContentDetailsView {
                 // scroll categories
                 if let availableGenres = detailsViewModel.details?.genres,
                    availableGenres.isEmpty == false {
-                    
-                    
-                    if #available(iOS 17.0, *) {
-                        GenresView(genres: availableGenres)
-                            .popoverTip(MyTip(), arrowEdge: .top)
-                    } else {
-                        // Fallback on earlier versions
-                        GenresView(genres: availableGenres)
-                    }
+                    GenresView(genres: availableGenres)
                 }
     
                 //DetailsView
@@ -125,11 +116,10 @@ extension ContentDetailsView {
                         .padding(.all, 10)
                         SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
                             .sheet(isPresented: $isSeasonsSheetPresented) {
-                                SeasonsDetailsTabView(index: $allSeasonsIndex,
-                                                      seasons: seasons,
-                                                      navBarTitle: name,
+                                SeasonsDetailsTabView(seasons: seasons,
+                                                      selectedSeason: $detailsViewModel.selectedSeason,
                                                       seriesID: seriesID)
-                                .presentationDetents([.medium, .large])
+                                .presentationDetents([.large])
                             }
                     }
                 }

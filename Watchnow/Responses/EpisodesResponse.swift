@@ -10,6 +10,7 @@ import Foundation
 struct EpisodesResponse: Codable {
     
     var episodes: [Episode]?
+    var air_date: String?
 }
 
 struct Episode: Codable, Hashable {

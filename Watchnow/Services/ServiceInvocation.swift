@@ -7,6 +7,15 @@
 
 import Foundation
 
+enum ResponseDumper {
+    
+    static func printJSON(for url: URL?, and data: Data) {
+        print("------ RESPONSE ------")
+        print(String(describing: url))
+        print(String(data: data, encoding: .utf8) as Any)
+    }
+}
+
 class ServiceInvocation {
     
     let api = APIKeys()
@@ -16,7 +25,7 @@ class ServiceInvocation {
         let url = URL(string: api.baseURL + screenType.rawValue + "/" + id + "/" + api.credits)
         
         let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
+        let (data,response) = try await urlSession.data(from: url!)
         return try JSONDecoder().decode(ResultCreditsResponse.self, from: data)
     }
     
@@ -64,6 +73,7 @@ class ServiceInvocation {
         
         let urlSession = URLSession.shared
         let (data,_) = try await urlSession.data(from: url!)
+        // ResponseDumper.printJSON(for: url, and: data)
         let response = try JSONDecoder().decode(ResultDetailsReponse.self, from: data)
         return response
     }
@@ -73,7 +83,8 @@ class ServiceInvocation {
         let url = URL(string: api.baseURL + "tv/" + String(seriesID) + "/season/" + String(seasonNumber) + api.apikey)
         
         let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
+        let (data,response) = try await urlSession.data(from: url!)
+        ResponseDumper.printJSON(for: url, and: data)
         return try JSONDecoder().decode(EpisodesResponse.self, from: data)
     }
     
