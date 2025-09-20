@@ -26,6 +26,7 @@ struct ContentView: View {
                 watchlistTabContent
             }
         }
+        .minimizeTabBar()
         .task {
             try? Tips.configure([
                 .displayFrequency(.immediate),

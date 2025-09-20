@@ -142,7 +142,7 @@ struct WatchlistView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .status) {
+            ToolbarItem(placement: .principal) {
                 pickerView
             }
         }

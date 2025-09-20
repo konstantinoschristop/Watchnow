@@ -121,7 +121,7 @@ extension SearchView {
                 }
                 .listStyle(.plain)
                 .toolbar {
-                    ToolbarItem(placement: .status) {
+                    ToolbarItem(placement: .principal) {
                         pickerView
                     }
                 }
