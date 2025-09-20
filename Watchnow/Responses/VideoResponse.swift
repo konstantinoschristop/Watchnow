@@ -13,7 +13,7 @@ struct VideoResponse: Codable {
     func getVideoURL() -> URL? {
         
         if let key = results?.first(where: { $0.official == true && $0.type == "Trailer" })?.key {
-            return URL(string: APIKeys.youtubeBaseURL + key)
+            return URL(string: API.Common.youtubeUrl(videoId: key))
         }
         
         return nil

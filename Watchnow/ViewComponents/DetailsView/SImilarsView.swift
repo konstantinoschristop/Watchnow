@@ -26,7 +26,7 @@ struct SimilarsView: View {
                                 ContentDetailsView(detailsViewModel: vm)
                             } label: {
                                 VStack {
-                                        let url = APIKeys().imageKey + imageURL
+                                    let url = API.Common.imageUrl(imageId: imageURL)
                                         
                                         GenericImageView.init(url: url,
                                                               width: 130,

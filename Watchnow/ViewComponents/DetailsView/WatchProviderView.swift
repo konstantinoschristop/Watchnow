@@ -40,7 +40,7 @@ struct WatchProviderView: View {
         if let imageURL = content.logoPath,
            let name = content.providerName  {
             
-            let url = APIKeys().imageKey + imageURL
+            let url = API.Common.imageUrl(imageId: imageURL)
             
             VStack(alignment: .center) {
                 GenericImageView.init(url: url,

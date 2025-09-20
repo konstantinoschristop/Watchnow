@@ -29,7 +29,7 @@ struct CastView: View {
                     if let imageURL = cast.profile_path,
                        let personID = cast.id  {
                         
-                        let url = APIKeys().imageKey + imageURL
+                        let url = API.Common.imageUrl(imageId: imageURL)
                             
                         NavigationLink {
                             let vm = PersonViewModel(personID: personID)

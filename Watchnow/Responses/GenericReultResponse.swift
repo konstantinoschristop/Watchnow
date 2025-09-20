@@ -57,19 +57,19 @@ struct Result: Codable, Hashable, Equatable {
     func getResultPosterURL() -> URL {
         
         let posterURL = (poster_path ?? backdrop_path ?? profile_path) ?? ""
-        return URL(string: APIKeys().imageKey + posterURL)!
+        return URL(string: API.Common.imageUrl(imageId: posterURL))!
     }
     
     func getPosterURL() -> URL {
         
         let posterURL = poster_path ?? ""
-        return URL(string: APIKeys().imageKey + posterURL)!
+        return URL(string: API.Common.imageUrl(imageId: posterURL))!
     }
     
     func getBackdropURL() -> URL {
         
         let posterURL = backdrop_path ?? ""
-        return URL(string: APIKeys().imageKey + posterURL)!
+        return URL(string: API.Common.imageUrl(imageId: posterURL))!
     }
     
     func getMediaType() -> String {

@@ -21,6 +21,6 @@ struct PersonResponse: Codable {
     
     func getResultPosterURL() -> URL {
         
-        return URL(string: APIKeys().imageKey + (profile_path ?? ""))!
+        return URL(string: API.Common.imageUrl(imageId: profile_path ?? ""))!
     }
 }

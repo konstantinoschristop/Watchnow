@@ -72,7 +72,7 @@ struct SeasonsView: View {
         return HStack() {
             if let imageURL = season.poster_path {
                 
-                let url = APIKeys().imageKey + imageURL
+                let url = API.Common.imageUrl(imageId: imageURL)
                 
                 GenericImageView.init(url: url,
                                       width: 30,

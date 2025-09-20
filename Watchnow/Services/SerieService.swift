@@ -7,43 +7,21 @@
 
 import Foundation
 
-class SerieService {
-    
-    let api = APIKeys()
-    
+class SerieService: BaseNetworkService {
+
     func fetchPopularSeries(page: Int) async throws -> GenericReultResponse {
-        
-        let url = URL(string: api.popularSeries + page.description)
-        
-        let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(GenericReultResponse.self, from: data)
+        return try await request(urlString: API.TV.popular(page: page))
     }
-    
+
     func fetchAiringTodaySeries(page: Int) async throws -> GenericReultResponse {
-        
-        let url = URL(string: api.airingTodaySeries + page.description)
-        
-        let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(GenericReultResponse.self, from: data)
+        return try await request(urlString: API.TV.airingToday(page: page))
     }
-    
+
     func fetchTrendingSeries(page: Int) async throws -> GenericReultResponse {
-        
-        let url = URL(string: api.trendingSeries + page.description)
-        
-        let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(GenericReultResponse.self, from: data)
+        return try await request(urlString: API.TV.trending(page: page))
     }
-    
+
     func fetchLatestSeries(page: Int) async throws -> GenericReultResponse {
-        
-        let url = URL(string: api.topRatedSeries + page.description)
-        
-        let urlSession = URLSession.shared
-        let (data,_) = try await urlSession.data(from: url!)
-        return try JSONDecoder().decode(GenericReultResponse.self, from: data)
+        return try await request(urlString: API.TV.topRated(page: page))
     }
 }

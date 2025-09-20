@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8A036A7426BBC8C100A3D0FF /* TopCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A036A7326BBC8C100A3D0FF /* TopCard.swift */; };
 		8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 8A036A7726BBE23700A3D0FF /* Kingfisher */; };
+		8A19B1AA2E7EEE820083A094 /* BaseNetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1A92E7EEE820083A094 /* BaseNetworkService.swift */; };
 		8A546AB52ADBE8C3007615BF /* ScrollKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8A546AB42ADBE8C3007615BF /* ScrollKit */; };
 		8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */; };
 		8A57A8B02AED6EFC002B636A /* TipKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */; };
@@ -80,6 +81,7 @@
 
 /* Begin PBXFileReference section */
 		8A036A7326BBC8C100A3D0FF /* TopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCard.swift; sourceTree = "<group>"; };
+		8A19B1A92E7EEE820083A094 /* BaseNetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseNetworkService.swift; sourceTree = "<group>"; };
 		8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsModel.swift; sourceTree = "<group>"; };
 		8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipKitManager.swift; sourceTree = "<group>"; };
 		8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsView.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 		8A981D6A26B68D8800993232 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				8A19B1A92E7EEE820083A094 /* BaseNetworkService.swift */,
 				8A981D7226B6920700993232 /* APIKeys.swift */,
 				8AC338FB2752800D00834B46 /* MovieService.swift */,
 				8AB84B8C275693810016D82E /* SerieService.swift */,
@@ -458,6 +461,7 @@
 				EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */,
 				EE9595C3289EB49B0016EC25 /* WatchlistManager.swift in Sources */,
 				8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */,
+				8A19B1AA2E7EEE820083A094 /* BaseNetworkService.swift in Sources */,
 				EE2732F3287B259E00B066C7 /* GenresResponse.swift in Sources */,
 				EEF45B202A48C4CA00D3460E /* AdBannerView.swift in Sources */,
 				EEDC84A828AAC40300F3C171 /* EpisodesViewModel.swift in Sources */,
