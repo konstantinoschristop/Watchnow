@@ -6,10 +6,9 @@
 //
 
 import SwiftUI
-import Kingfisher
 
+// MARK: - TopCard Component
 struct TopCard: View {
-    
     var content: Result
     var screenType: ScreenTypes
     @State var isPresented = false
@@ -17,13 +16,11 @@ struct TopCard: View {
     @State var isContextMenuSheetVisible = false
     
     init(content: Result, screenType: ScreenTypes) {
-        
         self.screenType = screenType
         self.content = content
     }
     
     var body: some View {
-        
         ZStack {
             VStack(alignment: .leading) {
                 NavigationLink {
@@ -32,39 +29,13 @@ struct TopCard: View {
                     ContentDetailsView(detailsViewModel: vm)
                 } label: {
                     VStack {
-                        KFImage.url(content.getBackdropURL())
-                            .downsampling(size: CGSize.init(width: 650, height: 350))
-                            .loadImmediately()
-                            .loadDiskFileSynchronously()
-                            .fromMemoryCacheOrRefresh()
-                            .cacheOriginalImage()
-                            .fade(duration: 0.25)
-                            .onProgress { receivedSize, totalSize in  }
-                            .onSuccess { result in  }
-                            .onFailure { error in }
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .cornerRadius(15)
-                            .shadow(color: .black, radius: 5)
-                        Text(content.getResultTitle())
-                            .font(.system(size: 16, weight: .heavy))
-                            .foregroundColor(Color(.systemBackground))
-                            .colorInvert()
+                        BackdropImage(url: content.getBackdropURL())
+                        TitleText(title: content.getResultTitle())
                     }
                 }
             }
             
-            HStack {
-                (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", content.vote_average ?? "-"))
-                    .foregroundColor(.gray))
-                    .font(.system(size: 14, weight: .regular))
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 9)
-                    .background(Color(.systemGray5))
-                    .foregroundColor(.orange)
-                    .cornerRadius(10)
-                    .offset(x: 120 , y: -100)
-            }
+            RatingView(rating: content.vote_average, cardType: .top)
         }
     }
 }

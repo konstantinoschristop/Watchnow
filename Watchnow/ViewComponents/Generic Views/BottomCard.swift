@@ -8,20 +8,18 @@
 import SwiftUI
 import Kingfisher
 
+// MARK: - BottomCard Component
 struct BottomCard: View {
-    
     var content: Result
     var screenType: ScreenTypes
     @Environment(\.colorScheme) var colorScheme
     
     init(content: Result, screenType: ScreenTypes) {
-        
         self.screenType = screenType
         self.content = content
     }
     
     var body: some View {
-        
         ZStack {
             VStack(alignment: .center) {
                 NavigationLink {
@@ -30,42 +28,13 @@ struct BottomCard: View {
                     ContentDetailsView(detailsViewModel: vm)
                 } label: {
                     VStack {
-                        KFImage.url(content.getPosterURL())
-                            .downsampling(size: CGSize.init(width: 350, height: 650))
-                            .loadImmediately()
-                            .loadDiskFileSynchronously()
-                            .fromMemoryCacheOrRefresh()
-                            .cacheOriginalImage()
-                            .fade(duration: 0.25)
-                            .onProgress { receivedSize, totalSize in }
-                            .onSuccess { result in  }
-                            .onFailure { error in }
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .cornerRadius(15)
-                            .shadow(color: .black, radius: 5)
-                        
-                        Text(content.getResultTitle())
-                            .font(.system(size: 16, weight: .heavy))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(Color(.systemBackground))
-                            .colorInvert()
+                        PosterImage(url: content.getPosterURL())
+                        TitleText(title: content.getResultTitle())
                     }
                 }
             }
             
-            HStack {
-                (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", content.vote_average ?? "-"))
-                    .foregroundColor(.gray))
-                    .font(.system(size: 14, weight: .regular))
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 9)
-                    .background(Color(.systemGray5))
-                    .foregroundColor(.orange)
-                    .cornerRadius(10)
-                    .offset(x: 60 , y: -150)
-            }
+            RatingView(rating: content.vote_average, cardType: .bottom)
         }
     }
 }
-
