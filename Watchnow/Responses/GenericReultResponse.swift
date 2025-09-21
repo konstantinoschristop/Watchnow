@@ -19,9 +19,13 @@ enum ViewSections {
     case latestSeries
 }
 
-struct GenericReultResponse: Codable {
+struct GenericReultResponse: Codable, Equatable {
     var results: [Result]
     var total_pages: Int?
+    
+    static func == (lhs: GenericReultResponse, rhs: GenericReultResponse) -> Bool {
+        return lhs.results == rhs.results
+    }
 }
 
 // MARK: - Result

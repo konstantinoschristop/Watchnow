@@ -17,14 +17,10 @@ struct LoadMoreButtonView: View {
     var body: some View {
         Group {
             if results.last == movie, viewModel.canLoadMoreContent(section: viewSection) {
-                Button {
-                    viewModel.loadMoreContent(section: viewSection)
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .imageScale(.large)
-                }
-                .padding()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Image(systemName: "chevron.left.chevron.left.dotted")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }
