@@ -19,6 +19,13 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
         
         self.model = model
         self.service = service
+        
+        Task {
+            await getTrendingSeries(page: trendingSeriesCurrentPage)
+            await getPopularSeries(page: popularSeriesCurrentPage)
+            await getLatestSeries(page: latestSeriesCurrentPage)
+            await getAiringTodaySeries(page: airingTodaySeriesCurrentPage)
+        }
     }
     
     func loadMoreContent(section: ViewSections) {

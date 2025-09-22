@@ -71,12 +71,6 @@ struct SeriesView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarHidden(!showNavBar)
         }
-        .task {
-            await seriesViewModel.getTrendingSeries(page: seriesViewModel.trendingSeriesCurrentPage)
-            await seriesViewModel.getPopularSeries(page: seriesViewModel.popularSeriesCurrentPage)
-            await seriesViewModel.getLatestSeries(page: seriesViewModel.latestSeriesCurrentPage)
-            await seriesViewModel.getAiringTodaySeries(page: seriesViewModel.airingTodaySeriesCurrentPage)
-        }
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {
                 await seriesViewModel.getPopularSeries(page: newValue)

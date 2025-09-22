@@ -69,12 +69,6 @@ struct MoviesView: View {
         .navigationTitle("Movies")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(!showNavBar)
-        .task {
-            await moviesViewModel.getUpcomingMovies(page: moviesViewModel.upcomingMoviesCurrentPage)
-            await moviesViewModel.getPopularMovies(page: moviesViewModel.popularMoviesCurrentPage)
-            await moviesViewModel.getTrendingMovies(page: moviesViewModel.trendingMoviesCurrentPage)
-            await moviesViewModel.getLatestMovies(page: moviesViewModel.latestMoviesCurrentPage)
-        }
         .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getUpcomingMovies(page: newValue)

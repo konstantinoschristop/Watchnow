@@ -11,14 +11,17 @@ struct StretchingActionScrollView<Content: View>: UIViewRepresentable {
 
     var threshold: CGFloat
     var onTriggered: () -> Void
+    var onThresholdReached: ((Bool) -> Void)?
     var content: Content
 
-    init(threshold: CGFloat = 110,
+    init(threshold: CGFloat = 100,
          onTriggered: @escaping () -> Void,
+         onThresholdReached: ((Bool) -> Void)?,
          @ViewBuilder content: () -> Content) {
         
         self.threshold = threshold
         self.onTriggered = onTriggered
+        self.onThresholdReached = onThresholdReached
         self.content = content()
     }
 
@@ -41,14 +44,20 @@ struct StretchingActionScrollView<Content: View>: UIViewRepresentable {
     }
     
     private func setupHostingView(_ uiView: UIScrollView, context: Context) {
-        
+        // 🔥 remove any old hosted views first
+        uiView.subviews.forEach { $0.removeFromSuperview() }
+
+        // create fresh hosting controller
         let hosting = UIHostingController(rootView: content)
         hosting.view.backgroundColor = .clear
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
-        
+
+        // keep reference
         context.coordinator.hostingController = hosting
+
+        // add hosted SwiftUI view
         uiView.addSubview(hosting.view)
-        
+
         NSLayoutConstraint.activate([
             hosting.view.leadingAnchor.constraint(equalTo: uiView.contentLayoutGuide.leadingAnchor),
             hosting.view.trailingAnchor.constraint(equalTo: uiView.contentLayoutGuide.trailingAnchor),
@@ -57,31 +66,55 @@ struct StretchingActionScrollView<Content: View>: UIViewRepresentable {
             hosting.view.heightAnchor.constraint(equalTo: uiView.frameLayoutGuide.heightAnchor)
         ])
     }
-
+    
     class Coordinator: NSObject, UIScrollViewDelegate {
+        
         var parent: StretchingActionScrollView
         weak var hostingController: UIHostingController<Content>?
-        private var alreadyTriggered = false
-
-        init(parent: StretchingActionScrollView) {
-            self.parent = parent
+        var didTrigger = false
+        var didTriggerHaptic: Bool = false {
+            didSet {
+                parent.onThresholdReached?(didTriggerHaptic)
+            }
         }
-
+        var overscroll : CGFloat = 0
+        
+        init(parent: StretchingActionScrollView) { self.parent = parent }
+        
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             let maxOffset = max(0, scrollView.contentSize.width - scrollView.bounds.width)
             let overs = max(0, scrollView.contentOffset.x - maxOffset)
-
+            self.overscroll = overs
+            
             DispatchQueue.main.async {
-
-                if overs > self.parent.threshold && !self.alreadyTriggered {
+                
+                if overs > self.parent.threshold,
+                   !self.didTriggerHaptic {
+                    UIImpactFeedbackGenerator().impactOccurred()
+                    self.didTriggerHaptic = true
+                    self.parent.onThresholdReached?(true)
+                } else if overs < self.parent.threshold / 1.5 {
+                    self.didTriggerHaptic = false
+                }
+            }
+        }
         
-                    self.alreadyTriggered = true
-                    self.parent.onTriggered()
-                }
-
-                if overs == 0 {
-                    self.alreadyTriggered = false
-                }
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            // only trigger after release if overscroll exceeded threshold
+            if overscroll >= parent.threshold && !didTrigger {
+                didTrigger = true
+                parent.onTriggered()
+            } else if overscroll <= 0 {
+                didTrigger = false
+                didTriggerHaptic = false
+            }
+        }
+        
+        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+            // reset if user scrolls back
+            if overscroll <= 0 {
+                didTrigger = false
+                didTriggerHaptic = false
             }
         }
     }
