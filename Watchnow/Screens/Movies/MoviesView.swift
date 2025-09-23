@@ -28,36 +28,37 @@ struct MoviesView: View {
                     }
                 }
                 VStack {
-                    if let upcomingMovies = moviesViewModel.getUpcomingMovieResults() {
-                        TopView(results: upcomingMovies,
-                                viewTitle: "Upcoming Movies",
+                    
+                    if let results = moviesViewModel.getTrendingMovieResults() {
+                        TopView(results: results,
+                                viewTitle: "🔥 Hot Right Now",
                                 screenType: .movie,
                                 viewModel: moviesViewModel,
-                                viewSection: .upcomingMovies)
+                                viewSection: .trendingMovies)
+                    }
+                    
+                    if let results = moviesViewModel.getLatestMovieResults() {
+                        BottomView(results: results,
+                                   viewTitle: "🎟️ In Theaters Now",
+                                   screenType: .movie,
+                                   viewModel: moviesViewModel,
+                                   viewSection: .latestMovies)
                     }
                     
                     if let results = moviesViewModel.getPopularMovieResults() {
                         BottomView(results: results,
-                                   viewTitle: "Popular Movies",
+                                   viewTitle: "Most Watched",
                                    screenType: .movie,
                                    viewModel: moviesViewModel,
                                    viewSection: .popularMovies)
                     }
                     
-                    if let results = moviesViewModel.getTrendingMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "Trending Today",
+                    if let upcomingMovies = moviesViewModel.getUpcomingMovieResults() {
+                        BottomView(results: upcomingMovies,
+                                   viewTitle: "Coming Soon",
                                    screenType: .movie,
                                    viewModel: moviesViewModel,
-                                   viewSection: .trendingMovies)
-                    }
-                    
-                    if let results = moviesViewModel.getLatestMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "Now Playing Movies",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .latestMovies)
+                                   viewSection: .upcomingMovies)
                     }
                 }
                 //                        AdBannerView()
@@ -110,7 +111,7 @@ extension MoviesView {
                     .opacity(0.5)
                 
                 VStack(alignment: .center, spacing: 3) {
-                    Text("Featured Now")
+                    Text("Spotlight")
                         .font(.custom("AvenirNext-Regular", size: 20))
                     
                     Text(content.getResultTitle())

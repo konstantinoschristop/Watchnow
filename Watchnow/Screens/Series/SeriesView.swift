@@ -29,36 +29,38 @@ struct SeriesView: View {
                 }
                 
                 VStack {
-                    if let results = seriesViewModel.popularSeries?.results {
-                        TopView(results: results,
-                                viewTitle: "Popular Series",
-                                screenType: .tv,
-                                viewModel: seriesViewModel,
-                                viewSection: .popularSeries)
-                    }
                     
                     if let results =  seriesViewModel.trendingSeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Trending Today",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .trendingSeries)
-                    }
-                    
-                    if let results = seriesViewModel.latestSeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Top Rated Series",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .latestSeries)
+                        TopView(results: results,
+                                viewTitle: "🔥 Binge-Worthy Today",
+                                screenType: .tv,
+                                viewModel: seriesViewModel,
+                                viewSection: .trendingSeries)
                     }
                     
                     if let results = seriesViewModel.airingTodaySeries?.results {
                         BottomView(results: results,
-                                   viewTitle: "On Air Today",
+                                   viewTitle: "Fresh Episodes",
                                    screenType: .tv,
                                    viewModel: seriesViewModel,
                                    viewSection: .airingTodaySeries)
+                    }
+                    
+                    if let results = seriesViewModel.popularSeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "Most Watched",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .popularSeries)
+                    }
+                    
+                    
+                    if let results = seriesViewModel.latestSeries?.results {
+                        BottomView(results: results,
+                                   viewTitle: "Critics' Choice",
+                                   screenType: .tv,
+                                   viewModel: seriesViewModel,
+                                   viewSection: .latestSeries)
                     }
                 }
                 
@@ -112,7 +114,7 @@ extension SeriesView {
                     .opacity(0.5)
                 
                 VStack(alignment: .center, spacing: 3) {
-                    Text("Featured Now")
+                    Text("Spotlight")
                         .font(.custom("AvenirNext-Regular", size: 20))
                     
                     Text(content.getResultTitle())
