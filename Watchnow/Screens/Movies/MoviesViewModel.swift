@@ -28,10 +28,10 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
         self.service = service
         
         Task {
-            await getUpcomingMovies(page: upcomingMoviesCurrentPage)
-            await getPopularMovies(page: popularMoviesCurrentPage)
             await getTrendingMovies(page: trendingMoviesCurrentPage)
             await getLatestMovies(page: latestMoviesCurrentPage)
+            await getPopularMovies(page: popularMoviesCurrentPage)
+            await getUpcomingMovies(page: upcomingMoviesCurrentPage)
         }
     }
     

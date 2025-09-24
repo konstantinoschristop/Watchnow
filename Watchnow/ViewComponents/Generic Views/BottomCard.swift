@@ -13,6 +13,7 @@ struct BottomCard: View {
     var content: Result
     var screenType: ScreenTypes
     @Environment(\.colorScheme) var colorScheme
+    @Namespace private var namespace
     
     init(content: Result, screenType: ScreenTypes) {
         self.screenType = screenType
@@ -26,6 +27,7 @@ struct BottomCard: View {
                     let model = ContentDetailsModel(screenType: screenType, result: content)
                     let vm = ContentDetailsViewModel(model: model)
                     ContentDetailsView(detailsViewModel: vm)
+                        .navigationTransition(.zoom(sourceID: "", in: namespace))
                 } label: {
                     VStack {
                         PosterImage(url: content.getPosterURL())

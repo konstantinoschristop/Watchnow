@@ -22,9 +22,9 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
         
         Task {
             await getTrendingSeries(page: trendingSeriesCurrentPage)
+            await getAiringTodaySeries(page: airingTodaySeriesCurrentPage)
             await getPopularSeries(page: popularSeriesCurrentPage)
             await getLatestSeries(page: latestSeriesCurrentPage)
-            await getAiringTodaySeries(page: airingTodaySeriesCurrentPage)
         }
     }
     

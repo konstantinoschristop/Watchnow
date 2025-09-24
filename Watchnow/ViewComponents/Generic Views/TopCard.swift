@@ -14,6 +14,7 @@ struct TopCard: View {
     @State var isPresented = false
     @Environment(\.colorScheme) var colorScheme
     @State var isContextMenuSheetVisible = false
+    @Namespace private var namespace
     
     init(content: Result, screenType: ScreenTypes) {
         self.screenType = screenType
@@ -27,6 +28,7 @@ struct TopCard: View {
                     let model = ContentDetailsModel(screenType: screenType, result: content)
                     let vm = ContentDetailsViewModel(model: model)
                     ContentDetailsView(detailsViewModel: vm)
+                        .navigationTransition(.zoom(sourceID: "", in: namespace))
                 } label: {
                     VStack {
                         BackdropImage(url: content.getBackdropURL())

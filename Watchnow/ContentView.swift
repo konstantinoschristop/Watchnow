@@ -44,6 +44,7 @@ extension ContentView {
             let vm = MoviesViewModel(model: model)
             MoviesView(moviesViewModel: vm)
                 .background(Color(.systemGray6))
+                .navigationBarTitle("Movies")
         }
         .attachPartialSheetToRoot()
     }
@@ -54,6 +55,7 @@ extension ContentView {
             let vm = SeriesViewModel(model: model)
             SeriesView(seriesViewModel: vm)
                 .background(Color(.systemGray6))
+                .navigationBarTitle("Series")
         }
         .attachPartialSheetToRoot()
     }

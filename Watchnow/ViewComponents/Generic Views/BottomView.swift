@@ -17,11 +17,15 @@ struct BottomView: View {
     var viewSection: ViewSections
     
     var body: some View {
-        VStack(spacing: 0) {
-            SectionHeaderView(title: viewTitle)
-            
-            ScrollableContentView(results: results, screenType: screenType, viewModel: viewModel, viewSection: viewSection, cardType: .bottom)
+        Section {
+            ScrollableContentView(results: results,
+                                  screenType: screenType,
+                                  viewModel: viewModel,
+                                  viewSection: viewSection,
+                                  cardType: .bottom)
+        } header: {
+            SectionHeaderView(title: viewTitle).textCase(.none)
         }
-        .background(LinearGradient(colors: [.clear, Color(.systemGray5).opacity(0.6)], startPoint: .center, endPoint: .bottom))
+       // .background(LinearGradient(colors: [.clear, Color(.systemGray5).opacity(0.6)], startPoint: .center, endPoint: .bottom))
     }
 }

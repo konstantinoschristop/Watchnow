@@ -12,6 +12,7 @@ struct SimilarsView: View {
     
     let content: [Result]
     let screenType: ScreenTypes
+    var namespace: Namespace.ID
     
     var body: some View {
         
@@ -24,6 +25,7 @@ struct SimilarsView: View {
                                 let model = ContentDetailsModel(screenType: screenType, result: content)
                                 let vm = ContentDetailsViewModel(model: model)
                                 ContentDetailsView(detailsViewModel: vm)
+                                    .navigationTransition(.zoom(sourceID: content.id, in: namespace))
                             } label: {
                                 VStack {
                                     let url = API.Common.imageUrl(imageId: imageURL)

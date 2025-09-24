@@ -12,6 +12,7 @@ struct GenericListView: View {
     
     var results: [Result]
     @State var viewModel: BaseSwipeActionsProtocol
+    var namespace: Namespace.ID
     
     var body: some View {
         
@@ -28,6 +29,7 @@ struct GenericListView: View {
                     let model = ContentDetailsModel(screenType: screenType, result: result)
                     let vm = ContentDetailsViewModel(model: model)
                     ContentDetailsView(detailsViewModel: vm)
+                        .navigationTransition(.zoom(sourceID: result.id, in: namespace))
                 }
             }
             label: {

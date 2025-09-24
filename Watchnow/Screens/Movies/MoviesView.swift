@@ -10,59 +10,56 @@ import SwiftUI
 struct MoviesView: View {
     
     @StateObject var moviesViewModel: MoviesViewModel
+    @Namespace private var namespace
     
     var body: some View {
         
-        Group {
-            ScrollView(showsIndicators: false) {
+        ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 0) {
                 if let featuredMovie = moviesViewModel.featuredMovie {
                     NavigationLink {
                         let model = ContentDetailsModel(screenType: .movie, result: featuredMovie)
                         let vm = ContentDetailsViewModel(model: model)
                         ContentDetailsView(detailsViewModel: vm)
+                            .navigationTransition(.zoom(sourceID: "zoom", in: namespace))
                     } label: {
                         MenuFeaturedView(imageURL: featuredMovie.getResultPosterURL(),
                                          overlayContent: overlayContent(for: featuredMovie),
                                          showNavBar: .constant(true))
                     }
                 }
-                LazyVStack {
-                    
-                    if let results = moviesViewModel.getTrendingMovieResults() {
-                        TopView(results: results,
-                                viewTitle: "🔥 Hot Right Now",
-                                screenType: .movie,
-                                viewModel: moviesViewModel,
-                                viewSection: .trendingMovies)
-                    }
-                    
-                    if let results = moviesViewModel.getLatestMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "🎟️ In Theaters Now",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .latestMovies)
-                    }
-                    
-                    if let results = moviesViewModel.getPopularMovieResults() {
-                        BottomView(results: results,
-                                   viewTitle: "Most Watched",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .popularMovies)
-                    }
-                    
-                    if let upcomingMovies = moviesViewModel.getUpcomingMovieResults() {
-                        BottomView(results: upcomingMovies,
-                                   viewTitle: "Coming Soon",
-                                   screenType: .movie,
-                                   viewModel: moviesViewModel,
-                                   viewSection: .upcomingMovies)
-                    }
+                
+                if let results = moviesViewModel.getTrendingMovieResults() {
+                    TopView(results: results,
+                            viewTitle: "🔥 Hot Right Now",
+                            screenType: .movie,
+                            viewModel: moviesViewModel,
+                            viewSection: .trendingMovies)
                 }
-                //                        AdBannerView()
-                //                            .frame(height: 50)
-                //                            .padding(.bottom)
+                
+                if let results = moviesViewModel.getLatestMovieResults() {
+                    BottomView(results: results,
+                               viewTitle: "🎟️ In Theaters Now",
+                               screenType: .movie,
+                               viewModel: moviesViewModel,
+                               viewSection: .latestMovies)
+                }
+                
+                if let results = moviesViewModel.getPopularMovieResults() {
+                    BottomView(results: results,
+                               viewTitle: "Most Watched",
+                               screenType: .movie,
+                               viewModel: moviesViewModel,
+                               viewSection: .popularMovies)
+                }
+                
+                if let upcomingMovies = moviesViewModel.getUpcomingMovieResults() {
+                    BottomView(results: upcomingMovies,
+                               viewTitle: "Coming Soon",
+                               screenType: .movie,
+                               viewModel: moviesViewModel,
+                               viewSection: .upcomingMovies)
+                }
             }
         }
         .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)

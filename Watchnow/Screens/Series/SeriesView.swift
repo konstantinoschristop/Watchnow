@@ -10,16 +10,18 @@ import SwiftUI
 struct SeriesView: View {
     
     @StateObject var seriesViewModel: SeriesViewModel
+    @Namespace private var namespace
     
     var body: some View {
         
-        Group {
-            ScrollView(showsIndicators: false) {
+        ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 0) {
                 if let featuredSerie = seriesViewModel.featuredSerie {
                     NavigationLink {
                         let model = ContentDetailsModel(screenType: .tv, result: featuredSerie)
                         let vm = ContentDetailsViewModel(model: model)
                         ContentDetailsView(detailsViewModel: vm)
+                            .navigationTransition(.zoom(sourceID: "zoom", in: namespace))
                     } label: {
                         MenuFeaturedView(imageURL: featuredSerie.getResultPosterURL(),
                                          overlayContent: overlayContent(for: featuredSerie),
@@ -27,49 +29,42 @@ struct SeriesView: View {
                     }
                 }
                 
-                LazyVStack {
-                    
-                    if let results =  seriesViewModel.trendingSeries?.results {
-                        TopView(results: results,
-                                viewTitle: "🔥 Binge-Worthy Today",
-                                screenType: .tv,
-                                viewModel: seriesViewModel,
-                                viewSection: .trendingSeries)
-                    }
-                    
-                    if let results = seriesViewModel.airingTodaySeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Fresh Episodes",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .airingTodaySeries)
-                    }
-                    
-                    if let results = seriesViewModel.popularSeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Most Watched",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .popularSeries)
-                    }
-                    
-                    
-                    if let results = seriesViewModel.latestSeries?.results {
-                        BottomView(results: results,
-                                   viewTitle: "Critics' Choice",
-                                   screenType: .tv,
-                                   viewModel: seriesViewModel,
-                                   viewSection: .latestSeries)
-                    }
+                if let results =  seriesViewModel.trendingSeries?.results {
+                    TopView(results: results,
+                            viewTitle: "🔥 Binge-Worthy Today",
+                            screenType: .tv,
+                            viewModel: seriesViewModel,
+                            viewSection: .trendingSeries)
                 }
                 
-                //                        AdBannerView()
-                //                            .frame(height: 50)
-                //                            .padding(.bottom)
+                if let results = seriesViewModel.airingTodaySeries?.results {
+                    BottomView(results: results,
+                               viewTitle: "Fresh Episodes",
+                               screenType: .tv,
+                               viewModel: seriesViewModel,
+                               viewSection: .airingTodaySeries)
+                }
+                
+                if let results = seriesViewModel.popularSeries?.results {
+                    BottomView(results: results,
+                               viewTitle: "Most Watched",
+                               screenType: .tv,
+                               viewModel: seriesViewModel,
+                               viewSection: .popularSeries)
+                }
+                
+                
+                if let results = seriesViewModel.latestSeries?.results {
+                    BottomView(results: results,
+                               viewTitle: "Critics' Choice",
+                               screenType: .tv,
+                               viewModel: seriesViewModel,
+                               viewSection: .latestSeries)
+                }
             }
-            .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
-            .navigationBarHidden(true)
         }
+        .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
+        .navigationBarHidden(true)
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {
                 await seriesViewModel.getPopularSeries(page: newValue)

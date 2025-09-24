@@ -19,7 +19,8 @@ struct ContentDetailsView: View {
     @State private var showAlert = false
     @State var isSheetPresented = false
     @State var isSeasonsSheetPresented = false
-  
+    @Namespace private var namespace
+    
     var body: some View {
         
         ScrollView(.vertical, showsIndicators: false) {
@@ -166,7 +167,7 @@ extension ContentDetailsView {
                     }
                     .padding(.top, 10)
                     .padding(.leading, 10)
-                    SimilarsView(content: content, screenType: screenType)
+                    SimilarsView(content: content, screenType: screenType, namespace: namespace)
                         .padding(.bottom, -30)
                 }
                 // user reviews
@@ -217,7 +218,7 @@ extension ContentDetailsView {
                     }
                     .padding(.top, 10)
                     .padding(.leading, 10)
-                    SimilarsView(content: content, screenType: screenType)
+                    SimilarsView(content: content, screenType: screenType, namespace: namespace)
                 }
                 
                 //                AdBannerView()

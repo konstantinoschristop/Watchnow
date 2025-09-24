@@ -11,7 +11,7 @@ struct MoviesModel {
     
     var upcomingMovies: GenericReultResponse? {
         didSet {
-            self.featuredMovie = upcomingMovies?.results[randomFeaturedIndex]
+            self.featuredMovie = trendingMovies?.results[randomFeaturedIndex]
         }
     }
      var popularMovies: GenericReultResponse?

@@ -13,6 +13,7 @@ struct WatchlistView: View {
     
     @StateObject var watchlistViewModel: WatchlistViewModel
     @State var selectedTab = "Movies"
+    @Namespace private var namespace
     
     var body: some View {
         
@@ -66,7 +67,7 @@ struct WatchlistView: View {
                         self.getSectionTitle(title: "Movies", sectionType: .movie)
                         
                         if watchlistViewModel.showingMovies {
-                            GenericListView(results: movies, viewModel: watchlistViewModel)
+                            GenericListView(results: movies, viewModel: watchlistViewModel, namespace: namespace)
                         }
                     }
                     
@@ -76,7 +77,7 @@ struct WatchlistView: View {
                         self.getSectionTitle(title: "TV Series", sectionType: .tv)
                         
                         if watchlistViewModel.showingSeries {
-                            GenericListView(results: series, viewModel: watchlistViewModel)
+                            GenericListView(results: series, viewModel: watchlistViewModel, namespace: namespace)
                         }
                     }
                     //
@@ -117,7 +118,7 @@ struct WatchlistView: View {
                             .padding(.top)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color(.systemGray6))
-                        GenericListView(results: movies, viewModel: watchlistViewModel)
+                        GenericListView(results: movies, viewModel: watchlistViewModel, namespace: namespace)
                     }
                     .listStyle(.plain)
                 }
@@ -135,7 +136,7 @@ struct WatchlistView: View {
                             .padding(.top)
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color(.systemGray6))
-                        GenericListView(results: series, viewModel: watchlistViewModel)
+                        GenericListView(results: series, viewModel: watchlistViewModel, namespace: namespace)
                     }
                     .listStyle(.plain)
                 }

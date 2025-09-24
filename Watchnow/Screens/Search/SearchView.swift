@@ -14,6 +14,7 @@ struct SearchView: View {
     @State var enablePicker = false
     @State var showGenres = false
     @State var searchInput = ""
+    @Namespace private var namespace
     
     var body: some View {
         
@@ -113,9 +114,9 @@ extension SearchView {
                             .listRowBackground(Color(.systemGray6))
                     } else {
                         if searchVM.listNeedsUpdate {
-                            GenericListView(results: filtered, viewModel: searchVM)
+                            GenericListView(results: filtered, viewModel: searchVM, namespace: namespace)
                         } else {
-                            GenericListView(results: filtered, viewModel: searchVM)
+                            GenericListView(results: filtered, viewModel: searchVM, namespace: namespace)
                         }
                     }
                 }
