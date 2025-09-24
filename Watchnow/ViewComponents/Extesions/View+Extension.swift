@@ -12,4 +12,9 @@ extension View {
     func minimizeTabBar() -> some View {
         self.modifier(TabBarMinimizeModifier())
     }
+    
+    /// Applies tab bar minimization behavior if available.
+    func hideBackButtonOptionally() -> some View {
+        self.modifier(NavigationBarBackButtonModifier())
+    }
 }

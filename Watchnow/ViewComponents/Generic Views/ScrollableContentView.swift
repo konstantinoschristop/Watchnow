@@ -39,7 +39,7 @@ struct ScrollableContentView: View {
             self.thresholdReached = thresholdReached
         },
                                    content: getContent)
-        .frame(height: cardType == .bottom ? 400 : 250)
+        .frame(height: cardType == .bottom ? 380 : 270)
         .sensoryFeedback(.success, trigger: performFeedback)
     }
     

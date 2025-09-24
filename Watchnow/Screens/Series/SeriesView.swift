@@ -10,7 +10,6 @@ import SwiftUI
 struct SeriesView: View {
     
     @StateObject var seriesViewModel: SeriesViewModel
-    @State var showNavBar: Bool = false
     
     var body: some View {
         
@@ -24,11 +23,11 @@ struct SeriesView: View {
                     } label: {
                         MenuFeaturedView(imageURL: featuredSerie.getResultPosterURL(),
                                          overlayContent: overlayContent(for: featuredSerie),
-                                         showNavBar: $showNavBar)
+                                         showNavBar: .constant(true))
                     }
                 }
                 
-                VStack {
+                LazyVStack {
                     
                     if let results =  seriesViewModel.trendingSeries?.results {
                         TopView(results: results,
@@ -69,9 +68,7 @@ struct SeriesView: View {
                 //                            .padding(.bottom)
             }
             .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
-            .navigationTitle("Series")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarHidden(!showNavBar)
+            .navigationBarHidden(true)
         }
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {

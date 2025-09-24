@@ -10,7 +10,6 @@ import SwiftUI
 struct MoviesView: View {
     
     @StateObject var moviesViewModel: MoviesViewModel
-    @State var showNavBar: Bool = false
     
     var body: some View {
         
@@ -24,10 +23,10 @@ struct MoviesView: View {
                     } label: {
                         MenuFeaturedView(imageURL: featuredMovie.getResultPosterURL(),
                                          overlayContent: overlayContent(for: featuredMovie),
-                                         showNavBar: $showNavBar)
+                                         showNavBar: .constant(true))
                     }
                 }
-                VStack {
+                LazyVStack {
                     
                     if let results = moviesViewModel.getTrendingMovieResults() {
                         TopView(results: results,
@@ -67,9 +66,7 @@ struct MoviesView: View {
             }
         }
         .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)
-        .navigationTitle("Movies")
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarHidden(!showNavBar)
+        .navigationBarHidden(true)
         .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getUpcomingMovies(page: newValue)

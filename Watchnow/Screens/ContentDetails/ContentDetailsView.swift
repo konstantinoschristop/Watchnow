@@ -15,7 +15,6 @@ struct ContentDetailsView: View {
     
     @StateObject var detailsViewModel: ContentDetailsViewModel
     @Environment(\.dismiss) var dismiss
-    @State var showNavBar: Bool = false
     @State var videoPresented = false
     @State private var showAlert = false
     @State var isSheetPresented = false
@@ -26,17 +25,10 @@ struct ContentDetailsView: View {
         ScrollView(.vertical, showsIndicators: false) {
             self.constructContent()
         }
-        .overlay(alignment: .top, content: {
-            if !showNavBar {
-                navBarHiddenView
-            }
-        })
         .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
         .background(Color(.systemGray6))
-        .navigationTitle(detailsViewModel.result.getResultTitle())
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarHidden(!showNavBar)
-        .navigationBarBackButtonHidden()
+        .hideBackButtonOptionally()
         .navigationBarItems(leading: navBarLeadingView,
                             trailing: navBarTrailingView)
         .toast(isPresenting: $showAlert, alert: {
@@ -71,7 +63,7 @@ extension ContentDetailsView {
     
             MenuFeaturedView(imageURL: result.getResultPosterURL(),
                              overlayContent: overlayContent(for: result),
-                             showNavBar: $showNavBar)
+                             showNavBar: .constant(true))
 
             Group {
                 // scroll categories
@@ -275,20 +267,22 @@ extension ContentDetailsView {
             .frame(maxWidth: .infinity, alignment: .leading)
            
         }
-        .blur(radius: showNavBar ? 10 : 0)
     }
     
+    @ViewBuilder
     var navBarLeadingView: some View {
         
-        getNavBarButton(imageName: "arrow.backward.circle.fill") {
-            self.dismiss()
+        if #unavailable(iOS 26) {
+            getNavBarButton(imageName: "arrow.backward") {
+                self.dismiss()
+            }
         }
     }
     
     var navBarTrailingView: some View {
         
-        HStack(spacing: 20) {
-            getNavBarButton(imageName: detailsViewModel.isInWatchList ?  "minus.circle.fill" : "plus.circle.fill") {
+        HStack(alignment: .center, spacing: 20) {
+            getNavBarButton(imageName: detailsViewModel.isInWatchList ?  "text.badge.minus" : "text.badge.plus") {
                 if detailsViewModel.isInWatchList {
                     WatchlistManager.removeFromWatchList(result: detailsViewModel.result)
                     detailsViewModel.isInWatchList = false
@@ -300,7 +294,7 @@ extension ContentDetailsView {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
             
-            getNavBarButton(imageName: "square.and.arrow.up.circle.fill") {
+            getNavBarButton(imageName: "square.and.arrow.up") {
                 let shareActivity = UIActivityViewController(activityItems: [URL(string: detailsViewModel.createShareLink())],
                                                              applicationActivities: nil)
                 
@@ -315,19 +309,27 @@ extension ContentDetailsView {
                 }
             }
         }
+        .padding(.horizontal, 5)
     }
     
+    @ViewBuilder
     private func getNavBarButton(imageName: String,
                                  action: @escaping () -> Void) -> some View{
         
-        Button(action: action,
-               label: {
-            Image(systemName: imageName)
-                .resizable()
-                .frame(width: 25, height: 25)
-                .foregroundColor(.white)
-                .shadow(color: .black, radius: 3)
-        })
+        if #available(iOS 26.0, *) {
+            Button(action: action,
+                   label: {
+                Image(systemName: imageName)
+            })
+        } else {
+            Button(action: action,
+                   label: {
+                Image(systemName: imageName)
+                    .foregroundColor(.white)
+                    .shadow(color: .black, radius: 3)
+                    .bold()
+            })
+        }
     }
     
     var navBarHiddenView: some View {

@@ -1,5 +1,5 @@
 //
-//  TabBarMinimizeModifier.swift
+//  ViewModifiers.swift
 //  Watchnow
 //
 //  Created by k.christopoulos on 20/9/25.
@@ -14,6 +14,17 @@ struct TabBarMinimizeModifier: ViewModifier {
             content.tabBarMinimizeBehavior(.automatic)
         } else {
             content
+        }
+    }
+}
+
+// MARK: - NavigationBarBackButtonModifier
+struct NavigationBarBackButtonModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.navigationBarBackButtonHidden(false)
+        } else {
+            content.navigationBarBackButtonHidden(true)
         }
     }
 }
