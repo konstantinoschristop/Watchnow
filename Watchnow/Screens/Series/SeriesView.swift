@@ -63,13 +63,14 @@ struct SeriesView: View {
                 }
             }
         }
+        .ignoresSafeArea()
         .onLoad {
             Task {
                 await seriesViewModel.loadContent()
             }
         }
         .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
-        .navigationBarHidden(true)
+        .toolbarTitleDisplayMode(.inlineLarge)
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
             Task {
                 await seriesViewModel.getPopularSeries(page: newValue)

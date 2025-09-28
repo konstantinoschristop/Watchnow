@@ -62,13 +62,14 @@ struct MoviesView: View {
                 }
             }
         }
+        .ignoresSafeArea()
         .onLoad {
             Task {
                 await moviesViewModel.loadContent()
             }
         }
         .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)
-        .navigationBarHidden(true)
+        .toolbarTitleDisplayMode(.inlineLarge)
         .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in
             Task {
                 await moviesViewModel.getUpcomingMovies(page: newValue)

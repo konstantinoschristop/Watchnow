@@ -18,7 +18,13 @@ extension View {
         self.modifier(NavigationBarBackButtonModifier())
     }
     
+    /// ViewDidLoad
     func onLoad(perform action: @escaping () -> ()) -> some View {
         self.modifier(ViewDidLoadModifier(action: action))
+    }
+    
+    /// Applies stretchy header effect
+    func stretchy() -> some View {
+        self.modifier(StretchEffectModifier())
     }
 }
