@@ -29,10 +29,10 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     }
     
     func loadContent() async {
-        await getTrendingMovies(page: trendingMoviesCurrentPage)
-        await getLatestMovies(page: latestMoviesCurrentPage)
-        await getPopularMovies(page: popularMoviesCurrentPage)
-        await getUpcomingMovies(page: upcomingMoviesCurrentPage)
+        await getTrendingMovies()
+        await getLatestMovies()
+        await getPopularMovies()
+        await getUpcomingMovies()
     }
     
     func loadMoreContent(section: ViewSections) {
@@ -43,13 +43,33 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
         
         switch section {
         case .upcomingMovies:
-            upcomingMoviesCurrentPage += 1
+            upcomingMovies?.incrementCurrentPage()
+            Task {
+                if let newPage = upcomingMovies?.currentPage {
+                    await getUpcomingMovies(page: newPage)
+                }
+            }
         case .popularMovies:
-            popularMoviesCurrentPage += 1
+            popularMovies?.incrementCurrentPage()
+            Task {
+                if let newPage = popularMovies?.currentPage {
+                    await getPopularMovies(page: newPage)
+                }
+            }
         case .trendingMovies:
-           trendingMoviesCurrentPage += 1
+            trendingMovies?.incrementCurrentPage()
+            Task {
+                if let newPage = trendingMovies?.currentPage {
+                    await getTrendingMovies(page: newPage)
+                }
+            }
         case .latestMovies:
-            latestMoviesCurrentPage += 1
+            latestMovies?.incrementCurrentPage()
+            Task {
+                if let newPage = latestMovies?.currentPage {
+                    await getLatestMovies(page: newPage)
+                }
+            }
         default:
             break
         }
@@ -59,53 +79,43 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
         
         switch section {
         case .upcomingMovies:
-            guard let totalPages = upcomingMovies?.total_pages else {
-                return false
-            }
-            return upcomingMoviesCurrentPage < totalPages
+            return upcomingMovies?.canLoadMoreContent() ?? false
         case .popularMovies:
-            guard let totalPages = popularMovies?.total_pages else {
-                return false
-            }
-            return popularMoviesCurrentPage < totalPages
+            return popularMovies?.canLoadMoreContent() ?? false
         case .trendingMovies:
-            guard let totalPages = trendingMovies?.total_pages else {
-                return false
-            }
-            return trendingMoviesCurrentPage < totalPages
+            return trendingMovies?.canLoadMoreContent() ?? false
         case .latestMovies:
-            guard let totalPages = latestMovies?.total_pages else {
-                return false
-            }
-            return latestMoviesCurrentPage < totalPages
+            return latestMovies?.canLoadMoreContent() ?? false
         default:
             return false
         }
     }
     
     func getUpcomingMovieResults() -> [Result]? {
-        return self.upcomingMovies?.results
+        return self.upcomingMovies?.getResults()
     }
     
     func getPopularMovieResults() -> [Result]? {
-        return self.popularMovies?.results
+        return self.popularMovies?.getResults()
     }
     
     func getTrendingMovieResults() -> [Result]? {
-        return self.trendingMovies?.results
+        return self.trendingMovies?.getResults()
     }
     
     func getLatestMovieResults() -> [Result]? {
-        return self.latestMovies?.results
+        return self.latestMovies?.getResults()
     }
     
     func getTrendingMovies(page: Int = 1) async {
         
         do {
+            let fetchedMovies = try await service.fetchTrendingMovies(page: page)
+            
             if page == 1 {
-                self.trendingMovies = try await service.fetchTrendingMovies(page: page)
+                self.trendingMovies = .init(result: fetchedMovies)
             } else {
-                self.trendingMovies?.results.append(contentsOf: try await service.fetchTrendingMovies(page: page).results)
+                self.trendingMovies?.appendResult(fetchedMovies)
             }
         } catch {
             apiError = true
@@ -115,10 +125,12 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     func getUpcomingMovies(page: Int = 1) async {
         
         do {
+            let fetchedMovies = try await service.fetchUpcomingMovies(page: page)
+            
             if page == 1 {
-                self.upcomingMovies = try await service.fetchUpcomingMovies(page: page)
+                self.upcomingMovies = .init(result: fetchedMovies)
             } else {
-                self.upcomingMovies?.results.append(contentsOf: try await service.fetchUpcomingMovies(page: page).results)
+                self.upcomingMovies?.appendResult(fetchedMovies)
             }
         } catch {
             apiError = true
@@ -128,10 +140,12 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     func getPopularMovies(page: Int = 1) async {
         
         do {
+            let fetchedMovies = try await service.fetchPopularMovies(page: page)
+            
             if page == 1 {
-                self.popularMovies = try await service.fetchPopularMovies(page: page)
+                self.popularMovies = .init(result: fetchedMovies)
             } else {
-                self.popularMovies?.results.append(contentsOf: try await service.fetchPopularMovies(page: page).results)
+                self.popularMovies?.appendResult(fetchedMovies)
             }
         } catch {
             apiError = true
@@ -141,10 +155,12 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
     func getLatestMovies(page: Int = 1) async {
         
         do {
+            let fetchedMovies = try await service.fetchLatestMovies(page: page)
+            
             if page == 1 {
-                self.latestMovies = try await service.fetchLatestMovies(page: page)
+                self.latestMovies = .init(result: fetchedMovies)
             } else {
-                self.latestMovies?.results.append(contentsOf: try await service.fetchLatestMovies(page: page).results)
+                self.latestMovies?.appendResult(fetchedMovies)
             }
         } catch {
             apiError = true
@@ -154,44 +170,24 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
 
 extension MoviesViewModel {
     
-    var upcomingMovies: GenericReultResponse? {
+    var upcomingMovies: ContentListResult? {
         get { model.upcomingMovies }
         set { model.upcomingMovies = newValue }
     }
     
-    var popularMovies: GenericReultResponse? {
+    var popularMovies: ContentListResult? {
         get { model.popularMovies }
         set { model.popularMovies = newValue }
     }
     
-    var trendingMovies: GenericReultResponse? {
+    var trendingMovies: ContentListResult? {
         get { model.trendingMovies }
         set { model.trendingMovies = newValue }
     }
     
-    var latestMovies: GenericReultResponse? {
+    var latestMovies: ContentListResult? {
         get { model.latestMovies }
         set { model.latestMovies = newValue }
-    }
-    
-    var upcomingMoviesCurrentPage: Int {
-        get { model.upcomingMoviesCurrentPage }
-        set { model.upcomingMoviesCurrentPage = newValue }
-    }
-    
-    var popularMoviesCurrentPage: Int {
-        get { model.popularMoviesCurrentPage }
-        set { model.popularMoviesCurrentPage = newValue }
-    }
-    
-    var trendingMoviesCurrentPage: Int {
-        get { model.trendingMoviesCurrentPage }
-        set { model.trendingMoviesCurrentPage = newValue }
-    }
-    
-    var latestMoviesCurrentPage: Int {
-        get { model.latestMoviesCurrentPage }
-        set { model.latestMoviesCurrentPage = newValue }
     }
     
     var featuredMovie: Result? {
@@ -199,9 +195,10 @@ extension MoviesViewModel {
     }
     
     var finishedLoadingContent: Bool {
-        return (upcomingMovies?.results.isEmpty == false &&
-                popularMovies?.results.isEmpty == false &&
-                trendingMovies?.results.isEmpty == false &&
-                latestMovies?.results.isEmpty == false)
+        return true
+//        return (upcomingMovies?.results.isEmpty == false &&
+//             //   popularMovies?.results.isEmpty == false &&
+//                trendingMovies?.results.isEmpty == false &&
+//                latestMovies?.results.isEmpty == false)
     }
 }

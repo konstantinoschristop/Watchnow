@@ -9,19 +9,14 @@ import Foundation
 
 struct SeriesModel {
     
-    var popularSeries: GenericReultResponse?
-    var airingTodaySeries: GenericReultResponse?
-    var trendingSeries: GenericReultResponse? {
+    var popularSeries: ContentListResult?
+    var airingTodaySeries: ContentListResult?
+    var trendingSeries: ContentListResult? {
         didSet {
-            self.featuredSerie = trendingSeries?.results[randomFeaturedIndex]
+            self.featuredSerie = trendingSeries?.getResults()[randomFeaturedIndex]
         }
     }
-    var latestSeries: GenericReultResponse?
-    
-    var popularSeriesCurrentPage = 1
-    var airingTodaySeriesCurrentPage = 1
-    var trendingSeriesCurrentPage = 1
-    var latestSeriesCurrentPage = 1
+    var latestSeries: ContentListResult?
     
     let randomFeaturedIndex = Int.random(in: 0...19)
     var featuredSerie: Result?

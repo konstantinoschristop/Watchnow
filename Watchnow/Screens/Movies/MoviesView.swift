@@ -70,26 +70,6 @@ struct MoviesView: View {
         }
         .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)
         .toolbarTitleDisplayMode(.inlineLarge)
-        .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in
-            Task {
-                await moviesViewModel.getUpcomingMovies(page: newValue)
-            }
-        }
-        .onChange(of: moviesViewModel.popularMoviesCurrentPage) { newValue in
-            Task {
-                await moviesViewModel.getPopularMovies(page: newValue)
-            }
-        }
-        .onChange(of: moviesViewModel.trendingMoviesCurrentPage) { newValue in
-            Task {
-                await moviesViewModel.getTrendingMovies(page: newValue)
-            }
-        }
-        .onChange(of: moviesViewModel.latestMoviesCurrentPage) { newValue in
-            Task {
-                await moviesViewModel.getLatestMovies(page: newValue)
-            }
-        }
     }
 }
 

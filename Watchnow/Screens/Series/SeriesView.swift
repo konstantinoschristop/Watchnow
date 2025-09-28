@@ -29,7 +29,7 @@ struct SeriesView: View {
                     }
                 }
                 
-                if let results =  seriesViewModel.trendingSeries?.results {
+                if let results =  seriesViewModel.trendingSeries?.getResults() {
                     TopView(results: results,
                             viewTitle: "🔥 Binge-Worthy Today",
                             screenType: .tv,
@@ -37,7 +37,7 @@ struct SeriesView: View {
                             viewSection: .trendingSeries)
                 }
                 
-                if let results = seriesViewModel.airingTodaySeries?.results {
+                if let results = seriesViewModel.airingTodaySeries?.getResults() {
                     BottomView(results: results,
                                viewTitle: "Fresh Episodes",
                                screenType: .tv,
@@ -45,7 +45,7 @@ struct SeriesView: View {
                                viewSection: .airingTodaySeries)
                 }
                 
-                if let results = seriesViewModel.popularSeries?.results {
+                if let results = seriesViewModel.popularSeries?.getResults() {
                     BottomView(results: results,
                                viewTitle: "Most Watched",
                                screenType: .tv,
@@ -54,7 +54,7 @@ struct SeriesView: View {
                 }
                 
                 
-                if let results = seriesViewModel.latestSeries?.results {
+                if let results = seriesViewModel.latestSeries?.getResults() {
                     BottomView(results: results,
                                viewTitle: "Critics' Choice",
                                screenType: .tv,
@@ -71,26 +71,6 @@ struct SeriesView: View {
         }
         .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
         .toolbarTitleDisplayMode(.inlineLarge)
-        .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
-            Task {
-                await seriesViewModel.getPopularSeries(page: newValue)
-            }
-        }
-        .onChange(of: seriesViewModel.airingTodaySeriesCurrentPage) { newValue in
-            Task {
-                await seriesViewModel.getAiringTodaySeries(page: newValue)
-            }
-        }
-        .onChange(of: seriesViewModel.trendingSeriesCurrentPage) { newValue in
-            Task {
-                await seriesViewModel.getTrendingSeries(page: newValue)
-            }
-        }
-        .onChange(of: seriesViewModel.latestSeriesCurrentPage) { newValue in
-            Task {
-                await seriesViewModel.getLatestSeries(page: newValue)
-            }
-        }
     }
 }
 

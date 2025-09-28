@@ -22,10 +22,10 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     }
     
     func loadContent() async {
-        await getTrendingSeries(page: trendingSeriesCurrentPage)
-        await getAiringTodaySeries(page: airingTodaySeriesCurrentPage)
-        await getPopularSeries(page: popularSeriesCurrentPage)
-        await getLatestSeries(page: latestSeriesCurrentPage)
+        await getTrendingSeries()
+        await getAiringTodaySeries()
+        await getPopularSeries()
+        await getLatestSeries()
     }
     
     func loadMoreContent(section: ViewSections) {
@@ -36,13 +36,33 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
         
         switch section {
         case .popularSeries:
-            popularSeriesCurrentPage += 1
+            popularSeries?.incrementCurrentPage()
+            Task {
+                if let newPage = popularSeries?.currentPage {
+                    await getPopularSeries(page: newPage)
+                }
+            }
         case .airingTodaySeries:
-            airingTodaySeriesCurrentPage += 1
+            airingTodaySeries?.incrementCurrentPage()
+            Task {
+                if let newPage = airingTodaySeries?.currentPage {
+                    await getAiringTodaySeries(page: newPage)
+                }
+            }
         case .trendingSeries:
-            trendingSeriesCurrentPage += 1
+            trendingSeries?.incrementCurrentPage()
+            Task {
+                if let newPage = trendingSeries?.currentPage {
+                    await getTrendingSeries(page: newPage)
+                }
+            }
         case .latestSeries:
-            latestSeriesCurrentPage += 1
+            latestSeries?.incrementCurrentPage()
+            Task {
+                if let newPage = latestSeries?.currentPage {
+                    await getLatestSeries(page: newPage)
+                }
+            }
         default:
             break
         }
@@ -52,25 +72,13 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
         
         switch section {
         case .popularSeries:
-            guard let totalPages = popularSeries?.total_pages else {
-                return false
-            }
-            return popularSeriesCurrentPage < totalPages
+            return popularSeries?.canLoadMoreContent() ?? false
         case .airingTodaySeries:
-            guard let totalPages = popularSeries?.total_pages else {
-                return false
-            }
-            return airingTodaySeriesCurrentPage < totalPages
+            return airingTodaySeries?.canLoadMoreContent() ?? false
         case .trendingSeries:
-            guard let totalPages = popularSeries?.total_pages else {
-                return false
-            }
-            return trendingSeriesCurrentPage < totalPages
+            return trendingSeries?.canLoadMoreContent() ?? false
         case .latestSeries:
-            guard let totalPages = latestSeries?.total_pages else {
-                return false
-            }
-            return latestSeriesCurrentPage < totalPages
+            return latestSeries?.canLoadMoreContent() ?? false
         default:
             return false
         }
@@ -79,10 +87,12 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     func getTrendingSeries(page: Int = 1) async {
         
         do {
+            let fetchedSeries = try await service.fetchTrendingSeries(page: page)
+            
             if page == 1 {
-                self.trendingSeries = try await service.fetchTrendingSeries(page: page)
+                self.trendingSeries = .init(result: fetchedSeries)
             } else {
-                self.trendingSeries?.results.append(contentsOf: try await service.fetchTrendingSeries(page: page).results)
+                self.trendingSeries?.appendResult(fetchedSeries)
             }
         } catch {
             apiError = true
@@ -92,10 +102,12 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     func getPopularSeries(page: Int = 1) async {
         
         do {
+            let fetchedSeries = try await service.fetchPopularSeries(page: page)
+            
             if page == 1 {
-                self.popularSeries = try await service.fetchPopularSeries(page: page)
+                self.popularSeries = .init(result: fetchedSeries)
             } else {
-                self.popularSeries?.results.append(contentsOf: try await service.fetchPopularSeries(page: page).results)
+                self.popularSeries?.appendResult(fetchedSeries)
             }
         } catch {
             apiError = true
@@ -105,10 +117,12 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     func getAiringTodaySeries(page: Int = 1) async {
         
         do {
+            let fetchedSeries = try await service.fetchAiringTodaySeries(page: page)
+            
             if page == 1 {
-                self.airingTodaySeries = try await service.fetchAiringTodaySeries(page: page)
+                self.airingTodaySeries = .init(result: fetchedSeries)
             } else {
-                self.airingTodaySeries?.results.append(contentsOf: try await service.fetchAiringTodaySeries(page: page).results)
+                self.airingTodaySeries?.appendResult(fetchedSeries)
             }
         } catch {
             apiError = true
@@ -118,10 +132,12 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
     func getLatestSeries(page: Int = 1) async {
         
         do {
+            let fetchedSeries = try await service.fetchLatestSeries(page: page)
+            
             if page == 1 {
-                self.latestSeries = try await service.fetchLatestSeries(page: page)
+                self.latestSeries = .init(result: fetchedSeries)
             } else {
-                self.latestSeries?.results.append(contentsOf: try await service.fetchLatestSeries(page: page).results)
+                self.latestSeries?.appendResult(fetchedSeries)
             }
         } catch {
             apiError = true
@@ -131,44 +147,24 @@ class SeriesViewModel: ObservableObject, BaseViewModelProtocol {
 
 extension SeriesViewModel {
     
-    var popularSeries: GenericReultResponse? {
+    var popularSeries: ContentListResult? {
         get { model.popularSeries }
         set { model.popularSeries = newValue }
     }
     
-    var airingTodaySeries: GenericReultResponse? {
+    var airingTodaySeries: ContentListResult? {
         get { model.airingTodaySeries }
         set { model.airingTodaySeries = newValue }
     }
     
-    var trendingSeries: GenericReultResponse? {
+    var trendingSeries: ContentListResult? {
         get { model.trendingSeries }
         set { model.trendingSeries = newValue }
     }
     
-    var latestSeries: GenericReultResponse? {
+    var latestSeries: ContentListResult? {
         get { model.latestSeries }
         set { model.latestSeries = newValue }
-    }
-    
-    var popularSeriesCurrentPage: Int {
-        get { model.popularSeriesCurrentPage }
-        set { model.popularSeriesCurrentPage = newValue }
-    }
-    
-    var airingTodaySeriesCurrentPage: Int {
-        get { model.airingTodaySeriesCurrentPage }
-        set { model.airingTodaySeriesCurrentPage = newValue }
-    }
-    
-    var trendingSeriesCurrentPage: Int {
-        get { model.trendingSeriesCurrentPage }
-        set { model.trendingSeriesCurrentPage = newValue }
-    }
-    
-    var latestSeriesCurrentPage: Int {
-        get { model.latestSeriesCurrentPage }
-        set { model.latestSeriesCurrentPage = newValue }
     }
     
     var featuredSerie: Result? {
@@ -177,9 +173,10 @@ extension SeriesViewModel {
     }
     
     var finishedLoadingContent: Bool {
-        return (popularSeries?.results.isEmpty == false &&
-                airingTodaySeries?.results.isEmpty == false &&
-                trendingSeries?.results.isEmpty == false &&
-                latestSeries?.results.isEmpty == false)
+        return true
+//        return (popularSeries?.results.isEmpty == false &&
+//                airingTodaySeries?.results.isEmpty == false &&
+//                trendingSeries?.results.isEmpty == false &&
+//                latestSeries?.results.isEmpty == false)
     }
 }
