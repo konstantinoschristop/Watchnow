@@ -17,4 +17,8 @@ extension View {
     func hideBackButtonOptionally() -> some View {
         self.modifier(NavigationBarBackButtonModifier())
     }
+    
+    func onLoad(perform action: @escaping () -> ()) -> some View {
+        self.modifier(ViewDidLoadModifier(action: action))
+    }
 }

@@ -62,6 +62,11 @@ struct MoviesView: View {
                 }
             }
         }
+        .onLoad {
+            Task {
+                await moviesViewModel.loadContent()
+            }
+        }
         .redacted(reason: moviesViewModel.finishedLoadingContent ? [] : .placeholder)
         .navigationBarHidden(true)
         .onChange(of: moviesViewModel.upcomingMoviesCurrentPage) { newValue in

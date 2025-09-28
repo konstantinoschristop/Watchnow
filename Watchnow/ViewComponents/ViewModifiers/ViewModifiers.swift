@@ -28,3 +28,23 @@ struct NavigationBarBackButtonModifier: ViewModifier {
         }
     }
 }
+
+// MARK: - NavigationBarBackButtonModifier
+struct ViewDidLoadModifier: ViewModifier {
+    
+    @State private var isViewAppeared: Bool = false
+    var action: () -> ()
+    
+    init(action: @escaping () -> ()) {
+        self.action = action
+    }
+    
+    func body(content: Content) -> some View {
+        content.onAppear {
+            if !self.isViewAppeared {
+                self.action()
+            }
+            self.isViewAppeared.toggle()
+        }
+    }
+}

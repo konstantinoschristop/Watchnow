@@ -26,13 +26,13 @@ class MoviesViewModel: ObservableObject, BaseViewModelProtocol {
         
         self.model = model
         self.service = service
-        
-        Task {
-            await getTrendingMovies(page: trendingMoviesCurrentPage)
-            await getLatestMovies(page: latestMoviesCurrentPage)
-            await getPopularMovies(page: popularMoviesCurrentPage)
-            await getUpcomingMovies(page: upcomingMoviesCurrentPage)
-        }
+    }
+    
+    func loadContent() async {
+        await getTrendingMovies(page: trendingMoviesCurrentPage)
+        await getLatestMovies(page: latestMoviesCurrentPage)
+        await getPopularMovies(page: popularMoviesCurrentPage)
+        await getUpcomingMovies(page: upcomingMoviesCurrentPage)
     }
     
     func loadMoreContent(section: ViewSections) {

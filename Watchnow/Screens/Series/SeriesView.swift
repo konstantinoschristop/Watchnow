@@ -63,6 +63,11 @@ struct SeriesView: View {
                 }
             }
         }
+        .onLoad {
+            Task {
+                await seriesViewModel.loadContent()
+            }
+        }
         .redacted(reason: seriesViewModel.finishedLoadingContent ? [] : .placeholder)
         .navigationBarHidden(true)
         .onChange(of: seriesViewModel.popularSeriesCurrentPage) { newValue in
