@@ -19,6 +19,40 @@ enum ViewSections {
     case latestSeries
 }
 
+extension ViewSections {
+    var screenType: ScreenTypes {
+        switch self {
+        case .upcomingMovies, .popularMovies, .trendingMovies, .latestMovies:
+            return .movie
+        case .popularSeries, .airingTodaySeries, .trendingSeries, .latestSeries:
+            return .tv
+        }
+    }
+    
+    var title: String {
+        switch self {
+        case .trendingMovies: return "🔥 Hot Right Now"
+        case .latestMovies: return "🎟️ In Theaters Now"
+        case .popularMovies: return "Most Watched"
+        case .upcomingMovies: return "Coming Soon"
+            
+        case .trendingSeries: return "🔥 Binge-Worthy Today"
+        case .airingTodaySeries: return "Fresh Episodes"
+        case .popularSeries: return "Most Watched"
+        case .latestSeries: return "Critics' Choice"
+        }
+    }
+    
+    var isTopView: Bool {
+        switch self {
+        case .trendingMovies, .trendingSeries:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 struct GenericReultResponse: Codable, Equatable {
     var results: [Result]
     var total_pages: Int?

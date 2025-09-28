@@ -26,7 +26,7 @@ struct ContentDetailsView: View {
         ScrollView(.vertical, showsIndicators: false) {
             self.constructContent()
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .top)
         .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
         .background(Color(.systemGray6))
         .navigationBarTitleDisplayMode(.inline)
