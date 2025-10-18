@@ -13,13 +13,18 @@ struct LoadMoreButtonView: View {
     var thresholdReached : Bool
     
     var body: some View {
-        let imageName: String = thresholdReached ? "checkmark.circle.dotted" : "chevron.left.chevron.left.dotted"
+        let frame: CGFloat = thresholdReached ? 50 : 40
         
-        Image(systemName: imageName)
-            .resizable()
-            .foregroundStyle(thresholdReached ? Color.green : Color.primary)
-            .frame(width: 30, height: 30)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.horizontal)
+            Image(systemName: "chevron.left.chevron.left.dotted")
+                .resizable()
+                .symbolEffect(.scale)
+                .padding(14)
+                .background(Color(.gray))
+                .clipShape(.circle)
+                .frame(width: frame, height: frame)
+                .scaledToFill()
+                .frame(width: 60, height: 50, alignment: .center)
+                .padding(.horizontal)
+                .frame(maxHeight: .infinity)
     }
 }

@@ -83,9 +83,7 @@
 		EEDC84A628AA366600F3C171 /* EpisodesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84A528AA366600F3C171 /* EpisodesResponse.swift */; };
 		EEDC84A828AAC40300F3C171 /* EpisodesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */; };
 		EEDC84AA28ABA4E100F3C171 /* EpisodesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84A928ABA4E100F3C171 /* EpisodesView.swift */; };
-		EEDC84AC28ABE4DC00F3C171 /* PersonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */; };
 		EEDC84AE28ABE61900F3C171 /* PersonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AD28ABE61900F3C171 /* PersonResponse.swift */; };
-		EEDC84B028ABE76300F3C171 /* PersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */; };
 		EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */ = {isa = PBXBuildFile; productRef = EEDC84B228B7F11200F3C171 /* FancyScrollView */; };
 		EEF45B202A48C4CA00D3460E /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */; };
 		EEF45B272A79864400D3460E /* WatchProvidersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */; };
@@ -167,9 +165,7 @@
 		EEDC84A528AA366600F3C171 /* EpisodesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodesResponse.swift; sourceTree = "<group>"; };
 		EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodesViewModel.swift; sourceTree = "<group>"; };
 		EEDC84A928ABA4E100F3C171 /* EpisodesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodesView.swift; sourceTree = "<group>"; };
-		EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonView.swift; sourceTree = "<group>"; };
 		EEDC84AD28ABE61900F3C171 /* PersonResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonResponse.swift; sourceTree = "<group>"; };
-		EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonViewModel.swift; sourceTree = "<group>"; };
 		EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBannerView.swift; sourceTree = "<group>"; };
 		EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProvidersResponse.swift; sourceTree = "<group>"; };
 		EEF45B282A7998D600D3460E /* WatchProviderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProviderView.swift; sourceTree = "<group>"; };
@@ -353,8 +349,6 @@
 				8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */,
 				EE95E43E2895C1B600B8C688 /* ContentDetailsViewModel.swift */,
 				8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */,
-				EEDC84AB28ABE4DC00F3C171 /* PersonView.swift */,
-				EEDC84AF28ABE76300F3C171 /* PersonViewModel.swift */,
 			);
 			path = ContentDetails;
 			sourceTree = "<group>";
@@ -545,7 +539,6 @@
 				8A981D9126B6A85F00993232 /* MoviesView.swift in Sources */,
 				8A981D5526B5AF1000993232 /* SceneDelegate.swift in Sources */,
 				8A981D5726B5AF1000993232 /* ContentView.swift in Sources */,
-				EEDC84AC28ABE4DC00F3C171 /* PersonView.swift in Sources */,
 				EE4002AD284CDC5600374143 /* SImilarsView.swift in Sources */,
 				EE95CF3328BB84FD000E97B6 /* DetailsView.swift in Sources */,
 				8A57A8B02AED6EFC002B636A /* TipKitManager.swift in Sources */,
@@ -564,7 +557,6 @@
 				EE95E4432895CA1000B8C688 /* MoviesViewModel.swift in Sources */,
 				8AE787E52E8966E000A6FF50 /* ContentMainView.swift in Sources */,
 				EE95CF3528BB852C000E97B6 /* GenresView.swift in Sources */,
-				EEDC84B028ABE76300F3C171 /* PersonViewModel.swift in Sources */,
 				EEDC84A628AA366600F3C171 /* EpisodesResponse.swift in Sources */,
 				8AC339032752957D00834B46 /* BottomView.swift in Sources */,
 				8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */,

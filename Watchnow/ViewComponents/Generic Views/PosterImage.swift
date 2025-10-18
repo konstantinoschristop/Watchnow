@@ -10,8 +10,8 @@ import Kingfisher
 
 struct PosterImage: View {
     var url: URL?
-    var width: CGFloat = 350
-    var height: CGFloat = 650
+    var width: CGFloat = 250
+    var height: CGFloat = 450
     var cornerRadius: CGFloat = 15
     var shadowRadius: CGFloat = 5
     

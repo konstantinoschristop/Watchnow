@@ -22,24 +22,20 @@ struct ScrollableContentView: View {
         
     @State private var performFeedback: Bool = false
     @State private var thresholdReached: Bool = false
-    @State private var isLoading: Bool = false
     
     var body: some View {
         
         StretchingActionScrollView(onTriggered: {
             Task { @MainActor in
                 performFeedback.toggle()
-                isLoading = true
-                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 sec
                 viewModel.loadMoreContent(section: viewSection)
-                isLoading = false
             }
         },
                                    onThresholdReached: { thresholdReached in
             self.thresholdReached = thresholdReached
         },
                                    content: getContent)
-        .frame(height: cardType == .bottom ? 380 : 270)
+        .frame(height: cardType == .bottom ? 250 : 180)
         .sensoryFeedback(.success, trigger: performFeedback)
     }
     
@@ -59,32 +55,25 @@ struct ScrollableContentView: View {
                         if cardType == .bottom {
                             BottomCard(content: movie,
                                        screenType: screenType)
-                            .frame(width: 200, height: 300)
+                            .frame(width: 130, height: 200)
                         } else {
                             TopCard(content: movie,
                                     screenType: screenType)
-                            .frame(width: 300, height: 200)
+                            .frame(width: 200, height: 180)
                         }
                     }
                     .scaleEffect(.init(width: scale, height: scale))
                     .animation(.easeOut, value: 1)
                     .padding(.vertical)
                 }
-                .frame(width: cardType == .bottom ? 200 : 350,
-                       height: cardType == .bottom ? 320 : 215)
+                .frame(width: cardType == .bottom ? 150 : 250,
+                       height: cardType == .bottom ? 250 : 200)
                 .background(Color.clear)
                 .padding(.vertical, 30)
                 
                 if results.last == movie,
                    viewModel.canLoadMoreContent(section: viewSection) {
-                    if isLoading {
-                        ProgressView()
-                            .frame(width: 30, height: 30)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding(.horizontal)
-                    } else {
-                        LoadMoreButtonView(thresholdReached: thresholdReached)
-                    }
+                    LoadMoreButtonView(thresholdReached: thresholdReached)
                 }
             }
         }

@@ -30,14 +30,19 @@ struct TopCard: View {
                     ContentDetailsView(detailsViewModel: vm)
                         .navigationTransition(.zoom(sourceID: "", in: namespace))
                 } label: {
-                    VStack {
-                        BackdropImage(url: content.getBackdropURL())
-                        TitleText(title: content.getResultTitle())
-                    }
+                    BackdropImage(url: content.getBackdropURL())
+                        .overlay(alignment: .top, content: {
+                            LinearGradient(colors: [.clear,
+                                                    .black.opacity(0.6)],
+                                           startPoint: .center,
+                                           endPoint: .top)
+                            .cornerRadius(10)
+                        })
+                        .overlay(alignment: .topTrailing) {
+                            RatingView(rating: content.vote_average)
+                        }
                 }
             }
-            
-            RatingView(rating: content.vote_average, cardType: .top)
         }
     }
 }

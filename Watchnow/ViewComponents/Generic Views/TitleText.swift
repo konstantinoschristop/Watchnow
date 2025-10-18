@@ -13,7 +13,7 @@ struct TitleText: View {
     
     var body: some View {
         Text(title)
-            .font(.system(size: 16, weight: .heavy))
+            .font(.system(size: 12, weight: .heavy))
             .foregroundColor(Color(.systemBackground))
             .colorInvert()
     }

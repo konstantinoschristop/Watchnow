@@ -31,28 +31,23 @@ struct CastView: View {
                         
                         let url = API.Common.imageUrl(imageId: imageURL)
                             
-                        NavigationLink {
-                            let vm = PersonViewModel(personID: personID)
-                            PersonView(personViewModel: vm)
-                        } label: {
-                            VStack {
-                                GenericImageView.init(url: url,
-                                                      width: 80,
-                                                      height: 120,
-                                                      cornerRadius: 6,
-                                                      showShadow: true)
-                                
-                                .clipShape(Circle())
-                                .frame(width: 80, height: 80)
-                                Text(cast.getName())
-                                    .font(.system(size: 12, weight: .heavy))
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(Color(.systemBackground))
-                                    .colorInvert()
-                                    .frame(width: 80, height: 30)
-                            }
-                            .frame(width: 80, height: 130)
+                        VStack {
+                            GenericImageView.init(url: url,
+                                                  width: 80,
+                                                  height: 120,
+                                                  cornerRadius: 6,
+                                                  showShadow: true)
+                            
+                            .clipShape(Circle())
+                            .frame(width: 80, height: 80)
+                            Text(cast.getName())
+                                .font(.system(size: 12, weight: .heavy))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(Color(.systemBackground))
+                                .colorInvert()
+                                .frame(width: 80, height: 30)
                         }
+                        .frame(width: 80, height: 130)
                     }
                 }
             }

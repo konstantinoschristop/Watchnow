@@ -16,18 +16,11 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 0) {
-                if let featured = viewModel.featuredResult {
-                    NavigationLink {
-                        let model = ContentDetailsModel(screenType: sections.first?.screenType ?? .movie,
-                                                        result: featured)
-                        let vm = ContentDetailsViewModel(model: model)
-                        ContentDetailsView(detailsViewModel: vm)
-                            .navigationTransition(.zoom(sourceID: "zoom", in: namespace))
-                    } label: {
-                        MenuFeaturedView(imageURL: featured.getResultPosterURL(),
-                                         overlayContent: overlayContent(for: featured),
-                                         showNavBar: .constant(true))
-                    }
+                if let results = viewModel.featuredResult {
+                    MenuFeaturedView(results: results,
+                                     overlayContent: { result in overlayContent(for: result) },
+                                     screenType: sections.allSatisfy({ $0.screenType == .movie }) ? .movie : .tv,
+                                     showNavBar: .constant(true))
                 }
                 
                 ForEach(sections, id: \.self) { section in
@@ -107,6 +100,7 @@ extension ContentMainView {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 .padding()
             }
+            .padding(.bottom, 20)
         }
     }
 }

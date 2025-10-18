@@ -28,13 +28,13 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     
     @Published var trending: ContentListResult? {
         didSet {
-            featuredResult = trending?.getResults()[randomFeaturedIndex]
+            featuredResult = trending?.getResults().prefix(5).map(\.self)
         }
     }
     @Published var popular: ContentListResult?
     @Published var special: ContentListResult?   // "upcoming" for movies, "airingToday" for series
     @Published var latest: ContentListResult?
-    @Published var featuredResult: Result?
+    @Published var featuredResult: [Result]?
     
     private let service: ContentService
     private let randomFeaturedIndex = Int.random(in: 0...19)

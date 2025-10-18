@@ -31,12 +31,20 @@ struct BottomCard: View {
                 } label: {
                     VStack {
                         PosterImage(url: content.getPosterURL())
-                        TitleText(title: content.getResultTitle())
+                            .overlay(alignment: .top, content: {
+                                LinearGradient(colors: [.clear,
+                                                        .black.opacity(0.6)],
+                                               startPoint: .center,
+                                               endPoint: .top)
+                                .cornerRadius(10)
+                            })
+                            .overlay(alignment: .topTrailing) {
+                                RatingView(rating: content.vote_average)
+                            }
+                      //  TitleText(title: content.getResultTitle())
                     }
                 }
             }
-            
-            RatingView(rating: content.vote_average, cardType: .bottom)
         }
     }
 }

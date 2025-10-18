@@ -23,9 +23,9 @@ struct BottomView: View {
                                   viewModel: viewModel,
                                   viewSection: viewSection,
                                   cardType: .bottom)
+            .background(LinearGradient(colors: [.clear, Color(.systemGray5).opacity(0.6)], startPoint: .center, endPoint: .bottom))
         } header: {
             SectionHeaderView(title: viewTitle).textCase(.none)
         }
-       // .background(LinearGradient(colors: [.clear, Color(.systemGray5).opacity(0.6)], startPoint: .center, endPoint: .bottom))
     }
 }

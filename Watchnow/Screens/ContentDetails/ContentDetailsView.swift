@@ -63,8 +63,9 @@ extension ContentDetailsView {
         
         return VStack(spacing: 0) {
     
-            MenuFeaturedView(imageURL: result.getResultPosterURL(),
-                             overlayContent: overlayContent(for: result),
+            MenuFeaturedView(results: [result],
+                             overlayContent: { _ in overlayContent(for: result) },
+                             screenType: screenType,
                              showNavBar: .constant(true))
 
             Group {

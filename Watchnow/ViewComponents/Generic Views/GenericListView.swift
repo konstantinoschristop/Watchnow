@@ -17,25 +17,26 @@ struct GenericListView: View {
     var body: some View {
         
         ForEach(Array(results.enumerated()), id: \.element) { index, result in
-            NavigationLink {
-                switch result.getMediaType() {
-                case "Actor":
-                    if let personID = result.id {
-                        let vm = PersonViewModel(personID: personID)
-                        PersonView(personViewModel: vm)
+            Group {
+                if result.getMediaType() == "Actor" {
+                    VStack(spacing: 2) {
+                        self.constructResult(result: result)
+                        Divider()
                     }
-                default:
-                    let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
-                    let model = ContentDetailsModel(screenType: screenType, result: result)
-                    let vm = ContentDetailsViewModel(model: model)
-                    ContentDetailsView(detailsViewModel: vm)
-                        .navigationTransition(.zoom(sourceID: result.id, in: namespace))
-                }
-            }
-            label: {
-                VStack(spacing: 2) {
-                    self.constructResult(result: result)
-                    Divider()
+                } else {
+                    NavigationLink {
+                        let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
+                        let model = ContentDetailsModel(screenType: screenType, result: result)
+                        let vm = ContentDetailsViewModel(model: model)
+                        ContentDetailsView(detailsViewModel: vm)
+                            .navigationTransition(.zoom(sourceID: result.id, in: namespace))
+                    }
+                    label: {
+                        VStack(spacing: 2) {
+                            self.constructResult(result: result)
+                            Divider()
+                        }
+                    }
                 }
             }
             .listRowSeparatorTint(.clear)
