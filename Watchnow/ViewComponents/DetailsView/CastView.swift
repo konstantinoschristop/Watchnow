@@ -25,10 +25,7 @@ struct CastView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(cast, id: \.self) { cast in
-                    
-                    if let imageURL = cast.profile_path,
-                       let personID = cast.id  {
-                        
+                    if let imageURL = cast.profile_path {
                         let url = API.Common.imageUrl(imageId: imageURL)
                             
                         VStack {

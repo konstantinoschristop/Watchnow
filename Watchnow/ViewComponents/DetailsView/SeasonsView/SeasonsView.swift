@@ -45,9 +45,7 @@ struct SeasonsView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: calculateRowsForSeasons(), spacing: 10) {
                 ForEach(seasons, id: \.self) { season in
-                    
-                    if let name = season.name {
-                        
+                    if season.name?.isEmpty == false {
                         Button {
                             selectedSeason = season
                             isSeasonsSheetPresented.toggle()

@@ -19,7 +19,6 @@ struct SearchView: View {
     var body: some View {
         
         VStack(spacing: 0) {
-          //  genresView
             searchResultsView
 //            AdBannerView()
 //                .frame(height: 50)
@@ -31,27 +30,23 @@ struct SearchView: View {
         .toast(isPresenting: $searchVM.showRemovedAlert, alert: {
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
-//        .refreshable {
-//            if searchInput != "" {
-//                await searchVM.getResults(search: searchInput)
-//                self.hideKeyboard()
-//            }
-//        }
         .searchable(text: $searchInput)
-        .onChange(of: searchInput) { newValue in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
-                guard newValue == searchInput,
-                      searchInput.isEmpty == false,
-                      newValue.count > 2 else {
-                    return
+        .onChange(of: searchInput) { newValue, _ in
+            guard !newValue.isEmpty, newValue.count > 1 else { return }
+
+            Task {
+                // Wait 0.6s to debounce
+                try? await Task.sleep(for: .seconds(0.6))
+
+                // Check if the text is still the same (user didn’t keep typing)
+                guard newValue == searchInput else { return }
+
+                await searchVM.getResults(search: newValue)
+                await MainActor.run {
+                    enablePicker = true
+                    hideKeyboard()
                 }
-                
-                Task {
-                    await searchVM.getResults(search: searchInput)
-                    self.enablePicker = true
-                    self.hideKeyboard()
-                }
-            })
+            }
         }
     }
 }

@@ -73,8 +73,8 @@ class ContentDetailsViewModel: ObservableObject {
        
         do {
             self.details = try await service.fetchDetails(screenType: screenType, id: id)
-            if let season = details?.seasons?.first {
-                self.selectedSeason = season
+            if let firstSeason = details?.seasons?.first(where: { $0.air_date != nil }) {
+                self.selectedSeason = firstSeason
             }
         } catch {
             apiError = true

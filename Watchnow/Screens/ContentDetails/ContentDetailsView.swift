@@ -296,19 +296,11 @@ extension ContentDetailsView {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
             
-            getNavBarButton(imageName: "square.and.arrow.up") {
-                let shareActivity = UIActivityViewController(activityItems: [URL(string: detailsViewModel.createShareLink())],
-                                                             applicationActivities: nil)
-                
-                if let vc = UIApplication.shared.windows.first?.rootViewController {
-                    shareActivity.popoverPresentationController?.sourceView = vc.view
-                    shareActivity.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2,
-                                                                                     y: UIScreen.main.bounds.height, width: 0, height: 0)
-                    
-                    shareActivity.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.down
-                    vc.present(shareActivity, animated: true, completion: nil)
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            if let url = URL(string: detailsViewModel.createShareLink()) {
+                ShareLink(item: url) {
+                    getnavBarLabel(imageName: "square.and.arrow.up")
                 }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 5)
@@ -318,19 +310,19 @@ extension ContentDetailsView {
     private func getNavBarButton(imageName: String,
                                  action: @escaping () -> Void) -> some View{
         
+        Button(action: action,
+               label: { getnavBarLabel(imageName: imageName)} )
+    }
+    
+    @ViewBuilder
+    private func getnavBarLabel(imageName: String) -> some View {
         if #available(iOS 26.0, *) {
-            Button(action: action,
-                   label: {
-                Image(systemName: imageName)
-            })
+            Image(systemName: imageName)
         } else {
-            Button(action: action,
-                   label: {
-                Image(systemName: imageName)
-                    .foregroundColor(.white)
-                    .shadow(color: .black, radius: 3)
-                    .bold()
-            })
+            Image(systemName: imageName)
+                .foregroundColor(.white)
+                .shadow(color: .black, radius: 3)
+                .bold()
         }
     }
     
@@ -344,7 +336,7 @@ extension ContentDetailsView {
     }
 }
 
-extension UINavigationController: UIGestureRecognizerDelegate {
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = nil
