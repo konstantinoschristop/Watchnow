@@ -15,14 +15,13 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
     
     var body: some View {
         ScrollView(showsIndicators: false) {
+            if let results = viewModel.featuredResult {
+                MenuFeaturedView(results: results,
+                                 overlayContent: { result in overlayContent(for: result) },
+                                 screenType: sections.allSatisfy({ $0.screenType == .movie }) ? .movie : .tv,
+                                 showNavBar: .constant(true))
+            }
             LazyVStack(spacing: 6) {
-                if let results = viewModel.featuredResult {
-                    MenuFeaturedView(results: results,
-                                     overlayContent: { result in overlayContent(for: result) },
-                                     screenType: sections.allSatisfy({ $0.screenType == .movie }) ? .movie : .tv,
-                                     showNavBar: .constant(true))
-                }
-                
                 ForEach(sections, id: \.self) { section in
                     if let results = results(for: section, from: viewModel) {
                         if section.isTopView {

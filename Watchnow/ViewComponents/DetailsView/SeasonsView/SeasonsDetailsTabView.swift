@@ -100,7 +100,7 @@ enum ScrollableTabBarViewConstants {
 
 struct ScrollableTabBarView<IdentifierType: Hashable>: View {
 
-    @StateObject var viewModel: ViewModel<IdentifierType>
+    @StateObject var viewModel: ScrollableTabBarViewModel<IdentifierType>
     @Binding var selectedTab: IdentifierType
     
     private var horizontalSpacing: CGFloat
@@ -149,33 +149,33 @@ struct ScrollableTabBarView<IdentifierType: Hashable>: View {
     }
 }
 
-extension ScrollableTabBarView {
-    class ViewModel<IdentifierType: Hashable>: ObservableObject {
-        var items: [ScrollableTabBarItemViewModel<IdentifierType>]
+@MainActor
+class ScrollableTabBarViewModel<IdentifierType: Hashable>: ObservableObject {
+    var items: [ScrollableTabBarItemViewModel<IdentifierType>]
 
-        @Published var allowsTapping: Bool = true
+    @Published var allowsTapping: Bool = true
 
-        init(items: [ScrollableTabBarItemViewModel<IdentifierType>]) {
-            self.items = items
+    init(items: [ScrollableTabBarItemViewModel<IdentifierType>]) {
+        self.items = items
+    }
+
+    func selectedItemChanged(id: IdentifierType,
+                             proxy: ScrollViewProxy ) {
+        withAnimation(.easeInOut(duration: ScrollableTabBarViewConstants.animationDuration)) {
+            proxy.scrollTo(id, anchor: .center)
         }
+    }
 
-        func selectedItemChanged(id: IdentifierType,
-                                 proxy: ScrollViewProxy ) {
-            withAnimation(.easeInOut(duration: ScrollableTabBarViewConstants.animationDuration)) {
-                proxy.scrollTo(id, anchor: .center)
-            }
-        }
+    func tabSelectedAction() {
+        disableTouchesWhileAnimating()
+    }
 
-        func tabSelectedAction() {
-            disableTouchesWhileAnimating()
-        }
+    func disableTouchesWhileAnimating() {
+        allowsTapping = false
 
-        func disableTouchesWhileAnimating() {
-            allowsTapping = false
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + ScrollableTabBarViewConstants.animationDuration) { [weak self] in
-                self?.allowsTapping = true
-            }
+        Task {
+            try await Task.sleep(nanoseconds: UInt64(ScrollableTabBarViewConstants.animationDuration * 1_000_000))
+            self.allowsTapping = true
         }
     }
 }

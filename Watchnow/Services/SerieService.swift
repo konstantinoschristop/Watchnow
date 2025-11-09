@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SerieService: BaseNetworkService {
+final class SerieService: BaseNetworkService {
 
     func fetchPopularSeries(page: Int) async throws -> GenericReultResponse {
         return try await request(urlString: API.TV.popular(page: page))
@@ -25,3 +25,5 @@ class SerieService: BaseNetworkService {
         return try await request(urlString: API.TV.topRated(page: page))
     }
 }
+
+extension SerieService: @unchecked Sendable {}

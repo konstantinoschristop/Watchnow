@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ServiceInvocation: BaseNetworkService {
+final class ServiceInvocation: BaseNetworkService {
 
     func fetchCredits(screenType: ScreenTypes, id: String) async throws -> ResultCreditsResponse {
         let urlString = API.Common.credits(type: screenType.rawValue, for: id)
@@ -67,3 +67,5 @@ class ServiceInvocation: BaseNetworkService {
         return try await request(urlString: urlString)
     }
 }
+
+extension ServiceInvocation: @unchecked Sendable {}

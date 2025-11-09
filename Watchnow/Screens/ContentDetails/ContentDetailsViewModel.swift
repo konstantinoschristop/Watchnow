@@ -21,6 +21,7 @@ class ContentDetailsViewModel: ObservableObject {
         
         self.model = model
         self.service = service
+        self.model.isInWatchList = WatchlistManager.existsInWatchList(result: result)
     }
     
     private func checkIfFetchingIsFinished() {

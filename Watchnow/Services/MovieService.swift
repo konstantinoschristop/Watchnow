@@ -30,3 +30,5 @@ final class MovieService: BaseNetworkService {
         try await request(urlString: API.Movie.nowPlaying(page: page))
     }
 }
+
+extension MovieService: @unchecked Sendable {}

@@ -14,6 +14,7 @@ protocol BaseViewModelProtocol {
     func canLoadMoreContent(section: ViewSections) -> Bool
 }
 
+@MainActor
 protocol ContentService {
     func fetchTrending(page: Int) async throws -> GenericReultResponse
     func fetchPopular(page: Int) async throws -> GenericReultResponse

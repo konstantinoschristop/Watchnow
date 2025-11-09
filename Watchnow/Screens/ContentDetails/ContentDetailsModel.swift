@@ -23,7 +23,7 @@ struct ContentDetailsModel {
     var collection: CollectionResponse?
     var images: ImagesResponse?
     var watchProviders: WatchProvidersResponse?
-    var isInWatchList: Bool
+    var isInWatchList: Bool = false
     var viewModelFinishedFetching: Bool = false
     
     var screenType: ScreenTypes
@@ -34,7 +34,6 @@ struct ContentDetailsModel {
         
         self.screenType = screenType
         self.result = result
-        self.isInWatchList = WatchlistManager.existsInWatchList(result: result)
         self.result.media_type = screenType == .movie ? "movie" : "tv"
     }
 }
