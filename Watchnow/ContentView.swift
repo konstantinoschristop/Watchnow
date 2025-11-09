@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PartialSheet
 import TipKit
 
 struct ContentView: View {
@@ -46,7 +45,6 @@ extension ContentView {
                 .background(Color(.systemGray6))
                 .navigationBarTitle("Movies")
         }
-        .attachPartialSheetToRoot()
     }
     
     private var seriesTabContent: some View {
@@ -57,7 +55,6 @@ extension ContentView {
                 .background(Color(.systemGray6))
                 .navigationBarTitle("Series")
         }
-        .attachPartialSheetToRoot()
     }
     
     private var searchTabContent: some View {
@@ -69,7 +66,6 @@ extension ContentView {
                 .navigationBarTitle("Search")
                 .navigationBarTitleDisplayMode(.automatic)
         }
-        .attachPartialSheetToRoot()
     }
     
     private var watchlistTabContent: some View {
@@ -81,6 +77,5 @@ extension ContentView {
                 .navigationBarTitle("Watchlist")
                 .navigationBarTitleDisplayMode(.automatic)
         }
-        .attachPartialSheetToRoot()
     }
 }

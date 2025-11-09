@@ -15,7 +15,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
     
     var body: some View {
         ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 6) {
                 if let results = viewModel.featuredResult {
                     MenuFeaturedView(results: results,
                                      overlayContent: { result in overlayContent(for: result) },

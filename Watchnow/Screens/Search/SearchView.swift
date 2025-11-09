@@ -26,10 +26,10 @@ struct SearchView: View {
 //                .padding(.bottom)
         }
         .toast(isPresenting: $searchVM.showAddedAlert, alert: {
-            AlertToast(displayMode: .banner(.slide), type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
         .toast(isPresenting: $searchVM.showRemovedAlert, alert: {
-            AlertToast(displayMode: .banner(.slide), type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
+            AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
 //        .refreshable {
 //            if searchInput != "" {

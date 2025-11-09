@@ -20,7 +20,6 @@
 		8A19B1BB2E7F00490083A094 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */; };
 		8A19B1BE2E7F006A0083A094 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BD2E7F006A0083A094 /* View+Extension.swift */; };
 		8A19B1C02E8085330083A094 /* StretchingActionScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */; };
-		8A546AB52ADBE8C3007615BF /* ScrollKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8A546AB42ADBE8C3007615BF /* ScrollKit */; };
 		8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */; };
 		8A57A8B02AED6EFC002B636A /* TipKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */; };
 		8A8F4B3726BC152F00D87BBB /* ContentDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */; };
@@ -60,7 +59,6 @@
 		EE67246627B9233800B8F8E8 /* ResultCreditsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246527B9233800B8F8E8 /* ResultCreditsResponse.swift */; };
 		EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */; };
 		EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247927B9876400B8F8E8 /* CastView.swift */; };
-		EE8B692428C4994200AD6B8D /* PartialSheet in Frameworks */ = {isa = PBXBuildFile; productRef = EE8B692328C4994200AD6B8D /* PartialSheet */; };
 		EE8B692628C4A63700AD6B8D /* CollectionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */; };
 		EE8B692828C6889C00AD6B8D /* ImagesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692728C6889C00AD6B8D /* ImagesResponse.swift */; };
 		EE93A1E628BFE86300F5B1E6 /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */; };
@@ -84,7 +82,6 @@
 		EEDC84A828AAC40300F3C171 /* EpisodesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */; };
 		EEDC84AA28ABA4E100F3C171 /* EpisodesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84A928ABA4E100F3C171 /* EpisodesView.swift */; };
 		EEDC84AE28ABE61900F3C171 /* PersonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AD28ABE61900F3C171 /* PersonResponse.swift */; };
-		EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */ = {isa = PBXBuildFile; productRef = EEDC84B228B7F11200F3C171 /* FancyScrollView */; };
 		EEF45B202A48C4CA00D3460E /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B1F2A48C4CA00D3460E /* AdBannerView.swift */; };
 		EEF45B272A79864400D3460E /* WatchProvidersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */; };
 		EEF45B292A7998D600D3460E /* WatchProviderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B282A7998D600D3460E /* WatchProviderView.swift */; };
@@ -176,10 +173,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8A546AB52ADBE8C3007615BF /* ScrollKit in Frameworks */,
-				EEDC84B328B7F11200F3C171 /* FancyScrollView in Frameworks */,
 				8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */,
-				EE8B692428C4994200AD6B8D /* PartialSheet in Frameworks */,
 				EE9595CC289FB5550016EC25 /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -442,9 +436,6 @@
 			packageProductDependencies = (
 				8A036A7726BBE23700A3D0FF /* Kingfisher */,
 				EE9595CB289FB5550016EC25 /* AlertToast */,
-				EEDC84B228B7F11200F3C171 /* FancyScrollView */,
-				EE8B692328C4994200AD6B8D /* PartialSheet */,
-				8A546AB42ADBE8C3007615BF /* ScrollKit */,
 			);
 			productName = Watchnow;
 			productReference = 8A981D4F26B5AF1000993232 /* Watchnow.app */;
@@ -476,9 +467,6 @@
 			packageReferences = (
 				8A036A7626BBE23700A3D0FF /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */,
-				EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */,
-				EE8B692228C4994200AD6B8D /* XCRemoteSwiftPackageReference "PartialSheet" */,
-				8A546AB32ADBE8C3007615BF /* XCRemoteSwiftPackageReference "ScrollKit" */,
 			);
 			productRefGroup = 8A981D5026B5AF1000993232 /* Products */;
 			projectDirPath = "";
@@ -795,36 +783,12 @@
 				minimumVersion = 6.3.1;
 			};
 		};
-		8A546AB32ADBE8C3007615BF /* XCRemoteSwiftPackageReference "ScrollKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/danielsaidi/ScrollKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.3.0;
-			};
-		};
-		EE8B692228C4994200AD6B8D /* XCRemoteSwiftPackageReference "PartialSheet" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/AndreaMiotto/PartialSheet";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.0.0;
-			};
-		};
 		EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/elai950/AlertToast.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
-			};
-		};
-		EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/nerdsupremacist/FancyScrollView";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.4;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -835,25 +799,10 @@
 			package = 8A036A7626BBE23700A3D0FF /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
-		8A546AB42ADBE8C3007615BF /* ScrollKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8A546AB32ADBE8C3007615BF /* XCRemoteSwiftPackageReference "ScrollKit" */;
-			productName = ScrollKit;
-		};
-		EE8B692328C4994200AD6B8D /* PartialSheet */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EE8B692228C4994200AD6B8D /* XCRemoteSwiftPackageReference "PartialSheet" */;
-			productName = PartialSheet;
-		};
 		EE9595CB289FB5550016EC25 /* AlertToast */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EE9595CA289FB5550016EC25 /* XCRemoteSwiftPackageReference "AlertToast" */;
 			productName = AlertToast;
-		};
-		EEDC84B228B7F11200F3C171 /* FancyScrollView */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EEDC84B128B7F11200F3C171 /* XCRemoteSwiftPackageReference "FancyScrollView" */;
-			productName = FancyScrollView;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

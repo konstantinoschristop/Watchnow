@@ -1,5 +1,5 @@
 {
-  "originHash" : "5fcc6b9251f88bf8b60e6983865230bfeb00be6a2bd91438d52c2f441e285fb8",
+  "originHash" : "59083b50cf0c350f008a3b189a158b710e172e27efb85ce315b88486a53e28a0",
   "pins" : [
     {
       "identity" : "alerttoast",
@@ -11,39 +11,12 @@
       }
     },
     {
-      "identity" : "fancyscrollview",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nerdsupremacist/FancyScrollView",
-      "state" : {
-        "revision" : "7f8194b23dc209cdb5b0ebc9799a8de487166fdf",
-        "version" : "0.1.4"
-      }
-    },
-    {
       "identity" : "kingfisher",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
         "revision" : "d06df9adf50ed8cde5786d935836a5f445f780ba",
         "version" : "6.3.1"
-      }
-    },
-    {
-      "identity" : "partialsheet",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/AndreaMiotto/PartialSheet",
-      "state" : {
-        "revision" : "6c61890976181274ea7baf6a4c297418346db799",
-        "version" : "3.1.1"
-      }
-    },
-    {
-      "identity" : "scrollkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danielsaidi/ScrollKit",
-      "state" : {
-        "revision" : "7c9530ceda4c9717679d7a483d77753eeb5acccf",
-        "version" : "0.5.0"
       }
     }
   ],

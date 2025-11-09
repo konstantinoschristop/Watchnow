@@ -8,7 +8,6 @@
 import SwiftUI
 import Kingfisher
 import AlertToast
-import PartialSheet
 import TipKit
 
 struct ContentDetailsView: View {
@@ -35,8 +34,8 @@ struct ContentDetailsView: View {
                             trailing: navBarTrailingView)
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
-            AlertToast(displayMode: .banner(.slide), type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
-            AlertToast(displayMode: .banner(.slide), type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
+            AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
+            AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
         .sheet(isPresented: $videoPresented) {
             WebView(videoURL: detailsViewModel.videos?.getVideoURL())
