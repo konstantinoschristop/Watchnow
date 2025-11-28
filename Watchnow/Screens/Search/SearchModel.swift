@@ -31,6 +31,24 @@ struct SearchModel {
     }
     
     var searchResponse: SearchResponse?
-    var results: [Result]?
-    var selectedChooser: SearchChooserOptions = .all 
+    var results: [Result]? {
+        didSet {
+            setFilteredArray()
+        }
+    }
+    var filteredResults: [Result] = []
+    var selectedChooser: SearchChooserOptions = .all {
+        didSet {
+            setFilteredArray()
+        }
+    }
+    
+    mutating func setFilteredArray() {
+        
+        if selectedChooser == .all {
+            filteredResults = results ?? []
+        } else {
+            filteredResults = results?.filter { $0.getMediaType() == selectedChooser.rawValue } ?? []
+        }
+    }
 }

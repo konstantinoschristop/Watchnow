@@ -12,12 +12,11 @@ import AlertToast
 struct WatchlistView: View {
     
     @StateObject var watchlistViewModel: WatchlistViewModel
-    @State var selectedTab = "Movies"
+    @State var selectedTab: WatchlistModel.Tab = .movies
     @Namespace private var namespace
     
     var body: some View {
         
-       // listView
         tabView
         .onAppear {
             watchlistViewModel.refreshDataIfNeeded()
@@ -50,96 +49,44 @@ struct WatchlistView: View {
         .padding(.init(top: 10, leading: 0, bottom: 5, trailing: 0))
     }
     
-    var listView: some View {
-        VStack(spacing: 0) {
-            if watchlistViewModel.isWatchListEmpty() {
-                Text("Your watchlist is empty!")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                //                AdBannerView()
-                //                    .background(.blue)
-                //                    .frame(height: 50)
-                //                    .padding(.bottom)
-            } else {
-                List {
-                    if let movies = watchlistViewModel.savedMovies,
-                       movies.isEmpty == false {
-                        
-                        self.getSectionTitle(title: "Movies", sectionType: .movie)
-                        
-                        if watchlistViewModel.showingMovies {
-                            GenericListView(results: movies, viewModel: watchlistViewModel, namespace: namespace)
-                        }
-                    }
-                    
-                    if let series = watchlistViewModel.savedSeries,
-                       series.isEmpty == false {
-                        
-                        self.getSectionTitle(title: "TV Series", sectionType: .tv)
-                        
-                        if watchlistViewModel.showingSeries {
-                            GenericListView(results: series, viewModel: watchlistViewModel, namespace: namespace)
-                        }
-                    }
-                    //
-                    //                        AdBannerView()
-                    //                            .frame(height: 50)
-                    //                            .padding(.bottom)
-                }
-                .listStyle(.plain)
-            }
-        }
-    }
-    
     @ViewBuilder
     var pickerView: some View {
         Picker("", selection: $selectedTab) {
-            Text("Movies")
-                .tag("Movies")
-            Text("TV Series")
-                .tag("TV Series")
+            ForEach(WatchlistModel.Tab.allCases, id: \.self) { tab in
+                Text(tab.title)
+                    .tag(tab.rawValue)
+            }
         }
         .pickerStyle(SegmentedPickerStyle())
         .padding(.horizontal)
+    }
+    
+    private func section(title: String, results: Binding<[Result]>) -> some View {
+        VStack(spacing: 0) {
+            List {
+                Text(title)
+                    .font(.system(size: 25, weight: .heavy))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top)
+                    .listRowSeparatorTint(.clear)
+                    .listRowBackground(Color(.systemGray6))
+                GenericListView(results: results,
+                                viewModel: watchlistViewModel,
+                                namespace: namespace)
+            }
+            .listStyle(.plain)
+        }
     }
     
     @ViewBuilder
     var tabView: some View {
         
         Group {
-            if let movies = watchlistViewModel.savedMovies,
-               movies.isEmpty == false,
-               selectedTab == "Movies" {
-                
-                VStack(spacing: 0) {
-                    List {
-                        Text("Movies")
-                            .font(.system(size: 25, weight: .heavy))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color(.systemGray6))
-                        GenericListView(results: movies, viewModel: watchlistViewModel, namespace: namespace)
-                    }
-                    .listStyle(.plain)
-                }
-            }
-            
-            if let series = watchlistViewModel.savedSeries,
-               series.isEmpty == false,
-               selectedTab == "TV Series" {
-                
-                VStack(spacing: 0) {
-                    List {
-                        Text("TV Series")
-                            .font(.system(size: 25, weight: .heavy))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top)
-                            .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color(.systemGray6))
-                        GenericListView(results: series, viewModel: watchlistViewModel, namespace: namespace)
-                    }
-                    .listStyle(.plain)
-                }
+            switch selectedTab {
+            case .movies:
+                section(title: "Movies", results: $watchlistViewModel.savedMovies)
+            case .series:
+                section(title: "TV Series", results: $watchlistViewModel.savedSeries)
             }
         }
         .toolbar {

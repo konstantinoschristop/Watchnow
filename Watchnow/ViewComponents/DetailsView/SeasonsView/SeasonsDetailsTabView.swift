@@ -52,15 +52,8 @@ struct SeasonsDetailsTabView: View {
             }
         }
         .background(Color(.systemGray6))
-        .task {
+        .task(id: selectedSeason) {
             await episodesViewModel.getEpisodes(seasonNumber: selectedSeason.season_number ?? 0)
-        }
-        .onChange(of: selectedSeason) { newValue, _ in
-            Task {
-                try? await Task.sleep(for: .milliseconds(100)) 
-                showLoader = true
-                await episodesViewModel.getEpisodes(seasonNumber: newValue.season_number ?? 0)
-            }
         }
     }
 }

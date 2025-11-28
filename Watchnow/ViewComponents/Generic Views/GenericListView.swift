@@ -10,7 +10,7 @@ import SwiftUI
 
 struct GenericListView: View {
     
-    var results: [Result]
+    @Binding var results: [Result]
     @State var viewModel: BaseSwipeActionsProtocol
     var namespace: Namespace.ID
     
@@ -65,7 +65,6 @@ struct GenericListView: View {
         return Button (action: {
                 WatchlistManager.addToWatchList(result: result)
                 viewModel.showAddedAlert = true
-                viewModel.listNeedsUpdate = true
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         }) {
             Label("Add to Watchlist", systemImage: "bookmark.fill")
@@ -78,8 +77,8 @@ struct GenericListView: View {
         return Button (action: {
             withAnimation {
                 WatchlistManager.removeFromWatchList(result: result)
+                viewModel.itemRemoved(result: result)
                 viewModel.showRemovedAlert = true
-                viewModel.listNeedsUpdate = true
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
         }) {

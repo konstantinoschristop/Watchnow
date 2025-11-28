@@ -71,6 +71,15 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
             return
         }
     }
+    
+    func itemRemoved(result: Result) {
+        if let movieToRemove = self.savedMovies.firstIndex(of: result) {
+            savedMovies.remove(at: movieToRemove)
+        }
+        if let seriesToRemove = self.savedSeries.firstIndex(of: result) {
+            savedSeries.remove(at: seriesToRemove)
+        }
+    }
 }
 
 extension WatchlistViewModel {
@@ -80,12 +89,12 @@ extension WatchlistViewModel {
         set { model.results = newValue }
     }
     
-    var savedMovies: [Result]? {
+    var savedMovies: [Result] {
         get { model.savedMovies }
         set { model.savedMovies = newValue }
     }
     
-    var savedSeries: [Result]? {
+    var savedSeries: [Result] {
         get { model.savedSeries }
         set { model.savedSeries = newValue }
     }

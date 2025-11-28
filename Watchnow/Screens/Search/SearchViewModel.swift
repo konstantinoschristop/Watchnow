@@ -11,21 +11,20 @@ import Foundation
 protocol BaseSwipeActionsProtocol {
     var showRemovedAlert: Bool { get set }
     var showAddedAlert: Bool { get set }
-    var listNeedsUpdate: Bool { get set }
-    func refreshDataIfNeeded()
+    func itemRemoved(result: Result)
+}
+
+extension BaseSwipeActionsProtocol {
+    func itemRemoved(result: Result) {}
 }
 
 @MainActor
 class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
-    
+ 
     @Published private var model: SearchModel
     @Published var showRemovedAlert = false
     @Published var showAddedAlert = false
-    @Published var listNeedsUpdate = false {
-        didSet {
-            refreshDataIfNeeded()
-        }
-    }
+    
     @Published var apiError: Bool = false
     private let service: ServiceInvocation
     
@@ -51,19 +50,6 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
         self.results = results?.results?.filter { $0.poster_path != nil && $0.media_type != "person" ||
                                                   $0.profile_path != nil && $0.media_type == "person" }
     }
-    
-    func getFilteredArray() -> [Result] {
-        
-        if selectedChooser == .all {
-            return results ?? []
-        } else {
-            return results?.filter { $0.getMediaType() == selectedChooser.rawValue } ?? []
-        }
-    }
-    
-    func refreshDataIfNeeded() {
-        cleanUpResults(results: searchResponse)
-    }
 }
 
 extension SearchViewModel {
@@ -76,6 +62,11 @@ extension SearchViewModel {
     var results: [Result]? {
         get { model.results }
         set { model.results = newValue }
+    }
+    
+    var filteredResults: [Result] {
+        get { model.filteredResults }
+        set { model.filteredResults = newValue }
     }
     
     var selectedChooser: SearchModel.SearchChooserOptions {

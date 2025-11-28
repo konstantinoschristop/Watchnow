@@ -31,7 +31,7 @@ struct SearchView: View {
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
         .searchable(text: $searchInput)
-        .onChange(of: searchInput) { newValue, _ in
+        .onChange(of: searchInput) { _ ,newValue in
             guard !newValue.isEmpty, newValue.count > 1 else { return }
 
             Task {
@@ -63,7 +63,7 @@ extension SearchView {
             }
         }
         .pickerStyle(SegmentedPickerStyle())
-        .padding(.horizontal)
+        .padding()
     }
     
     @ViewBuilder
@@ -98,44 +98,31 @@ extension SearchView {
     @ViewBuilder
     var searchResultsView: some View {
         
-        if let results = searchVM.results {
+        if let results = searchVM.results{
             if results.isEmpty == false {
-                let filtered = searchVM.getFilteredArray()
                 List {
-                    if filtered.isEmpty {
-                        Text("No results found for this filter.")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    if searchVM.filteredResults.isEmpty {
+                        ContentUnavailableView("No results found for this filter.", systemImage: "xmark.circle")
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color(.systemGray6))
+                            .listRowInsets(EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10))
                     } else {
-                        if searchVM.listNeedsUpdate {
-                            GenericListView(results: filtered, viewModel: searchVM, namespace: namespace)
-                        } else {
-                            GenericListView(results: filtered, viewModel: searchVM, namespace: namespace)
-                        }
+                        GenericListView(results: $searchVM.filteredResults,
+                                        viewModel: searchVM,
+                                        namespace: namespace)
                     }
                 }
                 .listStyle(.plain)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        pickerView
-                    }
-                }
+                .safeAreaInset(edge: .bottom, content: {
+                    pickerView
+                })
                 .scrollDismissesKeyboard(.interactively)
             } else {
-                Text("No results found. Try searching again with a different keyword.")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ContentUnavailableView("No results found. Try searching again with a different keyword.", systemImage: "xmark.circle")
             }
         } else {
-            VStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(Color(.systemGray4))
-                Text("Search Movies, TV Series or Actors")
-                    .font(.system(size: 18, weight: .bold))
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            ContentUnavailableView("Search Movies, TV Series or Actors",
+                                   systemImage: "magnifyingglass")
             .onTapGesture {
                 self.hideKeyboard()
             }
