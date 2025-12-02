@@ -27,7 +27,7 @@ struct ContentDetailsView: View {
         }
         .ignoresSafeArea(edges: .top)
         .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
-        .background(Color(.systemGray6))
+        .background(Color(.background))
         .navigationBarTitleDisplayMode(.inline)
         .hideBackButtonOptionally()
         .navigationBarItems(leading: navBarLeadingView,
@@ -60,176 +60,27 @@ extension ContentDetailsView {
         let result = detailsViewModel.result
         let screenType = detailsViewModel.screenType
         
-        return VStack(spacing: 0) {
+        return VStack(spacing: 10) {
     
             MenuFeaturedView(results: [result],
                              overlayContent: { _ in overlayContent(for: result) },
                              screenType: screenType,
                              showNavBar: .constant(true))
-
-            Group {
-                // scroll categories
-                if let availableGenres = detailsViewModel.details?.genres,
-                   availableGenres.isEmpty == false {
-                    GenresView(genres: availableGenres)
-                }
-    
-                //DetailsView
-                DetailsView(details: detailsViewModel.details)
-                
-                // if series, show seasons and episodes
-                if screenType == .tv {
-                    if let seasons = detailsViewModel.details?.getSeasons(),
-                       let numberOfSeasons = detailsViewModel.details?.number_of_seasons,
-                       let numberOfEpisodes = detailsViewModel.details?.number_of_episodes,
-                       let name = detailsViewModel.details?.name,
-                       let seriesID = detailsViewModel.details?.id {
-                        VStack(spacing: 0) {
-                            HStack {
-                                Text("Seasons")
-                                    .font(.system(size: 20, weight: .bold))
-                                Spacer()
-                            }
-                            
-                            HStack {
-                                Text("Total Seasons: " + String(numberOfSeasons))
-                                Divider()
-                                Text("Total Episodes: " + String(numberOfEpisodes))
-                                Spacer()
-                                
-                                Button {
-                                    isSeasonsSheetPresented.toggle()
-                                } label: {
-                                    Text("See all")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.gray)
-                        }
-                        .padding(.all, 10)
-                        SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
-                            .sheet(isPresented: $isSeasonsSheetPresented) {
-                                SeasonsDetailsTabView(seasons: seasons,
-                                                      selectedSeason: $detailsViewModel.selectedSeason,
-                                                      seriesID: seriesID)
-                                .presentationDetents([.large])
-                            }
-                    }
-                }
-                
-                // Watch Providers
-                if let watchProvidersResults = detailsViewModel.watchProviders?.results,
-                   let watchProvider = watchProvidersResults[Locale.current.language.region?.identifier ?? "US"],
-                   watchProvider.flatrate?.isEmpty == false || watchProvider.rent?.isEmpty == false {
-                    
-                    HStack {
-                        Text("Available on")
-                            .font(.system(size: 20, weight: .bold))
-                        Spacer()
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    
-                    WatchProviderView(flatrates: watchProvider.flatrate ?? [],
-                                      rent: watchProvider.rent ?? [])
-                }
-                
-                //cast
-                if let cast = detailsViewModel.credits?.cast,
-                   cast.isEmpty == false {
-                    
-                    HStack {
-                        Text("Cast")
-                            .font(.system(size: 20, weight: .bold))
-                        Spacer()
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    CastView(cast: cast)
-                }
-                
-                // similar
-                if let content = detailsViewModel.similar?.results,
-                   content.isEmpty == false {
-                    
-                    VStack(spacing: 0) {
-                        HStack {
-                            Text(screenType == .movie ? "Similar Movies" : "Similar TV Shows")
-                                .font(.system(size: 20, weight: .bold))
-                            Spacer()
-                        }
-                        HStack {
-                            Text("You might also like")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.gray)
-                            Spacer()
-                        }
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    SimilarsView(content: content, screenType: screenType, namespace: namespace)
-                        .padding(.bottom, -30)
-                }
-                // user reviews
-                if let reviews = detailsViewModel.reviews?.results,
-                   reviews.isEmpty == false {
-                    
-                    HStack {
-                        Text("User Reviews")
-                            .font(.system(size: 20, weight: .bold))
-                        Spacer()
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    ReviewsView(reviews: reviews)
-                }
-                
-                // Additional Info
-                if let details = detailsViewModel.details {
-                    
-                    HStack {
-                        Text("Additional Information")
-                            .font(.system(size: 20, weight: .bold))
-                        Spacer()
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    AdditionalInfoView(details: details)
-                }
-                
-                // collection
-                if let collection = detailsViewModel.details?.belongs_to_collection,
-                   let collectionName = collection.name,
-                   let content = detailsViewModel.collection?.parts,
-                   content.isEmpty == false {
-                    
-                    VStack(spacing: 0) {
-                        HStack() {
-                            Text("Belongs to: " + collectionName)
-                                .font(.system(size: 20, weight: .bold))
-                            Spacer()
-                        }
-                        HStack {
-                            Text("Parts of the Collection")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.gray)
-                            Spacer()
-                        }
-                    }
-                    .padding(.top, 10)
-                    .padding(.leading, 10)
-                    SimilarsView(content: content, screenType: screenType, namespace: namespace)
-                }
-                
-                //                AdBannerView()
-                //                    .frame(height: 50)
-                //                    .padding(.bottom)
-            }
+            
+            genresSection()
+            detailsSection()
+            seasonsSection()
+            watchProvidersSection()
+            castSection()
+            similarsSection()
+            reviewsSection()
+            additionalInfoSection()
+            collectionSection()
         }
         .padding(.bottom, 50)
     }
     
+    // MARK: - Overlay
     @ViewBuilder
     func overlayContent(for content: Result) -> some View {
         ZStack(alignment: .bottom) {
@@ -246,20 +97,7 @@ extension ContentDetailsView {
                     Spacer()
                     
                     if detailsViewModel.videos?.getVideoURL() != nil {
-                        VStack {
-                            Button(action: {
-                                videoPresented.toggle()
-                            }) {
-                                Image(systemName: "play.fill")
-                                    .imageScale(SwiftUI.Image.Scale.large)
-                                    .foregroundColor(.red)
-                            }
-                            Spacer()
-                                .frame(height: 12)
-                            Text("Watch Trailer")
-                                .font(.custom("AvenirNext-Bold", size: 12))
-                                .foregroundColor(.white)
-                        }
+                        TrailerButton(videoPresented: $videoPresented)
                     }
                 }
                 .shadow(color: .black, radius: 3)
@@ -271,6 +109,7 @@ extension ContentDetailsView {
         }
     }
     
+    // MARK: - Navigation Bar
     @ViewBuilder
     var navBarLeadingView: some View {
         
@@ -336,13 +175,123 @@ extension ContentDetailsView {
     }
 }
 
-extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
-    override open func viewDidLoad() {
-        super.viewDidLoad()
-        interactivePopGestureRecognizer?.delegate = nil
+// MARK: - Sections
+extension ContentDetailsView {
+    @ViewBuilder
+    private func genresSection() -> some View {
+        if detailsViewModel.hasGenres {
+            GenresView(genres: detailsViewModel.genresSafe)
+        }
     }
-    
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return viewControllers.count > 1
+
+    @ViewBuilder
+    private func detailsSection() -> some View {
+        DetailsView(details: detailsViewModel.details)
+    }
+
+    @ViewBuilder
+    private func seasonsSection() -> some View {
+        let screenType = detailsViewModel.screenType
+        if screenType == .tv, detailsViewModel.hasSeasons {
+            let seasons = detailsViewModel.seasonsSafe
+            let numberOfSeasons = detailsViewModel.details?.number_of_seasons ?? 0
+            let numberOfEpisodes = detailsViewModel.details?.number_of_episodes ?? 0
+            let name = detailsViewModel.details?.name ?? ""
+            let seriesID = detailsViewModel.details?.id ?? 0
+
+            HStack(alignment: .bottom) {
+                SectionHeaderView(title: "Seasons",
+                                  subtitle: "\(numberOfSeasons) Seasons | \(numberOfEpisodes) Episodes")
+                
+                Button {
+                    isSeasonsSheetPresented.toggle()
+                } label: {
+                    Text("See all")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.blue)
+                        .padding(.horizontal)
+                }
+            }
+
+            SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+                .sheet(isPresented: $isSeasonsSheetPresented) {
+                    SeasonsDetailsTabView(
+                        seasons: seasons,
+                        selectedSeason: $detailsViewModel.selectedSeason,
+                        seriesID: seriesID
+                    )
+                    .presentationDetents([.large])
+                }
+        }
+    }
+
+    @ViewBuilder
+    private func watchProvidersSection() -> some View {
+        if detailsViewModel.hasWatchProviders,
+           let provider = detailsViewModel.watchProviderSafe {
+
+            SectionHeaderView(title: "Available on")
+
+            WatchProviderView(
+                flatrates: provider.flatrate ?? [],
+                rent: provider.rent ?? []
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func castSection() -> some View {
+        if detailsViewModel.hasCast {
+            CastView(cast: detailsViewModel.castSafe)
+        }
+    }
+
+    @ViewBuilder
+    private func similarsSection() -> some View {
+        let screenType = detailsViewModel.screenType
+        if detailsViewModel.hasSimilars {
+            let content = detailsViewModel.similarsSafe
+
+            SectionHeaderView(title: "Similar \(screenType.rawValue)",
+                              subtitle: "You might also like")
+
+            SimilarsView(content: content, screenType: screenType, namespace: namespace)
+                .padding(.bottom, -30)
+        }
+    }
+
+    @ViewBuilder
+    private func reviewsSection() -> some View {
+        if detailsViewModel.hasReviews {
+            let reviews = detailsViewModel.reviewsSafe
+
+            SectionHeaderView(title: "User Reviews")
+
+            ReviewsView(reviews: reviews)
+        }
+    }
+
+    @ViewBuilder
+    private func additionalInfoSection() -> some View {
+        if let details = detailsViewModel.details {
+
+            SectionHeaderView(title: "Additional Information")
+
+            AdditionalInfoView(details: details)
+        }
+    }
+
+    @ViewBuilder
+    private func collectionSection() -> some View {
+        let screenType = detailsViewModel.screenType
+        if detailsViewModel.hasCollection,
+           let collectionName = detailsViewModel.details?.belongs_to_collection?.name {
+            let content = detailsViewModel.collectionSafe
+
+            SectionHeaderView(title: "Belongs to: \(collectionName)",
+                              subtitle: "Parts of the Collection")
+
+            SimilarsView(content: content, screenType: screenType, namespace: namespace)
+        }
     }
 }

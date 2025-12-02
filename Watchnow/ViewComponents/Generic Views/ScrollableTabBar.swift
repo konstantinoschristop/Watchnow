@@ -36,7 +36,7 @@ struct ScrollableTabBar<IdentifierType: Hashable>: View {
                                 .padding(.horizontal, 16)
                                 .background(
                                     selectedItem == item
-                                    ? Color(.systemGray5)
+                                    ? Color(.secondaryBackground)
                                     : Color.clear
                                 )
                                 .cornerRadius(10)

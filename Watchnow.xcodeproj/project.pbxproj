@@ -20,6 +20,8 @@
 		8A19B1BB2E7F00490083A094 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */; };
 		8A19B1BE2E7F006A0083A094 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BD2E7F006A0083A094 /* View+Extension.swift */; };
 		8A19B1C02E8085330083A094 /* StretchingActionScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */; };
+		8A4DDFC42EDCC20700F0E8DC /* UINavigationController+Extennsion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extennsion.swift */; };
+		8A4DDFC62EDCC4E900F0E8DC /* TrailerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DDFC52EDCC4E900F0E8DC /* TrailerButton.swift */; };
 		8A546AB72ADC56A6007615BF /* ContentDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */; };
 		8A57A8B02AED6EFC002B636A /* TipKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */; };
 		8A8F4B3726BC152F00D87BBB /* ContentDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */; };
@@ -101,6 +103,8 @@
 		8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		8A19B1BD2E7F006A0083A094 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 		8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StretchingActionScrollView.swift; sourceTree = "<group>"; };
+		8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extennsion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Extennsion.swift"; sourceTree = "<group>"; };
+		8A4DDFC52EDCC4E900F0E8DC /* TrailerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerButton.swift; sourceTree = "<group>"; };
 		8A546AB62ADC56A6007615BF /* ContentDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsModel.swift; sourceTree = "<group>"; };
 		8A57A8AF2AED6EFC002B636A /* TipKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipKitManager.swift; sourceTree = "<group>"; };
 		8A8F4B3626BC152F00D87BBB /* ContentDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailsView.swift; sourceTree = "<group>"; };
@@ -194,6 +198,7 @@
 		8A19B1BC2E7F00560083A094 /* Extesions */ = {
 			isa = PBXGroup;
 			children = (
+				8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extennsion.swift */,
 				8A19B1BD2E7F006A0083A094 /* View+Extension.swift */,
 			);
 			path = Extesions;
@@ -352,6 +357,7 @@
 		8AB84B7F275691CA0016D82E /* Generic Views */ = {
 			isa = PBXGroup;
 			children = (
+				8A4DDFC52EDCC4E900F0E8DC /* TrailerButton.swift */,
 				8AB23AA12EC112BE00AAA7A1 /* ScrollableTabBar.swift */,
 				8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */,
 				8A19B1B72E7EF99B0083A094 /* LoadMoreButtonView.swift */,
@@ -524,6 +530,7 @@
 				8AB84B8D275693810016D82E /* SerieService.swift in Sources */,
 				8A8F4B3E26BC1EF000D87BBB /* BottomCard.swift in Sources */,
 				8AC338FE2752923E00834B46 /* TopView.swift in Sources */,
+				8A4DDFC42EDCC20700F0E8DC /* UINavigationController+Extennsion.swift in Sources */,
 				EE27E298284D2A890055E25A /* GenericImageView.swift in Sources */,
 				8A19B1B62E7EF98F0083A094 /* ScrollableContentView.swift in Sources */,
 				8A981D7026B6917A00993232 /* GenericReultResponse.swift in Sources */,
@@ -563,6 +570,7 @@
 				EE4002A9284C98B500374143 /* GetSimilarModel.swift in Sources */,
 				EEF45B272A79864400D3460E /* WatchProvidersResponse.swift in Sources */,
 				EE95E43F2895C1B600B8C688 /* ContentDetailsViewModel.swift in Sources */,
+				8A4DDFC62EDCC4E900F0E8DC /* TrailerButton.swift in Sources */,
 				EE2732ED287AF11000B066C7 /* SearchResponse.swift in Sources */,
 				8AB84B8F2756946F0016D82E /* SeriesView.swift in Sources */,
 				8A981D7926B6935800993232 /* MovieGenresResponse.swift in Sources */,

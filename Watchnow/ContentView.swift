@@ -42,7 +42,7 @@ extension ContentView {
             let model = MoviesModel()
             let vm = MoviesViewModel(model: model)
             MoviesView(moviesViewModel: vm)
-                .background(Color(.systemGray6))
+                .background(Color(.background))
                 .navigationBarTitle("Movies")
         }
     }
@@ -52,7 +52,7 @@ extension ContentView {
             let model = SeriesModel()
             let vm = SeriesViewModel(model: model)
             SeriesView(seriesViewModel: vm)
-                .background(Color(.systemGray6))
+                .background(Color(.background))
                 .navigationBarTitle("Series")
         }
     }
@@ -62,7 +62,7 @@ extension ContentView {
             let model = SearchModel()
             let vm = SearchViewModel(model: model)
             SearchView(searchVM: vm)
-                .background(Color(.systemGray6))
+                .background(Color(.background))
                 .navigationBarTitle("Search")
                 .navigationBarTitleDisplayMode(.automatic)
         }
@@ -73,7 +73,7 @@ extension ContentView {
             let model = WatchlistModel()
             let vm = WatchlistViewModel(model: model)
             WatchlistView(watchlistViewModel: vm)
-                .background(Color(.systemGray6))
+                .background(Color(.background))
                 .navigationBarTitle("Watchlist")
                 .navigationBarTitleDisplayMode(.automatic)
         }

@@ -51,7 +51,7 @@ struct SeasonsDetailsTabView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
         }
-        .background(Color(.systemGray6))
+        .background(Color(.background))
         .task(id: selectedSeason) {
             await episodesViewModel.getEpisodes(seasonNumber: selectedSeason.season_number ?? 0)
         }

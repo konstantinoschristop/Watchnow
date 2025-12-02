@@ -102,7 +102,7 @@ struct SeasonsView: View {
         }
         .padding([.top, .bottom], 10)
         .padding([.leading, .trailing], 15)
-        .background(Color(.systemGray5))
+        .background(Color(.secondaryBackground))
         .cornerRadius(20)
     }
 }

@@ -186,3 +186,86 @@ extension ContentDetailsViewModel {
         return String(id)
     }
 }
+
+extension ContentDetailsViewModel {
+    var trailerURL: URL? {
+        videos?.getVideoURL()
+    }
+
+    var availableGenresSafe: [Genres] {
+        details?.genres ?? []
+    }
+
+    var castSafe: [Cast] {
+        credits?.cast ?? []
+    }
+
+    var similarContentSafe: [Result] {
+        similar?.results ?? []
+    }
+
+    var collectionPartsSafe: [Result] {
+        collection?.parts ?? []
+    }
+    
+    var hasGenres: Bool {
+        !(details?.genres?.isEmpty ?? true)
+    }
+
+    var genresSafe: [Genres] {
+        details?.genres ?? []
+    }
+
+    var hasSeasons: Bool {
+        details?.getSeasons()?.isEmpty == false &&
+        details?.number_of_seasons != nil &&
+        details?.number_of_episodes != nil &&
+        details?.name != nil &&
+        details?.id != nil
+    }
+
+    var seasonsSafe: [Season] {
+        details?.getSeasons() ?? []
+    }
+
+    var hasWatchProviders: Bool {
+        if let results = watchProviders?.results,
+           let provider = results[Locale.current.language.region?.identifier ?? "US"] {
+            return !(provider.flatrate?.isEmpty ?? true) || !(provider.rent?.isEmpty ?? true)
+        }
+        return false
+    }
+
+    var watchProviderSafe: ProviderResults? {
+        watchProviders?.results?[Locale.current.language.region?.identifier ?? "US"]
+    }
+
+    var hasCast: Bool {
+        !(credits?.cast?.isEmpty ?? true)
+    }
+
+    var hasSimilars: Bool {
+        !(similar?.results?.isEmpty ?? true)
+    }
+
+    var similarsSafe: [Result] {
+        similar?.results ?? []
+    }
+
+    var hasReviews: Bool {
+        !(reviews?.results?.isEmpty ?? true)
+    }
+
+    var reviewsSafe: [Reviews] {
+        reviews?.results ?? []
+    }
+
+    var hasCollection: Bool {
+        if let parts = collection?.parts { return !parts.isEmpty }
+        return false
+    }
+
+    var collectionSafe: [Result] {
+        collection?.parts ?? []
+    }
+}

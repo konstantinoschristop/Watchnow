@@ -10,11 +10,11 @@ import Foundation
 // MARK: - Welcome
 struct WatchProvidersResponse: Codable {
     var id: Int?
-    var results: [String: ProviderResulst]?
+    var results: [String: ProviderResults]?
 }
 
 // MARK: - Result
-struct ProviderResulst: Codable {
+struct ProviderResults: Codable {
     var link: String?
     var flatrate: [Flatrate]?
     var rent: [Flatrate]?

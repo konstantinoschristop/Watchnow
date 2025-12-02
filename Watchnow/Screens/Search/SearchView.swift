@@ -104,7 +104,7 @@ extension SearchView {
                     if searchVM.filteredResults.isEmpty {
                         ContentUnavailableView("No results found for this filter.", systemImage: "xmark.circle")
                             .listRowSeparatorTint(.clear)
-                            .listRowBackground(Color(.systemGray6))
+                            .listRowBackground(Color(.background))
                             .listRowInsets(EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10))
                     } else {
                         GenericListView(results: $searchVM.filteredResults,

@@ -45,7 +45,7 @@ struct WatchlistView: View {
             }
         }
         .listRowSeparatorTint(.clear)
-        .listRowBackground(Color(.systemGray6))
+        .listRowBackground(Color(.background))
         .padding(.init(top: 10, leading: 0, bottom: 5, trailing: 0))
     }
     
@@ -69,7 +69,7 @@ struct WatchlistView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top)
                     .listRowSeparatorTint(.clear)
-                    .listRowBackground(Color(.systemGray6))
+                    .listRowBackground(Color(.background))
                 GenericListView(results: results,
                                 viewModel: watchlistViewModel,
                                 namespace: namespace)
@@ -84,9 +84,9 @@ struct WatchlistView: View {
         Group {
             switch selectedTab {
             case .movies:
-                section(title: "Movies", results: $watchlistViewModel.savedMovies)
+                section(title: selectedTab.title, results: $watchlistViewModel.savedMovies)
             case .series:
-                section(title: "TV Series", results: $watchlistViewModel.savedSeries)
+                section(title: selectedTab.title, results: $watchlistViewModel.savedSeries)
             }
         }
         .toolbar {

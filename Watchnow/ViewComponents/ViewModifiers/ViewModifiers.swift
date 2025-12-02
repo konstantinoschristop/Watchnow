@@ -11,7 +11,7 @@ import SwiftUI
 struct TabBarMinimizeModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
-            content.tabBarMinimizeBehavior(.automatic)
+            content.tabBarMinimizeBehavior(.onScrollDown)
         } else {
             content
         }

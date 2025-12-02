@@ -10,12 +10,19 @@ import SwiftUI
 // MARK: - Section Header View (Title Section)
 struct SectionHeaderView: View {
     var title: String
+    var subtitle: String? = nil
     
     var body: some View {
-        HStack {
+        VStack(alignment: .leading) {
             Text(title)
                 .font(.system(size: 25, weight: .heavy))
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            if let subtitle {
+                Text(subtitle)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .padding(.horizontal)
     }

@@ -40,7 +40,7 @@ struct GenericListView: View {
                 }
             }
             .listRowSeparatorTint(.clear)
-            .listRowBackground(Color(.systemGray6))
+            .listRowBackground(Color(.background))
             .listRowInsets(EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10))
             .swipeActions(allowsFullSwipe: true, content: {
                 if result.getMediaType() == "Actor" {

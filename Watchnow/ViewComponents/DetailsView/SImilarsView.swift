@@ -52,7 +52,7 @@ struct SimilarsView: View {
                                 .font(.system(size: 12, weight: .regular))
                                 .padding(.vertical, 5)
                                 .padding(.horizontal, 9)
-                                .background(Color(.systemGray5))
+                                .background(Color(.secondaryBackground))
                                 .foregroundColor(.orange)
                                 .cornerRadius(10)
                                 .offset(x: 50 , y: -120)
