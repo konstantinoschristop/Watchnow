@@ -41,10 +41,19 @@ struct BottomCard: View {
                             .overlay(alignment: .topTrailing) {
                                 RatingView(rating: content.vote_average)
                             }
+                           
+
                       //  TitleText(title: content.getResultTitle())
                     }
                 }
             }
+        }
+        .contextMenu {
+           Button("Add to Watchlist") {
+                
+            }
+        } preview: {
+            PosterImage(url: content.getPosterURL())
         }
     }
 }
