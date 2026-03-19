@@ -43,9 +43,6 @@ struct ScrollableContentView: View {
         HStack(alignment: .top,
                spacing: cardType == .bottom ? 5 : -15) {
             
-            let height: CGFloat = cardType == .bottom ? 200 : 180
-            let width: CGFloat = cardType == .bottom ? 130 : 200
-            
             Spacer().frame(width: cardType == .bottom ? 10 : 60)
             
             ForEach(results, id: \.self) { movie in
@@ -54,17 +51,17 @@ struct ScrollableContentView: View {
                         proxy: proxy,
                         scaleType: cardType == .bottom ? .vertical : .horizontal
                     )
-                    
-                    Group {
+                    VStack {
                         if cardType == .bottom {
                             BottomCard(content: movie,
                                        screenType: screenType)
+                            .frame(width: 130, height: 200)
                         } else {
                             TopCard(content: movie,
                                     screenType: screenType)
+                            .frame(width: 200, height: 180)
                         }
                     }
-                    .frame(width: width, height: height)
                     .scaleEffect(.init(width: scale, height: scale))
                     .animation(.easeOut, value: 1)
                     .padding(.vertical)
@@ -73,13 +70,12 @@ struct ScrollableContentView: View {
                        height: cardType == .bottom ? 250 : 200)
                 .background(Color.clear)
                 .padding(.vertical, 30)
+                
+                if results.last == movie,
+                   viewModel.canLoadMoreContent(section: viewSection) {
+                    LoadMoreButtonView(thresholdReached: thresholdReached)
+                }
             }
         }
-               .safeAreaInset(edge: .trailing, alignment: .center) {
-                   if viewModel.canLoadMoreContent(section: viewSection) {
-                       LoadMoreButtonView(thresholdReached: thresholdReached)
-                           .frame(width: 50, height: 50)
-                   }
-               }
     }
 }

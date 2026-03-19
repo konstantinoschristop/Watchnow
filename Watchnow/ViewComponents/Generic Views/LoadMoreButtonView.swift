@@ -23,8 +23,8 @@ struct LoadMoreButtonView: View {
                 .clipShape(.circle)
                 .frame(width: frame, height: frame)
                 .scaledToFill()
-//                .frame(width: 60, height: 50, alignment: .center)
-              //  .padding(.horizontal)
-//                .frame(maxHeight: .infinity, alignment: .center)
+                .frame(width: 60, height: 50, alignment: .center)
+                .padding(.horizontal)
+                .frame(maxHeight: .infinity)
     }
 }

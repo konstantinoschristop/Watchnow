@@ -20,11 +20,6 @@ struct SearchView: View {
         
         VStack(spacing: 0) {
             searchResultsView
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        pickerView
-                    }
-                }
 //            AdBannerView()
 //                .frame(height: 50)
 //                .padding(.bottom)
@@ -36,7 +31,6 @@ struct SearchView: View {
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
         .searchable(text: $searchInput)
-        .searchPresentationToolbarBehavior(.avoidHidingContent)
         .onChange(of: searchInput) { _ ,newValue in
             guard !newValue.isEmpty, newValue.count > 1 else { return }
 
@@ -119,6 +113,9 @@ extension SearchView {
                     }
                 }
                 .listStyle(.plain)
+                .safeAreaInset(edge: .bottom, content: {
+                    pickerView
+                })
                 .scrollDismissesKeyboard(.interactively)
             } else {
                 ContentUnavailableView("No results found. Try searching again with a different keyword.", systemImage: "xmark.circle")

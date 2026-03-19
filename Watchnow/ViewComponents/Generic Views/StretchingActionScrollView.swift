@@ -14,7 +14,7 @@ struct StretchingActionScrollView<Content: View>: UIViewRepresentable {
     var onThresholdReached: ((Bool) -> Void)?
     var content: Content
 
-    init(threshold: CGFloat = 50,
+    init(threshold: CGFloat = 70,
          onTriggered: @escaping () -> Void,
          onThresholdReached: ((Bool) -> Void)?,
          @ViewBuilder content: () -> Content) {
