@@ -35,7 +35,7 @@ struct MenuFeaturedView<Content: View>: View {
             }
         })
         .stretchy()
-        .frame(height: (UIScreen.main.bounds.size.height) - (UIScreen.main.bounds.size.height / 3))
+        .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 2 / 3 }
         .tabViewStyle(.page(indexDisplayMode: .automatic))
         .onReceive(timer) { _ in
             guard !isDragging else { return }

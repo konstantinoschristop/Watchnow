@@ -12,10 +12,10 @@ class EpisodesViewModel: ObservableObject {
     
     @Published private(set) var episodes: EpisodesResponse?
     
-    private let service: ServiceInvocation
+    private let service: any DetailServiceProtocol
     let seriesID: Int
-    
-    init(service: ServiceInvocation,
+
+    init(service: any DetailServiceProtocol = ServiceInvocation(),
          seriesID: Int) {
         
         self.service = service

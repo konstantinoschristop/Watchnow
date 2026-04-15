@@ -21,19 +21,19 @@ class MoviesViewModel: BaseContentViewModel {
 }
 
 extension MovieService: ContentService {
-    func fetchTrending(page: Int) async throws -> GenericReultResponse {
+    func fetchTrending(page: Int) async throws -> GenericResultResponse {
         try await fetchTrendingMovies(page: page)
     }
     
-    func fetchPopular(page: Int) async throws -> GenericReultResponse {
+    func fetchPopular(page: Int) async throws -> GenericResultResponse {
         try await fetchPopularMovies(page: page)
     }
     
-    func fetchUpcomingOrAiring(page: Int) async throws -> GenericReultResponse {
+    func fetchUpcomingOrAiring(page: Int) async throws -> GenericResultResponse {
         try await fetchUpcomingMovies(page: page)
     }
     
-    func fetchLatest(page: Int) async throws -> GenericReultResponse {
+    func fetchLatest(page: Int) async throws -> GenericResultResponse {
         try await fetchLatestMovies(page: page)
     }
 }

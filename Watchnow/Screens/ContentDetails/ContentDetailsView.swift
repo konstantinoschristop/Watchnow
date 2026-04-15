@@ -30,8 +30,10 @@ struct ContentDetailsView: View {
         .background(Color(.background))
         .navigationBarTitleDisplayMode(.inline)
         .hideBackButtonOptionally()
-        .navigationBarItems(leading: navBarLeadingView,
-                            trailing: navBarTrailingView)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) { navBarLeadingView }
+            ToolbarItem(placement: .navigationBarTrailing) { navBarTrailingView }
+        }
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")  :
@@ -42,13 +44,16 @@ struct ContentDetailsView: View {
                 .ignoresSafeArea()
         }
         .task {
+            // getDetails must complete first — getCollection reads details?.belongs_to_collection
             await detailsViewModel.getDetails()
-            await detailsViewModel.getCredits()
-            await detailsViewModel.getVideos()
-            await detailsViewModel.getWatchProviders()
-            await detailsViewModel.getSimilars()
-            await detailsViewModel.getReviews()
-            await detailsViewModel.getCollection()
+
+            async let credits: Void = detailsViewModel.getCredits()
+            async let videos: Void = detailsViewModel.getVideos()
+            async let providers: Void = detailsViewModel.getWatchProviders()
+            async let similars: Void = detailsViewModel.getSimilars()
+            async let reviews: Void = detailsViewModel.getReviews()
+            async let collection: Void = detailsViewModel.getCollection()
+            _ = await (credits, videos, providers, similars, reviews, collection)
         }
     }
 }
@@ -165,14 +170,6 @@ extension ContentDetailsView {
         }
     }
     
-    var navBarHiddenView: some View {
-        HStack {
-            navBarLeadingView
-            Spacer()
-            navBarTrailingView
-        }
-        .padding()
-    }
 }
 
 // MARK: - Sections

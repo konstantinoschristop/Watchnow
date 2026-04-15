@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class ServiceInvocation: BaseNetworkService {
+final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol {
 
     func fetchCredits(screenType: ScreenTypes, id: String) async throws -> ResultCreditsResponse {
         let urlString = API.Common.credits(type: screenType.rawValue, for: id)
@@ -25,10 +25,7 @@ final class ServiceInvocation: BaseNetworkService {
     }
 
     func fetchSearchResults(search: String) async throws -> SearchResponse {
-        guard let query = search.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            throw URLError(.badURL)
-        }
-        let urlString = API.Search.multi(query: query)
+        let urlString = API.Search.multi(query: search)
         return try await request(urlString: urlString)
     }
 
@@ -37,7 +34,7 @@ final class ServiceInvocation: BaseNetworkService {
         return try await request(urlString: urlString)
     }
 
-    func fetchDetails(screenType: ScreenTypes, id: String) async throws -> ResultDetailsReponse {
+    func fetchDetails(screenType: ScreenTypes, id: String) async throws -> ResultDetailsResponse {
         let urlString = API.Common.details(screenType: screenType.rawValue, id: id)
         return try await request(urlString: urlString)
     }
@@ -57,15 +54,9 @@ final class ServiceInvocation: BaseNetworkService {
         return try await request(urlString: urlString)
     }
 
-    func fetchImages(screenType: ScreenTypes, id: String) async throws -> ImagesResponse {
-        let urlString = API.Common.images(type: screenType.rawValue, for: id)
-        return try await request(urlString: urlString)
-    }
-
     func fetchWatchProviders(screenType: ScreenTypes, id: String) async throws -> WatchProvidersResponse {
         let urlString = API.Common.watchProviders(type: screenType.rawValue, id: id)
         return try await request(urlString: urlString)
     }
 }
 
-extension ServiceInvocation: @unchecked Sendable {}

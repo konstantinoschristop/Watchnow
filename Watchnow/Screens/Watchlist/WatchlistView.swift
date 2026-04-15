@@ -11,7 +11,7 @@ import AlertToast
 
 struct WatchlistView: View {
     
-    @StateObject var watchlistViewModel: WatchlistViewModel
+    @ObservedObject var watchlistViewModel: WatchlistViewModel
     @State var selectedTab: WatchlistModel.Tab = .movies
     @Namespace private var namespace
     
@@ -24,29 +24,6 @@ struct WatchlistView: View {
         .toast(isPresenting: $watchlistViewModel.showRemovedAlert, alert: {
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
-    }
-    
-    func getSectionTitle(title: String, sectionType: ScreenTypes) -> some View {
-        
-        return HStack {
-            Text(title)
-                .font(.system(size: 25, weight: .heavy))
-            Spacer()
-            Button {
-                withAnimation(.easeInOut) {
-                    watchlistViewModel.sectionArrowAction(screenType: sectionType)
-                }
-            } label: {
-                Image(systemName: watchlistViewModel.getSectionArrowIcon(screenType: sectionType))
-                    .resizable()
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(.white)
-                    .shadow(color: .black, radius: 3)
-            }
-        }
-        .listRowSeparatorTint(.clear)
-        .listRowBackground(Color(.background))
-        .padding(.init(top: 10, leading: 0, bottom: 5, trailing: 0))
     }
     
     @ViewBuilder

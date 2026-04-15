@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MoviesView: View {
     
-    @StateObject var moviesViewModel: MoviesViewModel
+    @ObservedObject var moviesViewModel: MoviesViewModel
     
     var body: some View {
         ContentMainView(viewModel: moviesViewModel,

@@ -19,9 +19,8 @@ struct ContentDetailsModel {
     var similar: GetSimilarModel?
     var reviews: ResultReviewsResponse?
     var videos: VideoResponse?
-    var details: ResultDetailsReponse?
+    var details: ResultDetailsResponse?
     var collection: CollectionResponse?
-    var images: ImagesResponse?
     var watchProviders: WatchProvidersResponse?
     var isInWatchList: Bool = false
     var viewModelFinishedFetching: Bool = false

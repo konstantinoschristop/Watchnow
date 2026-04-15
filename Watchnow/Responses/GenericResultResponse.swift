@@ -53,11 +53,11 @@ extension ViewSections {
     }
 }
 
-struct GenericReultResponse: Codable, Equatable {
+struct GenericResultResponse: Codable, Equatable {
     var results: [Result]
     var total_pages: Int?
     
-    static func == (lhs: GenericReultResponse, rhs: GenericReultResponse) -> Bool {
+    static func == (lhs: GenericResultResponse, rhs: GenericResultResponse) -> Bool {
         return lhs.results == rhs.results
     }
 }
@@ -93,28 +93,28 @@ struct Result: Codable, Hashable, Equatable {
     }
     
     func getResultPosterURL() -> URL {
-        
         let posterURL = (poster_path ?? backdrop_path ?? profile_path) ?? ""
-        return URL(string: API.Common.imageUrl(imageId: posterURL))!
+        return URL(string: API.Common.imageUrl(imageId: posterURL))
+            ?? URL(string: API.baseURL)!
     }
-    
+
     func getPosterURL() -> URL {
-        
         let posterURL = poster_path ?? ""
-        return URL(string: API.Common.imageUrl(imageId: posterURL))!
+        return URL(string: API.Common.imageUrl(imageId: posterURL))
+            ?? URL(string: API.baseURL)!
     }
-    
+
     func getBackdropURL() -> URL {
-        
         let posterURL = backdrop_path ?? ""
-        return URL(string: API.Common.imageUrl(imageId: posterURL))!
+        return URL(string: API.Common.imageUrl(imageId: posterURL))
+            ?? URL(string: API.baseURL)!
     }
     
     func getMediaType() -> String {
         if media_type == "movie" {
             return "Movie"
         } else if media_type == "tv" {
-            return "TV Serie"
+            return "TV Series"
         } else {
             return "Actor"
         }

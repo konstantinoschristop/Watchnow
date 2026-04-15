@@ -8,13 +8,13 @@
 import Foundation
 
 struct ContentListResult: LoadMoreContentProtocol {
-    private(set) var result: GenericReultResponse
+    private(set) var result: GenericResultResponse
     var currentPage: Int = 1
 
-    init(result: GenericReultResponse) {
+    init(result: GenericResultResponse) {
         self.result = result
     }
-    mutating func appendResult(_ result: GenericReultResponse) {
+    mutating func appendResult(_ result: GenericResultResponse) {
         self.result.results.append(contentsOf: result.results)
     }
     mutating func incrementCurrentPage() {
@@ -29,7 +29,7 @@ struct ContentListResult: LoadMoreContentProtocol {
 protocol LoadMoreContentProtocol {
     
     var currentPage: Int { get set }
-    var result: GenericReultResponse { get }
+    var result: GenericResultResponse { get }
 }
 
 extension LoadMoreContentProtocol {

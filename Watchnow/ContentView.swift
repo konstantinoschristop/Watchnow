@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
-import TipKit
 
 struct ContentView: View {
-    
+
+    @StateObject private var moviesViewModel = MoviesViewModel(model: MoviesModel())
+    @StateObject private var seriesViewModel = SeriesViewModel(model: SeriesModel())
+    @StateObject private var searchViewModel = SearchViewModel(model: SearchModel())
+    @StateObject private var watchlistViewModel = WatchlistViewModel(model: WatchlistModel())
+
     var body: some View {
         TabView {
             Tab("Movies", systemImage: "film") {
@@ -26,12 +30,6 @@ struct ContentView: View {
             }
         }
         .minimizeTabBar()
-        .task {
-            try? Tips.configure([
-                .displayFrequency(.immediate),
-                .datastoreLocation(.applicationDefault)
-            ])
-        }
     }
 }
 
@@ -39,42 +37,34 @@ extension ContentView {
     
     private var moviesTabContent: some View {
         NavigationStack {
-            let model = MoviesModel()
-            let vm = MoviesViewModel(model: model)
-            MoviesView(moviesViewModel: vm)
+            MoviesView(moviesViewModel: moviesViewModel)
                 .background(Color(.background))
-                .navigationBarTitle("Movies")
+                .navigationTitle("Movies")
         }
     }
-    
+
     private var seriesTabContent: some View {
         NavigationStack {
-            let model = SeriesModel()
-            let vm = SeriesViewModel(model: model)
-            SeriesView(seriesViewModel: vm)
+            SeriesView(seriesViewModel: seriesViewModel)
                 .background(Color(.background))
-                .navigationBarTitle("Series")
+                .navigationTitle("Series")
         }
     }
-    
+
     private var searchTabContent: some View {
         NavigationStack {
-            let model = SearchModel()
-            let vm = SearchViewModel(model: model)
-            SearchView(searchVM: vm)
+            SearchView(viewModel: searchViewModel)
                 .background(Color(.background))
-                .navigationBarTitle("Search")
+                .navigationTitle("Search")
                 .navigationBarTitleDisplayMode(.automatic)
         }
     }
-    
+
     private var watchlistTabContent: some View {
         NavigationStack {
-            let model = WatchlistModel()
-            let vm = WatchlistViewModel(model: model)
-            WatchlistView(watchlistViewModel: vm)
+            WatchlistView(watchlistViewModel: watchlistViewModel)
                 .background(Color(.background))
-                .navigationBarTitle("Watchlist")
+                .navigationTitle("Watchlist")
                 .navigationBarTitleDisplayMode(.automatic)
         }
     }

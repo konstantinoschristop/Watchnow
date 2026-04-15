@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AdditionalInfoView: View {
     
-    let details: ResultDetailsReponse
+    let details: ResultDetailsResponse
     @State var isSheetPresented = false
     
     var body: some View {

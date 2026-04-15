@@ -14,12 +14,11 @@ protocol BaseViewModelProtocol {
     func canLoadMoreContent(section: ViewSections) -> Bool
 }
 
-@MainActor
-protocol ContentService {
-    func fetchTrending(page: Int) async throws -> GenericReultResponse
-    func fetchPopular(page: Int) async throws -> GenericReultResponse
-    func fetchUpcomingOrAiring(page: Int) async throws -> GenericReultResponse
-    func fetchLatest(page: Int) async throws -> GenericReultResponse
+protocol ContentService: AnyObject, Sendable {
+    func fetchTrending(page: Int) async throws -> GenericResultResponse
+    func fetchPopular(page: Int) async throws -> GenericResultResponse
+    func fetchUpcomingOrAiring(page: Int) async throws -> GenericResultResponse
+    func fetchLatest(page: Int) async throws -> GenericResultResponse
 }
 
 @MainActor
@@ -38,8 +37,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     @Published var featuredResult: [Result]?
     
     private let service: ContentService
-    private let randomFeaturedIndex = Int.random(in: 0...19)
-    
+
     init(service: ContentService) {
         self.service = service
     }
@@ -86,7 +84,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     }
     
     // MARK: - Helpers
-    private func fetch(list: ContentListResult?, fetcher: (Int) async throws -> GenericReultResponse, page: Int) async -> ContentListResult? {
+    private func fetch(list: ContentListResult?, fetcher: (Int) async throws -> GenericResultResponse, page: Int) async -> ContentListResult? {
         do {
             let fetched = try await fetcher(page)
             if page == 1 {
@@ -104,7 +102,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     
     private func loadMore(
         list: ContentListResult?,
-        fetcher: @escaping (Int) async throws -> GenericReultResponse,
+        fetcher: @escaping (Int) async throws -> GenericResultResponse,
         assign: @escaping (ContentListResult?) -> Void
     ) {
         var updated = list

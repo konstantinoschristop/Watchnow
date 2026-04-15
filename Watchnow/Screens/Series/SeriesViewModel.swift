@@ -13,27 +13,27 @@ class SeriesViewModel: BaseContentViewModel {
     @Published var model: SeriesModel
     
     init(model: SeriesModel,
-         service: SerieService = SerieService()) {
+         service: SeriesService = SeriesService()) {
         
         self.model = model
         super.init(service: service)
     }
 }
 
-extension SerieService: ContentService {
-    func fetchTrending(page: Int) async throws -> GenericReultResponse {
+extension SeriesService: ContentService {
+    func fetchTrending(page: Int) async throws -> GenericResultResponse {
         try await fetchTrendingSeries(page: page)
     }
     
-    func fetchPopular(page: Int) async throws -> GenericReultResponse {
+    func fetchPopular(page: Int) async throws -> GenericResultResponse {
         try await fetchPopularSeries(page: page)
     }
     
-    func fetchUpcomingOrAiring(page: Int) async throws -> GenericReultResponse {
+    func fetchUpcomingOrAiring(page: Int) async throws -> GenericResultResponse {
         try await fetchAiringTodaySeries(page: page)
     }
     
-    func fetchLatest(page: Int) async throws -> GenericReultResponse {
+    func fetchLatest(page: Int) async throws -> GenericResultResponse {
         try await fetchLatestSeries(page: page)
     }
 }

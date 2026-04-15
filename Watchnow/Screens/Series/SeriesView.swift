@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SeriesView: View {
     
-    @StateObject var seriesViewModel: SeriesViewModel
+    @ObservedObject var seriesViewModel: SeriesViewModel
     
     var body: some View {
         ContentMainView(viewModel: seriesViewModel,

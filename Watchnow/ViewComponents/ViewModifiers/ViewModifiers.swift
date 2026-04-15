@@ -41,10 +41,9 @@ struct ViewDidLoadModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content.onAppear {
-            if !self.isViewAppeared {
-                self.action()
-            }
-            self.isViewAppeared.toggle()
+            guard !self.isViewAppeared else { return }
+            self.isViewAppeared = true
+            self.action()
         }
     }
 }

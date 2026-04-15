@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(data[0][''''text'''']\\)\")",
+      "Bash(python3 -c \":*)",
+      "Bash(printf '// This file has been renamed to UINavigationController+Extension.swift\\\\n')",
+      "Bash(\"/Users/k.christopoulos/Desktop/MyProjects/Watchnow/ViewComponents/Extesions/UINavigationController+Extennsion.swift\")",
+      "Bash(plutil -lint \"/Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj\")",
+      "Bash(plutil -lint /Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj)"
+    ]
+  }
+}

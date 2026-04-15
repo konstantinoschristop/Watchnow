@@ -13,12 +13,7 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     @Published private var model: WatchlistModel
     @Published var showRemovedAlert = false
     @Published var showAddedAlert = false
-    @Published var listNeedsUpdate = false {
-        didSet {
-            refreshDataIfNeeded()
-        }
-    }
-    
+
     init(model: WatchlistModel) {
         self.model = model
         self.fetchResultsFromWatchList()
@@ -48,30 +43,6 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
         return WatchlistManager.watchlist.isEmpty == true
     }
     
-    func getSectionArrowIcon(screenType: ScreenTypes) -> String {
-        
-        switch screenType {
-        case .movie:
-            return showingMovies ? "arrow.down.right.and.arrow.up.left.circle.fill" : "arrow.up.backward.and.arrow.down.forward.circle.fill"
-        case .tv:
-            return showingSeries ? "arrow.down.right.and.arrow.up.left.circle.fill" : "arrow.up.backward.and.arrow.down.forward.circle.fill"
-        default:
-            return ""
-        }
-    }
-    
-    func sectionArrowAction(screenType: ScreenTypes) {
-        
-        switch screenType {
-        case .movie:
-            showingMovies.toggle()
-        case .tv:
-            showingSeries.toggle()
-        default:
-            return
-        }
-    }
-    
     func itemRemoved(result: Result) {
         if let movieToRemove = self.savedMovies.firstIndex(of: result) {
             savedMovies.remove(at: movieToRemove)
@@ -99,13 +70,4 @@ extension WatchlistViewModel {
         set { model.savedSeries = newValue }
     }
     
-    var showingMovies: Bool {
-        get { model.showingMovies }
-        set { model.showingMovies = newValue }
-    }
-    
-    var showingSeries: Bool {
-        get { model.showingSeries }
-        set { model.showingSeries = newValue }
-    }
 }

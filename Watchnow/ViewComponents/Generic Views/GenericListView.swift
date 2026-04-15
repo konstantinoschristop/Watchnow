@@ -48,10 +48,10 @@ struct GenericListView: View {
                 } else {
                     switch WatchlistManager.existsInWatchList(result: result) {
                     case true:
-                        self.contructRemoveSwipeAction(result: result)
+                        self.constructRemoveSwipeAction(result: result)
                             .tint(.red)
                     case false:
-                        self.contructAddSwipeAction(result: result)
+                        self.constructAddSwipeAction(result: result)
                             .tint(.green)
                     }
                 }
@@ -60,7 +60,7 @@ struct GenericListView: View {
     }
     
     @MainActor
-    func contructAddSwipeAction(result: Result) -> Button<Label<Text, Image>>? {
+    func constructAddSwipeAction(result: Result) -> Button<Label<Text, Image>>? {
         
         return Button (action: {
                 WatchlistManager.addToWatchList(result: result)
@@ -72,7 +72,7 @@ struct GenericListView: View {
     }
     
     @MainActor
-    func contructRemoveSwipeAction(result: Result) -> Button<Label<Text, Image>>? {
+    func constructRemoveSwipeAction(result: Result) -> Button<Label<Text, Image>>? {
         
         return Button (action: {
             withAnimation {
@@ -89,9 +89,8 @@ struct GenericListView: View {
     func constructResult(result: Result) -> some View {
         
         return HStack(alignment: .top) {
-            let imageURL = result.getResultPosterURL()
-            let url = String(describing: imageURL)
-            
+            let url = result.getResultPosterURL().absoluteString
+
             GenericImageView(url: url,
                              width: 60,
                              height: 80,

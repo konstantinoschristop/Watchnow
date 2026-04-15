@@ -12,7 +12,7 @@ struct SearchResponse: Codable {
     var results: [Result]?
 }
 
-enum GendreIDs: Int, CaseIterable {
+enum GenreIDs: Int, CaseIterable {
     
     case comedy = 35
     case crime = 80

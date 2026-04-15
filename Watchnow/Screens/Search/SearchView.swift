@@ -10,9 +10,7 @@ import AlertToast
 
 struct SearchView: View {
     
-    @StateObject var searchVM: SearchViewModel
-    @State var enablePicker = false
-    @State var showGenres = false
+    @ObservedObject var viewModel: SearchViewModel
     @State var searchInput = ""
     @Namespace private var namespace
     
@@ -24,10 +22,10 @@ struct SearchView: View {
 //                .frame(height: 50)
 //                .padding(.bottom)
         }
-        .toast(isPresenting: $searchVM.showAddedAlert, alert: {
+        .toast(isPresenting: $viewModel.showAddedAlert, alert: {
             AlertToast(displayMode: .hud, type: .systemImage("checkmark.circle", .green), title: "Added to Watchlist")
         })
-        .toast(isPresenting: $searchVM.showRemovedAlert, alert: {
+        .toast(isPresenting: $viewModel.showRemovedAlert, alert: {
             AlertToast(displayMode: .hud, type: .systemImage("x.circle", .red), title: "Removed from Watchlist")
         })
         .searchable(text: $searchInput)
@@ -41,9 +39,8 @@ struct SearchView: View {
                 // Check if the text is still the same (user didn’t keep typing)
                 guard newValue == searchInput else { return }
 
-                await searchVM.getResults(search: newValue)
+                await viewModel.getResults(search: newValue)
                 await MainActor.run {
-                    enablePicker = true
                     hideKeyboard()
                 }
             }
@@ -56,7 +53,7 @@ extension SearchView {
     @ViewBuilder
     var pickerView: some View {
         let options = SearchModel.SearchChooserOptions.allCases
-        Picker("", selection: $searchVM.selectedChooser) {
+        Picker("", selection: $viewModel.selectedChooser) {
             ForEach(options, id:\.hashValue) { option in
                 Text(option.getTitle())
                     .tag(option)
@@ -67,48 +64,19 @@ extension SearchView {
     }
     
     @ViewBuilder
-    var genresView: some View {
-        if showGenres {
-            let rows = [GridItem(.flexible(), alignment: .leading),
-                        GridItem(.flexible(), alignment: .trailing)]
-            
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVGrid(columns: rows, spacing: 0) {
-                    ForEach(GendreIDs.allCases, id: \.self) { genre in
-                        NavigationLink {
-                            
-                        } label: {
-                            Text(genre.getNameForGenre())
-                                .frame(width: 150, height: 150, alignment: .center)
-                                .background(LinearGradient(gradient: Gradient(colors: [.gray.opacity(0.6),
-                                                                                       genre.getBackgroundColorForGenre().opacity(0.6)]),
-                                                           startPoint: .topLeading,
-                                                           endPoint: .bottomTrailing))
-                                .cornerRadius(10)
-                                .padding()
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding()
-            }
-        }
-    }
-    
-    @ViewBuilder
     var searchResultsView: some View {
         
-        if let results = searchVM.results{
+        if let results = viewModel.results{
             if results.isEmpty == false {
                 List {
-                    if searchVM.filteredResults.isEmpty {
+                    if viewModel.filteredResults.isEmpty {
                         ContentUnavailableView("No results found for this filter.", systemImage: "xmark.circle")
                             .listRowSeparatorTint(.clear)
                             .listRowBackground(Color(.background))
                             .listRowInsets(EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10))
                     } else {
-                        GenericListView(results: $searchVM.filteredResults,
-                                        viewModel: searchVM,
+                        GenericListView(results: $viewModel.filteredResults,
+                                        viewModel: viewModel,
                                         namespace: namespace)
                     }
                 }
@@ -130,12 +98,3 @@ extension SearchView {
     }
 }
 
-extension View {
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-    
-    func showKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.becomeFirstResponder), to: nil, from: nil, for: nil)
-    }
-}

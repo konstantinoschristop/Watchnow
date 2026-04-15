@@ -14,10 +14,10 @@ class ContentDetailsViewModel: ObservableObject {
     @Published var apiError: Bool = false
     @Published var selectedSeason: Season = Season()
     
-    private let service: ServiceInvocation
-    
+    private let service: any DetailServiceProtocol
+
     init(model: ContentDetailsModel,
-         service: ServiceInvocation = .init()) {
+         service: any DetailServiceProtocol = ServiceInvocation()) {
         
         self.model = model
         self.service = service
@@ -96,15 +96,6 @@ class ContentDetailsViewModel: ObservableObject {
         }
     }
     
-    func getImages() async {
-       
-        do {
-            self.images = try await service.fetchImages(screenType: screenType, id: id)
-        } catch {
-            apiError = true
-        }
-    }
-    
     func getWatchProviders() async {
         do {
             self.watchProviders = try await service.fetchWatchProviders(screenType: screenType, id: id)
@@ -140,7 +131,7 @@ extension ContentDetailsViewModel {
         set { model.videos = newValue }
     }
     
-    var details: ResultDetailsReponse? {
+    var details: ResultDetailsResponse? {
         get { model.details }
         set { model.details = newValue }
     }
@@ -148,11 +139,6 @@ extension ContentDetailsViewModel {
     var collection: CollectionResponse? {
         get { model.collection }
         set { model.collection = newValue }
-    }
-    
-    var images: ImagesResponse? {
-        get { model.images }
-        set { model.images = newValue }
     }
     
     var watchProviders: WatchProvidersResponse? {
@@ -192,22 +178,10 @@ extension ContentDetailsViewModel {
         videos?.getVideoURL()
     }
 
-    var availableGenresSafe: [Genres] {
-        details?.genres ?? []
-    }
-
     var castSafe: [Cast] {
         credits?.cast ?? []
     }
 
-    var similarContentSafe: [Result] {
-        similar?.results ?? []
-    }
-
-    var collectionPartsSafe: [Result] {
-        collection?.parts ?? []
-    }
-    
     var hasGenres: Bool {
         !(details?.genres?.isEmpty ?? true)
     }

@@ -7,13 +7,10 @@
 
 import Foundation
 
-import Foundation
-
 enum API {
-    static let key = "8a5d569103b429228d23a32db4b9a426" // TODO: Replace with secure config
+    static let key = "8a5d569103b429228d23a32db4b9a426"
     static let baseURL = "https://api.themoviedb.org/3"
     static let imageBaseURL = "https://image.tmdb.org/t/p/original/"
-    static let imageCastBaseURL = "https://image.tmdb.org/t/p/original"
     static let youtubeBaseURL = "https://www.youtube.com/watch?v="
     static let language = "en-US"
 
@@ -29,9 +26,6 @@ enum API {
         }
         static func videos(type: String, for id: String) -> String {
             return "\(API.baseURL)/\(type)/\(id)/videos?api_key=\(API.key)&language=\(API.language)"
-        }
-        static func images(type: String, for id: String) -> String {
-            return "\(API.baseURL)/\(type)/\(id)/images?api_key=\(API.key)"
         }
         static func season(tvId: Int, seasonNumber: Int) -> String {
             return "\(API.baseURL)/tv/\(tvId)/season/\(seasonNumber)?api_key=\(API.key)&language=\(API.language)"
@@ -93,12 +87,4 @@ enum API {
         }
     }
 
-    enum Genre {
-        static var movieList: String {
-            return "\(API.baseURL)/genre/movie/list?api_key=\(API.key)&language=\(API.language)"
-        }
-        static var tvList: String {
-            return "\(API.baseURL)/genre/tv/list?api_key=\(API.key)&language=\(API.language)"
-        }
-    }
 }

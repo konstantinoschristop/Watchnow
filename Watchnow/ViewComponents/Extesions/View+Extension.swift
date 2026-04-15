@@ -6,8 +6,13 @@
 //
 
 import SwiftUI
+import UIKit
 
 extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
     /// Applies tab bar minimization behavior if available.
     func minimizeTabBar() -> some View {
         self.modifier(TabBarMinimizeModifier())

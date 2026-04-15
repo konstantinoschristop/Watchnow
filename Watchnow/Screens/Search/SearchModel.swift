@@ -12,7 +12,7 @@ struct SearchModel {
     enum SearchChooserOptions: String, CaseIterable {
         case all = "All"
         case movies = "Movie"
-        case series = "TV Serie"
+        case series = "TV Series"
         case actors = "Actor"
         
         func getTitle() -> String {

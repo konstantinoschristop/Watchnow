@@ -26,10 +26,10 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     @Published var showAddedAlert = false
     
     @Published var apiError: Bool = false
-    private let service: ServiceInvocation
-    
+    private let service: any DetailServiceProtocol
+
     init(model: SearchModel,
-         service: ServiceInvocation = .init()) {
+         service: any DetailServiceProtocol = ServiceInvocation()) {
         
         self.model = model
         self.service = service

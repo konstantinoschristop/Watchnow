@@ -7,7 +7,7 @@
 
 import Foundation
 
-class BaseNetworkService {
+class BaseNetworkService: @unchecked Sendable {
     
     private let session: URLSession
     private let decoder: JSONDecoder
@@ -25,18 +25,10 @@ class BaseNetworkService {
 
         let (data, response) = try await session.data(from: url)
 
-        printJSON(for: url, and: data)
-        
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
             throw URLError(.badServerResponse)
         }
 
         return try decoder.decode(T.self, from: data)
-    }
-    
-    func printJSON(for url: URL?, and data: Data) {
-        print("------ RESPONSE ------")
-        print(String(describing: url))
-        print(String(data: data, encoding: .utf8) as Any)
     }
 }

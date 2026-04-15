@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DetailsView: View {
     
-    var details: ResultDetailsReponse?
+    var details: ResultDetailsResponse?
     
     var body: some View {
         VStack(alignment: .center) {

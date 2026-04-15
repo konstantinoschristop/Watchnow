@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentMainView<VM: BaseContentViewModel>: View {
-    @StateObject var viewModel: VM
+    @ObservedObject var viewModel: VM
     @Namespace private var namespace
     
     let sections: [ViewSections]
@@ -88,7 +88,7 @@ extension ContentMainView {
                         HStack(spacing: 5) {
                             Image(systemName: "star.fill")
                                 .foregroundColor(.orange)
-                            Text(String(format: "%.1f", content.vote_average ?? "-"))
+                            Text(content.vote_average.map { String(format: "%.1f", $0) } ?? "-")
                         }
                     }
                     .font(.custom("AvenirNext-Regular", size: 18))

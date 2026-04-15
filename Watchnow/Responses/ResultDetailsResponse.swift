@@ -1,5 +1,5 @@
 //
-//  ResultDetailsReponse.swift
+//  ResultDetailsResponse.swift
 //  Watchnow
 //
 //  Created by Konstantinos Christopoulos on 12/8/22.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ResultDetailsReponse: Codable {
+struct ResultDetailsResponse: Codable {
     
     let genres: [Genres]?
     let seasons: [Season]?

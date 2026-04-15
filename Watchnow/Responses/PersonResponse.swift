@@ -20,7 +20,7 @@ struct PersonResponse: Codable {
     var profile_path: String?
     
     func getResultPosterURL() -> URL {
-        
-        return URL(string: API.Common.imageUrl(imageId: profile_path ?? ""))!
+        return URL(string: API.Common.imageUrl(imageId: profile_path ?? ""))
+            ?? URL(string: API.baseURL)!
     }
 }
