@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum ViewSections {
     case upcomingMovies
     case popularMovies
     case trendingMovies
     case latestMovies
-    
+
     case popularSeries
     case airingTodaySeries
     case trendingSeries
@@ -28,29 +29,78 @@ extension ViewSections {
             return .tv
         }
     }
-    
+
+    /// Emoji-prefixed title kept for any legacy caller. New layouts use
+    /// `cleanTitle` + `themeIcon` so the icon is a proper SF Symbol that
+    /// can be tinted, animated, and styled consistently.
     var title: String {
         switch self {
         case .trendingMovies: return "🔥 Hot Right Now"
         case .latestMovies: return "🎟️ In Theaters Now"
         case .popularMovies: return "Most Watched"
         case .upcomingMovies: return "Coming Soon"
-            
+
         case .trendingSeries: return "🔥 Binge-Worthy Today"
         case .airingTodaySeries: return "Fresh Episodes"
         case .popularSeries: return "Most Watched"
         case .latestSeries: return "Critics' Choice"
         }
     }
-    
-    var isTopView: Bool {
+
+    /// Emoji-free variant. The emoji is replaced by a tinted SF Symbol
+    /// rendered alongside the title in `SectionHeaderView`, which gives
+    /// us a proper tint, a larger hit-size, and the option to animate
+    /// the glyph (e.g. the live pulse on trending).
+    var cleanTitle: String {
         switch self {
-        case .trendingMovies, .trendingSeries:
-            return true
-        default:
-            return false
+        case .trendingMovies: return "Hot Right Now"
+        case .latestMovies: return "In Theaters Now"
+        case .popularMovies, .popularSeries: return "Most Watched"
+        case .upcomingMovies: return "Coming Soon"
+        case .trendingSeries: return "Binge-Worthy Today"
+        case .airingTodaySeries: return "Fresh Episodes"
+        case .latestSeries: return "Critics' Choice"
         }
     }
+
+    /// Section-specific SF Symbol. Rendered at the leading edge of the
+    /// header; carries the section's personality without bloating the
+    /// title with emoji.
+    var themeIcon: String {
+        switch self {
+        case .trendingMovies, .trendingSeries: return "flame.fill"
+        case .latestMovies:                    return "ticket.fill"
+        case .popularMovies, .popularSeries:   return "eye.fill"
+        case .upcomingMovies:                  return "calendar"
+        case .airingTodaySeries:               return "sparkles"
+        case .latestSeries:                    return "star.circle.fill"
+        }
+    }
+
+    /// Tint applied to both the header's 3pt rail and the section icon.
+    /// Colours were picked so each section feels distinct without
+    /// clashing when two sections stack vertically.
+    var themeColor: Color {
+        switch self {
+        case .trendingMovies, .trendingSeries: return .red
+        case .latestMovies:                    return .orange
+        case .popularMovies, .popularSeries:   return .accentColor
+        case .upcomingMovies:                  return .blue
+        case .airingTodaySeries:               return .green
+        case .latestSeries:                    return .purple
+        }
+    }
+
+    /// Trending sections show a small live-pulse dot so the row reads
+    /// as real-time, not canned.
+    var isTrending: Bool {
+        switch self {
+        case .trendingMovies, .trendingSeries: return true
+        default: return false
+        }
+    }
+
+    var isTopView: Bool { isTrending }
 }
 
 struct GenericResultResponse: Codable, Equatable {

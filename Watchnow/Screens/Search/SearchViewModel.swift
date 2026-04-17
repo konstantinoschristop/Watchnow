@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-protocol BaseSwipeActionsProtocol {
+protocol BaseSwipeActionsProtocol: AnyObject {
     var showRemovedAlert: Bool { get set }
     var showAddedAlert: Bool { get set }
     func itemRemoved(result: Result)
@@ -26,6 +26,7 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     @Published var showAddedAlert = false
     
     @Published var apiError: Bool = false
+    @Published var isSearching: Bool = false
     private let service: any DetailServiceProtocol
 
     init(model: SearchModel,
@@ -36,13 +37,20 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     }
     
     func getResults(search: String) async {
-        
+        apiError = false
+        isSearching = true
+        defer { isSearching = false }
         do {
             searchResponse = try await service.fetchSearchResults(search: search)
             cleanUpResults(results: searchResponse)
         } catch {
             apiError = true
         }
+    }
+
+    func clearResults() {
+        results = nil
+        apiError = false
     }
     
     private func cleanUpResults(results: SearchResponse?) {

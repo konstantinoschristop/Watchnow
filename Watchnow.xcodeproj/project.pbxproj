@@ -62,6 +62,9 @@
 		EE67246627B9233800B8F8E8 /* ResultCreditsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246527B9233800B8F8E8 /* ResultCreditsResponse.swift */; };
 		EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */; };
 		EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67247927B9876400B8F8E8 /* CastView.swift */; };
+		FE1D0A01000000000000FB01 /* HeroOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A01000000000000FA01 /* HeroOverlayView.swift */; };
+		FE1D0A02000000000000FB02 /* PrimaryActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A02000000000000FA02 /* PrimaryActionRow.swift */; };
+		FE1D0A03000000000000FB03 /* MoreLikeThisSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A03000000000000FA03 /* MoreLikeThisSection.swift */; };
 		EE8B692628C4A63700AD6B8D /* CollectionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */; };
 		EE93A1E628BFE86300F5B1E6 /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */; };
 		EE94209428A6AFFF00577629 /* ResultDetailsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE94209328A6AFFF00577629 /* ResultDetailsResponse.swift */; };
@@ -145,6 +148,9 @@
 		EE67246527B9233800B8F8E8 /* ResultCreditsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCreditsResponse.swift; sourceTree = "<group>"; };
 		EE67246927B9240900B8F8E8 /* ServiceInvocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceInvocation.swift; sourceTree = "<group>"; };
 		EE67247927B9876400B8F8E8 /* CastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastView.swift; sourceTree = "<group>"; };
+		FE1D0A01000000000000FA01 /* HeroOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroOverlayView.swift; sourceTree = "<group>"; };
+		FE1D0A02000000000000FA02 /* PrimaryActionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryActionRow.swift; sourceTree = "<group>"; };
+		FE1D0A03000000000000FA03 /* MoreLikeThisSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreLikeThisSection.swift; sourceTree = "<group>"; };
 		EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionResponse.swift; sourceTree = "<group>"; };
 		EE93A1E528BFE86300F5B1E6 /* AdditionalInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdditionalInfoView.swift; sourceTree = "<group>"; };
 		EE94209328A6AFFF00577629 /* ResultDetailsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultDetailsResponse.swift; sourceTree = "<group>"; };
@@ -405,6 +411,9 @@
 				EE4002B2284CEBA300374143 /* ReviewsView.swift */,
 				EE95E43C2895B02C00B8C688 /* VideoView.swift */,
 				EEF45B282A7998D600D3460E /* WatchProviderView.swift */,
+				FE1D0A01000000000000FA01 /* HeroOverlayView.swift */,
+				FE1D0A02000000000000FA02 /* PrimaryActionRow.swift */,
+				FE1D0A03000000000000FA03 /* MoreLikeThisSection.swift */,
 			);
 			path = DetailsView;
 			sourceTree = "<group>";
@@ -508,6 +517,9 @@
 				8AA98D852ADB15B5007963E3 /* MoviesModel.swift in Sources */,
 				EEDC84AE28ABE61900F3C171 /* PersonResponse.swift in Sources */,
 				EE67247A27B9876400B8F8E8 /* CastView.swift in Sources */,
+				FE1D0A01000000000000FB01 /* HeroOverlayView.swift in Sources */,
+				FE1D0A02000000000000FB02 /* PrimaryActionRow.swift in Sources */,
+				FE1D0A03000000000000FB03 /* MoreLikeThisSection.swift in Sources */,
 				EE67246A27B9240900B8F8E8 /* ServiceInvocation.swift in Sources */,
 				EE9595C3289EB49B0016EC25 /* WatchlistManager.swift in Sources */,
 				8A981D5326B5AF1000993232 /* AppDelegate.swift in Sources */,

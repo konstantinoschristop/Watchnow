@@ -214,6 +214,13 @@ extension ContentDetailsViewModel {
         watchProviders?.results?[Locale.current.language.region?.identifier ?? "US"]
     }
 
+    /// JustWatch deeplink for the current region, when available. Powers the
+    /// sticky "Watch Now" CTA on the details screen.
+    var watchNowURL: URL? {
+        guard let link = watchProviderSafe?.link, !link.isEmpty else { return nil }
+        return URL(string: link)
+    }
+
     var hasCast: Bool {
         !(credits?.cast?.isEmpty ?? true)
     }

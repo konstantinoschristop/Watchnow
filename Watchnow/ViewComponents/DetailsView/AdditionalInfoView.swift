@@ -8,67 +8,82 @@
 import SwiftUI
 
 struct AdditionalInfoView: View {
-    
+
     let details: ResultDetailsResponse
     @State var isSheetPresented = false
-    
+    @State private var isExpanded = false
+
     var body: some View {
-        
-        VStack(alignment: .leading, spacing: 20) {
-            
-            if let createdBy = details.getCreatedBy(),
-               createdBy.isEmpty == false {
-                
-                switch createdBy.count {
-                case 1:
-                    getView(title: "Created By", subtitle: createdBy)
-                default:
-                    getBulletListView(title: "Created By", bullets: createdBy)
+
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: 20) {
+
+                if let createdBy = details.getCreatedBy(),
+                   createdBy.isEmpty == false {
+
+                    switch createdBy.count {
+                    case 1:
+                        getView(title: "Created By", subtitle: createdBy)
+                    default:
+                        getBulletListView(title: "Created By", bullets: createdBy)
+                    }
+                }
+
+                if let dateString = details.getDate() {
+                    getView(title: "Release Date", subtitle: [dateString])
+                }
+
+                if let runtime = details.getRuntime() {
+                    getView(title: "Runtime", subtitle: [runtime])
+                }
+
+                if let spokenLanguages = details.getLanguages(),
+                   spokenLanguages.isEmpty == false {
+
+                    switch spokenLanguages.count {
+                    case 1:
+                        getView(title: "Spoken Languages", subtitle: spokenLanguages)
+                    default:
+                        getBulletListView(title: "Spoken Languages", bullets: spokenLanguages)
+                    }
+                }
+
+                if let budget = details.getBudget() {
+                    getView(title: "Budget", subtitle: [budget])
+                }
+
+                if let revenue = details.getRevenue() {
+                    getView(title: "Revenue", subtitle: [revenue])
+                }
+
+                if let tagline = details.getTagline() {
+                    getView(title: "Tagline", subtitle: [tagline])
+                }
+
+                if let status = details.status {
+                    getView(title: "Status", subtitle: [status])
+                }
+
+                if let homepage = details.homepage,
+                   homepage.isEmpty == false {
+                    getLinkView(title: "Homepage", homepage: homepage)
                 }
             }
-            
-            if let dateString = details.getDate() {
-                getView(title: "Release Date", subtitle: [dateString])
-            }
-            
-            if let runtime = details.getRuntime() {
-                getView(title: "Runtime", subtitle: [runtime])
-            }
-            
-            if let spokenLanguages = details.getLanguages(),
-               spokenLanguages.isEmpty == false {
-                
-                switch spokenLanguages.count {
-                case 1:
-                    getView(title: "Spoken Languages", subtitle: spokenLanguages)
-                default:
-                    getBulletListView(title: "Spoken Languages", bullets: spokenLanguages)
-                }
-            }
-            
-            if let budget = details.getBudget() {
-                getView(title: "Budget", subtitle: [budget])
-            }
-            
-            if let revenue = details.getRevenue() {
-                getView(title: "Revenue", subtitle: [revenue])
-            }
-            
-            if let tagline = details.getTagline() {
-                getView(title: "Tagline", subtitle: [tagline])
-            }
-            
-            if let status = details.status {
-                getView(title: "Status", subtitle: [status])
-            }
-            
-            if let homepage = details.homepage,
-               homepage.isEmpty == false {
-                getLinkView(title: "Homepage", homepage: homepage)
+            .padding(.top, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .symbolRenderingMode(.hierarchical)
+                Text("Additional Information")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.primary)
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .tint(.secondary)
+        .padding(.horizontal)
         .sheet(isPresented: $isSheetPresented) {
             WebView(videoURL: URL(string: details.homepage ?? ""))
                 .ignoresSafeArea()

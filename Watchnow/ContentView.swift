@@ -29,7 +29,6 @@ struct ContentView: View {
                 watchlistTabContent
             }
         }
-        .minimizeTabBar()
     }
 }
 
@@ -56,7 +55,6 @@ extension ContentView {
             SearchView(viewModel: searchViewModel)
                 .background(Color(.background))
                 .navigationTitle("Search")
-                .navigationBarTitleDisplayMode(.automatic)
         }
     }
 
@@ -65,7 +63,6 @@ extension ContentView {
             WatchlistView(watchlistViewModel: watchlistViewModel)
                 .background(Color(.background))
                 .navigationTitle("Watchlist")
-                .navigationBarTitleDisplayMode(.automatic)
         }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 @MainActor
 protocol BaseViewModelProtocol {
-    
+
     func loadMoreContent(section: ViewSections)
     func canLoadMoreContent(section: ViewSections) -> Bool
 }
@@ -23,102 +23,110 @@ protocol ContentService: AnyObject, Sendable {
 
 @MainActor
 class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
-    
+
     @Published var apiError = false
-    
+    @Published var loadingCompleted = false
+
     @Published var trending: ContentListResult? {
-        didSet {
-            featuredResult = trending?.getResults().prefix(5).map(\.self)
-        }
+        didSet { featuredResult = trending?.getResults().prefix(5).map(\.self) }
     }
     @Published var popular: ContentListResult?
     @Published var special: ContentListResult?   // "upcoming" for movies, "airingToday" for series
     @Published var latest: ContentListResult?
     @Published var featuredResult: [Result]?
-    
+
     private let service: ContentService
+
+    // Non-published so flipping it doesn't trigger a SwiftUI re-render mid-scroll.
+    // Used to block re-entry into loadMoreContent while a fetch is in-flight.
+    private var loadingSections: Set<ViewSections> = []
 
     init(service: ContentService) {
         self.service = service
     }
-    
-    func loadContent() async {
-        trending = await fetch(list: trending, fetcher: service.fetchTrending, page: 1)
-        popular = await fetch(list: popular, fetcher: service.fetchPopular, page: 1)
-        special = await fetch(list: special, fetcher: service.fetchUpcomingOrAiring, page: 1)
-        latest = await fetch(list: latest, fetcher: service.fetchLatest, page: 1)
+
+    // MARK: - Load
+
+    /// Fetches all 4 sections concurrently.
+    /// - Parameter resetFirst: Pass `true` when retrying after an error to reset
+    ///   the UI back to placeholder state. Omit (or pass `false`) for pull-to-refresh
+    ///   so existing content stays visible while new data loads.
+    func loadContent(resetFirst: Bool = false) async {
+        if resetFirst {
+            trending = nil
+            popular = nil
+            special = nil
+            latest = nil
+        }
+        apiError = false
+        loadingCompleted = false
+
+        let svc = service   // capture Sendable reference for child tasks
+        async let t = svc.fetchTrending(page: 1)
+        async let p = svc.fetchPopular(page: 1)
+        async let s = svc.fetchUpcomingOrAiring(page: 1)
+        async let l = svc.fetchLatest(page: 1)
+
+        if let r = try? await t { trending  = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await p { popular   = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await s { special   = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await l { latest    = ContentListResult(result: r) } else { apiError = true }
+
+        loadingCompleted = true
     }
-    
+
+    // MARK: - Pagination
+
     func canLoadMoreContent(section: ViewSections) -> Bool {
         switch section {
-        case .trendingMovies, .trendingSeries:
-            return trending?.canLoadMoreContent() ?? false
-        case .popularMovies, .popularSeries:
-            return popular?.canLoadMoreContent() ?? false
-        case .upcomingMovies, .airingTodaySeries:
-            return special?.canLoadMoreContent() ?? false
-        case .latestMovies, .latestSeries:
-            return latest?.canLoadMoreContent() ?? false
+        case .trendingMovies, .trendingSeries:      return trending?.canLoadMoreContent() ?? false
+        case .popularMovies, .popularSeries:        return popular?.canLoadMoreContent()  ?? false
+        case .upcomingMovies, .airingTodaySeries:   return special?.canLoadMoreContent()  ?? false
+        case .latestMovies, .latestSeries:          return latest?.canLoadMoreContent()   ?? false
         }
     }
-    
+
     func loadMoreContent(section: ViewSections) {
+        guard !loadingSections.contains(section) else { return }
+        loadingSections.insert(section)
+
         switch section {
         case .trendingMovies, .trendingSeries:
-            loadMore(list: trending, fetcher: service.fetchTrending) { [weak self] updated in
-                self?.trending = updated
-            }
+            loadMore(section: section, list: trending,  fetcher: service.fetchTrending)          { [weak self] in self?.trending  = $0 }
         case .popularMovies, .popularSeries:
-            loadMore(list: popular, fetcher: service.fetchPopular) { [weak self] updated in
-                self?.popular = updated
-            }
+            loadMore(section: section, list: popular,   fetcher: service.fetchPopular)           { [weak self] in self?.popular   = $0 }
         case .upcomingMovies, .airingTodaySeries:
-            loadMore(list: special, fetcher: service.fetchUpcomingOrAiring) { [weak self] updated in
-                self?.special = updated
-            }
+            loadMore(section: section, list: special,   fetcher: service.fetchUpcomingOrAiring)  { [weak self] in self?.special   = $0 }
         case .latestMovies, .latestSeries:
-            loadMore(list: latest, fetcher: service.fetchLatest) { [weak self] updated in
-                self?.latest = updated
-            }
+            loadMore(section: section, list: latest,    fetcher: service.fetchLatest)            { [weak self] in self?.latest    = $0 }
         }
     }
-    
+
     // MARK: - Helpers
-    private func fetch(list: ContentListResult?, fetcher: (Int) async throws -> GenericResultResponse, page: Int) async -> ContentListResult? {
-        do {
-            let fetched = try await fetcher(page)
-            if page == 1 {
-                return ContentListResult(result: fetched)
-            } else {
-                var updated = list
-                updated?.appendResult(fetched)
-                return updated
-            }
-        } catch {
-            apiError = true
-            return list
-        }
-    }
-    
+
     private func loadMore(
+        section: ViewSections,
         list: ContentListResult?,
         fetcher: @escaping (Int) async throws -> GenericResultResponse,
         assign: @escaping (ContentListResult?) -> Void
     ) {
         var updated = list
         updated?.incrementCurrentPage()
-        if let page = updated?.currentPage {
-            Task {
-                let newList = await fetch(list: updated, fetcher: fetcher, page: page)
-                assign(newList)
+        guard let page = updated?.currentPage else {
+            loadingSections.remove(section)
+            return
+        }
+        Task { [weak self] in
+            defer { self?.loadingSections.remove(section) }
+            do {
+                let fetched = try await fetcher(page)
+                updated?.appendResult(fetched)
+                assign(updated)
+            } catch {
+                self?.apiError = true
             }
         }
     }
-    
-    var finishedLoadingContent: Bool {
-        return (special?.result.results.isEmpty == false &&
-                popular?.result.results.isEmpty == false &&
-                trending?.result.results.isEmpty == false &&
-                latest?.result.results.isEmpty == false)
-    }
+
+    var finishedLoadingContent: Bool { loadingCompleted }
 }

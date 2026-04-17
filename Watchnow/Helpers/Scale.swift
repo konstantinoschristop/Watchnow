@@ -12,22 +12,14 @@ class Scale {
         case vertical
         case horizontal
     }
-    
+
     static func getScale(proxy: GeometryProxy, scaleType: ScaleTypes) -> CGFloat {
-        let midPoint: CGFloat = 120
-        
-        let viewFrame = proxy.frame(in: CoordinateSpace.global)
-        
-        var scale: CGFloat = 1.0
-        let deltaXAnimationThreshold: CGFloat = scaleType == .vertical ? 100 : 130
-        
-        let diffFromCenter = abs(midPoint - viewFrame.origin.x - deltaXAnimationThreshold / 2)
-        if diffFromCenter < deltaXAnimationThreshold {
-            scale = 1 + (deltaXAnimationThreshold - diffFromCenter) / 600
-        }
-        
-        return scale
+        let screenCenter = UIScreen.main.bounds.width / 2
+        let cardCenter   = proxy.frame(in: .global).midX
+        let diff         = abs(screenCenter - cardCenter)
+        let threshold: CGFloat = scaleType == .vertical ? 150 : 160
+
+        guard diff < threshold else { return 1.0 }
+        return 1 + (threshold - diff) / 600
     }
 }
-
-

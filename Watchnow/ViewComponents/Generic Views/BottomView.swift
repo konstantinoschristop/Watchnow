@@ -25,7 +25,13 @@ struct BottomView: View {
                                   cardType: .bottom)
             .background(LinearGradient(colors: [.clear, Color(.secondaryBackground).opacity(0.6)], startPoint: .center, endPoint: .bottom))
         } header: {
-            SectionHeaderView(title: viewTitle).textCase(.none)
+            SectionHeaderView(
+                title: viewSection.cleanTitle,
+                icon: viewSection.themeIcon,
+                tint: viewSection.themeColor,
+                showsPulse: viewSection.isTrending
+            )
+            .textCase(.none)
         }
     }
 }

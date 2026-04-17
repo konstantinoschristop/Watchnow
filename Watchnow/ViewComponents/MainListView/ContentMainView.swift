@@ -10,49 +10,63 @@ import SwiftUI
 struct ContentMainView<VM: BaseContentViewModel>: View {
     @ObservedObject var viewModel: VM
     @Namespace private var namespace
-    
+
     let sections: [ViewSections]
-    
+
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            if let results = viewModel.featuredResult {
-                MenuFeaturedView(results: results,
-                                 overlayContent: { result in overlayContent(for: result) },
-                                 screenType: sections.allSatisfy({ $0.screenType == .movie }) ? .movie : .tv,
-                                 showNavBar: .constant(true))
-            }
-            LazyVStack(spacing: 6) {
-                ForEach(sections, id: \.self) { section in
-                    if let results = results(for: section, from: viewModel) {
-                        if section.isTopView {
-                            TopView(results: results,
-                                    viewTitle: section.title,
-                                    screenType: section.screenType,
-                                    viewModel: viewModel,
-                                    viewSection: section)
-                        } else {
-                            BottomView(results: results,
-                                       viewTitle: section.title,
-                                       screenType: section.screenType,
-                                       viewModel: viewModel,
-                                       viewSection: section)
+        Group {
+            if viewModel.apiError && !viewModel.finishedLoadingContent {
+                ContentUnavailableView {
+                    Label("Couldn't load content", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text("Check your connection and try again.")
+                } actions: {
+                    Button("Retry") {
+                        Task { await viewModel.loadContent(resetFirst: true) }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            } else {
+                ScrollView(showsIndicators: false) {
+                    if let results = viewModel.featuredResult {
+                        MenuFeaturedView(results: results,
+                                         overlayContent: { result in overlayContent(for: result) },
+                                         screenType: sections.allSatisfy({ $0.screenType == .movie }) ? .movie : .tv)
+                    }
+                    LazyVStack(spacing: 6) {
+                        ForEach(sections, id: \.self) { section in
+                            if let results = results(for: section, from: viewModel) {
+                                if section.isTopView {
+                                    TopView(results: results,
+                                            viewTitle: section.title,
+                                            screenType: section.screenType,
+                                            viewModel: viewModel,
+                                            viewSection: section)
+                                } else {
+                                    BottomView(results: results,
+                                               viewTitle: section.title,
+                                               screenType: section.screenType,
+                                               viewModel: viewModel,
+                                               viewSection: section)
+                                }
+                            }
                         }
                     }
                 }
+                .redacted(reason: viewModel.finishedLoadingContent ? [] : .placeholder)
             }
         }
         .ignoresSafeArea(edges: .top)
-        .onLoad { Task { await viewModel.loadContent() } }
-        .redacted(reason: viewModel.finishedLoadingContent ? [] : .placeholder)
+        .onLoad { Task { await viewModel.loadContent(resetFirst: true) } }
         .toolbarTitleDisplayMode(.inlineLarge)
     }
-    
+
     private func results(for section: ViewSections, from viewModel: BaseContentViewModel) -> [Result]? {
         switch section {
-        case .trendingMovies, .trendingSeries: return viewModel.trending?.result.results
-        case .popularMovies, .popularSeries: return viewModel.popular?.result.results
-        case .upcomingMovies, .airingTodaySeries: return viewModel.special?.result.results
-        case .latestMovies, .latestSeries: return viewModel.latest?.result.results
+        case .trendingMovies, .trendingSeries:      return viewModel.trending?.result.results
+        case .popularMovies, .popularSeries:        return viewModel.popular?.result.results
+        case .upcomingMovies, .airingTodaySeries:   return viewModel.special?.result.results
+        case .latestMovies, .latestSeries:          return viewModel.latest?.result.results
         }
     }
 }
@@ -62,26 +76,25 @@ extension ContentMainView {
     @ViewBuilder
     func overlayContent(for content: Result) -> some View {
         ZStack {
-            LinearGradient(colors: [.clear,
-                                    .black.opacity(0.6)],
+            LinearGradient(colors: [.clear, .black.opacity(0.6)],
                            startPoint: .center,
                            endPoint: .bottom)
-            
+
             ZStack(alignment: .bottom) {
                 Rectangle()
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity, maxHeight: 120)
                     .blur(radius: 20)
                     .opacity(0.5)
-                
+
                 VStack(alignment: .center, spacing: 3) {
                     Text("Spotlight")
                         .font(.custom("AvenirNext-Regular", size: 20))
-                    
+
                     Text(content.getResultTitle())
                         .font(.custom("AvenirNext-Bold", size: 25))
                         .multilineTextAlignment(.center)
-                    
+
                     HStack {
                         Text(content.getReleaseDate(addSeparator: false))
                         Text(" | ")

@@ -9,16 +9,15 @@ import SwiftUI
 
 // MARK: - RatingView Component
 struct RatingView: View {
- 
+
     var rating: Double?
-    
+
     var body: some View {
-        
-        (Text(Image(systemName: "star.fill")) + Text(" ") + Text(rating.map { String(format: "%.1f", $0) } ?? "-")
-            .foregroundColor(.white))
-        .font(.system(size: 11, weight: .bold))
-        .padding(.vertical, 5)
-        .padding(.horizontal, 9)
-        .foregroundColor(.orange)
+        (Text(Image(systemName: "star.fill")) + Text(" ") + Text(rating.map { String(format: "%.1f", $0) } ?? "-"))
+            .font(.system(size: 11, weight: .bold))
+            .foregroundColor(.orange)
+            .padding(.vertical, 5)
+            .padding(.horizontal, 9)
+            .background(.black.opacity(0.55), in: Capsule())
     }
 }

@@ -14,7 +14,7 @@ struct PosterImage: View {
     var height: CGFloat = 450
     var cornerRadius: CGFloat = 15
     var shadowRadius: CGFloat = 5
-    
+
     var body: some View {
         KFImage.url(url)
             .downsampling(size: CGSize(width: width, height: height))

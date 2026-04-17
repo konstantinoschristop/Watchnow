@@ -37,9 +37,6 @@ struct GenericImageView: View {
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
             .fade(duration: 0.25)
-            .onProgress { receivedSize, totalSize in  }
-            .onSuccess { result in  }
-            .onFailure { error in }
             .resizable()
             .frame(width: width, height: height)
             .cornerRadius(cornerRadius)

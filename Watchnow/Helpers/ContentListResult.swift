@@ -27,18 +27,13 @@ struct ContentListResult: LoadMoreContentProtocol {
 }
 
 protocol LoadMoreContentProtocol {
-    
     var currentPage: Int { get set }
     var result: GenericResultResponse { get }
 }
 
 extension LoadMoreContentProtocol {
-    
     func canLoadMoreContent() -> Bool {
-        
-        guard let totalPages = result.total_pages else {
-            return false
-        }
+        guard let totalPages = result.total_pages else { return false }
         return currentPage < totalPages
     }
 }

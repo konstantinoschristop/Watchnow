@@ -11,29 +11,27 @@ import Foundation
 class EpisodesViewModel: ObservableObject {
     
     @Published private(set) var episodes: EpisodesResponse?
-    
+    @Published var isLoading = false
+    @Published var apiError = false
+
     private let service: any DetailServiceProtocol
     let seriesID: Int
 
     init(service: any DetailServiceProtocol = ServiceInvocation(),
          seriesID: Int) {
-        
+
         self.service = service
         self.seriesID = seriesID
     }
-    
+
     func getEpisodes(seasonNumber: Int) async {
-                
+        episodes = nil
+        isLoading = true
+        defer { isLoading = false }
         do {
             self.episodes = try await service.fetchEpisodes(seriesID: self.seriesID, seasonNumber: seasonNumber)
         } catch {
-            print(error)
-        }
-    }
-    
-    func resetEpisodes() {
-        DispatchQueue.main.async {
-            self.episodes = nil
+            apiError = true
         }
     }
 }

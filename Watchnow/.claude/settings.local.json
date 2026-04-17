@@ -6,7 +6,8 @@
       "Bash(printf '// This file has been renamed to UINavigationController+Extension.swift\\\\n')",
       "Bash(\"/Users/k.christopoulos/Desktop/MyProjects/Watchnow/ViewComponents/Extesions/UINavigationController+Extennsion.swift\")",
       "Bash(plutil -lint \"/Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj\")",
-      "Bash(plutil -lint /Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj)"
+      "Bash(plutil -lint /Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj)",
+      "Bash(xcodebuild -scheme Watchnow -destination 'generic/platform=iOS' -quiet build)"
     ]
   }
 }
