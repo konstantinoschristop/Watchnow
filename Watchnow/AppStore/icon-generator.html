@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Watchnow — App Icon Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background: #0c0f1a;
+    color: #e5e7eb;
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    color: #9ca3af;
+    margin-bottom: 32px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    max-width: 1100px;
+  }
+
+  .previews {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .preview-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  /* iOS renders icons with a "squircle" mask at ~22.37% of the icon size.
+     We emulate it here so you see what Apple's mask will do. */
+  .squircle {
+    border-radius: 22.37%;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  .label {
+    color: #9ca3af;
+    font-size: 13px;
+  }
+
+  /* Preview canvases */
+  .s180 { width: 180px; height: 180px; }
+  .s120 { width: 120px; height: 120px; }
+  .s60  { width: 60px;  height: 60px;  }
+  .s40  { width: 40px;  height: 40px;  }
+
+  /* Full 1024 canvas, scaled down for screen display */
+  .hero-wrap {
+    width: 400px;
+    height: 400px;
+  }
+
+  .hero-wrap canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+    background: #161a28;
+    border-radius: 12px;
+    border: 1px solid #2a2f40;
+  }
+
+  button {
+    padding: 12px 20px;
+    font: inherit;
+    font-weight: 600;
+    color: #fff;
+    background: #3b82f6;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  button:hover { background: #2563eb; }
+
+  button.secondary {
+    background: #374151;
+  }
+  button.secondary:hover { background: #4b5563; }
+
+  .note {
+    color: #9ca3af;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  .note code {
+    background: #000;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #60a5fa;
+    font-family: ui-monospace, monospace;
+  }
+
+  .status {
+    color: #10b981;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 20px;
+  }
+
+  /* Hidden canvas used for export — kept offscreen */
+  #exportCanvas {
+    position: absolute;
+    left: -9999px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Watchnow — App Icon Generator</h1>
+<p class="subtitle">
+  Rendered via Canvas 2D. Preview below at iOS sizes, then export all required PNGs with one click.
+</p>
+
+<div class="layout">
+
+  <div class="previews">
+    <div class="preview-row">
+      <div class="squircle hero-wrap">
+        <canvas id="previewHero" width="1024" height="1024"></canvas>
+      </div>
+      <div>
+        <div style="font-size: 16px; font-weight: 600; color: #fff;">1024 × 1024</div>
+        <div class="label">App Store / master</div>
+      </div>
+    </div>
+
+    <div class="preview-row">
+      <div class="squircle s180">
+        <canvas class="prev" width="180" height="180"></canvas>
+      </div>
+      <div class="squircle s120">
+        <canvas class="prev" width="120" height="120"></canvas>
+      </div>
+      <div class="squircle s60">
+        <canvas class="prev" width="60" height="60"></canvas>
+      </div>
+      <div class="squircle s40">
+        <canvas class="prev" width="40" height="40"></canvas>
+      </div>
+      <div class="label">iOS sizes at 3×, 3×, 3×, 2× (home screen, Spotlight, settings)</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button onclick="exportOne(1024)">Export 1024.png (master)</button>
+    <button onclick="exportAll()" id="exportAllBtn">Export ALL app icon sizes (19 files)</button>
+    <button onclick="exportLaunchLogo()" id="exportLogoBtn">Export launch logo (3 sizes)</button>
+    <button class="secondary" onclick="exportSVG()">Export SVG (vector master)</button>
+
+    <div class="status" id="status"></div>
+
+    <p class="note">
+      <strong>App icon PNGs</strong> → move into
+      <code>Assets.xcassets/AppIcon-1.appiconset/</code>, replacing the existing files.
+      <br><br>
+      <strong>Launch logo PNGs</strong> → move into
+      <code>Assets.xcassets/LaunchLogo.imageset/</code> (already created).
+      <br><br>
+      Xcode picks them up on the next build. If Chrome prompts
+      "allow multiple downloads", click Allow.
+    </p>
+  </div>
+
+</div>
+
+<canvas id="exportCanvas"></canvas>
+
+<script>
+  /* ───────────────────────────────────────────────────────────────────────
+     Icon as SVG string — single source of truth.
+     Using SVG (not raw Canvas drawing) gives us smooth rounded triangle
+     corners for free via stroke-linejoin="round", and lets `drawImage`
+     rasterise cleanly at any target size.
+     ─────────────────────────────────────────────────────────────────────── */
+  const iconSVG = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#0A1B40"/>
+          <stop offset="50%"  stop-color="#1A3480"/>
+          <stop offset="100%" stop-color="#2D5BD9"/>
+        </linearGradient>
+
+        <linearGradient id="play" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stop-color="#FFFFFF"/>
+          <stop offset="100%" stop-color="#E8EDF5"/>
+        </linearGradient>
+
+        <radialGradient id="topLight" cx="30%" cy="25%" r="55%">
+          <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+        </radialGradient>
+
+        <filter id="playShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="18"/>
+          <feOffset dx="0" dy="12"/>
+          <feComponentTransfer><feFuncA type="linear" slope="0.4"/></feComponentTransfer>
+          <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Background plate -->
+      <rect width="1024" height="1024" fill="url(#bg)"/>
+
+      <!-- Soft top-left highlight -->
+      <rect width="1024" height="1024" fill="url(#topLight)"/>
+
+      <!-- Play triangle.
+           stroke + stroke-linejoin="round" creates soft corners without
+           needing bezier math. Stroke colour matches fill so the outline
+           reads as extra padding, not as a border. -->
+      <polygon
+        points="340,280 340,744 760,512"
+        fill="url(#play)"
+        stroke="url(#play)"
+        stroke-width="80"
+        stroke-linejoin="round"
+        filter="url(#playShadow)"
+      />
+    </svg>
+  `.trim();
+
+  /* ───────────────────────────────────────────────────────────────────────
+     Render pipeline
+     ─────────────────────────────────────────────────────────────────────── */
+  let iconImage = null;
+
+  function loadIcon() {
+    return new Promise((resolve) => {
+      const blob = new Blob([iconSVG], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        iconImage = img;
+        resolve();
+      };
+      img.src = url;
+    });
+  }
+
+  function drawAt(canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(iconImage, 0, 0, canvas.width, canvas.height);
+  }
+
+  function renderAllPreviews() {
+    drawAt(document.getElementById('previewHero'));
+    document.querySelectorAll('.prev').forEach(drawAt);
+  }
+
+  /* ───────────────────────────────────────────────────────────────────────
+     Export
+     ─────────────────────────────────────────────────────────────────────── */
+  function exportOne(size, filename) {
+    const canvas = document.getElementById('exportCanvas');
+    canvas.width = size;
+    canvas.height = size;
+    drawAt(canvas);
+
+    canvas.toBlob((blob) => {
+      const a = document.createElement('a');
+      a.download = filename || `${size}.png`;
+      a.href = URL.createObjectURL(blob);
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 100);
+    }, 'image/png', 1.0);
+  }
+
+  // Exact set of filenames currently in AppIcon-1.appiconset
+  const requiredSizes = [
+    20, 29, 40, 50, 57, 58, 60, 72, 76, 80, 87,
+    100, 114, 120, 144, 152, 167, 180, 1024
+  ];
+
+  async function exportAll() {
+    const btn = document.getElementById('exportAllBtn');
+    const status = document.getElementById('status');
+    btn.disabled = true;
+
+    for (let i = 0; i < requiredSizes.length; i++) {
+      const size = requiredSizes[i];
+      status.textContent = `Exporting ${i + 1}/${requiredSizes.length} — ${size}.png`;
+      exportOne(size);
+      // brief delay so the browser processes each download separately
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    status.textContent = `✓ Exported ${requiredSizes.length} PNGs.`;
+    btn.disabled = false;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────────
+     Launch logo: white play triangle only, transparent background.
+     Rendered at 3 scales for the LaunchLogo.imageset (1×/2×/3×).
+     Base size is 120 pt, matching the storyboard's imageView constraints.
+     ─────────────────────────────────────────────────────────────────────── */
+  const logoSVG = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+      <defs>
+        <linearGradient id="play2" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stop-color="#FFFFFF"/>
+          <stop offset="100%" stop-color="#E8EDF5"/>
+        </linearGradient>
+      </defs>
+      <polygon
+        points="340,280 340,744 760,512"
+        fill="url(#play2)"
+        stroke="url(#play2)"
+        stroke-width="80"
+        stroke-linejoin="round"
+      />
+    </svg>
+  `.trim();
+
+  let logoImage = null;
+  function loadLogo() {
+    return new Promise((resolve) => {
+      const blob = new Blob([logoSVG], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); logoImage = img; resolve(); };
+      img.src = url;
+    });
+  }
+
+  function exportLogoAt(size, filename) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(logoImage, 0, 0, size, size);
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.download = filename;
+        a.href = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); resolve(); }, 100);
+      }, 'image/png', 1.0);
+    });
+  }
+
+  async function exportLaunchLogo() {
+    const btn = document.getElementById('exportLogoBtn');
+    const status = document.getElementById('status');
+    btn.disabled = true;
+    if (!logoImage) await loadLogo();
+
+    // base: 120pt @1x, 240 @2x, 360 @3x
+    status.textContent = 'Exporting 1/3 — LaunchLogo.png';
+    await exportLogoAt(120, 'LaunchLogo.png');
+    await new Promise(r => setTimeout(r, 250));
+
+    status.textContent = 'Exporting 2/3 — LaunchLogo@2x.png';
+    await exportLogoAt(240, 'LaunchLogo@2x.png');
+    await new Promise(r => setTimeout(r, 250));
+
+    status.textContent = 'Exporting 3/3 — LaunchLogo@3x.png';
+    await exportLogoAt(360, 'LaunchLogo@3x.png');
+
+    status.textContent = '✓ Launch logo exported.';
+    btn.disabled = false;
+  }
+
+  function exportSVG() {
+    const blob = new Blob([iconSVG], { type: 'image/svg+xml' });
+    const a = document.createElement('a');
+    a.download = 'WatchnowIcon.svg';
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 100);
+  }
+
+  /* ───────────────────────────────────────────────────────────────────────
+     Boot
+     ─────────────────────────────────────────────────────────────────────── */
+  Promise.all([loadIcon(), loadLogo()]).then(renderAllPreviews);
+</script>
+
+</body>
+</html>

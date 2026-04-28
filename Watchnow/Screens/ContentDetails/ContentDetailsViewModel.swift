@@ -21,7 +21,8 @@ class ContentDetailsViewModel: ObservableObject {
         
         self.model = model
         self.service = service
-        self.model.isInWatchList = WatchlistManager.existsInWatchList(result: result)
+        self.model.isInWatchList   = WatchlistManager.existsInWatchList(result: result)
+        self.model.isInWatchedList = WatchedManager.shared.existsInWatched(result: result)
     }
     
     private func checkIfFetchingIsFinished() {
@@ -150,6 +151,11 @@ extension ContentDetailsViewModel {
         get { model.isInWatchList }
         set { model.isInWatchList = newValue }
     }
+
+    var isInWatchedList: Bool {
+        get { model.isInWatchedList }
+        set { model.isInWatchedList = newValue }
+    }
     
     var viewModelFinishedFetching: Bool {
         get { model.viewModelFinishedFetching }
@@ -205,7 +211,9 @@ extension ContentDetailsViewModel {
     var hasWatchProviders: Bool {
         if let results = watchProviders?.results,
            let provider = results[Locale.current.language.region?.identifier ?? "US"] {
-            return !(provider.flatrate?.isEmpty ?? true) || !(provider.rent?.isEmpty ?? true)
+            return !(provider.flatrate?.isEmpty ?? true)
+                || !(provider.rent?.isEmpty ?? true)
+                || !(provider.buy?.isEmpty ?? true)
         }
         return false
     }

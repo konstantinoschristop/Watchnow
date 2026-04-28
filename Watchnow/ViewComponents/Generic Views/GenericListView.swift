@@ -13,9 +13,9 @@ import Kingfisher
 ///
 /// Each row is a `ResultRow` — portrait poster, a tinted media-type badge,
 /// title, meta line (year + rating), and a short overview snippet. Actor
-/// rows drop the rating/overview (none of it exists for a person) and lose
-/// their chevron because we don't navigate anywhere for actors yet. Swipe
-/// actions are unchanged: left-swipe toggles Watchlist membership.
+/// rows drop the rating/overview (none of it applies to a person) and open
+/// `PersonSheetView` on tap instead of pushing a full details screen.
+/// Swipe actions are unchanged: left-swipe toggles Watchlist membership.
 struct GenericListView: View {
 
     @Binding var results: [Result]
@@ -35,13 +35,13 @@ struct GenericListView: View {
         }
     }
 
-    /// Wraps actors in a plain container (no push destination) and every
-    /// other result in a `NavigationLink`. The chevron is drawn by the row
-    /// itself, so the link's default disclosure indicator is hidden.
+    /// Wraps actors in a tappable `ActorRow` that opens `PersonSheetView`,
+    /// and every other result in a `NavigationLink`. The chevron is drawn
+    /// by the row itself, so the link's default disclosure indicator is hidden.
     @ViewBuilder
     private func row(for result: Result) -> some View {
         if result.getMediaType() == "Actor" {
-            ResultRow(result: result)
+            ActorRow(result: result)
         } else {
             NavigationLink {
                 let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
@@ -95,6 +95,36 @@ struct GenericListView: View {
     }
 }
 
+// MARK: - Actor row
+
+/// Self-contained row for person results. Tapping opens `PersonSheetView`
+/// as a medium/large sheet — no navigation push needed for a lightweight
+/// biography peek.
+private struct ActorRow: View {
+
+    let result: Result
+    @State private var isSheetPresented = false
+
+    var body: some View {
+        Button {
+            guard let path = result.profile_path, !path.isEmpty else { return }
+            isSheetPresented = true
+        } label: {
+            ResultRow(result: result)
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $isSheetPresented) {
+            PersonSheetView(
+                personID:    result.id ?? 0,
+                name:        result.getResultTitle(),
+                profilePath: result.profile_path,
+                knownFor:    result.known_for
+            )
+            .presentationDetents([.medium, .large])
+        }
+    }
+}
+
 // MARK: - ResultRow
 
 /// Single row. Split out from `GenericListView` so the row layout isn't
@@ -103,7 +133,7 @@ struct GenericListView: View {
 /// No chevron here — `NavigationLink` inside a `List` row draws the
 /// system disclosure indicator automatically, so a custom one would
 /// double up.
-private struct ResultRow: View {
+struct ResultRow: View {
     let result: Result
 
     private let posterWidth: CGFloat = 64
@@ -252,36 +282,24 @@ private struct ResultRow: View {
 
 // MARK: - MediaTypeBadge
 
-/// Small tinted pill indicating Movie / TV Series / Actor. Colour-codes
-/// the row so the media type is readable before the eye even reaches the
-/// title — useful in mixed-media lists (search) and still quietly helpful
-/// when the list is homogeneous (watchlist).
-private struct MediaTypeBadge: View {
+/// Quiet outlined pill indicating Movie / TV Series / Actor. The pill
+/// labels the type but no longer colour-codes it — colour was redundant
+/// in single-type contexts (Watchlist tabs, ListSection rows) and added
+/// to the visual noise globally. In mixed-type contexts (Search results)
+/// the text label still does the disambiguation work.
+struct MediaTypeBadge: View {
     let kind: String
 
     var body: some View {
         Text(kind.uppercased())
             .font(.system(size: 10, weight: .bold, design: .rounded))
             .tracking(0.5)
-            .foregroundStyle(tint)
+            .foregroundStyle(.secondary)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
-            .background {
-                Capsule(style: .continuous)
-                    .fill(tint.opacity(0.15))
-            }
             .overlay {
                 Capsule(style: .continuous)
-                    .strokeBorder(tint.opacity(0.35), lineWidth: 0.5)
+                    .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
             }
-    }
-
-    private var tint: Color {
-        switch kind {
-        case "Movie":     return .accentColor
-        case "TV Series": return .purple
-        case "Actor":     return .orange
-        default:          return .secondary
-        }
     }
 }

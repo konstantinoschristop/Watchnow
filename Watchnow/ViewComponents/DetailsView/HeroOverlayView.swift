@@ -23,10 +23,27 @@ struct HeroOverlayView: View {
     /// line; spreading the ramp over ~90pt with eased intermediate
     /// stops makes the transition feel like a gradient of light rather
     /// than an overlay edge.
-    private let bottomFadeHeight: CGFloat = 90
+    private let bottomFadeHeight: CGFloat = 70
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // Top scrim — covers the status-bar / Dynamic Island safe area
+            // so the image bleed looks intentional rather than clipped.
+            // Three stops give a soft vignette: darkest at the very top
+            // (where system UI lives), easing to transparent by ~120 pt.
+            LinearGradient(
+                stops: [
+                    .init(color: .black.opacity(0.6),  location: 0.0),
+                    .init(color: .black.opacity(0.2),  location: 0.5),
+                    .init(color: .clear,               location: 1.0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 120)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .allowsHitTesting(false)
+
             // Main scrim — darkens the backdrop underneath for text
             // legibility. Bottom stop stays modest (0.5 opacity) because
             // the fader below handles the real darkening into the app

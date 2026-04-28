@@ -96,8 +96,9 @@ struct MoreLikeThisSection: View {
     /// gets its own colour so a user flipping between details screens can
     /// tell at a glance "this title is part of a franchise" just from the
     /// header tint.
-    private var sectionTint: Color {
-        if hasCollection && !hasSimilars { return .indigo }
-        return .accentColor
-    }
+    /// Always the accent — colour-coding "this is a collection" vs
+    /// "more like this" was visual noise once the rest of the app
+    /// settled on a single accent palette. The icon (a different SF
+    /// Symbol per mode) still carries the differentiation.
+    private var sectionTint: Color { .accentColor }
 }

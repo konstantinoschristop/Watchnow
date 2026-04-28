@@ -7,7 +7,11 @@
       "Bash(\"/Users/k.christopoulos/Desktop/MyProjects/Watchnow/ViewComponents/Extesions/UINavigationController+Extennsion.swift\")",
       "Bash(plutil -lint \"/Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj\")",
       "Bash(plutil -lint /Users/k.christopoulos/Desktop/MyProjects/Watchnow.xcodeproj/project.pbxproj)",
-      "Bash(xcodebuild -scheme Watchnow -destination 'generic/platform=iOS' -quiet build)"
+      "Bash(xcodebuild -scheme Watchnow -destination 'generic/platform=iOS' -quiet build)",
+      "Bash(sips -z 20 20 1024.png --out 20.png)",
+      "Bash(sips -z 76 76 1024.png --out 76.png)",
+      "Bash(sips -z 152 152 1024.png --out 152.png)",
+      "Bash(sips -z 167 167 1024.png --out 167.png)"
     ]
   }
 }

@@ -28,11 +28,12 @@ struct MenuFeaturedView<Content: View>: View {
     /// scene-phase change) restarts this countdown from zero, so viewers
     /// always get a full window to read the slide they just landed on.
     private let slideDwell: Duration = .seconds(6)
+    private let dwellSeconds: Double = 6
 
     // Card treatment — only applied when there is more than one slide.
-    private let cardCornerRadius: CGFloat = 22
-    private let cardInset: CGFloat = 20      // side padding; drives peek width
-    private let cardSpacing: CGFloat = 10
+    private let cardCornerRadius: CGFloat = 20
+    private let cardInset: CGFloat = 10      // side padding; drives peek width
+    private let cardSpacing: CGFloat = 8
 
     @State private var scrollIndex: Int? = 0
     @State private var isDragging: Bool = false
@@ -48,7 +49,7 @@ struct MenuFeaturedView<Content: View>: View {
     var body: some View {
         heroContent
         .stretchy()
-        .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 2 / 3 }
+        .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 0.75 }
         .simultaneousGesture(
             DragGesture()
                 .onChanged { _ in if !isDragging { isDragging = true } }
@@ -86,9 +87,8 @@ struct MenuFeaturedView<Content: View>: View {
         }
     }
 
-    // Reserved space below the card for the page indicator so the indicator
-    // never sits on top of the card's bottom overlay.
-    private let pageIndicatorReserve: CGFloat = 34
+    // Page indicator lives inside the card now — no reserved space needed.
+    private let pageIndicatorReserve: CGFloat = 0
 
     // MARK: - Hero content
 
@@ -133,24 +133,25 @@ struct MenuFeaturedView<Content: View>: View {
         return ZStack(alignment: .bottom) {
             ambientBackdrop(size: size)
 
-            VStack(spacing: 0) {
-                ScrollView(.horizontal) {
-                    LazyHStack(spacing: cardSpacing) {
-                        ForEach(results.indices, id: \.self) { index in
-                            card(for: index, width: cardWidth, height: cardHeight)
-                                .id(index)
-                        }
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: cardSpacing) {
+                    ForEach(results.indices, id: \.self) { index in
+                        card(for: index, width: cardWidth, height: cardHeight)
+                            .id(index)
                     }
-                    .scrollTargetLayout()
                 }
-                .scrollIndicators(.hidden)
-                .scrollTargetBehavior(.viewAligned)
-                .scrollPosition(id: $scrollIndex)
-                .safeAreaPadding(.horizontal, cardInset)
-
+                .scrollTargetLayout()
+            }
+            .scrollIndicators(.hidden)
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $scrollIndex)
+            .safeAreaPadding(.horizontal, cardInset)
+            .scrollClipDisabled()
+            .frame(width: size.width, height: size.height)
+            // Indicator sits inside the card, above the spotlight overlay
+            .overlay(alignment: .bottom) {
                 pageIndicator
             }
-            .frame(width: size.width, height: size.height)
         }
     }
 
@@ -161,7 +162,12 @@ struct MenuFeaturedView<Content: View>: View {
             .clipped()
             .overlay { overlayContent(results[index]) }
             .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
-            .shadow(color: .black.opacity(0.25), radius: 12, y: 6)
+            // compositingGroup() flattens the card + shadow into a single
+            // layer before scrollTransition applies opacity. Without it the
+            // shadow renders at full strength even when the card is faded,
+            // producing a ghost artefact behind transitioning slides.
+            .compositingGroup()
+            .shadow(color: .black.opacity(0.35), radius: 6, y: 10)
             .scrollTransition(axis: .horizontal) { content, phase in
                 content
                     .scaleEffect(phase.isIdentity ? 1.0 : 0.9)
@@ -208,6 +214,44 @@ struct MenuFeaturedView<Content: View>: View {
             // the image still shows through the tint.
             .overlay(tint.opacity(0.45))
             .overlay(Color.black.opacity(0.25))
+            // Left edge vignette — fades the backdrop into darkness at the
+            // card's left boundary so the gap between card and backdrop reads
+            // as a smooth darkening rather than a hard image edge / seam line.
+            .overlay(alignment: .leading) {
+                LinearGradient(
+                    colors: [.black.opacity(0.75), .clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: cardInset + 14)
+                .allowsHitTesting(false)
+            }
+            // Right edge vignette — mirrors the left treatment.
+            .overlay(alignment: .trailing) {
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.75)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: cardInset + 14)
+                .allowsHitTesting(false)
+            }
+            // Top scrim — the ambient backdrop bleeds behind the nav bar and
+            // status bar. A soft top-to-transparent vignette keeps system UI
+            // legible over whatever colour the backdrop happens to be.
+            .overlay(alignment: .top) {
+                LinearGradient(
+                    stops: [
+                        .init(color: .black.opacity(0.55), location: 0.0),
+                        .init(color: .black.opacity(0.15), location: 0.5),
+                        .init(color: .clear,               location: 1.0)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 120)
+                .allowsHitTesting(false)
+            }
             // Bottom fader — dissolves the tinted ambient backdrop into the
             // app's scroll background, so the first section below the hero
             // (e.g. "Trending Movies") grows out of the tint rather than
@@ -254,16 +298,91 @@ struct MenuFeaturedView<Content: View>: View {
     private var pageIndicator: some View {
         HStack(spacing: 6) {
             ForEach(results.indices, id: \.self) { index in
-                Capsule()
-                    .fill(Color.white.opacity(index == (scrollIndex ?? 0) ? 0.95 : 0.35))
-                    .frame(width: index == (scrollIndex ?? 0) ? 18 : 6, height: 6)
-                    .animation(.easeInOut(duration: 0.25), value: scrollIndex)
+                let isActive = index == (scrollIndex ?? 0)
+                Group {
+                    if isActive {
+                        ProgressCapsule(duration: dwellSeconds)
+                    } else {
+                        Capsule()
+                            .fill(Color.white.opacity(0.35))
+                            .frame(width: 6, height: 6)
+                    }
+                }
+                // Force recreation when a dot transitions active ↔ inactive
+                // so ProgressCapsule's .onAppear always fires on a fresh view.
+                .id("\(index)-\(isActive)")
+                .animation(.easeInOut(duration: 0.25), value: scrollIndex)
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(.ultraThinMaterial, in: Capsule())
         .padding(.bottom, 18)
+    }
+
+    // MARK: - Progress capsule
+
+    /// A 28 × 6 pt capsule that fills left-to-right over `duration` seconds.
+    ///
+    /// Two gotchas the animation has to survive:
+    /// 1. On reappear, `progress` may still be at 1.0 from a previous cycle.
+    ///    A naive `withAnimation { progress = 1.0 }` sees no state change and
+    ///    skips the animation entirely — the fill appears instantly full.
+    /// 2. While the app is backgrounded, SwiftUI snaps in-flight animations
+    ///    to their final state. When the app returns to `.active`, the parent
+    ///    carousel's auto-advance `.task` restarts with a fresh `dwellSeconds`
+    ///    wait, but this view isn't recreated, so without intervention the
+    ///    capsule stays stuck at full for the next dwell.
+    ///
+    /// The fix: reset `progress` to 0 inside a transaction with animations
+    /// disabled, then start the linear fill on the next runloop tick so the
+    /// reset has committed before the animated change is read. `scenePhase`
+    /// observation retriggers the same reset-then-animate cycle on resume.
+    private struct ProgressCapsule: View {
+        let duration: Double
+        @State private var progress: CGFloat = 0
+        @Environment(\.scenePhase) private var scenePhase
+
+        var body: some View {
+            ZStack(alignment: .leading) {
+                // Track
+                Capsule()
+                    .fill(Color.white.opacity(0.3))
+                    .frame(width: 28, height: 6)
+                // Animated fill
+                Capsule()
+                    .fill(Color.white.opacity(0.95))
+                    .frame(width: 28, height: 6)
+                    .scaleEffect(x: progress, anchor: .leading)
+            }
+            .frame(width: 28, height: 6)
+            .clipShape(Capsule())
+            .onAppear { restartAnimation() }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    restartAnimation()
+                }
+            }
+        }
+
+        private func restartAnimation() {
+            // Snap back to 0 with animations explicitly disabled so the
+            // reset is instantaneous, not part of the previous animation.
+            var resetTx = Transaction()
+            resetTx.disablesAnimations = true
+            withTransaction(resetTx) {
+                progress = 0
+            }
+            // Defer the animated change to the next runloop tick so SwiftUI
+            // commits the reset first. Without this, both mutations coalesce
+            // and the animation starts from whatever `progress` was before,
+            // not from 0.
+            DispatchQueue.main.async {
+                withAnimation(.linear(duration: duration)) {
+                    progress = 1.0
+                }
+            }
+        }
     }
 
     // MARK: - Auto-advance plumbing

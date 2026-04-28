@@ -4,68 +4,157 @@
 //
 //  Created by Konstantinos Christopoulos on 16/8/22.
 //
+//  Redesigned episode row:
+//    - 16:9 still thumbnail (128×72) with episode-number pill overlay
+//    - Title + compact meta row (air date · star rating)
+//    - 2-line overview snippet
+//    - Inset divider aligned to the text column so rows breathe
+//
 
 import SwiftUI
 
 struct EpisodeView: View {
-    
+
     var episode: Episode
-    
+
+    @State private var isExpanded = false
+
+    private let thumbWidth: CGFloat = 128
+    private let thumbHeight: CGFloat = 72
+    private let thumbCornerRadius: CGFloat = 10
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            if let name = episode.name,
-               let rating = episode.vote_average,
-               let airDate = episode.air_date {
-                
-                HStack {
-                    Text("E" + String(episode.episode_number ?? 0) + ": " + name)
-                        .bold()
-                        .lineLimit(1)
-                        .foregroundColor(Color(.systemBackground))
-                        .colorInvert()
-                    
-                    Spacer()
-                    
-                    HStack {
-                        Text(airDate)
-                        HStack(spacing: 2) {
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.orange)
-                            Text(String(format: "%.1f", rating))
-                        }
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top, spacing: 12) {
+                thumbnail
+                info
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            // Inset divider — starts at the text column, not the screen edge
+            Divider()
+                .padding(.leading, 16 + thumbWidth + 12)
+        }
+    }
+
+    // MARK: - Thumbnail
+
+    private var thumbnail: some View {
+        ZStack(alignment: .bottomLeading) {
+            if let path = episode.still_path {
+                let url = API.Common.imageUrl(imageId: path)
+                GenericImageView(url: url,
+                                 width: thumbWidth,
+                                 height: thumbHeight,
+                                 cornerRadius: thumbCornerRadius,
+                                 showShadow: false)
+            } else {
+                RoundedRectangle(cornerRadius: thumbCornerRadius, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+                    .frame(width: thumbWidth, height: thumbHeight)
+                    .overlay {
+                        Image(systemName: "film")
+                            .font(.system(size: 22, weight: .light))
+                            .foregroundStyle(.tertiary)
                     }
-                }
-                
-                if let overview = episode.overview,
-                   overview.isEmpty == false {
-                    Text(overview)
-                } else {
-                    Text("Overview not available.")
-                        .italic()
-                }
+            }
+
+            // Episode number pill pinned to the bottom-left of the still
+            if let num = episode.episode_number {
+                Text("E\(num)")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background {
+                        Capsule()
+                            .fill(.black.opacity(0.65))
+                    }
+                    .padding(6)
             }
         }
-        .font(.custom("AvenirNext-Regular", size: 15))
-        .padding()
-        .cornerRadius(10)
-        .foregroundColor(.gray)
-        
-        Divider()
+        .frame(width: thumbWidth, height: thumbHeight)
+        .clipShape(RoundedRectangle(cornerRadius: thumbCornerRadius, style: .continuous))
+    }
+
+    // MARK: - Info
+
+    private var info: some View {
+        VStack(alignment: .leading, spacing: 4) {
+
+            // Title
+            Text(episode.name ?? "Untitled")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+
+            // Meta: air date · star rating
+            HStack(spacing: 8) {
+                if let airDate = episode.air_date {
+                    Text(airDate)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+
+                if let rating = episode.vote_average, rating > 0 {
+                    HStack(spacing: 3) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.orange)
+                        Text(String(format: "%.1f", rating))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            // Overview snippet with expand toggle
+            if let overview = episode.overview, !overview.isEmpty {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(overview)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(isExpanded ? nil : 2)
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isExpanded.toggle()
+                        }
+                    } label: {
+                        Text(isExpanded ? "Show less" : "Read more")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+            } else {
+                Text("No overview available.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.tertiary)
+                    .italic()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
+// MARK: - Preview
+
 struct EpisodeView_Previews: PreviewProvider {
     static var previews: some View {
-        
-        let episode = Episode.init(id: 1,
-                                   name: "HarryHarryHarryHarryHarryHarryHarryHarryHarry",
-                                   overview: "yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yyo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo yo",
-                                   still_path: nil,
-                                   vote_average: 6.7,
-                                   vote_count: 1000,
-                                   air_date: "10/02/2002",
-                                   episode_number: 1)
-        
+
+        let episode = Episode(id: 1,
+                              name: "The One Where It All Begins",
+                              overview: "A long overview that describes what happens in this episode in some detail, possibly wrapping to two lines.",
+                              still_path: nil,
+                              vote_average: 8.4,
+                              vote_count: 1000,
+                              air_date: "2002-02-10",
+                              episode_number: 1)
+
         EpisodeView(episode: episode)
+            .preferredColorScheme(.dark)
     }
 }

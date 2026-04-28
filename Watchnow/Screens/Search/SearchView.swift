@@ -102,17 +102,52 @@ private extension SearchView {
         ContentUnavailableView.search(text: searchInput)
     }
 
-    /// The screen the user sees before typing anything. Intentionally
-    /// restrained — an icon, a headline, and a hint — so the focus stays
-    /// on the search field above. Glyph paints in the brand accent so the
-    /// screen reads as on-theme rather than a generic grey placeholder.
+    /// The screen the user sees before typing anything.
+    /// When there are recent searches, shows a "Recent" chip section
+    /// instead of the generic placeholder.
+    @ViewBuilder
     var initialState: some View {
-        ContentUnavailableView {
-            themedLabel(title: "Find something to watch",
-                        systemImage: "magnifyingglass",
-                        tint: .accentColor)
-        } description: {
-            Text("Search across movies, TV series, and actors.")
+        if viewModel.recentSearches.isEmpty {
+            ContentUnavailableView {
+                themedLabel(title: "Find something to watch",
+                            systemImage: "magnifyingglass",
+                            tint: .accentColor)
+            } description: {
+                Text("Search across movies, TV series, and actors.")
+            }
+        } else {
+            recentSearchesView
+        }
+    }
+
+    var recentSearchesView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("Recent")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
+                    Button("Clear All") {
+                        viewModel.clearRecentSearches()
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Color.accentColor)
+                }
+                .padding(.horizontal, 16)
+
+                FlowLayout(spacing: 8) {
+                    ForEach(viewModel.recentSearches, id: \.self) { query in
+                        RecentSearchChip(query: query) {
+                            searchInput = query
+                        } onRemove: {
+                            viewModel.removeRecentSearch(query)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+            .padding(.top, 16)
         }
     }
 
@@ -250,16 +285,94 @@ private extension SearchView {
         return results.filter { $0.getMediaType() == option.rawValue }.count
     }
 
-    /// Category tint — mirrors `MediaTypeBadge` in the row so the chip up
-    /// top and the badge on the matching row paint with the same colour.
-    /// "All" stays on the brand accent because it represents the whole
-    /// set rather than a specific media type.
+    /// Single accent palette for all chips. The four-colour scheme used to
+    /// pair with `MediaTypeBadge` tints, but with the badge muted to
+    /// secondary text the tint now lives only in the *selected* state —
+    /// which is the only state that needs to draw the eye anyway.
     func tint(for option: SearchModel.SearchChooserOptions) -> Color {
-        switch option {
-        case .all:    return .accentColor
-        case .movies: return .accentColor
-        case .series: return .purple
-        case .actors: return .orange
+        .accentColor
+    }
+}
+
+// MARK: - RecentSearchChip
+
+private struct RecentSearchChip: View {
+    let query: String
+    let onTap: () -> Void
+    let onRemove: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 5) {
+                Image(systemName: "clock")
+                    .font(.system(size: 11))
+                Text(query)
+                    .font(.system(size: 13, weight: .medium))
+                Button(action: onRemove) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(3)
+                }
+                .buttonStyle(.plain)
+            }
+            .foregroundStyle(.primary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background {
+                Capsule(style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            }
+            .overlay {
+                Capsule(style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - FlowLayout
+
+/// A simple wrapping layout that flows chips into rows.
+private struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 0
+        var height: CGFloat = 0
+        var x: CGFloat = 0
+        var rowHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x + size.width > width, x > 0 {
+                height += rowHeight + spacing
+                x = 0
+                rowHeight = 0
+            }
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
+        height += rowHeight
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x + size.width > bounds.maxX, x > bounds.minX {
+                y += rowHeight + spacing
+                x = bounds.minX
+                rowHeight = 0
+            }
+            subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
         }
     }
 }

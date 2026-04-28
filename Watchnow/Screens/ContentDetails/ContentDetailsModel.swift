@@ -22,7 +22,8 @@ struct ContentDetailsModel {
     var details: ResultDetailsResponse?
     var collection: CollectionResponse?
     var watchProviders: WatchProvidersResponse?
-    var isInWatchList: Bool = false
+    var isInWatchList:   Bool = false
+    var isInWatchedList: Bool = false
     var viewModelFinishedFetching: Bool = false
     
     var screenType: ScreenTypes

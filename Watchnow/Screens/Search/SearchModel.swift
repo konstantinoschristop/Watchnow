@@ -31,6 +31,7 @@ struct SearchModel {
     }
     
     var searchResponse: SearchResponse?
+    var recentSearches: [String] = []
     var results: [Result]? {
         didSet {
             setFilteredArray()

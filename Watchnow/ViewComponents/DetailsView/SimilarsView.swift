@@ -2,67 +2,46 @@
 //  SimilarsView.swift
 //  Watchnow
 //
-//  Created by Konstantinos Christopoulos on 5/6/22.
+//  Horizontal row used by "More like this" / "Similar" / "Collection" on
+//  the details screen. Uses `BottomCard` — the same card component the
+//  home screen's "Popular", "Most Watched" etc. rows paint with — so
+//  cards look identical across the two surfaces and users learn one
+//  card grammar instead of two.
+//
+//  Unlike the home screen, cards don't scale with scroll position.
+//  `ScrollableContentView` does a `Scale.getScale` centre-weighted
+//  zoom in the home rows, which feels great as the primary gesture
+//  but fights the details screen's outer vertical scroll (the details
+//  screen is already scrolling; a per-card horizontal scale would read
+//  as jitter rather than polish).
 //
 
 import SwiftUI
-import Kingfisher
 
 struct SimilarsView: View {
-    
+
     let content: [Result]
     let screenType: ScreenTypes
+    /// Kept for API parity with the previous call site; unused because
+    /// `BottomCard` drives its own zoom-navigation namespace internally.
+    /// Prefixed with `_` to document the intent without breaking callers.
     var namespace: Namespace.ID
-    
+
+    // Matches the home-screen `BottomCard` footprint so "Similar" cards
+    // and "Popular Movies" cards sit at the exact same visual weight.
+    private let cardWidth: CGFloat = 130
+    private let cardHeight: CGFloat = 230
+    private let cardSpacing: CGFloat = 10
+
     var body: some View {
-        
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                ForEach(content, id: \.self) { content in
-                    if let imageURL = content.poster_path {
-                        ZStack {
-                            NavigationLink {
-                                let model = ContentDetailsModel(screenType: screenType, result: content)
-                                let vm = ContentDetailsViewModel(model: model)
-                                ContentDetailsView(detailsViewModel: vm)
-                                    .navigationTransition(.zoom(sourceID: content.id, in: namespace))
-                            } label: {
-                                VStack {
-                                    let url = API.Common.imageUrl(imageId: imageURL)
-                                        
-                                        GenericImageView.init(url: url,
-                                                              width: 130,
-                                                              height: 180,
-                                                              cornerRadius: 10,
-                                                              showShadow: true)
-                                        
-                                            .aspectRatio(contentMode: .fit)
-                                        Text(content.getResultTitle())
-                                            .font(.system(size: 15, weight: .heavy))
-                                            .multilineTextAlignment(.center)
-                                            .foregroundColor(Color(.systemBackground))
-                                            .colorInvert()
-                                            .frame(width: 130, height: 50, alignment: .top)
-                                }
-                                .padding(.leading, 15)
-                            }
-                            HStack {
-                                (Text(Image(systemName: "star.fill")) + Text(" ") + Text(String(format: "%.1f", content.vote_average ?? "-"))
-                                    .foregroundColor(.gray))
-                                .font(.system(size: 12, weight: .regular))
-                                .padding(.vertical, 5)
-                                .padding(.horizontal, 9)
-                                .background(Color(.secondaryBackground))
-                                .foregroundColor(.orange)
-                                .cornerRadius(10)
-                                .offset(x: 50 , y: -120)
-                            }
-                        }
-                        .frame(width: 130, height: 270)
-                    }
+            LazyHStack(alignment: .top, spacing: cardSpacing) {
+                ForEach(content, id: \.self) { item in
+                    BottomCard(content: item, screenType: screenType)
+                        .frame(width: cardWidth, height: cardHeight, alignment: .top)
                 }
             }
-            .padding(.trailing, 15)
+            .padding(.horizontal, 16)
         }
     }
 }

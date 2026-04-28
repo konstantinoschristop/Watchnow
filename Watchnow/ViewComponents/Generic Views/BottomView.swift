@@ -9,13 +9,13 @@ import SwiftUI
 
 // MARK: - BottomView (Main View)
 struct BottomView: View {
-    
+
     var results: [Result]
     var viewTitle: String
     var screenType: ScreenTypes
     var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
-    
+
     var body: some View {
         Section {
             ScrollableContentView(results: results,

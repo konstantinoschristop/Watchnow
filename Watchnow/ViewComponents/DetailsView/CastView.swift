@@ -63,28 +63,45 @@ private struct CastCard: View {
     private let cardWidth: CGFloat = 110
     private let imageHeight: CGFloat = 140
 
+    @State private var isSheetPresented = false
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            portrait
-                .frame(width: cardWidth, height: imageHeight)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+        Button {
+            guard let path = member.profile_path, !path.isEmpty else { return }
+            isSheetPresented = true
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                portrait
+                    .frame(width: cardWidth, height: imageHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
 
-            Text(member.getName())
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.primary)
-                .lineLimit(1)
+                Text(member.getName())
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
 
-            if let character = member.character, !character.isEmpty {
-                Text(character)
-                    .font(.system(size: 11, weight: .regular))
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
+                if let character = member.character, !character.isEmpty {
+                    Text(character)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+            .frame(width: cardWidth, alignment: .leading)
         }
-        .frame(width: cardWidth, alignment: .leading)
+        .buttonStyle(.plain)
+        .sheet(isPresented: $isSheetPresented) {
+            PersonSheetView(
+                personID:    member.id ?? 0,
+                name:        member.getName(),
+                profilePath: member.profile_path,
+                knownFor:    member.known_for
+            )
+            .presentationDetents([.medium, .large])
+        }
     }
 
     @ViewBuilder

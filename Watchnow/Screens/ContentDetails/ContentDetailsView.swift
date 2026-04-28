@@ -15,8 +15,8 @@ struct ContentDetailsView: View {
     @Environment(\.dismiss) var dismiss
     @State var videoPresented = false
     @State private var showAlert = false
+    @State private var showWatchedAlert = false
     @State var isSeasonsSheetPresented = false
-    @State private var isWatchNowPresented = false
     @Namespace private var namespace
 
     var body: some View {
@@ -46,19 +46,14 @@ struct ContentDetailsView: View {
             AlertToast(displayMode: .alert, type: .error(.red), title: "Removed from Watchlist")  :
             AlertToast(displayMode: .alert, type: .complete(.green), title: "Added to Watchlist")
         })
+        .toast(isPresenting: $showWatchedAlert, alert: {
+            detailsViewModel.isInWatchedList ?
+            AlertToast(displayMode: .alert, type: .complete(.green), title: "Marked as Watched") :
+            AlertToast(displayMode: .alert, type: .error(.red), title: "Removed from Watched")
+        })
         .sheet(isPresented: $videoPresented) {
             WebView(videoURL: detailsViewModel.videos?.getVideoURL())
                 .ignoresSafeArea()
-        }
-        .sheet(isPresented: $isWatchNowPresented) {
-            WebView(videoURL: detailsViewModel.watchNowURL)
-                .ignoresSafeArea()
-        }
-        .safeAreaInset(edge: .bottom) {
-            if detailsViewModel.viewModelFinishedFetching,
-               detailsViewModel.watchNowURL != nil {
-                stickyWatchNowCTA
-            }
         }
         .task {
             // getDetails must complete first — getCollection reads details?.belongs_to_collection
@@ -98,8 +93,13 @@ extension ContentDetailsView {
                              },
                              screenType: screenType,
                              isTappable: false)
+            // Single static image — no carousel interaction needed.
+            // Disabling hit-testing lets the parent ScrollView receive
+            // vertical pan gestures that start on the hero.
+            .allowsHitTesting(false)
 
             primaryActionRow
+                .padding(.top, -32)
             watchProvidersSection()
             detailsSection()
             seasonsSection()
@@ -137,38 +137,12 @@ extension ContentDetailsView {
     private var primaryActionRow: some View {
         PrimaryActionRow(
             isInWatchList: detailsViewModel.isInWatchList,
+            isInWatchedList: detailsViewModel.isInWatchedList,
             hasTrailer: detailsViewModel.videos?.getVideoURL() != nil,
             onWatchlistTap: toggleWatchlist,
+            onWatchedTap: toggleWatched,
             onTrailerTap: { videoPresented = true }
         )
-    }
-
-    // MARK: - Sticky bottom CTA
-    //
-    // Shown only when the title has a JustWatch provider link for the user's
-    // region. Takes the viewer straight to where they can actually watch the
-    // content — the highest-intent action on this screen. When no provider
-    // link is available, the sticky hides entirely (no clutter).
-
-    @ViewBuilder
-    private var stickyWatchNowCTA: some View {
-        Button {
-            isWatchNowPresented = true
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "play.fill")
-                Text("Watch Now")
-            }
-            .font(.system(size: 15, weight: .semibold))
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Color.accentColor, in: Capsule())
-            .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 20)
-        .padding(.bottom, 6)
     }
 
     // MARK: - Shared actions
@@ -182,6 +156,18 @@ extension ContentDetailsView {
             detailsViewModel.isInWatchList = true
         }
         showAlert = true
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    private func toggleWatched() {
+        if detailsViewModel.isInWatchedList {
+            WatchedManager.shared.removeFromWatched(result: detailsViewModel.result)
+            detailsViewModel.isInWatchedList = false
+        } else {
+            WatchedManager.shared.addToWatched(result: detailsViewModel.result)
+            detailsViewModel.isInWatchedList = true
+        }
+        showWatchedAlert = true
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
@@ -253,18 +239,22 @@ extension ContentDetailsView {
                 title: "Seasons",
                 subtitle: "\(numberOfSeasons) Seasons | \(numberOfEpisodes) Episodes",
                 icon: "rectangle.stack.fill",
-                tint: .purple
+                tint: .accentColor
             ) {
                 Button {
                     isSeasonsSheetPresented.toggle()
                 } label: {
                     Text("See all")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.purple)
+                        .foregroundColor(.accentColor)
                 }
             }
 
-            SeasonsView(seasons: seasons, navBarTitle: name, seriesID: seriesID)
+            SeasonsView(seasons: seasons,
+                        navBarTitle: name,
+                        seriesID: seriesID,
+                        selectedSeason: $detailsViewModel.selectedSeason,
+                        isSheetPresented: $isSeasonsSheetPresented)
                 .sheet(isPresented: $isSeasonsSheetPresented) {
                     SeasonsDetailsTabView(
                         seasons: seasons,
@@ -284,12 +274,14 @@ extension ContentDetailsView {
             SectionHeaderView(
                 title: "Available on",
                 icon: "play.rectangle.fill",
-                tint: .green
+                tint: .accentColor
             )
 
             WatchProviderView(
                 flatrates: provider.flatrate ?? [],
-                rent: provider.rent ?? []
+                rent: provider.rent ?? [],
+                buy: provider.buy ?? [],
+                justWatchURL: detailsViewModel.watchNowURL
             )
         }
     }
@@ -312,7 +304,7 @@ extension ContentDetailsView {
             SectionHeaderView(
                 title: "User Reviews",
                 icon: "quote.bubble.fill",
-                tint: .orange
+                tint: .accentColor
             )
             ReviewsView(reviews: detailsViewModel.reviewsSafe)
         }

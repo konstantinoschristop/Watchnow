@@ -12,10 +12,12 @@ protocol BaseSwipeActionsProtocol: AnyObject {
     var showRemovedAlert: Bool { get set }
     var showAddedAlert: Bool { get set }
     func itemRemoved(result: Result)
+    func watchedItemRemoved(result: Result)
 }
 
 extension BaseSwipeActionsProtocol {
     func itemRemoved(result: Result) {}
+    func watchedItemRemoved(result: Result) {}
 }
 
 @MainActor
@@ -31,9 +33,10 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
 
     init(model: SearchModel,
          service: any DetailServiceProtocol = ServiceInvocation()) {
-        
+
         self.model = model
         self.service = service
+        self.model.recentSearches = SearchHistoryManager.recentSearches
     }
     
     func getResults(search: String) async {
@@ -43,6 +46,8 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
         do {
             searchResponse = try await service.fetchSearchResults(search: search)
             cleanUpResults(results: searchResponse)
+            SearchHistoryManager.addSearch(search)
+            model.recentSearches = SearchHistoryManager.recentSearches
         } catch {
             apiError = true
         }
@@ -51,6 +56,16 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     func clearResults() {
         results = nil
         apiError = false
+    }
+
+    func removeRecentSearch(_ query: String) {
+        SearchHistoryManager.removeSearch(query)
+        model.recentSearches = SearchHistoryManager.recentSearches
+    }
+
+    func clearRecentSearches() {
+        SearchHistoryManager.clearAll()
+        model.recentSearches = SearchHistoryManager.recentSearches
     }
     
     private func cleanUpResults(results: SearchResponse?) {
@@ -76,9 +91,14 @@ extension SearchViewModel {
         get { model.filteredResults }
         set { model.filteredResults = newValue }
     }
-    
+
     var selectedChooser: SearchModel.SearchChooserOptions {
         get { model.selectedChooser }
         set { model.selectedChooser = newValue }
+    }
+
+    var recentSearches: [String] {
+        get { model.recentSearches }
+        set { model.recentSearches = newValue }
     }
 }

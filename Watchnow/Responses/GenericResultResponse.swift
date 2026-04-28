@@ -78,16 +78,15 @@ extension ViewSections {
     }
 
     /// Tint applied to both the header's 3pt rail and the section icon.
-    /// Colours were picked so each section feels distinct without
-    /// clashing when two sections stack vertically.
+    /// Tint for the section header icon. Trending paints red — it's the
+    /// "live, hot right now" headliner and earns the attention colour.
+    /// Every other section uses the brand accent so the screen reads as
+    /// one design system, with the SF Symbol shape (flame, eye, calendar)
+    /// doing the section differentiation.
     var themeColor: Color {
         switch self {
         case .trendingMovies, .trendingSeries: return .red
-        case .latestMovies:                    return .orange
-        case .popularMovies, .popularSeries:   return .accentColor
-        case .upcomingMovies:                  return .blue
-        case .airingTodaySeries:               return .green
-        case .latestSeries:                    return .purple
+        default:                               return .accentColor
         }
     }
 
@@ -101,6 +100,18 @@ extension ViewSections {
     }
 
     var isTopView: Bool { isTrending }
+
+    /// Rendered as a vertical list of rich rows instead of a horizontal
+    /// poster scroll. Kept at the same positional slot (the "new / fresh"
+    /// section — position 2) on both the Movies and Series screens so the
+    /// two tabs stay structurally symmetric: trending → list → most-watched
+    /// → discover.
+    var isListSection: Bool {
+        switch self {
+        case .latestMovies, .airingTodaySeries: return true
+        default: return false
+        }
+    }
 }
 
 struct GenericResultResponse: Codable, Equatable {
@@ -133,6 +144,9 @@ struct Result: Codable, Hashable, Equatable {
     let profile_path: String?
     let castID: Int?
     let runtime: Int?
+    /// Populated by TMDB's multi-search endpoint for person results.
+    /// Contains a short reel of the actor's most notable work.
+    let known_for: [Result]?
     
     static func == (lhs: Result, rhs: Result) -> Bool {
         return lhs.id == rhs.id
@@ -171,7 +185,7 @@ struct Result: Codable, Hashable, Equatable {
     }
     
     func getReleaseDate(addSeparator: Bool = true) -> String {
-        
+
         if let date = release_date?.dropLast(6) {
             return date + (addSeparator ? " - " : "")
         } else if let date = first_air_date?.dropLast(6) {
@@ -179,5 +193,18 @@ struct Result: Codable, Hashable, Equatable {
         } else {
             return ""
         }
+    }
+
+    /// Parses `release_date` (movies) or `first_air_date` (TV) into a `Date`.
+    /// Returns nil when neither field is present or fails to parse.
+    func releaseDate() -> Date? {
+        let raw = release_date ?? first_air_date ?? ""
+        guard !raw.isEmpty else { return nil }
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .iso8601)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.timeZone = TimeZone(secondsFromGMT: 0)
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt.date(from: raw)
     }
 }

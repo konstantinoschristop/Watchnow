@@ -9,11 +9,20 @@ import SwiftUI
 
 // MARK: - Section Header View (Title Section)
 
-/// Section header with an optional tinted icon + rail + live-pulse dot
-/// and an optional trailing accessory slot (e.g., a "See all" button or a
-/// segmented picker). Keeps typography and padding uniform across the app
-/// while letting each section carry its own personality — a flame for
-/// trending, a calendar for Coming Soon, etc.
+/// Section header with an optional tinted SF Symbol on the leading edge,
+/// a title, an optional subtitle, and an optional trailing accessory slot
+/// (e.g., a "See all" button). Keeps typography and padding uniform across
+/// the app while letting each section carry its own personality — a flame
+/// for trending, a calendar for Coming Soon, etc.
+///
+/// Previously also rendered a 3pt vertical rail behind the icon. The rail
+/// existed to carry the section's theme colour back when every section had
+/// its own (red trending, orange theaters, blue popular, etc.). After the
+/// colour audit consolidated those tints to neutral grey for everything
+/// except trending, the rail became visual noise — a thin grey line
+/// repeating identical information already conveyed by the icon. Dropped
+/// in favour of icon-only, matching iOS-native section grammars (Settings,
+/// Mail, Apple TV).
 struct SectionHeaderView<Accessory: View>: View {
     var title: String
     var subtitle: String? = nil
@@ -43,18 +52,12 @@ struct SectionHeaderView<Accessory: View>: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             if let icon {
-                // 3pt capsule rail carries the section's theme colour right
-                // at the reading entry point — quick visual anchor even on
-                // a busy scroll.
-                Capsule()
-                    .fill(tint)
-                    .frame(width: 3, height: 24)
-
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: icon)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(tint)
                         .symbolRenderingMode(.hierarchical)
+                        .frame(width: 26, height: 26)
 
                     if showsPulse {
                         PulseDot()
