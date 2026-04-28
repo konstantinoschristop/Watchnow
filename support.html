@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Support and frequently asked questions for the Watchnow iOS app.">
+<title>Watchnow — Support</title>
+<style>
+  /* ───────────────────────────────────────────────────────────────────
+     Reset + base
+     ─────────────────────────────────────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep:    #06112A;
+    --bg-mid:     #0E1F4A;
+    --accent:     #2D5BD9;
+    --accent-2:   #5A82F0;
+    --text:       #E8ECF4;
+    --text-mute:  #9AA3BC;
+    --line:       rgba(255, 255, 255, 0.08);
+    --card-bg:    rgba(255, 255, 255, 0.04);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                 "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(ellipse 1200px 800px at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 70%, var(--bg-deep) 100%);
+    min-height: 100vh;
+  }
+
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Header
+     ─────────────────────────────────────────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 72px 24px 56px;
+  }
+
+  /* App icon — same play-triangle silhouette as the iOS icon */
+  .logo {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 24px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #0A1B40 0%, #1A3480 50%, #2D5BD9 100%);
+    display: grid;
+    place-items: center;
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .logo svg { width: 38px; height: 38px; fill: #FFFFFF; }
+
+  h1 {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+
+  .tagline {
+    color: var(--text-mute);
+    font-size: 17px;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Sections
+     ─────────────────────────────────────────────────────────────────── */
+  section {
+    padding: 32px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+  }
+
+  p { margin-bottom: 12px; color: var(--text); }
+  p.muted { color: var(--text-mute); }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Contact card
+     ─────────────────────────────────────────────────────────────────── */
+  .contact-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 8px;
+  }
+
+  .email-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 12px 20px;
+    background: var(--accent);
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: background 0.15s ease;
+  }
+
+  .email-button:hover {
+    background: var(--accent-2);
+    text-decoration: none;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     FAQ
+     ─────────────────────────────────────────────────────────────────── */
+  details {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: background 0.15s ease;
+  }
+
+  details[open] { background: rgba(255, 255, 255, 0.06); }
+
+  summary {
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 44px;
+  }
+
+  /* Custom chevron */
+  summary::after {
+    content: "";
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-mute);
+    border-bottom: 2px solid var(--text-mute);
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
+  details[open] summary::after {
+    transform: translateY(-30%) rotate(-135deg);
+  }
+
+  summary::-webkit-details-marker { display: none; }
+
+  details > div {
+    padding: 0 20px 18px;
+    color: var(--text-mute);
+    line-height: 1.65;
+  }
+
+  details > div p { margin-bottom: 10px; color: var(--text-mute); }
+  details > div p:last-child { margin-bottom: 0; }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Footer
+     ─────────────────────────────────────────────────────────────────── */
+  footer {
+    padding: 48px 24px 64px;
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 13px;
+    border-top: 1px solid var(--line);
+    margin-top: 32px;
+  }
+
+  footer .links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  footer p { color: var(--text-mute); margin: 0; }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Mobile
+     ─────────────────────────────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    header { padding: 48px 24px 40px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 20px; }
+    .logo { width: 72px; height: 72px; border-radius: 18px; }
+    .logo svg { width: 32px; height: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo" aria-hidden="true">
+      <!-- Same play-triangle as the app icon -->
+      <svg viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>Watchnow Support</h1>
+    <p class="tagline">Your personal companion for movies and TV</p>
+  </header>
+
+  <section id="contact">
+    <h2>Get in touch</h2>
+    <p class="muted">
+      Need help, want to report a bug, or have a feature you'd like to see? Drop me a line —
+      every email is read by a real human (me).
+    </p>
+
+    <div class="contact-card">
+      <strong>Response time:</strong> usually within 1–2 days
+      <br>
+      <a href="mailto:christopko@gmail.com?subject=Watchnow%20Support" class="email-button">
+        ✉️ christopko@gmail.com
+      </a>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2>Frequently asked questions</h2>
+
+    <details>
+      <summary>Why don't I see all streaming services for a title?</summary>
+      <div>
+        <p>
+          Streaming availability is provided by JustWatch through The Movie Database (TMDB).
+          Coverage varies by region — a service that's available in one country may not be
+          tracked in another. Watchnow shows whatever JustWatch currently knows about, in your
+          device's region.
+        </p>
+        <p>
+          If you change your iOS region (Settings → General → Language &amp; Region), the
+          providers shown will update accordingly the next time you open the app.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>How do I clear my watchlist or watched history?</summary>
+      <div>
+        <p>
+          To remove individual titles, swipe left on a row in your Watchlist or Watched tab and
+          tap the remove action.
+        </p>
+        <p>
+          To clear everything at once, the simplest path is to delete and reinstall the app —
+          all watchlist and watched data is stored locally on your device, so removing the app
+          removes the data with it.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Can I sync my watchlist across devices?</summary>
+      <div>
+        <p>
+          Not in the current version. Watchnow has no user accounts and no backend — your data
+          stays on your device. iCloud sync may come in a future release.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Why is a movie or TV series missing?</summary>
+      <div>
+        <p>
+          All content metadata comes from TMDB, an open community-edited database. If a title
+          isn't showing up in Watchnow, it usually means it isn't yet listed on TMDB.
+        </p>
+        <p>
+          Anyone can add or correct a title at
+          <a href="https://www.themoviedb.org" target="_blank" rel="noopener">themoviedb.org</a>.
+          Once it's added there, it'll appear in Watchnow within a day or two.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Does Watchnow collect any personal data?</summary>
+      <div>
+        <p>
+          No. Watchnow has no analytics, no advertising trackers, and no user accounts. Your
+          watchlist, watched titles, and search history are stored only on your device.
+        </p>
+        <p>
+          See the <a href="privacy.html">Privacy Policy</a> for the full breakdown.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>The app is showing stale data — how do I refresh?</summary>
+      <div>
+        <p>
+          Pull down on any feed (Movies, Series, or a section list) to trigger a refresh. If a
+          specific title's metadata looks wrong, force-quit the app and relaunch — Watchnow
+          caches images aggressively to keep things fast, but a fresh launch always fetches the
+          latest data.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Is Watchnow free? Are there ads or in-app purchases?</summary>
+      <div>
+        <p>
+          Yes, Watchnow is free. No ads, no in-app purchases, no subscriptions. Just an app I
+          built because I wanted it to exist.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>I have a feature request</summary>
+      <div>
+        <p>
+          Send it over —
+          <a href="mailto:christopko@gmail.com?subject=Feature%20request">christopko@gmail.com</a>.
+          I read everything, and the most-requested ideas tend to get prioritised.
+        </p>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<footer>
+  <div class="links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="https://www.themoviedb.org" target="_blank" rel="noopener">Powered by TMDB</a>
+    <a href="mailto:christopko@gmail.com">Contact</a>
+  </div>
+  <p>© 2026 Konstantinos Christopoulos. All rights reserved.</p>
+  <p style="margin-top: 6px;">
+    This product uses the TMDB API but is not endorsed or certified by TMDB.
+  </p>
+</footer>
+
+</body>
+</html>

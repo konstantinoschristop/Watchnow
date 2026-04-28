@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Privacy policy for the Watchnow iOS app. Watchnow collects no personal data.">
+<title>Watchnow — Privacy Policy</title>
+<style>
+  /* ───────────────────────────────────────────────────────────────────
+     Reset + base — kept identical to support.html so the two pages
+     read as one site.
+     ─────────────────────────────────────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep:    #06112A;
+    --bg-mid:     #0E1F4A;
+    --accent:     #2D5BD9;
+    --accent-2:   #5A82F0;
+    --text:       #E8ECF4;
+    --text-mute:  #9AA3BC;
+    --line:       rgba(255, 255, 255, 0.08);
+    --card-bg:    rgba(255, 255, 255, 0.04);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                 "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(ellipse 1200px 800px at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 70%, var(--bg-deep) 100%);
+    min-height: 100vh;
+  }
+
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Header
+     ─────────────────────────────────────────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 72px 24px 48px;
+  }
+
+  .logo {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 24px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #0A1B40 0%, #1A3480 50%, #2D5BD9 100%);
+    display: grid;
+    place-items: center;
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .logo svg { width: 38px; height: 38px; fill: #FFFFFF; }
+
+  h1 {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+
+  .updated {
+    color: var(--text-mute);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     TL;DR card — the most important thing on the page, surfaced first.
+     ─────────────────────────────────────────────────────────────────── */
+  .tldr {
+    background: linear-gradient(135deg, rgba(45, 91, 217, 0.18), rgba(45, 91, 217, 0.06));
+    border: 1px solid rgba(45, 91, 217, 0.35);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 0 0 24px;
+  }
+
+  .tldr h2 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 10px;
+    border: none;
+    padding: 0;
+  }
+
+  .tldr p {
+    font-size: 17px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Sections
+     ─────────────────────────────────────────────────────────────────── */
+  section {
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  section:first-of-type { border-top: none; padding-top: 8px; }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: -0.3px;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 14px; color: var(--text-mute); }
+  p:last-child { margin-bottom: 0; }
+
+  ul {
+    list-style: none;
+    margin: 8px 0 14px;
+    padding-left: 0;
+  }
+
+  ul li {
+    color: var(--text-mute);
+    padding: 6px 0 6px 24px;
+    position: relative;
+  }
+
+  ul li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--accent-2);
+    font-weight: 700;
+  }
+
+  ul.no-bullet li::before { content: "•"; }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Footer
+     ─────────────────────────────────────────────────────────────────── */
+  footer {
+    padding: 48px 24px 64px;
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 13px;
+    border-top: 1px solid var(--line);
+    margin-top: 32px;
+  }
+
+  footer .links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  footer p { color: var(--text-mute); margin: 0; }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Mobile
+     ─────────────────────────────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    header { padding: 48px 24px 32px; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 20px; }
+    .logo { width: 72px; height: 72px; border-radius: 18px; }
+    .logo svg { width: 32px; height: 32px; }
+    .tldr p { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: 28 April 2026</p>
+  </header>
+
+  <div class="tldr">
+    <h2>The short version</h2>
+    <p>
+      Watchnow collects nothing. No accounts, no analytics, no advertising. Everything you do
+      in the app stays on your device, and uninstalling the app removes all of it.
+    </p>
+  </div>
+
+  <section>
+    <h2>What we collect</h2>
+    <p>
+      <strong>Nothing.</strong> Watchnow has no user accounts, no sign-up flow, no analytics
+      framework, and no third-party advertising or tracking SDKs. We do not maintain any
+      server-side database of users.
+    </p>
+  </section>
+
+  <section>
+    <h2>What's stored on your device</h2>
+    <p>
+      The app uses iOS <code style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 13px;">UserDefaults</code>
+      to remember your preferences and lists between launches. This data lives only on your
+      device, is never transmitted to us or to any third party, and is removed entirely when
+      you delete the app.
+    </p>
+    <ul>
+      <li>Your watchlist (titles you've saved)</li>
+      <li>Your watched history (titles you've marked as watched)</li>
+      <li>Your recent search queries (last 10, used to populate the recents list)</li>
+      <li>Your sort preferences (date added, alphabetical, by rating)</li>
+    </ul>
+    <p>
+      The app also caches movie posters and backdrops on disk via Kingfisher to keep things
+      fast and reduce data usage. Cached images are stored locally and can be cleared by iOS at
+      any time.
+    </p>
+  </section>
+
+  <section>
+    <h2>Third-party services</h2>
+
+    <h3>The Movie Database (TMDB)</h3>
+    <p>
+      Watchnow uses the public TMDB API to fetch movie, TV, and actor information. When you
+      browse, search, or open a title, the app sends a request to TMDB containing only the
+      information needed to retrieve the content — for example, a search keyword or a numeric
+      content ID. No personal data, device identifier, or user account information is included
+      in these requests.
+    </p>
+    <p>
+      TMDB's privacy policy is available at
+      <a href="https://www.themoviedb.org/privacy-policy" target="_blank" rel="noopener">
+        themoviedb.org/privacy-policy</a>.
+    </p>
+
+    <h3>JustWatch (streaming availability)</h3>
+    <p>
+      Streaming, rental, and purchase availability is sourced from JustWatch, exposed through
+      TMDB's API. The same applies — only content IDs are sent, no personal data.
+    </p>
+  </section>
+
+  <section>
+    <h2>Region and language</h2>
+    <p>
+      Watchnow uses your device's region setting (set in iOS Settings → General → Language
+      &amp; Region) to determine which streaming providers to display. The region value is
+      read locally and sent to TMDB only as part of the streaming availability query — it's
+      not stored on our side and is not linked to your identity in any way.
+    </p>
+  </section>
+
+  <section>
+    <h2>Children's privacy</h2>
+    <p>
+      Watchnow is rated 12+ and does not knowingly collect any data from anyone, including
+      children under 13. Because we collect no personal information at all, this section is
+      effectively a formality — but we want to be explicit about it.
+    </p>
+  </section>
+
+  <section>
+    <h2>Changes to this policy</h2>
+    <p>
+      If this policy ever changes — for example, if a future version of Watchnow adds optional
+      iCloud sync — we will update the "Last updated" date at the top and describe what
+      changed. Material changes will be communicated in the app's release notes on the App
+      Store.
+    </p>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <p>
+      If you have any questions about this policy, you can reach me at
+      <a href="mailto:christopko@gmail.com?subject=Watchnow%20Privacy">christopko@gmail.com</a>.
+    </p>
+  </section>
+
+</div>
+
+<footer>
+  <div class="links">
+    <a href="index.html">Support</a>
+    <a href="https://www.themoviedb.org" target="_blank" rel="noopener">Powered by TMDB</a>
+    <a href="mailto:christopko@gmail.com">Contact</a>
+  </div>
+  <p>© 2026 Konstantinos Christopoulos. All rights reserved.</p>
+  <p style="margin-top: 6px;">
+    This product uses the TMDB API but is not endorsed or certified by TMDB.
+  </p>
+</footer>
+
+</body>
+</html>
