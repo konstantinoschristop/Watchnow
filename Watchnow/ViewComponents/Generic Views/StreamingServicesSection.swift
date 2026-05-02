@@ -100,6 +100,7 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
             }
             .padding(.horizontal, 16)
         }
+        .sensoryFeedback(.selection, trigger: viewModel.selectedProvider?.id)
     }
 
     // MARK: - Results row
@@ -250,7 +251,8 @@ private struct ProviderChip: View {
                               : Color.primary.opacity(0.08),
                               lineWidth: 0.5)
         }
-        .animation(.easeInOut(duration: 0.18), value: isSelected)
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 
     @ViewBuilder

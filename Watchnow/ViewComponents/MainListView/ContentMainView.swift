@@ -151,6 +151,10 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
+        // One haptic per selection change. Hosted on the container so
+        // we don't fire N times for the N chips that all see their
+        // `isSelected` flip during a single user tap.
+        .sensoryFeedback(.selection, trigger: selectedGenreID)
     }
 
     // MARK: - Filtered results
@@ -211,6 +215,8 @@ private struct GenreChip: View {
                 }
         }
         .buttonStyle(.plain)
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 }
 

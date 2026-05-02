@@ -92,6 +92,7 @@ struct SeasonsDetailsTabView: View {
                     proxy.scrollTo(season, anchor: .center)
                 }
             }
+            .sensoryFeedback(.selection, trigger: selectedSeason)
         }
     }
 
@@ -121,6 +122,8 @@ struct SeasonsDetailsTabView: View {
                 }
         }
         .buttonStyle(.plain)
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
         .id(season)
     }
 

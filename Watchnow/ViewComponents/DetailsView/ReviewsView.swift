@@ -332,6 +332,8 @@ private struct AllReviewsSheet: View {
                 .symbolVariant(hasCustomFilters ? .fill : .none)
         }
         .tint(.accentColor)
+        .sensoryFeedback(.selection, trigger: sortOrder)
+        .sensoryFeedback(.selection, trigger: ratedOnly)
     }
 }
 

@@ -81,6 +81,11 @@ struct WatchlistView: View {
         .overlay(alignment: .bottom) {
             Divider()
         }
+        // Single haptic per tab change. Previously fired on every
+        // UnderlineTab whose `isSelected` flipped, which means two
+        // haptics per tap (one as the old tab deselected, one as the
+        // new tab selected).
+        .sensoryFeedback(.selection, trigger: selectedTab)
     }
 
     // MARK: - Content dispatch
@@ -155,6 +160,7 @@ struct WatchlistView: View {
             Image(systemName: "line.3.horizontal.decrease.circle")
                 .symbolVariant(watchlistViewModel.sortOrder == .dateAdded ? .none : .fill)
         }
+        .sensoryFeedback(.selection, trigger: watchlistViewModel.sortOrder)
     }
 
     private func count(for tab: WatchlistModel.Tab) -> Int {
@@ -323,6 +329,11 @@ private struct UnderlineTab: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: isSelected)
+        // Sized-based bounce when selection flips — light overshoot
+        // pop on the chosen tab (and a subtle settle on the previous
+        // one) makes the selection feel responsive without the
+        // matchedGeometryEffect being the only motion cue.
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 }
