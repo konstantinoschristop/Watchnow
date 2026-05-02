@@ -22,7 +22,11 @@ struct ScrollableContentView: View {
 
     @State private var performFeedback: Bool = false
     @State private var thresholdReached: Bool = false
-    @State private var loadMoreProgress: CGFloat = 0
+    /// Observable so `LoadMoreButtonView` can re-render *during* the
+    /// user's overscroll pull. A plain `@State CGFloat` would freeze
+    /// at 0 because StretchingActionScrollView buffers parent updates
+    /// while the user is dragging — see LoadMoreButtonView's header.
+    @StateObject private var loadMoreProgress = LoadMoreProgress()
 
     // Card dimensions. Top cards are a Netflix-style numeral + poster pair:
     // card width ≈ numeral frame (78) + poster (100) - overlap (14) = 164,
@@ -44,7 +48,7 @@ struct ScrollableContentView: View {
         }, onThresholdReached: { thresholdReached in
             self.thresholdReached = thresholdReached
         }, onProgress: { progress in
-            self.loadMoreProgress = progress
+            self.loadMoreProgress.value = progress
         }, content: getContent)
         .frame(height: slotHeight)
         .sensoryFeedback(.success, trigger: performFeedback)
@@ -81,7 +85,7 @@ struct ScrollableContentView: View {
 
                 if results.last == movie,
                    viewModel.canLoadMoreContent(section: viewSection) {
-                    LoadMoreButtonView(progress: loadMoreProgress)
+                    LoadMoreButtonView(tracker: loadMoreProgress)
                 }
             }
         }

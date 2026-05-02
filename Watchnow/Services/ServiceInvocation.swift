@@ -69,5 +69,26 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol {
         let urlString = API.Common.watchProviders(type: screenType.rawValue, id: id)
         return try await request(urlString: urlString)
     }
+
+    /// Streaming services available in `region` for the given content type.
+    /// Used to build the provider tile row on the home tabs.
+    func fetchProviders(screenType: ScreenTypes, region: String) async throws -> ProvidersListResponse {
+        let urlString = API.Common.providersList(type: screenType.rawValue, region: region)
+        return try await request(urlString: urlString)
+    }
+
+    /// Titles available on a specific streaming service in `region`.
+    /// `flatrate` monetization filter scopes the results to subscription
+    /// content (no rentals or purchases).
+    func fetchByProvider(screenType: ScreenTypes,
+                         providerID: Int,
+                         region: String,
+                         page: Int = 1) async throws -> GenericResultResponse {
+        let urlString = API.Common.discoverByProvider(type: screenType.rawValue,
+                                                       providerID: providerID,
+                                                       region: region,
+                                                       page: page)
+        return try await request(urlString: urlString)
+    }
 }
 

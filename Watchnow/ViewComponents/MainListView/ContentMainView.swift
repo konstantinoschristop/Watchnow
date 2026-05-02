@@ -77,7 +77,15 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
 
                     LazyVStack(spacing: 6) {
                         ForEach(sections, id: \.self) { section in
-                            if let results = filteredResults(for: section) {
+                            // Streaming-services has a different data shape
+                            // (providers + selected results, not the standard
+                            // section list) so it goes through its own branch
+                            // and consumes the view model directly.
+                            if section.isStreamingServicesSection,
+                               let providers = viewModel.providers, !providers.isEmpty {
+                                StreamingServicesSection(viewModel: viewModel,
+                                                         viewSection: section)
+                            } else if let results = filteredResults(for: section) {
                                 if section.isTopView {
                                     TopView(results: results,
                                             viewTitle: section.title,
@@ -157,6 +165,11 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         case .upcomingMovies, .airingTodaySeries: raw = viewModel.special?.result.results
         case .latestMovies,   .latestSeries:      raw = viewModel.latest?.result.results
         case .topRatedMovies, .topRatedSeries:    raw = viewModel.topRated?.result.results
+        // Streaming-services renders providers, not results — caller
+        // handles it via its own branch in the dispatcher and never
+        // reaches this point. Returning nil keeps the switch exhaustive
+        // without inviting accidental use as a results source.
+        case .streamingServicesMovies, .streamingServicesSeries: raw = nil
         }
 
         guard let raw else { return nil }

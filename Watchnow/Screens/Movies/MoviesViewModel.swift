@@ -21,6 +21,8 @@ class MoviesViewModel: BaseContentViewModel {
 }
 
 extension MovieService: ContentService {
+    var screenType: ScreenTypes { .movie }
+
     func fetchTrending(page: Int) async throws -> GenericResultResponse {
         try await fetchTrendingMovies(page: page)
     }

@@ -21,6 +21,8 @@ class SeriesViewModel: BaseContentViewModel {
 }
 
 extension SeriesService: ContentService {
+    var screenType: ScreenTypes { .tv }
+
     func fetchTrending(page: Int) async throws -> GenericResultResponse {
         try await fetchTrendingSeries(page: page)
     }

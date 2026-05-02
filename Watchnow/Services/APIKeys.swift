@@ -42,6 +42,19 @@ enum API {
         static func watchProviders(type: String, id: String) -> String {
             return "\(API.baseURL)/\(type)/\(id)/watch/providers?api_key=\(API.key)"
         }
+
+        /// Region-scoped catalogue of streaming services TMDB knows about,
+        /// used to populate the "Browse by streaming service" tile row.
+        static func providersList(type: String, region: String) -> String {
+            return "\(API.baseURL)/watch/providers/\(type)?api_key=\(API.key)&language=\(API.language)&watch_region=\(region)"
+        }
+
+        /// Discover endpoint filtered to titles available on a specific
+        /// streaming service in the user's region. `flatrate` restricts
+        /// to subscription content (no rent / buy / ads).
+        static func discoverByProvider(type: String, providerID: Int, region: String, page: Int = 1) -> String {
+            return "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&watch_region=\(region)&with_watch_providers=\(providerID)&with_watch_monetization_types=flatrate&sort_by=popularity.desc&page=\(page)"
+        }
         static func details(screenType: String, id: String) -> String {
             return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)"
         }

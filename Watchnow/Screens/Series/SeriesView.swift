@@ -18,6 +18,7 @@ struct SeriesView: View {
         // both keeps the screen's content unique row-to-row.
         ContentMainView(viewModel: seriesViewModel,
                         sections: [.trendingSeries,
+                                   .streamingServicesSeries,
                                    .airingTodaySeries,
                                    .popularSeries,
                                    .topRatedSeries])

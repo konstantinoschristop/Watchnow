@@ -1,0 +1,367 @@
+//
+//  StreamingServicesSection.swift
+//  Watchnow
+//
+//  "Browse by streaming service" — a horizontal chip bar of streaming
+//  services available in the user's region, with the selected chip's
+//  catalogue shown directly underneath. Netflix is preselected (or the
+//  highest-priority provider in the region if Netflix isn't carried).
+//
+//  Layout reads as: chip bar (filter) → result row (content). Tapping a
+//  chip swaps the result row to that provider's titles in place — no
+//  modal, no navigation push. Quick-scan, "find what's on my Netflix"
+//  experience without leaving the home feed.
+//
+//  Source data: TMDB's `/discover/{movie|tv}` endpoint with
+//  `with_watch_providers=ID` and `with_watch_monetization_types=flatrate`
+//  so only subscription content surfaces (no rentals, no purchases).
+//
+
+import SwiftUI
+import Kingfisher
+
+struct StreamingServicesSection<VM: BaseContentViewModel>: View {
+
+    @ObservedObject var viewModel: VM
+    let viewSection: ViewSections
+
+    @Namespace private var namespace
+
+    // Overscroll-to-load-more state, mirrored from the BottomView /
+    // TopView pattern. The progress tracker is an ObservableObject
+    // (rather than a plain @State CGFloat) so the trailing
+    // LoadMoreButtonView can re-render *during* the user's pull —
+    // StretchingActionScrollView's parent-update buffering would
+    // otherwise freeze the button at progress=0 until release.
+    @StateObject private var loadMoreProgress = LoadMoreProgress()
+    @State private var thresholdReached: Bool = false
+    @State private var performFeedback: Bool = false
+
+    // Fixed dimensions matching the BottomView carousel grammar so the
+    // streaming-services row sits in the page at the same scale and
+    // rhythm as the other card carousels. Slot is the GeometryReader's
+    // outer bound; card is the inner content; the slot/card ratio
+    // (~1.25) leaves room for the scale-up at centre screen without
+    // the scaled content clipping the slot.
+    private let cardWidth:   CGFloat = 110
+    private let cardHeight:  CGFloat = 220
+    private let slotWidth:   CGFloat = 138
+    private let slotHeight:  CGFloat = 275
+
+    var body: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 4) {
+                chipBar
+                resultsRow
+                    // Pinning the result-row height keeps the section's
+                    // overall footprint stable across loading / loaded /
+                    // empty / error so the page below doesn't shift when
+                    // the user taps a different chip.
+                    .frame(height: slotHeight)
+            }
+        } header: {
+            SectionHeaderView(
+                title: viewSection.cleanTitle,
+                subtitle: subtitle,
+                icon: viewSection.themeIcon,
+                tint: viewSection.themeColor,
+                showsPulse: viewSection.isTrending
+            )
+            .textCase(.none)
+        }
+    }
+
+    /// Section subtitle — surfaces the picked provider's name when we
+    /// have one, so the result row's identity is unambiguous even if
+    /// the user has scrolled the chip bar past the active selection.
+    private var subtitle: String {
+        if let name = viewModel.selectedProvider?.provider_name {
+            return "Showing what's on \(name)"
+        }
+        return "Find what's on your subscription"
+    }
+
+    // MARK: - Chip bar
+
+    private var chipBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(viewModel.providers ?? []) { provider in
+                    Button {
+                        Task { await viewModel.selectProvider(provider) }
+                    } label: {
+                        ProviderChip(
+                            provider: provider,
+                            isSelected: viewModel.selectedProvider?.id == provider.id
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+
+    // MARK: - Results row
+
+    @ViewBuilder
+    private var resultsRow: some View {
+        if viewModel.isLoadingProviderResults {
+            loadingRow
+        } else if viewModel.providerResults.isEmpty {
+            emptyRow
+        } else {
+            populatedRow
+        }
+    }
+
+    /// Carousel of result thumbs with the same focal-card scale effect
+    /// the rest of the home feed uses (BottomView, TopView). Each card
+    /// scales up to 1.25× as it crosses the screen centre, settling to
+    /// 1.0× at the edges. Wrapped in `StretchingActionScrollView` so
+    /// pulling past the trailing edge triggers `loadMoreProviderResults`
+    /// — the same overscroll-to-paginate gesture every other carousel uses.
+    private var populatedRow: some View {
+        StretchingActionScrollView(
+            onTriggered: {
+                Task { @MainActor in
+                    performFeedback.toggle()
+                    await viewModel.loadMoreProviderResults()
+                }
+            },
+            onThresholdReached: { reached in self.thresholdReached = reached },
+            onProgress: { progress in self.loadMoreProgress.value = progress },
+            content: { populatedRowContent }
+        )
+        .sensoryFeedback(.success, trigger: performFeedback)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.selectedProvider?.id)
+    }
+
+    private var populatedRowContent: some View {
+        HStack(alignment: .top, spacing: 0) {
+            Spacer().frame(width: 10)
+            ForEach(viewModel.providerResults, id: \.self) { result in
+                GeometryReader { proxy in
+                    let scale = Scale.getScale(proxy: proxy, scaleType: .vertical)
+                    NavigationLink {
+                        let model = ContentDetailsModel(screenType: viewModel.screenType, result: result)
+                        let detailVM = ContentDetailsViewModel(model: model)
+                        ContentDetailsView(detailsViewModel: detailVM)
+                            .navigationTransition(.zoom(sourceID: result.id, in: namespace))
+                    } label: {
+                        ProviderResultThumb(result: result)
+                    }
+                    .matchedTransitionSource(id: result.id, in: namespace)
+                    .buttonStyle(.plain)
+                    .frame(width: cardWidth, height: cardHeight)
+                    .scaleEffect(.init(width: scale, height: scale))
+                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+                }
+                .frame(width: slotWidth, height: slotHeight)
+
+                // The trailing button only renders on the last cell so
+                // the overscroll affordance lands at the very end of the
+                // row — pulling past it is the natural "give me more"
+                // gesture, identical to BottomView / TopView.
+                if result == viewModel.providerResults.last,
+                   viewModel.canLoadMoreProviderResults {
+                    LoadMoreButtonView(tracker: loadMoreProgress)
+                }
+            }
+        }
+    }
+
+    /// Shimmer placeholders matching the real thumb layout — poster
+    /// rectangle + 2 short text lines below. Same height as a populated
+    /// row so the section doesn't visually "bounce" while a chip change
+    /// resolves.
+    private var loadingRow: some View {
+        InlineShimmerContainer {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 14) {
+                    Spacer().frame(width: 10)
+                    ForEach(0..<6, id: \.self) { _ in
+                        VStack(alignment: .leading, spacing: 6) {
+                            ShimmerBox(cornerRadius: 10)
+                                .frame(width: cardWidth, height: 165)
+                            ShimmerBox(cornerRadius: 4)
+                                .frame(width: cardWidth * 0.85, height: 11)
+                            ShimmerBox(cornerRadius: 4)
+                                .frame(width: cardWidth * 0.55, height: 9)
+                        }
+                    }
+                }
+                .padding(.vertical, 20)
+            }
+            .disabled(true)
+        }
+    }
+
+    private var emptyRow: some View {
+        HStack {
+            Spacer()
+            VStack(spacing: 6) {
+                Image(systemName: "tray")
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundStyle(.secondary)
+                Text("Nothing matching this filter")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+    }
+}
+
+// MARK: - ProviderChip
+
+/// Capsule chip carrying a small provider logo + the service name on a
+/// single horizontal line. Selection state flips to a tinted accent fill
+/// with white text — same grammar as the genre filter chips on the same
+/// screen, so the chip-as-filter language stays consistent.
+private struct ProviderChip: View {
+
+    let provider: WatchProvider
+    let isSelected: Bool
+
+    private let logoSize: CGFloat = 22
+    private let logoPadCorner: CGFloat = 5
+
+    var body: some View {
+        HStack(spacing: 8) {
+            logo
+            Text(provider.provider_name)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        }
+        .padding(.leading, 6)
+        .padding(.trailing, 14)
+        .padding(.vertical, 6)
+        .background {
+            Capsule(style: .continuous)
+                .fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+        }
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(isSelected
+                              ? Color.accentColor.opacity(0.45)
+                              : Color.primary.opacity(0.08),
+                              lineWidth: 0.5)
+        }
+        .animation(.easeInOut(duration: 0.18), value: isSelected)
+    }
+
+    @ViewBuilder
+    private var logo: some View {
+        if let url = provider.logoURL {
+            KFImage.url(url)
+                .loadImmediately()
+                .fromMemoryCacheOrRefresh()
+                .cacheOriginalImage()
+                .fade(duration: 0.2)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: logoSize, height: logoSize)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: logoPadCorner, style: .continuous))
+        } else {
+            RoundedRectangle(cornerRadius: logoPadCorner, style: .continuous)
+                .fill(Color(.tertiarySystemFill))
+                .frame(width: logoSize, height: logoSize)
+                .overlay {
+                    Text(String(provider.provider_name.prefix(1)).uppercased())
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+        }
+    }
+}
+
+// MARK: - ProviderResultThumb
+
+/// Compact poster card used in the inline results row. Smaller than
+/// `BottomCard` (110pt vs. 130pt) because the chip bar already takes
+/// vertical space, and the goal here is "as many titles visible at once
+/// as possible" so the user can scan their subscription quickly.
+private struct ProviderResultThumb: View {
+
+    let result: Result
+
+    private let posterWidth:  CGFloat = 110
+    private let posterHeight: CGFloat = 165
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            poster
+
+            Text(result.getResultTitle())
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(width: posterWidth, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+
+            metaRow
+                .frame(width: posterWidth, alignment: .leading)
+        }
+        .frame(width: posterWidth)
+    }
+
+    private var poster: some View {
+        KFImage.url(result.getResultPosterURL())
+            .downsampling(size: CGSize(width: 320, height: 480))
+            .loadImmediately()
+            .fromMemoryCacheOrRefresh()
+            .cacheOriginalImage()
+            .fade(duration: 0.2)
+            .placeholder {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.secondary.opacity(0.15))
+                    .overlay {
+                        Image(systemName: "film")
+                            .font(.system(size: 22, weight: .light))
+                            .foregroundStyle(.secondary)
+                    }
+            }
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: posterWidth, height: posterHeight)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(.white.opacity(0.08), lineWidth: 0.5)
+            }
+            .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
+    }
+
+    @ViewBuilder
+    private var metaRow: some View {
+        let year = result.getReleaseDate(addSeparator: false)
+        let rating = (result.vote_average ?? 0) > 0 ? result.vote_average : nil
+        let ratingText = rating.map { String(format: "%.1f", $0) }
+
+        if ratingText != nil || !year.isEmpty {
+            HStack(spacing: 4) {
+                if let ratingText {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 9))
+                        .foregroundStyle(RatingStyle.tint(for: rating))
+                    Text(ratingText)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                if ratingText != nil, !year.isEmpty {
+                    Text("•").font(.system(size: 10)).foregroundStyle(.secondary.opacity(0.6))
+                }
+                if !year.isEmpty {
+                    Text(year)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}

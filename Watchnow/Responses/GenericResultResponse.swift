@@ -14,20 +14,22 @@ enum ViewSections {
     case trendingMovies
     case latestMovies
     case topRatedMovies
+    case streamingServicesMovies
 
     case popularSeries
     case airingTodaySeries
     case trendingSeries
     case latestSeries
     case topRatedSeries
+    case streamingServicesSeries
 }
 
 extension ViewSections {
     var screenType: ScreenTypes {
         switch self {
-        case .upcomingMovies, .popularMovies, .trendingMovies, .latestMovies, .topRatedMovies:
+        case .upcomingMovies, .popularMovies, .trendingMovies, .latestMovies, .topRatedMovies, .streamingServicesMovies:
             return .movie
-        case .popularSeries, .airingTodaySeries, .trendingSeries, .latestSeries, .topRatedSeries:
+        case .popularSeries, .airingTodaySeries, .trendingSeries, .latestSeries, .topRatedSeries, .streamingServicesSeries:
             return .tv
         }
     }
@@ -42,12 +44,14 @@ extension ViewSections {
         case .popularMovies: return "Most Watched"
         case .upcomingMovies: return "Coming Soon"
         case .topRatedMovies: return "🏆 Top 10 of All Time"
+        case .streamingServicesMovies: return "Browse by Streaming"
 
         case .trendingSeries: return "🔥 Binge-Worthy Today"
         case .airingTodaySeries: return "Fresh Episodes"
         case .popularSeries: return "Most Watched"
         case .latestSeries: return "Critics' Choice"
         case .topRatedSeries: return "🏆 Top 10 of All Time"
+        case .streamingServicesSeries: return "Browse by Streaming"
         }
     }
 
@@ -65,6 +69,7 @@ extension ViewSections {
         case .airingTodaySeries: return "Fresh Episodes"
         case .latestSeries: return "Critics' Choice"
         case .topRatedMovies, .topRatedSeries: return "Top 10 of All Time"
+        case .streamingServicesMovies, .streamingServicesSeries: return "Browse by Streaming"
         }
     }
 
@@ -80,6 +85,7 @@ extension ViewSections {
         case .airingTodaySeries:               return "sparkles"
         case .latestSeries:                    return "star.circle.fill"
         case .topRatedMovies, .topRatedSeries: return "trophy.fill"
+        case .streamingServicesMovies, .streamingServicesSeries: return "play.tv.fill"
         }
     }
 
@@ -126,6 +132,16 @@ extension ViewSections {
     var isTopTenSection: Bool {
         switch self {
         case .topRatedMovies, .topRatedSeries: return true
+        default: return false
+        }
+    }
+
+    /// Horizontal tile row of streaming-service logos. Tapping a tile
+    /// opens a sheet that discovers titles available on that service in
+    /// the user's region — "I have Netflix, what's on it?"
+    var isStreamingServicesSection: Bool {
+        switch self {
+        case .streamingServicesMovies, .streamingServicesSeries: return true
         default: return false
         }
     }
