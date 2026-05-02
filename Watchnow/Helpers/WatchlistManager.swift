@@ -40,11 +40,14 @@ enum WatchlistManager {
     
     @UserDefault("watchlist", defaultValue: []) static var watchlist: [Result]
     
-    static func addToWatchList(result: Result) {
-        
+    @discardableResult
+    static func addToWatchList(result: Result) -> Bool {
+
         if WatchlistManager.watchlist.contains(result) == false {
             WatchlistManager.watchlist.append(result)
+            return true
         }
+        return false
     }
     
     static func removeFromWatchList(result: Result) {

@@ -92,6 +92,7 @@
 		FE1D0A04000000000000FB04 /* PersonSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A04000000000000FA04 /* PersonSheetView.swift */; };
 		FE1D0A05000000000000FB05 /* SearchHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A05000000000000FA05 /* SearchHistoryManager.swift */; };
 		FE1D0A06000000000000FB06 /* WatchedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A06000000000000FA06 /* WatchedManager.swift */; };
+		FE1D0A07000000000000FB07 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A07000000000000FA07 /* ReviewRequestManager.swift */; };
 		FE1D0A0A000000000000FB0A /* ShimmerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0A000000000000FA0A /* ShimmerView.swift */; };
 		FE1D0A0B000000000000FB0B /* ListSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0B000000000000FA0B /* ListSection.swift */; };
 		FE1D0A0C000000000000FB0C /* PersonCombinedCreditsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0C000000000000FA0C /* PersonCombinedCreditsResponse.swift */; };
@@ -186,6 +187,7 @@
 		FE1D0A04000000000000FA04 /* PersonSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonSheetView.swift; sourceTree = "<group>"; };
 		FE1D0A05000000000000FA05 /* SearchHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHistoryManager.swift; sourceTree = "<group>"; };
 		FE1D0A06000000000000FA06 /* WatchedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchedManager.swift; sourceTree = "<group>"; };
+		FE1D0A07000000000000FA07 /* ReviewRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManager.swift; sourceTree = "<group>"; };
 		FE1D0A0A000000000000FA0A /* ShimmerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerView.swift; sourceTree = "<group>"; };
 		FE1D0A0B000000000000FA0B /* ListSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListSection.swift; sourceTree = "<group>"; };
 		FE1D0A0C000000000000FA0C /* PersonCombinedCreditsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonCombinedCreditsResponse.swift; sourceTree = "<group>"; };
@@ -413,6 +415,7 @@
 				EE9595C2289EB49A0016EC25 /* WatchlistManager.swift */,
 				FE1D0A06000000000000FA06 /* WatchedManager.swift */,
 				FE1D0A05000000000000FA05 /* SearchHistoryManager.swift */,
+				FE1D0A07000000000000FA07 /* ReviewRequestManager.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -615,6 +618,7 @@
 				AA000001000000000000AA04 /* DetailServiceProtocol.swift in Sources */,
 				FE1D0A05000000000000FB05 /* SearchHistoryManager.swift in Sources */,
 				FE1D0A06000000000000FB06 /* WatchedManager.swift in Sources */,
+				FE1D0A07000000000000FB07 /* ReviewRequestManager.swift in Sources */,
 				FE1D0A0A000000000000FB0A /* ShimmerView.swift in Sources */,
 				FE1D0A0B000000000000FB0B /* ListSection.swift in Sources */,
 				FE1D0A0C000000000000FB0C /* PersonCombinedCreditsResponse.swift in Sources */,

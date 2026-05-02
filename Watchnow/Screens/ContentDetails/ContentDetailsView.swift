@@ -152,8 +152,12 @@ extension ContentDetailsView {
             WatchlistManager.removeFromWatchList(result: detailsViewModel.result)
             detailsViewModel.isInWatchList = false
         } else {
-            WatchlistManager.addToWatchList(result: detailsViewModel.result)
+            let added = WatchlistManager.addToWatchList(result: detailsViewModel.result)
             detailsViewModel.isInWatchList = true
+            if added {
+                ReviewRequestManager.recordWatchlistAdd()
+                ReviewRequestManager.requestReviewIfAppropriate()
+            }
         }
         showAlert = true
         UINotificationFeedbackGenerator().notificationOccurred(.success)

@@ -72,9 +72,13 @@ struct GenericListView: View {
     @MainActor
     private func addSwipeAction(result: Result) -> some View {
         Button {
-            WatchlistManager.addToWatchList(result: result)
+            let added = WatchlistManager.addToWatchList(result: result)
             viewModel.showAddedAlert = true
             UINotificationFeedbackGenerator().notificationOccurred(.success)
+            if added {
+                ReviewRequestManager.recordWatchlistAdd()
+                ReviewRequestManager.requestReviewIfAppropriate()
+            }
         } label: {
             Label("Add to Watchlist", systemImage: "bookmark.fill")
         }
