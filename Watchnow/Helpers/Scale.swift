@@ -13,6 +13,11 @@ class Scale {
         case horizontal
     }
 
+    /// Marked `@MainActor` because `UIScreen.main.bounds` is main-actor
+    /// isolated under Swift 6 / strict concurrency. All callers live in
+    /// SwiftUI view bodies (also main-actor by default), so this is a
+    /// no-op at the call site.
+    @MainActor
     static func getScale(proxy: GeometryProxy, scaleType: ScaleTypes) -> CGFloat {
         let screenCenter = UIScreen.main.bounds.width / 2
         let cardCenter   = proxy.frame(in: .global).midX

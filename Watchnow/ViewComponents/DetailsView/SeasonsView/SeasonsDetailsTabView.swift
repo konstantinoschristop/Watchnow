@@ -87,7 +87,7 @@ struct SeasonsDetailsTabView: View {
             .onAppear {
                 proxy.scrollTo(selectedSeason, anchor: .center)
             }
-            .onChange(of: selectedSeason) { season in
+            .onChange(of: selectedSeason) { _, season in
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                     proxy.scrollTo(season, anchor: .center)
                 }

@@ -7,7 +7,12 @@
 
 import Foundation
 
-final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol {
+// Restating `@unchecked Sendable` is required because `BaseNetworkService`
+// declares it but Swift 6's strict concurrency doesn't propagate the
+// conformance through subclasses automatically. The concrete subclass has
+// to opt in explicitly that *it* upholds the same invariants — which it
+// does, since this class adds no mutable state of its own.
+final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unchecked Sendable {
 
     func fetchCredits(screenType: ScreenTypes, id: String) async throws -> ResultCreditsResponse {
         let urlString = API.Common.credits(type: screenType.rawValue, for: id)
