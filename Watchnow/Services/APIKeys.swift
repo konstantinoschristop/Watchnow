@@ -33,6 +33,9 @@ enum API {
         static func person(id: Int) -> String {
             return "\(API.baseURL)/person/\(id)?api_key=\(API.key)&language=\(API.language)"
         }
+        static func personCombinedCredits(id: Int) -> String {
+            return "\(API.baseURL)/person/\(id)/combined_credits?api_key=\(API.key)&language=\(API.language)"
+        }
         static func collection(id: Int) -> String {
             return "\(API.baseURL)/collection/\(id)?api_key=\(API.key)&language=\(API.language)"
         }
@@ -62,6 +65,9 @@ enum API {
         }
         static func nowPlaying(page: Int) -> String {
             return "\(API.baseURL)/movie/now_playing?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+        }
+        static func topRated(page: Int) -> String {
+            return "\(API.baseURL)/movie/top_rated?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }
     }
 

@@ -112,7 +112,7 @@ struct SeasonsDetailsTabView: View {
                 .background {
                     if isSelected {
                         Capsule()
-                            .fill(Color.purple)
+                            .fill(Color.accentColor)
                             .matchedGeometryEffect(id: "pill", in: pillNamespace)
                     } else {
                         Capsule()
@@ -156,7 +156,7 @@ struct SeasonsDetailsTabView: View {
             ContentUnavailableView {
                 Label("Not aired yet", systemImage: "clock")
                     .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(.purple)
+                    .foregroundStyle(Color.accentColor)
             } description: {
                 Text("This season hasn't started yet.")
             }

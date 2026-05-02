@@ -13,6 +13,10 @@ struct MoviesView: View {
     
     var body: some View {
         ContentMainView(viewModel: moviesViewModel,
-                        sections: [.trendingMovies, .latestMovies, .popularMovies, .upcomingMovies])
+                        sections: [.trendingMovies,
+                                   .latestMovies,
+                                   .popularMovies,
+                                   .upcomingMovies,
+                                   .topRatedMovies])
     }
 }

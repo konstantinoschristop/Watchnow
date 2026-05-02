@@ -120,7 +120,10 @@ private struct ActorRow: View {
                 profilePath: result.profile_path,
                 knownFor:    result.known_for
             )
-            .presentationDetents([.medium, .large])
+            // 70% gives a clear glimpse of the Known For row without
+            // forcing a scroll, but still leaves the underlying details
+            // screen visible at the top so the sheet feels like a peek.
+            .presentationDetents([.fraction(0.7), .large])
         }
     }
 }

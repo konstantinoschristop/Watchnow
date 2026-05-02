@@ -50,11 +50,11 @@ struct MenuFeaturedView<Content: View>: View {
         heroContent
         .stretchy()
         .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 0.75 }
-        .simultaneousGesture(
-            DragGesture()
-                .onChanged { _ in if !isDragging { isDragging = true } }
-                .onEnded   { _ in isDragging = false }
-        )
+        // Note: dragging detection is wired up inside `carouselView` via
+        // `onScrollPhaseChange` on the horizontal ScrollView itself, so the
+        // hero no longer installs an outer DragGesture. That gesture used
+        // to swallow vertical pans, blocking the parent ScrollView from
+        // scrolling whenever the user's finger started on the hero.
         .task(id: autoAdvanceKey) {
             // Any change to scrollIndex / scenePhase / isDragging cancels the
             // in-flight sleep and re-enters this task with fresh state. That's
@@ -147,6 +147,14 @@ struct MenuFeaturedView<Content: View>: View {
             .scrollPosition(id: $scrollIndex)
             .safeAreaPadding(.horizontal, cardInset)
             .scrollClipDisabled()
+            // `onScrollPhaseChange` observes the inner horizontal scroll
+            // *non-intrusively* — it doesn't intercept the gesture, so
+            // vertical pans on this view fall through to the parent
+            // ScrollView. We only need to know when the carousel is being
+            // actively touched/dragged so the auto-advance task pauses.
+            .onScrollPhaseChange { _, newPhase in
+                isDragging = (newPhase == .interacting || newPhase == .tracking)
+            }
             .frame(width: size.width, height: size.height)
             // Indicator sits inside the card, above the spotlight overlay
             .overlay(alignment: .bottom) {

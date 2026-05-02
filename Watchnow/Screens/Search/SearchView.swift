@@ -25,6 +25,24 @@ struct SearchView: View {
 
     var body: some View {
         contentView
+            .toolbar {
+                // Explicit Cancel/back affordance — iOS's native Cancel
+                // button only shows while the search field has focus, so as
+                // soon as the user dismisses the keyboard there's no obvious
+                // way back to the initial state. This toolbar item stays
+                // visible whenever there's *any* search activity (typed
+                // input or returned results) and bails out of search
+                // entirely on tap, including dismissing the search field
+                // focus via the SwiftUI `dismissSearch` environment action.
+                if !searchInput.isEmpty || viewModel.results != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        SearchCancelButton {
+                            searchInput = ""
+                            viewModel.clearResults()
+                        }
+                    }
+                }
+            }
             .toast(isPresenting: $viewModel.showAddedAlert) {
                 AlertToast(displayMode: .alert,
                            type: .complete(.green),
@@ -50,6 +68,26 @@ struct SearchView: View {
                     await viewModel.getResults(search: newValue)
                 }
             }
+    }
+}
+
+// MARK: - SearchCancelButton
+
+/// Small helper that reads `dismissSearch` from the environment so a
+/// caller-provided cleanup closure can run alongside the standard
+/// "remove search field focus" behaviour. Lives in this file because it
+/// is a thin shim that only makes sense inside `SearchView`'s searchable
+/// scope.
+private struct SearchCancelButton: View {
+    let onCancel: () -> Void
+    @Environment(\.dismissSearch) private var dismissSearch
+
+    var body: some View {
+        Button("Cancel") {
+            onCancel()
+            dismissSearch()
+        }
+        .tint(.accentColor)
     }
 }
 
@@ -103,51 +141,94 @@ private extension SearchView {
     }
 
     /// The screen the user sees before typing anything.
-    /// When there are recent searches, shows a "Recent" chip section
-    /// instead of the generic placeholder.
-    @ViewBuilder
+    ///
+    /// Always opens with an `introHeader` explaining what's searchable —
+    /// new users were landing on a screen with only a search field at the
+    /// top and either nothing or a row of chips, with no signal about what
+    /// kind of content the app can find. The header card up front sells
+    /// the surface area before the user has to commit to typing.
+    /// Recent searches, when present, render as a second block below it.
     var initialState: some View {
-        if viewModel.recentSearches.isEmpty {
-            ContentUnavailableView {
-                themedLabel(title: "Find something to watch",
-                            systemImage: "magnifyingglass",
-                            tint: .accentColor)
-            } description: {
-                Text("Search across movies, TV series, and actors.")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                introHeader
+
+                if !viewModel.recentSearches.isEmpty {
+                    recentSearchesBlock
+                }
             }
-        } else {
-            recentSearchesView
+            .padding(.top, 24)
+            .padding(.bottom, 32)
         }
     }
 
-    var recentSearchesView: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text("Recent")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                    Spacer(minLength: 0)
-                    Button("Clear All") {
-                        viewModel.clearRecentSearches()
-                    }
-                    .font(.system(size: 13, weight: .medium))
+    /// Welcome card + a row of category tiles that double as a visual
+    /// index of what the app can search. Static — taps are intentionally
+    /// not wired to anything because typing is the primary action and
+    /// "tap a category" would compete with the search field for focus.
+    private var introHeader: some View {
+        VStack(alignment: .center, spacing: 18) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.12))
+                    .frame(width: 86, height: 86)
+                Image(systemName: "sparkle.magnifyingglass")
+                    .font(.system(size: 36, weight: .semibold))
                     .foregroundStyle(Color.accentColor)
-                }
-                .padding(.horizontal, 16)
+                    .symbolRenderingMode(.hierarchical)
+            }
 
-                FlowLayout(spacing: 8) {
-                    ForEach(viewModel.recentSearches, id: \.self) { query in
-                        RecentSearchChip(query: query) {
-                            searchInput = query
-                        } onRemove: {
-                            viewModel.removeRecentSearch(query)
-                        }
+            VStack(spacing: 6) {
+                Text("Find what to watch")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(.primary)
+                Text("Search any movie, series, or actor —\nfrom blockbusters to deep cuts.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(2)
+            }
+            .multilineTextAlignment(.center)
+
+            HStack(spacing: 10) {
+                CategoryTile(icon: "film.fill",          label: "Movies")
+                CategoryTile(icon: "tv.fill",            label: "Series")
+                CategoryTile(icon: "person.fill",        label: "Actors")
+            }
+            .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+    }
+
+    /// Recent searches block — same chip + clear-all controls as before,
+    /// but no longer scroll-wrapped (the parent ScrollView in
+    /// `initialState` handles scrolling now).
+    private var recentSearchesBlock: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Recent")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                Button("Clear All") {
+                    viewModel.clearRecentSearches()
+                }
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Color.accentColor)
+            }
+            .padding(.horizontal, 16)
+
+            FlowLayout(spacing: 8) {
+                ForEach(viewModel.recentSearches, id: \.self) { query in
+                    RecentSearchChip(query: query) {
+                        searchInput = query
+                    } onRemove: {
+                        viewModel.removeRecentSearch(query)
                     }
                 }
-                .padding(.horizontal, 16)
             }
-            .padding(.top, 16)
+            .padding(.horizontal, 16)
         }
     }
 
@@ -291,6 +372,40 @@ private extension SearchView {
     /// which is the only state that needs to draw the eye anyway.
     func tint(for option: SearchModel.SearchChooserOptions) -> Color {
         .accentColor
+    }
+}
+
+// MARK: - CategoryTile
+
+/// Static "what you can find" tile shown in the search initial state.
+/// Visual index, not a control — the search field is the only entry
+/// point on this screen by design.
+private struct CategoryTile: View {
+    let icon: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 38, height: 38)
+                .background(Color.accentColor.opacity(0.10), in: Circle())
+
+            Text(label)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.tertiarySystemFill))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+        }
     }
 }
 

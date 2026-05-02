@@ -20,6 +20,13 @@ final class PersonViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var hasError = false
 
+    /// Resolved "Known For" titles fetched from `/person/{id}/combined_credits`.
+    /// Only populated when the caller didn't already supply a `knownFor`
+    /// array via the sheet's init — saves a round-trip when the parent
+    /// already had the data (multi-search results carry it inline).
+    @Published var combinedCredits: [Result]?
+    @Published var isLoadingCredits = false
+
     private let service = ServiceInvocation()
 
     func fetch(id: Int) async {
@@ -33,6 +40,39 @@ final class PersonViewModel: ObservableObject {
         }
         isLoading = false
     }
+
+    /// Loads the person's combined credits and exposes the top-N most
+    /// popular acting credits as the "Known For" reel. Crew credits are
+    /// dropped — the section is meant to show titles the user might
+    /// recognise the actor *from*, which is almost always cast work.
+    /// Duplicates (same title, multiple roles) are folded by TMDB id so
+    /// the row never repeats a poster.
+    func loadCombinedCredits(id: Int, limit: Int = 8) async {
+        guard id > 0 else { return }
+        isLoadingCredits = true
+        defer { isLoadingCredits = false }
+
+        do {
+            let response = try await service.fetchCombinedCredits(personID: id)
+            let cast = response.cast ?? []
+
+            var seen = Set<Int>()
+            let deduped = cast.filter { result in
+                guard let id = result.id else { return false }
+                return seen.insert(id).inserted
+            }
+
+            // Sort by popularity descending — TMDB's own ordering is
+            // sometimes by date which buries the headliner roles.
+            let sorted = deduped.sorted { ($0.popularity ?? 0) > ($1.popularity ?? 0) }
+            combinedCredits = Array(sorted.prefix(limit))
+        } catch {
+            // Soft-fail: the section just stays empty. The biography +
+            // meta blocks on the sheet are still useful, so a Known For
+            // failure shouldn't surface a screen-level error state.
+            combinedCredits = []
+        }
+    }
 }
 
 // MARK: - Sheet
@@ -45,45 +85,127 @@ struct PersonSheetView: View {
     /// Pre-loaded from Cast.known_for / Result.known_for — shown with no
     /// extra network call. Optional: sections that can't supply it omit it.
     let knownFor: [Result]?
+    /// The TMDB id of the title the sheet was opened *from* (the details
+    /// screen the user was viewing when they tapped a cast row). When a
+    /// Known For card matches this id, tapping it just dismisses the
+    /// sheet — the user is already viewing that title. Pass nil when the
+    /// sheet is opened outside a details context (search results,
+    /// watchlist, etc.) so every Known For card is fully tappable.
+    var currentTitleID: Int? = nil
 
     @StateObject private var vm = PersonViewModel()
     @State private var isBioExpanded = false
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .center, spacing: 28) {
+        // The sheet manages its own NavigationStack. Tapping a Known For
+        // card pushes the corresponding ContentDetailsView *inside* the
+        // sheet — the user can dismiss to get back to where they were,
+        // or drag to .large for full-screen reading mid-navigation.
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .center, spacing: 28) {
 
-                headerSection
+                    headerSection
 
-                if vm.isLoading {
-                    ProgressView()
+                    if vm.isLoading {
+                        ProgressView()
+                            .padding(.top, 8)
+                    } else if vm.hasError {
+                        ContentUnavailableView(
+                            "Couldn't load",
+                            systemImage: "person.slash",
+                            description: Text("Check your connection and try again.")
+                        )
                         .padding(.top, 8)
-                } else if vm.hasError {
-                    ContentUnavailableView(
-                        "Couldn't load",
-                        systemImage: "person.slash",
-                        description: Text("Check your connection and try again.")
-                    )
-                    .padding(.top, 8)
-                } else {
-                    if let person = vm.person {
-                        if !buildMetaItems(person).isEmpty {
-                            metaSection(person)
+                    } else {
+                        if let person = vm.person {
+                            if !buildMetaItems(person).isEmpty {
+                                metaSection(person)
+                            }
+                            if let bio = person.biography, !bio.isEmpty {
+                                bioSection(bio)
+                            }
                         }
-                        if let bio = person.biography, !bio.isEmpty {
-                            bioSection(bio)
-                        }
-                    }
 
-                    if let works = knownFor, !works.isEmpty {
-                        knownForSection(works)
+                        knownForBlock
                     }
                 }
+                .padding(.bottom, 36)
+                // Force the inner stack to occupy the full sheet height even
+                // while content is sparse (e.g. during the initial fetch).
+                // Without this, the ScrollView shrinks to fit its content and
+                // leaves the bottom half of the sheet showing system chrome
+                // through the gap.
+                .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
             }
-            .padding(.bottom, 36)
+            // Wire up the value-based navigation destination. NavigationLinks
+            // anywhere in the sheet that pass a `Result` push to a fresh
+            // ContentDetailsView for that title.
+            .navigationDestination(for: Result.self) { result in
+                let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
+                let model = ContentDetailsModel(screenType: screenType, result: result)
+                let vm = ContentDetailsViewModel(model: model)
+                ContentDetailsView(detailsViewModel: vm)
+            }
         }
-        .background(Color(.background))
+        // `presentationBackground` colours the entire sheet container —
+        // it survives the ScrollView's intrinsic-size shrinkage during
+        // loading. The `.background` modifier on the ScrollView itself
+        // only paints behind content, which is why "half the sheet"
+        // appeared transparent when only a header + spinner were drawn.
+        .presentationBackground(Color(.background))
         .task { await vm.fetch(id: personID) }
+        // Only fetch credits if the caller didn't supply them. Avoids a
+        // wasteful round-trip when opening the sheet from a multi-search
+        // result (which already carries `known_for`).
+        .task {
+            guard knownFor == nil else { return }
+            await vm.loadCombinedCredits(id: personID)
+        }
+    }
+
+    /// Resolves which list to show in the "Known For" section, with a
+    /// shimmer skeleton while the credits endpoint is in flight. Order of
+    /// precedence: caller-supplied `knownFor` (instant) → fetched
+    /// `combinedCredits` (after the round-trip) → nothing (section hides).
+    @ViewBuilder
+    private var knownForBlock: some View {
+        if let works = knownFor, !works.isEmpty {
+            knownForSection(works)
+        } else if let fetched = vm.combinedCredits, !fetched.isEmpty {
+            knownForSection(fetched)
+        } else if vm.isLoadingCredits {
+            knownForSkeleton
+        }
+    }
+
+    private var knownForSkeleton: some View {
+        InlineShimmerContainer {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Known For")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 24)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .top, spacing: 12) {
+                        ForEach(0..<5, id: \.self) { _ in
+                            VStack(alignment: .leading, spacing: 6) {
+                                ShimmerBox(cornerRadius: 10)
+                                    .frame(width: 90, height: 135)
+                                ShimmerBox(cornerRadius: 4)
+                                    .frame(width: 70, height: 10)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 4)
+                }
+                .disabled(true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     // MARK: - Header
@@ -239,7 +361,11 @@ struct PersonSheetView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(works.prefix(8), id: \.self) { result in
-                        KnownForCard(result: result)
+                        KnownForCard(
+                            result: result,
+                            isCurrentTitle: result.id == currentTitleID,
+                            onDismissToCurrent: { dismiss() }
+                        )
                     }
                 }
                 .padding(.horizontal, 24)
@@ -277,13 +403,38 @@ struct PersonSheetView: View {
 
 // MARK: - Known For Card
 
+/// Tap behaviour:
+///   - When the card represents the title the user was already viewing
+///     (`isCurrentTitle == true`), tapping just dismisses the sheet —
+///     pushing a fresh details for the same title would be a no-op /
+///     duplicate from the user's perspective.
+///   - Otherwise, the card is a `NavigationLink(value: Result)` that
+///     pushes onto the sheet's own NavigationStack, taking the user to
+///     a full ContentDetailsView for that title without leaving the sheet.
 private struct KnownForCard: View {
 
     let result: Result
+    let isCurrentTitle: Bool
+    let onDismissToCurrent: () -> Void
+
     private let cardWidth:  CGFloat = 90
     private let cardHeight: CGFloat = 135
 
     var body: some View {
+        if isCurrentTitle {
+            Button(action: onDismissToCurrent) {
+                cardContent
+            }
+            .buttonStyle(.plain)
+        } else {
+            NavigationLink(value: result) {
+                cardContent
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var cardContent: some View {
         VStack(alignment: .leading, spacing: 6) {
             KFImage.url(result.getResultPosterURL())
                 .loadImmediately()

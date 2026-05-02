@@ -19,6 +19,7 @@ protocol ContentService: AnyObject, Sendable {
     func fetchPopular(page: Int) async throws -> GenericResultResponse
     func fetchUpcomingOrAiring(page: Int) async throws -> GenericResultResponse
     func fetchLatest(page: Int) async throws -> GenericResultResponse
+    func fetchTopRated(page: Int) async throws -> GenericResultResponse
 }
 
 @MainActor
@@ -33,6 +34,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     @Published var popular: ContentListResult?
     @Published var special: ContentListResult?   // "upcoming" for movies, "airingToday" for series
     @Published var latest: ContentListResult?
+    @Published var topRated: ContentListResult?
     @Published var featuredResult: [Result]?
 
     private let service: ContentService
@@ -57,6 +59,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
             popular = nil
             special = nil
             latest = nil
+            topRated = nil
         }
         apiError = false
         loadingCompleted = false
@@ -66,11 +69,13 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
         async let p = svc.fetchPopular(page: 1)
         async let s = svc.fetchUpcomingOrAiring(page: 1)
         async let l = svc.fetchLatest(page: 1)
+        async let r5 = svc.fetchTopRated(page: 1)
 
-        if let r = try? await t { trending  = ContentListResult(result: r) } else { apiError = true }
-        if let r = try? await p { popular   = ContentListResult(result: r) } else { apiError = true }
-        if let r = try? await s { special   = ContentListResult(result: r) } else { apiError = true }
-        if let r = try? await l { latest    = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await t  { trending  = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await p  { popular   = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await s  { special   = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await l  { latest    = ContentListResult(result: r) } else { apiError = true }
+        if let r = try? await r5 { topRated  = ContentListResult(result: r) } else { apiError = true }
 
         loadingCompleted = true
     }
@@ -83,6 +88,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
         case .popularMovies, .popularSeries:        return popular?.canLoadMoreContent()  ?? false
         case .upcomingMovies, .airingTodaySeries:   return special?.canLoadMoreContent()  ?? false
         case .latestMovies, .latestSeries:          return latest?.canLoadMoreContent()   ?? false
+        case .topRatedMovies, .topRatedSeries:      return topRated?.canLoadMoreContent() ?? false
         }
     }
 
@@ -99,6 +105,8 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
             loadMore(section: section, list: special,   fetcher: service.fetchUpcomingOrAiring)  { [weak self] in self?.special   = $0 }
         case .latestMovies, .latestSeries:
             loadMore(section: section, list: latest,    fetcher: service.fetchLatest)            { [weak self] in self?.latest    = $0 }
+        case .topRatedMovies, .topRatedSeries:
+            loadMore(section: section, list: topRated,  fetcher: service.fetchTopRated)          { [weak self] in self?.topRated  = $0 }
         }
     }
 

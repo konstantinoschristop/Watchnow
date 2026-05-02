@@ -13,19 +13,21 @@ enum ViewSections {
     case popularMovies
     case trendingMovies
     case latestMovies
+    case topRatedMovies
 
     case popularSeries
     case airingTodaySeries
     case trendingSeries
     case latestSeries
+    case topRatedSeries
 }
 
 extension ViewSections {
     var screenType: ScreenTypes {
         switch self {
-        case .upcomingMovies, .popularMovies, .trendingMovies, .latestMovies:
+        case .upcomingMovies, .popularMovies, .trendingMovies, .latestMovies, .topRatedMovies:
             return .movie
-        case .popularSeries, .airingTodaySeries, .trendingSeries, .latestSeries:
+        case .popularSeries, .airingTodaySeries, .trendingSeries, .latestSeries, .topRatedSeries:
             return .tv
         }
     }
@@ -39,11 +41,13 @@ extension ViewSections {
         case .latestMovies: return "🎟️ In Theaters Now"
         case .popularMovies: return "Most Watched"
         case .upcomingMovies: return "Coming Soon"
+        case .topRatedMovies: return "🏆 Top 10 of All Time"
 
         case .trendingSeries: return "🔥 Binge-Worthy Today"
         case .airingTodaySeries: return "Fresh Episodes"
         case .popularSeries: return "Most Watched"
         case .latestSeries: return "Critics' Choice"
+        case .topRatedSeries: return "🏆 Top 10 of All Time"
         }
     }
 
@@ -60,6 +64,7 @@ extension ViewSections {
         case .trendingSeries: return "Binge-Worthy Today"
         case .airingTodaySeries: return "Fresh Episodes"
         case .latestSeries: return "Critics' Choice"
+        case .topRatedMovies, .topRatedSeries: return "Top 10 of All Time"
         }
     }
 
@@ -74,6 +79,7 @@ extension ViewSections {
         case .upcomingMovies:                  return "calendar"
         case .airingTodaySeries:               return "sparkles"
         case .latestSeries:                    return "star.circle.fill"
+        case .topRatedMovies, .topRatedSeries: return "trophy.fill"
         }
     }
 
@@ -109,6 +115,17 @@ extension ViewSections {
     var isListSection: Bool {
         switch self {
         case .latestMovies, .airingTodaySeries: return true
+        default: return false
+        }
+    }
+
+    /// Top-10 ranked list with giant rank numerals on the leading edge.
+    /// The "scroll-payoff" section at the very bottom of each tab —
+    /// rewards the user for getting all the way down with the most
+    /// distinctive layout in the app.
+    var isTopTenSection: Bool {
+        switch self {
+        case .topRatedMovies, .topRatedSeries: return true
         default: return false
         }
     }

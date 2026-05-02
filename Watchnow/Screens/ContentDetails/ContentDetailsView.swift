@@ -294,7 +294,8 @@ extension ContentDetailsView {
                 icon: "person.2.fill",
                 tint: .accentColor
             )
-            CastView(cast: detailsViewModel.castSafe)
+            CastView(cast: detailsViewModel.castSafe,
+                     currentTitleID: detailsViewModel.result.id)
         }
     }
 

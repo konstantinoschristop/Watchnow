@@ -209,28 +209,129 @@ private struct AllReviewsSheet: View {
     let reviews: [Reviews]
     @State private var selectedReview: Reviews?
     @State private var isReviewPresented = false
+    @State private var sortOrder: SortOrder = .mostRecent
+    @State private var ratedOnly = false
+
+    /// All-client-side ordering — TMDB returns reviews in submission order
+    /// (newest first), and the full list is small enough that re-sorting on
+    /// every menu toggle is free.
+    enum SortOrder: String, CaseIterable, Identifiable {
+        case mostRecent   = "Most Recent"
+        case oldestFirst  = "Oldest First"
+        case highestRated = "Highest Rated"
+        case lowestRated  = "Lowest Rated"
+        case mostDetailed = "Most Detailed"
+
+        var id: String { rawValue }
+
+        var icon: String {
+            switch self {
+            case .mostRecent:   return "clock"
+            case .oldestFirst:  return "clock.arrow.circlepath"
+            case .highestRated: return "star.fill"
+            case .lowestRated:  return "star.slash"
+            case .mostDetailed: return "text.justify"
+            }
+        }
+    }
+
+    /// The reviews list after applying both the rated-only filter and
+    /// the active sort order.
+    ///
+    /// Reviews without a rating are pushed to the end when sorting by
+    /// rating — by giving them an out-of-range sentinel (`0` for highest,
+    /// `Int.max` for lowest) instead of dropping them. The dedicated
+    /// `ratedOnly` toggle is the explicit way to remove them entirely.
+    private var displayedReviews: [Reviews] {
+        let filtered = ratedOnly
+            ? reviews.filter { ($0.author_details?.rating ?? 0) > 0 }
+            : reviews
+
+        return filtered.sorted { lhs, rhs in
+            switch sortOrder {
+            case .mostRecent:
+                return (lhs.created_at ?? "") > (rhs.created_at ?? "")
+            case .oldestFirst:
+                return (lhs.created_at ?? "") < (rhs.created_at ?? "")
+            case .highestRated:
+                return (lhs.author_details?.rating ?? 0) > (rhs.author_details?.rating ?? 0)
+            case .lowestRated:
+                return (lhs.author_details?.rating ?? Int.max) < (rhs.author_details?.rating ?? Int.max)
+            case .mostDetailed:
+                return (lhs.content?.count ?? 0) > (rhs.content?.count ?? 0)
+            }
+        }
+    }
+
+    /// True when the user has touched the menu — drives the toolbar
+    /// glyph's filled variant so they have a quick visual cue that the
+    /// list is no longer the default ordering.
+    private var hasCustomFilters: Bool {
+        sortOrder != .mostRecent || ratedOnly
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    ForEach(reviews, id: \.self) { review in
-                        ReviewCard(review: review) {
-                            selectedReview = review
-                            isReviewPresented = true
+                    if displayedReviews.isEmpty {
+                        ContentUnavailableView(
+                            "No rated reviews",
+                            systemImage: "star.slash",
+                            description: Text("Turn off \"Rated reviews only\" to see all reviews.")
+                        )
+                        .padding(.top, 60)
+                    } else {
+                        ForEach(displayedReviews, id: \.self) { review in
+                            ReviewCard(review: review) {
+                                selectedReview = review
+                                isReviewPresented = true
+                            }
                         }
                     }
                 }
                 .padding(16)
+                .animation(.easeInOut(duration: 0.2), value: sortOrder)
+                .animation(.easeInOut(duration: 0.2), value: ratedOnly)
             }
             .background(Color(.background))
             .navigationTitle("Reviews")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    sortMenu
+                }
+            }
         }
         .sheet(isPresented: $isReviewPresented) {
             ReviewSheet(review: $selectedReview)
                 .presentationDetents([.medium, .large])
         }
+    }
+
+    /// Sort + filter dropdown. The `Picker` inside `Menu` renders as a
+    /// native iOS radio group with a checkmark on the active option, so
+    /// the user can see at a glance which sort is currently applied.
+    /// "Rated only" lives below a divider as a separate toggle since
+    /// it's an *additional* filter, not another sort order.
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort", selection: $sortOrder) {
+                ForEach(SortOrder.allCases) { order in
+                    Label(order.rawValue, systemImage: order.icon).tag(order)
+                }
+            }
+
+            Divider()
+
+            Toggle(isOn: $ratedOnly) {
+                Label("Rated reviews only", systemImage: "star.leadinghalf.filled")
+            }
+        } label: {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+                .symbolVariant(hasCustomFilters ? .fill : .none)
+        }
+        .tint(.accentColor)
     }
 }
 

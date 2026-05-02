@@ -36,4 +36,8 @@ extension SeriesService: ContentService {
     func fetchLatest(page: Int) async throws -> GenericResultResponse {
         try await fetchLatestSeries(page: page)
     }
+
+    func fetchTopRated(page: Int) async throws -> GenericResultResponse {
+        try await fetchTopRatedSeries(page: page)
+    }
 }

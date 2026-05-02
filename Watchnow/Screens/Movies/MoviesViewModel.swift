@@ -36,4 +36,8 @@ extension MovieService: ContentService {
     func fetchLatest(page: Int) async throws -> GenericResultResponse {
         try await fetchLatestMovies(page: page)
     }
+
+    func fetchTopRated(page: Int) async throws -> GenericResultResponse {
+        try await fetchTopRatedMovies(page: page)
+    }
 }

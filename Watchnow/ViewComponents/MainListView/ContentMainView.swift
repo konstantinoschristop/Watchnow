@@ -89,6 +89,11 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                                                 screenType: section.screenType,
                                                 viewSection: section,
                                                 viewModel: viewModel)
+                                } else if section.isTopTenSection {
+                                    TopTenSection(results: results,
+                                                  screenType: section.screenType,
+                                                  viewSection: section,
+                                                  viewModel: viewModel)
                                 } else {
                                     BottomView(results: results,
                                                viewTitle: section.title,
@@ -151,6 +156,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         case .popularMovies,  .popularSeries:     raw = viewModel.popular?.result.results
         case .upcomingMovies, .airingTodaySeries: raw = viewModel.special?.result.results
         case .latestMovies,   .latestSeries:      raw = viewModel.latest?.result.results
+        case .topRatedMovies, .topRatedSeries:    raw = viewModel.topRated?.result.results
         }
 
         guard let raw else { return nil }

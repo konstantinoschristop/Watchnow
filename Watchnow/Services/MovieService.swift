@@ -29,6 +29,10 @@ final class MovieService: BaseNetworkService {
     func fetchLatestMovies(page: Int) async throws -> GenericResultResponse {
         try await request(urlString: API.Movie.nowPlaying(page: page))
     }
+
+    func fetchTopRatedMovies(page: Int) async throws -> GenericResultResponse {
+        try await request(urlString: API.Movie.topRated(page: page))
+    }
 }
 
 extension MovieService: @unchecked Sendable {}

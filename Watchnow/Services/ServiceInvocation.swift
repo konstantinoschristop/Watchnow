@@ -49,6 +49,17 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol {
         return try await request(urlString: urlString)
     }
 
+    /// Returns every movie / TV credit a person has — used by the actor
+    /// sheet's "Known For" section when the caller didn't already have a
+    /// pre-loaded `known_for` array (e.g. tapped from a cast carousel
+    /// rather than a multi-search result). The cast and crew arrays both
+    /// reuse the existing `Result` shape because TMDB's combined_credits
+    /// response uses the same field set as the search/discover endpoints.
+    func fetchCombinedCredits(personID: Int) async throws -> PersonCombinedCreditsResponse {
+        let urlString = API.Common.personCombinedCredits(id: personID)
+        return try await request(urlString: urlString)
+    }
+
     func fetchCollection(collectionID: Int) async throws -> CollectionResponse {
         let urlString = API.Common.collection(id: collectionID)
         return try await request(urlString: urlString)

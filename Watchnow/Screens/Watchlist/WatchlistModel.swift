@@ -30,7 +30,6 @@ struct WatchlistModel {
 
     enum SortOrder: String, CaseIterable, Identifiable {
         case dateAdded = "Date Added"
-        case titleAZ   = "Title A→Z"
         case rating    = "Rating"
 
         var id: String { rawValue }
@@ -38,7 +37,6 @@ struct WatchlistModel {
         var icon: String {
             switch self {
             case .dateAdded: return "clock"
-            case .titleAZ:   return "textformat.abc"
             case .rating:    return "star.fill"
             }
         }
@@ -59,10 +57,6 @@ struct WatchlistModel {
         switch sortOrder {
         case .dateAdded:
             return items.reversed()
-        case .titleAZ:
-            return items.sorted {
-                $0.getResultTitle().localizedCompare($1.getResultTitle()) == .orderedAscending
-            }
         case .rating:
             // Items with no rating sort to the end.
             return items.sorted {

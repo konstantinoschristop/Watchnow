@@ -53,6 +53,30 @@ struct ShimmerBox: View {
     }
 }
 
+// MARK: - InlineShimmerContainer
+
+/// Drop-in shimmer scope with a self-driving phase animation. Use this
+/// anywhere you want shimmer placeholders *outside* of `SkeletonContentView`
+/// (e.g. a small inline skeleton inside an actor sheet, a sheet header,
+/// etc.). Identical look to the main feed skeleton — same sweep duration,
+/// same gradient — just doesn't depend on the parent driving the phase.
+struct InlineShimmerContainer<Content: View>: View {
+
+    @ViewBuilder var content: () -> Content
+    @State private var phase: CGFloat = -1
+
+    var body: some View {
+        content()
+            .environment(\.shimmerPhase, phase)
+            .onAppear {
+                phase = -1
+                withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) {
+                    phase = 1.5
+                }
+            }
+    }
+}
+
 // MARK: - Skeleton cards
 
 private struct SkeletonBottomCard: View {

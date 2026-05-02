@@ -24,6 +24,15 @@ final class SeriesService: BaseNetworkService {
     func fetchLatestSeries(page: Int) async throws -> GenericResultResponse {
         return try await request(urlString: API.TV.topRated(page: page))
     }
+
+    /// Same endpoint as `fetchLatestSeries` because TMDB's TV API doesn't
+    /// expose a separate "newest releases" stream — `top_rated` is the
+    /// only TV endpoint that returns curated quality picks. The series
+    /// tab currently doesn't use both (Top 10 supersedes Critics' Choice
+    /// in the section list), so the duplicate is logical, not actual.
+    func fetchTopRatedSeries(page: Int) async throws -> GenericResultResponse {
+        return try await request(urlString: API.TV.topRated(page: page))
+    }
 }
 
 extension SeriesService: @unchecked Sendable {}

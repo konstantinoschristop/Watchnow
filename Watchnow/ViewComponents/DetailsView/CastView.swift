@@ -17,12 +17,18 @@ import Kingfisher
 struct CastView: View {
 
     let cast: [Cast]
+    /// TMDB id of the title this cast belongs to. Threaded through to the
+    /// actor sheet so that "Known For" entries matching this title (the
+    /// one the user is currently viewing) collapse to a plain dismiss
+    /// instead of pushing a redundant details screen.
+    let currentTitleID: Int?
     private let inlineLimit = 10
 
     @State private var showAll = false
 
-    init(cast: [Cast]?) {
+    init(cast: [Cast]?, currentTitleID: Int? = nil) {
         self.cast = cast ?? []
+        self.currentTitleID = currentTitleID
     }
 
     private var visibleCast: [Cast] {
@@ -35,7 +41,7 @@ struct CastView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 12) {
                 ForEach(visibleCast, id: \.self) { member in
-                    CastCard(member: member)
+                    CastCard(member: member, currentTitleID: currentTitleID)
                 }
 
                 if hasMore {
@@ -48,7 +54,7 @@ struct CastView: View {
             .padding(.vertical, 4)
         }
         .sheet(isPresented: $showAll) {
-            CastSheet(cast: cast)
+            CastSheet(cast: cast, currentTitleID: currentTitleID)
                 .presentationDetents([.large])
         }
     }
@@ -59,6 +65,7 @@ struct CastView: View {
 private struct CastCard: View {
 
     let member: Cast
+    let currentTitleID: Int?
 
     private let cardWidth: CGFloat = 110
     private let imageHeight: CGFloat = 140
@@ -95,12 +102,16 @@ private struct CastCard: View {
         .buttonStyle(.plain)
         .sheet(isPresented: $isSheetPresented) {
             PersonSheetView(
-                personID:    member.id ?? 0,
-                name:        member.getName(),
-                profilePath: member.profile_path,
-                knownFor:    member.known_for
+                personID:       member.id ?? 0,
+                name:           member.getName(),
+                profilePath:    member.profile_path,
+                knownFor:       member.known_for,
+                currentTitleID: currentTitleID
             )
-            .presentationDetents([.medium, .large])
+            // 70% gives the Known For row enough room to read at a
+            // glance without forcing a scroll. Drag-up to .large still
+            // available when the user wants the full bio.
+            .presentationDetents([.fraction(0.7), .large])
         }
     }
 
@@ -185,6 +196,7 @@ private struct SeeAllCard: View {
 private struct CastSheet: View {
 
     let cast: [Cast]
+    let currentTitleID: Int?
 
     // Fixed card width so each cell matches the inline carousel exactly; the
     // adaptive grid flows as many per row as fit.
@@ -197,7 +209,7 @@ private struct CastSheet: View {
             ScrollView {
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
                     ForEach(cast, id: \.self) { member in
-                        CastCard(member: member)
+                        CastCard(member: member, currentTitleID: currentTitleID)
                     }
                 }
                 .padding()
