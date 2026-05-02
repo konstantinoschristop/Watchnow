@@ -159,23 +159,34 @@ struct WatchProviderView: View {
 
     // MARK: - Attribution
 
-    /// JustWatch credit. TMDB requires this whenever provider data is
-    /// surfaced; when a JustWatch deeplink is available the line doubles
-    /// as the "take me to where I can watch" action (replacing the old
-    /// sticky bottom CTA). When no URL is available it degrades to a
-    /// plain, non-tappable caption — so the credit is still visible but
-    /// not misleading as a tap target.
+    /// Credit line for the data sources. TMDB's terms of use require an
+    /// in-app attribution ("This product uses the TMDB API but is not
+    /// endorsed or certified by TMDB"), and TMDB's licensing of the
+    /// streaming-availability data requires a JustWatch credit alongside.
+    /// Both are surfaced here in a compact two-line stack. When a
+    /// JustWatch deeplink is available the JustWatch line doubles as a
+    /// "take me to where I can watch" action.
     @ViewBuilder
     private var attribution: some View {
-        if justWatchURL != nil {
-            Button {
-                isJustWatchPresented = true
-            } label: {
-                attributionContent(chevron: true)
+        VStack(alignment: .leading, spacing: 4) {
+            // JustWatch (interactive when a deeplink exists)
+            if justWatchURL != nil {
+                Button {
+                    isJustWatchPresented = true
+                } label: {
+                    attributionContent(chevron: true)
+                }
+                .buttonStyle(.plain)
+            } else {
+                attributionContent(chevron: false)
             }
-            .buttonStyle(.plain)
-        } else {
-            attributionContent(chevron: false)
+
+            // TMDB credit. Plain caption — TMDB's terms require the line
+            // be visible but don't ask for it to be interactive.
+            Text("Data provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.")
+                .font(.system(size: 10, weight: .regular))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

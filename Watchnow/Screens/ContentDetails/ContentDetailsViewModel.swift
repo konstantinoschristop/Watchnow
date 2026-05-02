@@ -209,8 +209,7 @@ extension ContentDetailsViewModel {
     }
 
     var hasWatchProviders: Bool {
-        if let results = watchProviders?.results,
-           let provider = results[Locale.current.language.region?.identifier ?? "US"] {
+        if let provider = watchProviderSafe {
             return !(provider.flatrate?.isEmpty ?? true)
                 || !(provider.rent?.isEmpty ?? true)
                 || !(provider.buy?.isEmpty ?? true)
@@ -219,11 +218,32 @@ extension ContentDetailsViewModel {
     }
 
     var watchProviderSafe: ProviderResults? {
-        watchProviders?.results?[Locale.current.language.region?.identifier ?? "US"]
+        watchProviders?.results?[Self.currentRegionCode]
     }
 
-    /// JustWatch deeplink for the current region, when available. Powers the
-    /// sticky "Watch Now" CTA on the details screen.
+    /// User's actual region (e.g. "GR", "DE", "US") — taken from
+    /// Settings → General → Language & Region → Region.
+    ///
+    /// Previously this lookup used `Locale.current.language.region`, which
+    /// returns the region tag of the *language* (English-US → "US"), not
+    /// the user's actual location. A user in Greece running their phone
+    /// in English would consequently see US streaming providers. Reading
+    /// `Locale.current.region` instead returns the region the user
+    /// explicitly chose in Settings, decoupled from their language.
+    /// Falls back to "US" if the device for some reason has no region
+    /// set, since TMDB always has US data and an empty providers card
+    /// is worse than the wrong country's card.
+    private static var currentRegionCode: String {
+        Locale.current.region?.identifier ?? "US"
+    }
+
+    /// TMDB-hosted "where to watch" URL for the current region, when
+    /// available. This is the URL TMDB returns in the `link` field of
+    /// the /watch/providers response — it points to a themoviedb.org
+    /// page (e.g. themoviedb.org/movie/123/watch?locale=US) which then
+    /// mediates to JustWatch and the actual provider deeplinks.
+    /// TMDB's API docs explicitly recommend linking to this URL rather
+    /// than bypassing to JustWatch directly.
     var watchNowURL: URL? {
         guard let link = watchProviderSafe?.link, !link.isEmpty else { return nil }
         return URL(string: link)
