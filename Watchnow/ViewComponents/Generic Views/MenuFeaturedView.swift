@@ -324,7 +324,7 @@ struct MenuFeaturedView<Content: View>: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(.ultraThinMaterial, in: Capsule())
+        .modifier(PageIndicatorBackground())
         .padding(.bottom, 18)
     }
 
@@ -432,6 +432,23 @@ struct MenuFeaturedView<Content: View>: View {
             .tag(index)
     }
 
+}
+
+// MARK: - PageIndicatorBackground
+
+/// Capsule surface behind the hero page-indicator dots. On iOS 26 uses
+/// the system liquid-glass material; pre-iOS 26 falls back to
+/// `.ultraThinMaterial` — the same surface it always had.
+private struct PageIndicatorBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(.regular, in: Capsule())
+        } else {
+            content
+                .background(.ultraThinMaterial, in: Capsule())
+        }
+    }
 }
 
 /// Attaches a tap gesture only when enabled. Avoids installing an idle gesture

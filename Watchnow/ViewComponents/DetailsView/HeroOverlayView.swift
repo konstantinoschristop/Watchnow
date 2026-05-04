@@ -155,15 +155,38 @@ struct HeroOverlayView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(genres, id: \.self) { genre in
-                    Text(genre.name ?? "- -")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(.ultraThinMaterial.opacity(0.9), in: Capsule())
-                        .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 0.5))
+                    GenrePill(name: genre.name ?? "- -")
                 }
             }
+        }
+    }
+}
+
+/// Display-only genre tag rendered on the hero image. Sits over the
+/// bottom scrim, so the surface must stay readable against any poster
+/// colour. On iOS 26 it uses the system liquid-glass material which is
+/// depth-aware and auto-adapts to the image underneath. Pre-iOS 26 it
+/// falls back to `.ultraThinMaterial` — still translucent, just not
+/// physically simulated.
+private struct GenrePill: View {
+    let name: String
+
+    var body: some View {
+        if #available(iOS 26.0, *) {
+            Text(name)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .glassEffect(.regular, in: Capsule())
+        } else {
+            Text(name)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(.ultraThinMaterial.opacity(0.9), in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 0.5))
         }
     }
 }

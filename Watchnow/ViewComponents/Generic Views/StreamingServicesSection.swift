@@ -37,6 +37,11 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     @State private var thresholdReached: Bool = false
     @State private var performFeedback: Bool = false
 
+    // Incremented every time the active provider changes. Used as the
+    // `.id()` on `populatedRow` so SwiftUI treats each provider's scroll
+    // view as a distinct identity and plays its `.transition` on swap.
+    @State private var cardAnimationToken: Int = 0
+
     // Fixed dimensions matching the BottomView carousel grammar so the
     // streaming-services row sits in the page at the same scale and
     // rhythm as the other card carousels. Slot is the GeometryReader's
@@ -101,6 +106,11 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
             .padding(.horizontal, 16)
         }
         .sensoryFeedback(.selection, trigger: viewModel.selectedProvider?.id)
+        .onChange(of: viewModel.selectedProvider?.id) { _, _ in
+            withAnimation(.easeInOut(duration: 0.25)) {
+                cardAnimationToken += 1
+            }
+        }
     }
 
     // MARK: - Results row
@@ -122,6 +132,12 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     /// 1.0× at the edges. Wrapped in `StretchingActionScrollView` so
     /// pulling past the trailing edge triggers `loadMoreProviderResults`
     /// — the same overscroll-to-paginate gesture every other carousel uses.
+    /// The scroll view is given a stable `.id(cardAnimationToken)` so
+    /// SwiftUI treats each provider's row as a distinct view identity.
+    /// When the token bumps (inside `withAnimation`) the old row plays
+    /// its `.transition` remove and the new row plays its insert — a
+    /// single cheap crossfade for the whole surface, with no per-card
+    /// state that could re-trigger on scroll.
     private var populatedRow: some View {
         StretchingActionScrollView(
             onTriggered: {
@@ -135,7 +151,8 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
             content: { populatedRowContent }
         )
         .sensoryFeedback(.success, trigger: performFeedback)
-        .animation(.easeInOut(duration: 0.2), value: viewModel.selectedProvider?.id)
+        .id(cardAnimationToken)
+        .transition(.opacity)
     }
 
     private var populatedRowContent: some View {
@@ -160,10 +177,6 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
                 }
                 .frame(width: slotWidth, height: slotHeight)
 
-                // The trailing button only renders on the last cell so
-                // the overscroll affordance lands at the very end of the
-                // row — pulling past it is the natural "give me more"
-                // gesture, identical to BottomView / TopView.
                 if result == viewModel.providerResults.last,
                    viewModel.canLoadMoreProviderResults {
                     LoadMoreButtonView(tracker: loadMoreProgress)
@@ -220,6 +233,11 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
 /// single horizontal line. Selection state flips to a tinted accent fill
 /// with white text — same grammar as the genre filter chips on the same
 /// screen, so the chip-as-filter language stays consistent.
+///
+/// On iOS 26+ both states use the system liquid-glass material:
+/// `.regular` (frosted) when idle, `.regular.tinted()` (accent-washed
+/// glass) when selected. The logo retains its own rounded white square
+/// background so it reads clearly against any content behind the glass.
 private struct ProviderChip: View {
 
     let provider: WatchProvider
@@ -229,30 +247,50 @@ private struct ProviderChip: View {
     private let logoPadCorner: CGFloat = 5
 
     var body: some View {
-        HStack(spacing: 8) {
-            logo
-            Text(provider.provider_name)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(isSelected ? .white : .primary)
-                .lineLimit(1)
-                .truncationMode(.tail)
+        chipContent
+            .scaleEffect(isSelected ? 1.03 : 1.0)
+            .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
+    }
+
+    @ViewBuilder
+    private var chipContent: some View {
+        if #available(iOS 26.0, *) {
+            HStack(spacing: 8) {
+                logo
+                Text(provider.provider_name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isSelected ? .white : .primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+            .padding(.leading, 6)
+            .padding(.trailing, 14)
+            .padding(.vertical, 6)
+            .glassEffect(isSelected ? .regular.tint(Color.accentColor) : .regular, in: Capsule(style: .continuous))
+        } else {
+            HStack(spacing: 8) {
+                logo
+                Text(provider.provider_name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isSelected ? .white : .primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+            .padding(.leading, 6)
+            .padding(.trailing, 14)
+            .padding(.vertical, 6)
+            .background {
+                Capsule(style: .continuous)
+                    .fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+            }
+            .overlay {
+                Capsule(style: .continuous)
+                    .strokeBorder(isSelected
+                                  ? Color.accentColor.opacity(0.45)
+                                  : Color.primary.opacity(0.08),
+                                  lineWidth: 0.5)
+            }
         }
-        .padding(.leading, 6)
-        .padding(.trailing, 14)
-        .padding(.vertical, 6)
-        .background {
-            Capsule(style: .continuous)
-                .fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
-        }
-        .overlay {
-            Capsule(style: .continuous)
-                .strokeBorder(isSelected
-                              ? Color.accentColor.opacity(0.45)
-                              : Color.primary.opacity(0.08),
-                              lineWidth: 0.5)
-        }
-        .scaleEffect(isSelected ? 1.03 : 1.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 
     @ViewBuilder

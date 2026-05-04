@@ -190,6 +190,12 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
 /// parameter is kept for source-compatibility with callers but ignored —
 /// the chip palette is global so the screen reads as one design system,
 /// not a per-tab one.
+///
+/// On iOS 26+ the capsule is rendered with the system liquid-glass
+/// material: `.regular` (frosted) when idle, `.regular.tinted()` (accent-
+/// washed glass) when selected. This replaces the opaque fill + stroke
+/// with a translucent, depth-aware surface that reacts to the content
+/// behind it. Pre-iOS 26 devices keep the existing solid-fill style.
 private struct GenreChip: View {
     let name: String
     let isSelected: Bool
@@ -198,6 +204,23 @@ private struct GenreChip: View {
 
     var body: some View {
         Button(action: action) {
+            chipLabel
+        }
+        .buttonStyle(.plain)
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
+    }
+
+    @ViewBuilder
+    private var chipLabel: some View {
+        if #available(iOS 26.0, *) {
+            Text(name)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .glassEffect(isSelected ? .regular.tint(Color.accentColor) : .regular, in: Capsule())
+        } else {
             Text(name)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(isSelected ? .white : .secondary)
@@ -214,9 +237,6 @@ private struct GenreChip: View {
                     }
                 }
         }
-        .buttonStyle(.plain)
-        .scaleEffect(isSelected ? 1.03 : 1.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 }
 
@@ -299,12 +319,7 @@ extension ContentMainView {
                 if !genres.isEmpty {
                     HStack(spacing: 6) {
                         ForEach(genres, id: \.self) { name in
-                            Text(name)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial, in: Capsule())
+                            heroPill(name: name)
                         }
                     }
                 }
@@ -319,5 +334,26 @@ extension ContentMainView {
     private func resolvedGenres(for content: Result) -> [String] {
         guard let ids = content.genre_ids else { return [] }
         return ids.prefix(2).compactMap { tmdbGenreNames[$0] }
+    }
+
+    /// Display-only genre tag on the home-feed hero image. On iOS 26
+    /// uses liquid glass; pre-iOS 26 uses `.ultraThinMaterial`.
+    @ViewBuilder
+    private func heroPill(name: String) -> some View {
+        if #available(iOS 26.0, *) {
+            Text(name)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .glassEffect(.regular, in: Capsule())
+        } else {
+            Text(name)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(.ultraThinMaterial, in: Capsule())
+        }
     }
 }

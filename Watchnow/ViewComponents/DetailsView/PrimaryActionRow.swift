@@ -88,24 +88,7 @@ private struct ActionPill: View {
             .foregroundStyle(foreground)
             .frame(maxWidth: .infinity)
             .frame(height: height)
-            .background {
-                ZStack {
-                    // Material base — readable over any poster colour.
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(.ultraThinMaterial)
-
-                    // Coloured fill, only painted when the pill is active.
-                    if let fill {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .fill(fill)
-                    }
-                }
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(borderColor, lineWidth: 1)
-            }
-            .shadow(color: .black.opacity(0.10), radius: 3, y: 2)
+            .modifier(ActionPillBackground(style: style, radius: radius))
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.impact(flexibility: .soft), trigger: style != .neutral)
@@ -116,6 +99,60 @@ private struct ActionPill: View {
         case .neutral:       return .primary
         case .activeAccent,
              .activeGreen:   return .white
+        }
+    }
+}
+
+// MARK: - ActionPillBackground
+
+/// Applies the pill surface on iOS 26+ with liquid-glass and on earlier
+/// OS with the classic material + coloured fill combo.
+///
+/// iOS 26 strategy:
+///  • Neutral  → plain glass (`GlassEffect.regular`) — frosted, no tint.
+///  • Active   → tinted glass (`GlassEffect.regular.tinted()`) — the tint
+///    colour is driven by `.tint()` on the modifier output, so the accent
+///    pill gets accent glass and the green "Watched" pill gets green glass
+///    without any extra wiring.
+///
+/// Pre-iOS 26 strategy (unchanged):
+///  • `.ultraThinMaterial` base + optional solid colour overlay + stroke.
+private struct ActionPillBackground: ViewModifier {
+
+    let style: ActionPill.Style
+    let radius: CGFloat
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(style == .neutral ? .regular : .regular.tint(glassTint),
+                             in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+                .tint(glassTint)
+        } else {
+            content
+                .background {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: radius, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                        if let fill {
+                            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                                .fill(fill)
+                        }
+                    }
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(borderColor, lineWidth: 1)
+                }
+                .shadow(color: .black.opacity(0.10), radius: 3, y: 2)
+        }
+    }
+
+    private var glassTint: Color {
+        switch style {
+        case .neutral:       return .accentColor   // irrelevant — .regular has no tint
+        case .activeAccent:  return .accentColor
+        case .activeGreen:   return .green
         }
     }
 
