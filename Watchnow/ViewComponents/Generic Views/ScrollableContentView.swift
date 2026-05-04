@@ -55,39 +55,66 @@ struct ScrollableContentView: View {
     }
 
     func getContent() -> some View {
-        HStack(alignment: .top,
+        // Captured once in the SwiftUI body (main-actor context) so the
+        // visualEffect closure can reference it without a main-actor call.
+        let screenHalfWidth = UIScreen.main.bounds.width / 2
+        let scaleType: Scale.ScaleTypes = cardType == .bottom ? .vertical : .horizontal
+
+        return HStack(alignment: .top,
                spacing: cardType == .bottom ? 5 : 0) {
 
             Spacer().frame(width: cardType == .bottom ? 10 : 20)
 
-            // `enumerated()` gives us the 1-based rank to pass into TopCard.
-            // `id: \.element` keeps the identity stable across paginated
-            // reloads (Result is Hashable) instead of tying it to the list
-            // position.
             ForEach(Array(results.enumerated()), id: \.element) { index, movie in
-                GeometryReader { proxy in
-                    let scale = Scale.getScale(
-                        proxy: proxy,
-                        scaleType: cardType == .bottom ? .vertical : .horizontal
-                    )
-                    Group {
-                        if cardType == .bottom {
-                            BottomCard(content: movie, screenType: screenType)
-                        } else {
-                            TopCard(content: movie, screenType: screenType, rank: index + 1)
-                        }
-                    }
-                    .frame(width: cardWidth, height: cardHeight)
-                    .scaleEffect(.init(width: scale, height: scale))
-                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                }
-                .frame(width: slotWidth, height: slotHeight)
+                cardSlot(for: movie, index: index,
+                         screenHalfWidth: screenHalfWidth,
+                         scaleType: scaleType)
 
                 if results.last == movie,
                    viewModel.canLoadMoreContent(section: viewSection) {
                     LoadMoreButtonView(tracker: loadMoreProgress)
                 }
             }
+        }
+    }
+
+    /// Card slot with a scale effect that magnifies the card nearest the
+    /// screen centre. On iOS 17+ this runs via `visualEffect` — a
+    /// display-layer pass that never triggers SwiftUI layout, so scrolling
+    /// stays smooth regardless of how many cards are in the row. Pre-iOS 17
+    /// falls back to GeometryReader (the original approach).
+    @ViewBuilder
+    private func cardSlot(for movie: Result,
+                          index: Int,
+                          screenHalfWidth: CGFloat,
+                          scaleType: Scale.ScaleTypes) -> some View {
+        if #available(iOS 17, *) {
+            cardContent(for: movie, index: index)
+                .frame(width: cardWidth, height: cardHeight)
+                .visualEffect { content, geometry in
+                    let diff = abs(screenHalfWidth - geometry.frame(in: .global).midX)
+                    let threshold: CGFloat = scaleType == .vertical ? 150 : 160
+                    let scale = diff < threshold ? 1.0 + (threshold - diff) / 600.0 : 1.0
+                    return content.scaleEffect(scale)
+                }
+                .frame(width: slotWidth, height: slotHeight)
+        } else {
+            GeometryReader { proxy in
+                cardContent(for: movie, index: index)
+                    .frame(width: cardWidth, height: cardHeight)
+                    .scaleEffect(Scale.getScale(proxy: proxy, scaleType: scaleType))
+                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+            }
+            .frame(width: slotWidth, height: slotHeight)
+        }
+    }
+
+    @ViewBuilder
+    private func cardContent(for movie: Result, index: Int) -> some View {
+        if cardType == .bottom {
+            BottomCard(content: movie, screenType: screenType)
+        } else {
+            TopCard(content: movie, screenType: screenType, rank: index + 1)
         }
     }
 }

@@ -211,32 +211,27 @@ private struct GenreChip: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 
-    @ViewBuilder
+    // Glass is intentionally omitted here — genre chips sit inside the
+    // main vertical scroll view and re-compositing glass on every scroll
+    // frame causes measurable lag. Static glass surfaces (hero pills,
+    // page indicator, action buttons) are fine; interactive chips in a
+    // scrolling container are not.
     private var chipLabel: some View {
-        if #available(iOS 26.0, *) {
-            Text(name)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(isSelected ? .white : .primary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 7)
-                .glassEffect(isSelected ? .regular.tint(Color.accentColor) : .regular, in: Capsule())
-        } else {
-            Text(name)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(isSelected ? .white : .secondary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 7)
-                .background {
+        Text(name)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(isSelected ? .white : .secondary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background {
+                Capsule()
+                    .fill(isSelected ? Color.accentColor : Color(.tertiarySystemFill))
+            }
+            .overlay {
+                if !isSelected {
                     Capsule()
-                        .fill(isSelected ? Color.accentColor : Color(.tertiarySystemFill))
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                 }
-                .overlay {
-                    if !isSelected {
-                        Capsule()
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    }
-                }
-        }
+            }
     }
 }
 

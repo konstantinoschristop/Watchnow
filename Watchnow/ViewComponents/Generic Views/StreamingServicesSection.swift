@@ -156,32 +156,52 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     }
 
     private var populatedRowContent: some View {
-        HStack(alignment: .top, spacing: 0) {
+        let screenHalfWidth = UIScreen.main.bounds.width / 2
+
+        return HStack(alignment: .top, spacing: 0) {
             Spacer().frame(width: 10)
             ForEach(viewModel.providerResults, id: \.self) { result in
-                GeometryReader { proxy in
-                    let scale = Scale.getScale(proxy: proxy, scaleType: .vertical)
-                    NavigationLink {
-                        let model = ContentDetailsModel(screenType: viewModel.screenType, result: result)
-                        let detailVM = ContentDetailsViewModel(model: model)
-                        ContentDetailsView(detailsViewModel: detailVM)
-                            .navigationTransition(.zoom(sourceID: result.id, in: namespace))
-                    } label: {
-                        ProviderResultThumb(result: result)
-                    }
-                    .matchedTransitionSource(id: result.id, in: namespace)
-                    .buttonStyle(.plain)
-                    .frame(width: cardWidth, height: cardHeight)
-                    .scaleEffect(.init(width: scale, height: scale))
-                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                }
-                .frame(width: slotWidth, height: slotHeight)
+                providerCard(for: result, screenHalfWidth: screenHalfWidth)
 
                 if result == viewModel.providerResults.last,
                    viewModel.canLoadMoreProviderResults {
                     LoadMoreButtonView(tracker: loadMoreProgress)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func providerCard(for result: Result, screenHalfWidth: CGFloat) -> some View {
+        let link = NavigationLink {
+            let model = ContentDetailsModel(screenType: viewModel.screenType, result: result)
+            let detailVM = ContentDetailsViewModel(model: model)
+            ContentDetailsView(detailsViewModel: detailVM)
+                .navigationTransition(.zoom(sourceID: result.id, in: namespace))
+        } label: {
+            ProviderResultThumb(result: result)
+        }
+        .matchedTransitionSource(id: result.id, in: namespace)
+        .buttonStyle(.plain)
+
+        if #available(iOS 17, *) {
+            link
+                .frame(width: cardWidth, height: cardHeight)
+                .visualEffect { content, geometry in
+                    let diff = abs(screenHalfWidth - geometry.frame(in: .global).midX)
+                    let threshold: CGFloat = 150
+                    let scale = diff < threshold ? 1.0 + (threshold - diff) / 600.0 : 1.0
+                    return content.scaleEffect(scale)
+                }
+                .frame(width: slotWidth, height: slotHeight)
+        } else {
+            GeometryReader { proxy in
+                link
+                    .frame(width: cardWidth, height: cardHeight)
+                    .scaleEffect(Scale.getScale(proxy: proxy, scaleType: .vertical))
+                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+            }
+            .frame(width: slotWidth, height: slotHeight)
         }
     }
 
@@ -252,44 +272,30 @@ private struct ProviderChip: View {
             .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 
-    @ViewBuilder
+    // Same reasoning as GenreChip — glass inside a scroll view re-composites
+    // every frame and hurts scroll performance. Solid fill retained.
     private var chipContent: some View {
-        if #available(iOS 26.0, *) {
-            HStack(spacing: 8) {
-                logo
-                Text(provider.provider_name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(isSelected ? .white : .primary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-            .padding(.leading, 6)
-            .padding(.trailing, 14)
-            .padding(.vertical, 6)
-            .glassEffect(isSelected ? .regular.tint(Color.accentColor) : .regular, in: Capsule(style: .continuous))
-        } else {
-            HStack(spacing: 8) {
-                logo
-                Text(provider.provider_name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(isSelected ? .white : .primary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-            .padding(.leading, 6)
-            .padding(.trailing, 14)
-            .padding(.vertical, 6)
-            .background {
-                Capsule(style: .continuous)
-                    .fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
-            }
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(isSelected
-                                  ? Color.accentColor.opacity(0.45)
-                                  : Color.primary.opacity(0.08),
-                                  lineWidth: 0.5)
-            }
+        HStack(spacing: 8) {
+            logo
+            Text(provider.provider_name)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        }
+        .padding(.leading, 6)
+        .padding(.trailing, 14)
+        .padding(.vertical, 6)
+        .background {
+            Capsule(style: .continuous)
+                .fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+        }
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(isSelected
+                              ? Color.accentColor.opacity(0.45)
+                              : Color.primary.opacity(0.08),
+                              lineWidth: 0.5)
         }
     }
 

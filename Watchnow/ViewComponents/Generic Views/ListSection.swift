@@ -98,7 +98,6 @@ private struct ListSectionRow: View {
         KFImage.url(result.getResultPosterURL())
             .downsampling(size: CGSize(width: 256, height: 384))
             .loadImmediately()
-            .loadDiskFileSynchronously()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
             .fade(duration: 0.2)

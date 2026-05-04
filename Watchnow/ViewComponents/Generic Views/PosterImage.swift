@@ -19,7 +19,6 @@ struct PosterImage: View {
         KFImage.url(url)
             .downsampling(size: CGSize(width: width, height: height))
             .loadImmediately()
-            .loadDiskFileSynchronously()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
             .fade(duration: 0.25)

@@ -61,7 +61,6 @@ struct TopCard: View {
         KFImage.url(content.getBackdropURL())
             .downsampling(size: CGSize(width: 500, height: 282))
             .loadImmediately()
-            .loadDiskFileSynchronously()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
             .fade(duration: 0.25)
@@ -190,19 +189,24 @@ struct TopCard: View {
     /// `NEW` for titles released in the last 14 days, `SOON` for future
     /// release dates, `nil` otherwise. Parsed inline so we don't need to
     /// thread a `Date` through the model layer just for a pill.
+    /// Shared formatter — `DateFormatter` init is expensive; allocating one
+    /// per render during scroll causes measurable main-thread cost.
+    private static let releaseDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.calendar  = Calendar(identifier: .iso8601)
+        f.locale    = Locale(identifier: "en_US_POSIX")
+        f.timeZone  = TimeZone(secondsFromGMT: 0)
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
+
     private var statusBadge: StatusPill.Status? {
         let raw = (content.release_date?.isEmpty == false
                    ? content.release_date
                    : content.first_air_date) ?? ""
         guard !raw.isEmpty else { return nil }
 
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .iso8601)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        guard let date = formatter.date(from: raw) else { return nil }
+        guard let date = Self.releaseDateFormatter.date(from: raw) else { return nil }
         let now = Date()
 
         if date > now { return .soon }

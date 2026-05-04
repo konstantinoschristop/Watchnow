@@ -79,8 +79,14 @@ enum API {
         static func nowPlaying(page: Int) -> String {
             return "\(API.baseURL)/movie/now_playing?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }
+        /// `/discover/movie` sorted by weighted average with a 5 000-vote
+        /// floor. TMDB's `/movie/top_rated` endpoint applies its own
+        /// Bayesian filter but uses ~300 votes as the minimum, which lets
+        /// niche titles with a handful of perfect ratings outrank genuine
+        /// classics. Requiring 5 000 votes ensures only widely-seen,
+        /// widely-rated films appear — Shawshank, The Godfather, etc.
         static func topRated(page: Int) -> String {
-            return "\(API.baseURL)/movie/top_rated?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+            return "\(API.baseURL)/discover/movie?api_key=\(API.key)&language=\(API.language)&sort_by=vote_average.desc&vote_count.gte=30000&page=\(page)"
         }
     }
 
@@ -94,8 +100,12 @@ enum API {
         static func trending(page: Int) -> String {
             return "\(API.baseURL)/trending/tv/day?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }
+        /// `/discover/tv` sorted by weighted average with a 1 000-vote
+        /// floor. TV shows accumulate fewer votes than movies on TMDB, so
+        /// 1 000 is the right threshold to filter out niche high-rated
+        /// content while still surfacing Breaking Bad, Band of Brothers, etc.
         static func topRated(page: Int) -> String {
-            return "\(API.baseURL)/tv/top_rated?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+            return "\(API.baseURL)/discover/tv?api_key=\(API.key)&language=\(API.language)&sort_by=vote_average.desc&vote_count.gte=12000&page=\(page)"
         }
     }
 
