@@ -109,6 +109,11 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                                 }
                             }
                         }
+
+                        // Subtle inline banner — sits below all content sections,
+                        // takes up no space until a creative loads.
+                        InlineBannerSection()
+                            .padding(.top, 4)
                     }
                     .animation(.easeInOut(duration: 0.25), value: selectedGenreID)
                 }
