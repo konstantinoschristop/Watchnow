@@ -98,10 +98,8 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                                                 viewSection: section,
                                                 viewModel: viewModel)
                                 } else if section.isTopTenSection {
-                                    TopTenSection(results: results,
-                                                  screenType: section.screenType,
-                                                  viewSection: section,
-                                                  viewModel: viewModel)
+                                    // Hidden — results need review before re-enabling.
+                                    EmptyView()
                                 } else {
                                     BottomView(results: results,
                                                viewTitle: section.title,
