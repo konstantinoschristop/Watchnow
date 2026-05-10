@@ -29,6 +29,10 @@ struct ContentDetailsView: View {
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
                     self.constructContent()
+                    // Subtle inline banner — sits below all content sections,
+                    // takes up no space until a creative loads.
+                    InlineBannerSection()
+                        .padding(.top, 4)
                 }
                 .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
             }
