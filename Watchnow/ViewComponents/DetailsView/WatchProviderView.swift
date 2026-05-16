@@ -180,13 +180,6 @@ struct WatchProviderView: View {
             } else {
                 attributionContent(chevron: false)
             }
-
-            // TMDB credit. Plain caption — TMDB's terms require the line
-            // be visible but don't ask for it to be interactive.
-            Text("Data provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.")
-                .font(.system(size: 10, weight: .regular))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
