@@ -39,8 +39,7 @@ struct AdditionalInfoView: View {
         }
         .padding(.horizontal, 16)
         .sheet(isPresented: $isHomepagePresented) {
-            WebView(videoURL: URL(string: details.homepage ?? ""))
-                .ignoresSafeArea()
+            WebViewSheet(url: URL(string: details.homepage ?? ""))
         }
     }
 

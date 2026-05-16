@@ -86,8 +86,7 @@ struct WatchProviderView: View {
         }
         .padding(.horizontal)
         .sheet(isPresented: $isJustWatchPresented) {
-            WebView(videoURL: justWatchURL)
-                .ignoresSafeArea()
+            WebViewSheet(url: justWatchURL)
         }
     }
 

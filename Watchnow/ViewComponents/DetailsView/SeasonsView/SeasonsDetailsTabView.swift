@@ -15,19 +15,27 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct SeasonsDetailsTabView: View {
 
     @StateObject private var episodesViewModel: EpisodesViewModel
     let seasons: [Season]
+    let seriesID: Int
+    let seriesName: String
     @Binding var selectedSeason: Season
     @Namespace private var pillNamespace
+    @State private var seasonReminderOn = false
+    @State private var showReminderToast = false
 
     init(seasons: [Season],
          selectedSeason: Binding<Season>,
-         seriesID: Int) {
+         seriesID: Int,
+         seriesName: String) {
 
         self.seasons = seasons
+        self.seriesID = seriesID
+        self.seriesName = seriesName
         _selectedSeason = selectedSeason
         _episodesViewModel = StateObject(wrappedValue: EpisodesViewModel(service: ServiceInvocation(),
                                                                          seriesID: seriesID))
@@ -43,7 +51,16 @@ struct SeasonsDetailsTabView: View {
         .background(Color(.background))
         .task(id: selectedSeason) {
             await episodesViewModel.getEpisodes(seasonNumber: selectedSeason.season_number ?? 0)
+            syncReminderState()
         }
+        .onChange(of: selectedSeason) { _, _ in
+            syncReminderState()
+        }
+        .toast(isPresenting: $showReminderToast, alert: {
+            seasonReminderOn ?
+            AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
+            AlertToast(displayMode: .alert, type: .error(.red), title: "Reminder Removed")
+        })
     }
 
     // MARK: - Sheet Header
@@ -150,7 +167,9 @@ struct SeasonsDetailsTabView: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(episodes, id: \.self) { episode in
-                        EpisodeView(episode: episode)
+                        EpisodeView(episode: episode,
+                                    seriesName: seriesName,
+                                    seriesID: seriesID)
                     }
                 }
             }
@@ -161,9 +180,76 @@ struct SeasonsDetailsTabView: View {
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(Color.accentColor)
             } description: {
-                Text("This season hasn't started yet.")
+                if let airDate = selectedSeason.airDateValue() {
+                    Text("Premieres \(airDate.formatted(date: .abbreviated, time: .omitted)).")
+                } else {
+                    Text("This season hasn't started yet.")
+                }
+            } actions: {
+                if canScheduleReminder {
+                    Button(action: toggleSeasonReminder) {
+                        Label(seasonReminderOn ? "Reminding" : "Remind Me",
+                              systemImage: seasonReminderOn ? "bell.fill" : "bell")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(seasonReminderOn ? .accentColor : .accentColor.opacity(0.9))
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    // MARK: - Season reminder
+
+    private var canScheduleReminder: Bool {
+        guard let airDate = selectedSeason.airDateValue() else { return false }
+        return airDate > Date()
+    }
+
+    private var seasonReminderIdentifier: String? {
+        guard let number = selectedSeason.season_number else { return nil }
+        return ReminderManager.seasonIdentifier(seriesID: seriesID, seasonNumber: number)
+    }
+
+    private func syncReminderState() {
+        guard let identifier = seasonReminderIdentifier else {
+            seasonReminderOn = false
+            return
+        }
+        seasonReminderOn = ReminderManager.isScheduled(identifier: identifier)
+    }
+
+    private func toggleSeasonReminder() {
+        guard let identifier = seasonReminderIdentifier,
+              let airDate = selectedSeason.airDateValue() else {
+            return
+        }
+
+        if seasonReminderOn {
+            ReminderManager.cancel(identifier: identifier)
+            seasonReminderOn = false
+            showReminderToast = true
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            return
+        }
+
+        let seasonLabel = selectedSeason.name ?? "New season"
+        let deepLink = DeepLink(id: seriesID, mediaType: .tv)
+        Task {
+            let scheduled = await ReminderManager.schedule(
+                identifier: identifier,
+                title: "Premiering today",
+                body: "\(seasonLabel) of \(seriesName) starts today.",
+                on: airDate,
+                deepLink: deepLink
+            )
+            seasonReminderOn = scheduled
+            showReminderToast = scheduled
+            if scheduled {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            } else {
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            }
         }
     }
 }

@@ -228,6 +228,37 @@ struct Result: Codable, Hashable, Equatable {
         }
     }
 
+    /// Stub initialiser for deeplink targets — TMDB id + media_type are
+    /// all we have from a notification's userInfo. All other fields are
+    /// nil, which is fine because `ContentDetailsView` re-fetches every
+    /// field from the API on appear.
+    static func stub(id: Int, mediaType: String) -> Result {
+        Result(
+            backdrop_path: nil,
+            first_air_date: nil,
+            genre_ids: nil,
+            id: id,
+            original_title: nil,
+            name: nil,
+            origin_country: nil,
+            original_language: nil,
+            original_name: nil,
+            overview: nil,
+            popularity: nil,
+            poster_path: nil,
+            release_date: nil,
+            title: nil,
+            video: nil,
+            vote_average: nil,
+            vote_count: nil,
+            media_type: mediaType,
+            profile_path: nil,
+            castID: nil,
+            runtime: nil,
+            known_for: nil
+        )
+    }
+
     /// Parses `release_date` (movies) or `first_air_date` (TV) into a `Date`.
     /// Returns nil when neither field is present or fails to parse.
     func releaseDate() -> Date? {

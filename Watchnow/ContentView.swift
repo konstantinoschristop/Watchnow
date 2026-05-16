@@ -13,22 +13,51 @@ struct ContentView: View {
     @StateObject private var seriesViewModel = SeriesViewModel(model: SeriesModel())
     @StateObject private var searchViewModel = SearchViewModel(model: SearchModel())
     @StateObject private var watchlistViewModel = WatchlistViewModel(model: WatchlistModel())
+    @StateObject private var router = DeepLinkRouter.shared
+
+    @State private var selectedTab: AppTab = .movies
+    @State private var moviesDeepLinkResult: Result?
+    @State private var seriesDeepLinkResult: Result?
+
+    enum AppTab: Hashable {
+        case movies, series, search, watchlist
+    }
 
     var body: some View {
-        TabView {
-            Tab("Movies", systemImage: "film") {
+        TabView(selection: $selectedTab) {
+            Tab("Movies", systemImage: "film", value: AppTab.movies) {
                 moviesTabContent
             }
-            Tab("Series", systemImage: "tv.inset.filled") {
+            Tab("Series", systemImage: "tv.inset.filled", value: AppTab.series) {
                 seriesTabContent
             }
-            Tab("Search", systemImage: "magnifyingglass.circle", role: .search) {
+            Tab("Search", systemImage: "magnifyingglass.circle", value: AppTab.search, role: .search) {
                 searchTabContent
             }
-            Tab("Watchlist", systemImage: "list.bullet.circle.fill") {
+            Tab("Watchlist", systemImage: "list.bullet.circle.fill", value: AppTab.watchlist) {
                 watchlistTabContent
             }
         }
+        .onChange(of: router.pending) { _, pending in
+            applyDeepLink(pending)
+        }
+    }
+
+    // MARK: - Deeplink handling
+
+    private func applyDeepLink(_ deeplink: DeepLink?) {
+        guard let deeplink else { return }
+        switch deeplink.mediaType {
+        case .movie:
+            selectedTab = .movies
+            moviesDeepLinkResult = Result.stub(id: deeplink.id, mediaType: "movie")
+        case .tv:
+            selectedTab = .series
+            seriesDeepLinkResult = Result.stub(id: deeplink.id, mediaType: "tv")
+        }
+        // Consume — clear the router so the same deeplink doesn't re-fire
+        // on a subsequent state change.
+        router.pending = nil
     }
 }
 
@@ -39,6 +68,19 @@ extension ContentView {
             MoviesView(moviesViewModel: moviesViewModel)
                 .background(Color(.background))
                 .navigationTitle("Movies")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            Task { await ReminderManager.scheduleDebugTest() }
+                        } label: {
+                            Image(systemName: "bell.badge")
+                        }
+                        .accessibilityLabel("Preview reminder notification")
+                    }
+                }
+                .navigationDestination(item: $moviesDeepLinkResult) { result in
+                    detailsDestination(for: result, screenType: .movie)
+                }
         }
     }
 
@@ -47,7 +89,17 @@ extension ContentView {
             SeriesView(seriesViewModel: seriesViewModel)
                 .background(Color(.background))
                 .navigationTitle("Series")
+                .navigationDestination(item: $seriesDeepLinkResult) { result in
+                    detailsDestination(for: result, screenType: .tv)
+                }
         }
+    }
+
+    @ViewBuilder
+    private func detailsDestination(for result: Result, screenType: ScreenTypes) -> some View {
+        let model = ContentDetailsModel(screenType: screenType, result: result)
+        let vm = ContentDetailsViewModel(model: model)
+        ContentDetailsView(detailsViewModel: vm)
     }
 
     private var searchTabContent: some View {

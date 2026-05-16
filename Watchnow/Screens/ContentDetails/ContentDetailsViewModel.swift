@@ -277,4 +277,33 @@ extension ContentDetailsViewModel {
     var collectionSafe: [Result] {
         collection?.parts ?? []
     }
+
+    // MARK: - Reminders
+
+    /// Parsed release / first-air date if the title is unreleased. Returns
+    /// nil for titles that already aired (no reminder needed) or for
+    /// person results / titles missing a date.
+    var futureReleaseDate: Date? {
+        guard screenType != .person else { return nil }
+        let raw = details?.release_date ?? details?.first_air_date ?? ""
+        guard !raw.isEmpty else { return nil }
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .iso8601)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.timeZone = TimeZone(secondsFromGMT: 0)
+        fmt.dateFormat = "yyyy-MM-dd"
+        guard let date = fmt.date(from: raw) else { return nil }
+        return date > Date() ? date : nil
+    }
+
+    var reminderIdentifier: String? {
+        guard let id = result.id else { return nil }
+        return ReminderManager.titleIdentifier(resultID: id)
+    }
+
+    var reminderDeepLink: DeepLink? {
+        guard let id = result.id else { return nil }
+        let mediaType: DeepLink.MediaType = (screenType == .movie) ? .movie : .tv
+        return DeepLink(id: id, mediaType: mediaType)
+    }
 }

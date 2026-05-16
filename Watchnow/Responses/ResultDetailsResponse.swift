@@ -173,7 +173,7 @@ struct ResultDetailsResponse: Codable {
 }
 
 struct Season: Codable, Hashable, Identifiable {
-    
+
     var air_date: String?
     var episode_count: Int?
     var id: Int?
@@ -181,14 +181,26 @@ struct Season: Codable, Hashable, Identifiable {
     var overview: String?
     var poster_path: String?
     var season_number: Int?
-    
+
     func getAirDate() -> String? {
-        
+
         if let date = air_date?.dropLast(6) {
             return "(\(date))"
         }
-        
+
         return nil
+    }
+
+    /// Parses `air_date` (yyyy-MM-dd) into a `Date`. Returns nil if the
+    /// field is missing or unparseable.
+    func airDateValue() -> Date? {
+        guard let raw = air_date, !raw.isEmpty else { return nil }
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .iso8601)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.timeZone = TimeZone(secondsFromGMT: 0)
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt.date(from: raw)
     }
 }
 

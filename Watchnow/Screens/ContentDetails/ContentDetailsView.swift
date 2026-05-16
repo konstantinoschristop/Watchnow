@@ -17,6 +17,8 @@ struct ContentDetailsView: View {
     @State private var showAlert = false
     @State private var showWatchedAlert = false
     @State var isSeasonsSheetPresented = false
+    @State private var isReminderOn = false
+    @State private var showReminderAlert = false
     @Namespace private var namespace
 
     var body: some View {
@@ -55,9 +57,13 @@ struct ContentDetailsView: View {
             AlertToast(displayMode: .alert, type: .complete(.green), title: "Marked as Watched") :
             AlertToast(displayMode: .alert, type: .error(.red), title: "Removed from Watched")
         })
+        .toast(isPresenting: $showReminderAlert, alert: {
+            isReminderOn ?
+            AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
+            AlertToast(displayMode: .alert, type: .error(.red), title: "Reminder Removed")
+        })
         .sheet(isPresented: $videoPresented) {
-            WebView(videoURL: detailsViewModel.videos?.getVideoURL())
-                .ignoresSafeArea()
+            WebViewSheet(url: detailsViewModel.videos?.getVideoURL())
         }
         .task {
             // getDetails must complete first — getCollection reads details?.belongs_to_collection
@@ -149,6 +155,52 @@ extension ContentDetailsView {
         )
     }
 
+    private func syncReminderState() {
+        guard let identifier = detailsViewModel.reminderIdentifier else {
+            isReminderOn = false
+            return
+        }
+        isReminderOn = ReminderManager.isScheduled(identifier: identifier)
+    }
+
+    private func toggleReminder() {
+        guard let identifier = detailsViewModel.reminderIdentifier,
+              let releaseDate = detailsViewModel.futureReleaseDate else {
+            return
+        }
+
+        if isReminderOn {
+            ReminderManager.cancel(identifier: identifier)
+            isReminderOn = false
+            showReminderAlert = true
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            return
+        }
+
+        let title = detailsViewModel.result.getResultTitle()
+        let body = detailsViewModel.screenType == .movie
+            ? "\(title) is out today — time to watch."
+            : "\(title) starts today — time to tune in."
+        let deepLink = detailsViewModel.reminderDeepLink
+
+        Task {
+            let scheduled = await ReminderManager.schedule(
+                identifier: identifier,
+                title: "Out now",
+                body: body,
+                on: releaseDate,
+                deepLink: deepLink
+            )
+            isReminderOn = scheduled
+            showReminderAlert = scheduled
+            if scheduled {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            } else {
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            }
+        }
+    }
+
     // MARK: - Shared actions
 
     private func toggleWatchlist() {
@@ -193,6 +245,14 @@ extension ContentDetailsView {
     var navBarTrailingView: some View {
 
         HStack(alignment: .center, spacing: 20) {
+            if detailsViewModel.futureReleaseDate != nil {
+                Button(action: toggleReminder) {
+                    getnavBarLabel(imageName: isReminderOn ? "bell.fill" : "bell")
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isReminderOn ? "Cancel reminder" : "Remind me on release")
+            }
+
             if let url = URL(string: detailsViewModel.createShareLink()) {
                 ShareLink(item: url) {
                     getnavBarLabel(imageName: "square.and.arrow.up")
@@ -201,6 +261,10 @@ extension ContentDetailsView {
             }
         }
         .padding(.horizontal, 5)
+        .onAppear { syncReminderState() }
+        .onChange(of: detailsViewModel.reminderIdentifier) { _, _ in
+            syncReminderState()
+        }
     }
 
     @ViewBuilder
@@ -267,7 +331,8 @@ extension ContentDetailsView {
                     SeasonsDetailsTabView(
                         seasons: seasons,
                         selectedSeason: $detailsViewModel.selectedSeason,
-                        seriesID: seriesID
+                        seriesID: seriesID,
+                        seriesName: name
                     )
                     .presentationDetents([.large])
                 }

@@ -6,6 +6,7 @@
 import SwiftUI
 import GoogleMobileAds
 import UserMessagingPlatform
+import UserNotifications
 
 @main
 struct WatchnowApp: App {
@@ -18,6 +19,12 @@ struct WatchnowApp: App {
         // (as the previous version did) means a stalled consent flow blocks
         // ads forever.
         MobileAds.shared.start(completionHandler: nil)
+
+        // Allow notification banners to display while the app is in the
+        // foreground — required for the debug-preview button to be useful
+        // and improves the UX for real reminders that fire while the user
+        // happens to have the app open.
+        UNUserNotificationCenter.current().delegate = NotificationCenterDelegate.shared
     }
 
     var body: some Scene {

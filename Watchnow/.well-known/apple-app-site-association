@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["YC87BA998K.k.christopoulos.Watchnow"],
+        "components": [
+          { "/": "/Watchnow/movie/*" },
+          { "/": "/Watchnow/tv/*" }
+        ]
+      }
+    ]
+  }
+}
