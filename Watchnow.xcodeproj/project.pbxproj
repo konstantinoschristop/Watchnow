@@ -95,7 +95,6 @@
 		FE1D0A03000000000000FB03 /* MoreLikeThisSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A03000000000000FA03 /* MoreLikeThisSection.swift */; };
 		FE1D0A04000000000000FB04 /* PersonSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A04000000000000FA04 /* PersonSheetView.swift */; };
 		FE1D0A05000000000000FB05 /* SearchHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A05000000000000FA05 /* SearchHistoryManager.swift */; };
-		FE1D0A06000000000000FB06 /* WatchedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A06000000000000FA06 /* WatchedManager.swift */; };
 		FE1D0A07000000000000FB07 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A07000000000000FA07 /* ReviewRequestManager.swift */; };
 		FE1D0A08000000000000FB08 /* ReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A08000000000000FA08 /* ReminderManager.swift */; };
 		FE1D0A09000000000000FB09 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A09000000000000FA09 /* DeepLinkRouter.swift */; };
@@ -105,6 +104,7 @@
 		FE1D0A0D000000000000FB0D /* TopTenSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0D000000000000FA0D /* TopTenSection.swift */; };
 		FE1D0A0E000000000000FB0E /* ProvidersListResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0E000000000000FA0E /* ProvidersListResponse.swift */; };
 		FE1D0A0F000000000000FB0F /* StreamingServicesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0F000000000000FA0F /* StreamingServicesSection.swift */; };
+		FE1D0A20000000000000FB20 /* FolderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A20000000000000FA20 /* FolderManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -194,7 +194,6 @@
 		FE1D0A03000000000000FA03 /* MoreLikeThisSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreLikeThisSection.swift; sourceTree = "<group>"; };
 		FE1D0A04000000000000FA04 /* PersonSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonSheetView.swift; sourceTree = "<group>"; };
 		FE1D0A05000000000000FA05 /* SearchHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHistoryManager.swift; sourceTree = "<group>"; };
-		FE1D0A06000000000000FA06 /* WatchedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchedManager.swift; sourceTree = "<group>"; };
 		FE1D0A07000000000000FA07 /* ReviewRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManager.swift; sourceTree = "<group>"; };
 		FE1D0A08000000000000FA08 /* ReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderManager.swift; sourceTree = "<group>"; };
 		FE1D0A09000000000000FA09 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
@@ -204,6 +203,7 @@
 		FE1D0A0D000000000000FA0D /* TopTenSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopTenSection.swift; sourceTree = "<group>"; };
 		FE1D0A0E000000000000FA0E /* ProvidersListResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersListResponse.swift; sourceTree = "<group>"; };
 		FE1D0A0F000000000000FA0F /* StreamingServicesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingServicesSection.swift; sourceTree = "<group>"; };
+		FE1D0A20000000000000FA20 /* FolderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -427,11 +427,11 @@
 				8AE787DF2E895FA900A6FF50 /* ContentService.swift */,
 				8AC339002752932D00834B46 /* Scale.swift */,
 				EE9595C2289EB49A0016EC25 /* WatchlistManager.swift */,
-				FE1D0A06000000000000FA06 /* WatchedManager.swift */,
 				FE1D0A05000000000000FA05 /* SearchHistoryManager.swift */,
 				FE1D0A07000000000000FA07 /* ReviewRequestManager.swift */,
 				FE1D0A08000000000000FA08 /* ReminderManager.swift */,
 				FE1D0A09000000000000FA09 /* DeepLinkRouter.swift */,
+				FE1D0A20000000000000FA20 /* FolderManager.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -653,10 +653,10 @@
 				AA000001000000000000AA02 /* WatchnowApp.swift in Sources */,
 				AA000001000000000000AA04 /* DetailServiceProtocol.swift in Sources */,
 				FE1D0A05000000000000FB05 /* SearchHistoryManager.swift in Sources */,
-				FE1D0A06000000000000FB06 /* WatchedManager.swift in Sources */,
 				FE1D0A07000000000000FB07 /* ReviewRequestManager.swift in Sources */,
 				FE1D0A08000000000000FB08 /* ReminderManager.swift in Sources */,
 				FE1D0A09000000000000FB09 /* DeepLinkRouter.swift in Sources */,
+				FE1D0A20000000000000FB20 /* FolderManager.swift in Sources */,
 				FE1D0A0A000000000000FB0A /* ShimmerView.swift in Sources */,
 				FE1D0A0B000000000000FB0B /* ListSection.swift in Sources */,
 				FE1D0A0C000000000000FB0C /* PersonCombinedCreditsResponse.swift in Sources */,
@@ -816,7 +816,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
 				ENABLE_PREVIEWS = YES;
@@ -826,7 +826,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -847,7 +847,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
 				ENABLE_PREVIEWS = YES;
@@ -857,7 +857,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

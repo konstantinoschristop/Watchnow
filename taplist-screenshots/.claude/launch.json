@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "taplist-screenshots",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd ../taplist-screenshots && npm run dev"],
+      "port": 3000
+    }
+  ]
+}

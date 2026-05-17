@@ -12,12 +12,10 @@ protocol BaseSwipeActionsProtocol: AnyObject {
     var showRemovedAlert: Bool { get set }
     var showAddedAlert: Bool { get set }
     func itemRemoved(result: Result)
-    func watchedItemRemoved(result: Result)
 }
 
 extension BaseSwipeActionsProtocol {
     func itemRemoved(result: Result) {}
-    func watchedItemRemoved(result: Result) {}
 }
 
 @MainActor

@@ -9,23 +9,28 @@ import Foundation
 import SwiftUI
 import AlertToast
 
-/// User's saved titles. Three tabs: Movies, Series, and Watched.
+/// User's saved titles.
 ///
-/// - Movies + Series tabs support sort order (Date Added / A→Z / Rating)
-///   via a toolbar menu.
-/// - Watched tab is a reverse-chronological log; swipe left removes a title
-///   from the watched list.
+/// One axis of organisation: folders. Movies and TV series share a single
+/// list — the MediaTypeBadge on each row distinguishes them. Folders are
+/// the user's own collections ("Date Night", "Halloween", etc.) and live
+/// in the chip row below the nav bar; their creation / rename / delete
+/// lives in the nav-bar folders menu.
 struct WatchlistView: View {
 
     @ObservedObject var watchlistViewModel: WatchlistViewModel
-    @State private var selectedTab: WatchlistModel.Tab = .movies
-    @Namespace private var tabNamespace
+    /// Observed here so the chip row + filtered list refresh when folders
+    /// are created/renamed/deleted or items move between folders.
+    @ObservedObject private var folderStore = FolderManager.shared
+    @State private var newFolderPresented = false
+    @State private var folderToRename: Folder?
+    @State private var moveTarget: Result?
     @Namespace private var navigationNamespace
 
     var body: some View {
         VStack(spacing: 0) {
             if !isGlobalEmpty {
-                tabBar
+                folderChipsRow
             }
             content
         }
@@ -42,50 +47,79 @@ struct WatchlistView: View {
                        type: .complete(.green),
                        title: "Added to Watchlist")
         }
-        .toast(isPresenting: $watchlistViewModel.showWatchedRemovedAlert) {
-            AlertToast(displayMode: .alert,
-                       type: .complete(.green),
-                       title: "Removed from Watched")
+        .sheet(isPresented: $newFolderPresented) {
+            NewFolderSheet { name, symbol in
+                let created = watchlistViewModel.folderStore.createFolder(name: name,
+                                                                          symbol: symbol)
+                watchlistViewModel.setFilter(.folder(created.id))
+            }
+        }
+        .sheet(item: $folderToRename) { folder in
+            NewFolderSheet(initial: folder) { name, symbol in
+                watchlistViewModel.folderStore.renameFolder(id: folder.id, to: name)
+                watchlistViewModel.folderStore.updateSymbol(id: folder.id, to: symbol)
+            }
+        }
+        .confirmationDialog("Move to folder",
+                            isPresented: Binding(
+                                get: { moveTarget != nil },
+                                set: { if !$0 { moveTarget = nil } }
+                            ),
+                            titleVisibility: .visible) {
+            moveDialogButtons
         }
     }
 
-    // MARK: - Tab bar (tabs + sort button in one row)
+    // MARK: - Folder chips
 
-    private var tabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(WatchlistModel.Tab.allCases, id: \.self) { tab in
-                UnderlineTab(
-                    title: tab.title,
-                    count: count(for: tab),
-                    isSelected: selectedTab == tab,
-                    tint: tint(for: tab),
-                    namespace: tabNamespace
-                ) {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        selectedTab = tab
+    private var folderChipsRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                FolderChip(label: "All",
+                           symbol: "tray.full",
+                           isSelected: watchlistViewModel.selectedFilter == .all) {
+                    setFilter(.all)
+                }
+
+                ForEach(watchlistViewModel.folderStore.folders) { folder in
+                    FolderChip(label: folder.name,
+                               symbol: folder.symbol,
+                               isSelected: watchlistViewModel.selectedFilter == .folder(folder.id)) {
+                        setFilter(.folder(folder.id))
+                    }
+                    .contextMenu {
+                        Button {
+                            folderToRename = folder
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        Button(role: .destructive) {
+                            deleteFolder(folder)
+                        } label: {
+                            Label("Delete folder", systemImage: "trash")
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity)
-            }
 
-            // Sort button — always in the layout so tabs never shift.
-            // Invisible on the Watched tab (no sort applicable there).
-            let sortVisible = selectedTab != .watched && !currentTabItems.isEmpty
-            sortMenuButton
-                .padding(.horizontal, 14)
-                .opacity(sortVisible ? 1 : 0)
-                .disabled(!sortVisible)
+                // Action chip — visually distinct (ghost style) so it
+                // doesn't read as another filter folder.
+                FolderChip(label: "New",
+                           symbol: "plus",
+                           isSelected: false,
+                           style: .ghost) {
+                    newFolderPresented = true
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .padding(.vertical, 4)
-        .background(.bar)
-        .overlay(alignment: .bottom) {
-            Divider()
+        .background(Color(.background))
+    }
+
+    private func setFilter(_ filter: WatchlistModel.FolderFilter) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            watchlistViewModel.setFilter(filter)
         }
-        // Single haptic per tab change. Previously fired on every
-        // UnderlineTab whose `isSelected` flipped, which means two
-        // haptics per tap (one as the old tab deselected, one as the
-        // new tab selected).
-        .sensoryFeedback(.selection, trigger: selectedTab)
     }
 
     // MARK: - Content dispatch
@@ -94,92 +128,69 @@ struct WatchlistView: View {
     private var content: some View {
         if isGlobalEmpty {
             globalEmptyState
-        } else if selectedTab == .watched {
-            if watchlistViewModel.savedWatched.isEmpty {
-                tabEmptyState
-            } else {
-                watchedListView
-            }
-        } else if currentTabItems.isEmpty {
-            tabEmptyState
+        } else if filteredItems.isEmpty {
+            folderEmptyState
         } else {
-            watchlistListView(items: currentTabItems)
+            watchlistListView(items: filteredItems)
         }
     }
 
     private func watchlistListView(items: [Result]) -> some View {
+        // `.onMove` on the inner ForEach gives long-press-to-drag in iOS
+        // 16+ without requiring `editMode = .active`, which would also
+        // turn on delete circles + intercept NavigationLink taps.
         List {
             GenericListView(results: .constant(items),
                             viewModel: watchlistViewModel,
-                            namespace: navigationNamespace)
+                            namespace: navigationNamespace,
+                            onMoveToFolder: { moveTarget = $0 },
+                            onReorder: { source, destination in
+                                watchlistViewModel.reorder(displayed: items,
+                                                           from: source,
+                                                           to: destination)
+                            })
         }
         .listStyle(.plain)
     }
 
-    private var watchedListView: some View {
-        List {
-            ForEach(watchlistViewModel.savedWatched, id: \.self) { result in
-                NavigationLink {
-                    let model = ContentDetailsModel(screenType: result.media_type == "movie" ? .movie : .tv,
-                                                   result: result)
-                    let vm = ContentDetailsViewModel(model: model)
-                    ContentDetailsView(detailsViewModel: vm)
-                        .navigationTransition(.zoom(sourceID: result.id, in: navigationNamespace))
-                } label: {
-                    ResultRow(result: result)
-                }
-                .matchedTransitionSource(id: result.id, in: navigationNamespace)
-                .listRowBackground(Color(.background))
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        watchlistViewModel.watchedItemRemoved(result: result)
-                    } label: {
-                        Label("Remove", systemImage: "xmark.circle")
+    // MARK: - Move dialog
+
+    @ViewBuilder
+    private var moveDialogButtons: some View {
+        if let target = moveTarget, let id = target.id {
+            let currentFolderID = watchlistViewModel.folderStore.folderID(for: id)
+
+            ForEach(watchlistViewModel.folderStore.folders) { folder in
+                if folder.id != currentFolderID {
+                    Button(folder.name) {
+                        watchlistViewModel.folderStore.assign(resultID: id, to: folder.id)
+                        moveTarget = nil
                     }
                 }
             }
-        }
-        .listStyle(.plain)
-    }
 
-    // MARK: - Sort menu
-
-    private var sortMenuButton: some View {
-        Menu {
-            ForEach(WatchlistModel.SortOrder.allCases) { order in
-                Button {
-                    watchlistViewModel.setSortOrder(order)
-                } label: {
-                    Label(order.rawValue, systemImage: order.icon)
-                    if watchlistViewModel.sortOrder == order {
-                        Image(systemName: "checkmark")
-                    }
+            if currentFolderID != nil {
+                Button("Remove from folder") {
+                    watchlistViewModel.folderStore.assign(resultID: id, to: nil)
+                    moveTarget = nil
                 }
             }
-        } label: {
-            Image(systemName: "line.3.horizontal.decrease.circle")
-                .symbolVariant(watchlistViewModel.sortOrder == .dateAdded ? .none : .fill)
-        }
-        .sensoryFeedback(.selection, trigger: watchlistViewModel.sortOrder)
-    }
 
-    private func count(for tab: WatchlistModel.Tab) -> Int {
-        switch tab {
-        case .movies:  return watchlistViewModel.savedMovies.count
-        case .series:  return watchlistViewModel.savedSeries.count
-        case .watched: return watchlistViewModel.savedWatched.count
+            Button("New folder…") {
+                moveTarget = nil
+                newFolderPresented = true
+            }
+
+            Button("Cancel", role: .cancel) {
+                moveTarget = nil
+            }
         }
     }
 
-    /// All tabs share the accent palette — the underline + tinted count
-    /// pill is the only thing that draws the eye, so per-tab colours just
-    /// add visual noise. Watched still gets the brand green ONLY when it's
-    /// the selected tab, because that's the one place "completion" semantics
-    /// add real meaning to the colour.
-    private func tint(for tab: WatchlistModel.Tab) -> Color {
-        switch tab {
-        case .watched: return .green
-        default:       return .accentColor
+    private func deleteFolder(_ folder: Folder) {
+        folderStore.deleteFolder(id: folder.id)
+        if watchlistViewModel.selectedFilter == .folder(folder.id) {
+            setFilter(.all)
         }
     }
 
@@ -195,27 +206,29 @@ struct WatchlistView: View {
         }
     }
 
+    /// Empty state for an active folder filter — the list is non-empty
+    /// overall, just empty inside the selected folder.
     @ViewBuilder
-    private var tabEmptyState: some View {
-        let selectedTint = tint(for: selectedTab)
+    private var folderEmptyState: some View {
         ContentUnavailableView {
-            themedLabel(title: tabEmptyTitle,
-                        systemImage: tabEmptyIcon,
-                        tint: selectedTint)
+            themedLabel(title: "Folder is empty",
+                        systemImage: folderEmptyIcon,
+                        tint: .accentColor)
         } description: {
-            Text(tabEmptyDescription)
+            Text("Swipe a saved title and tap Move to file it here.")
         } actions: {
-            if let cta = tabEmptyCTA {
-                Button(cta.title) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedTab = cta.destination
-                    }
-                }
+            Button("Show all") { setFilter(.all) }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
-                .tint(tint(for: cta.destination))
-            }
+                .tint(.accentColor)
         }
+    }
+
+    private var folderEmptyIcon: String {
+        guard case let .folder(id) = watchlistViewModel.selectedFilter,
+              let folder = watchlistViewModel.folderStore.folders.first(where: { $0.id == id })
+        else { return "folder" }
+        return folder.symbol
     }
 
     private func themedLabel(title: String,
@@ -232,108 +245,159 @@ struct WatchlistView: View {
 
     // MARK: - Data shaping
 
-    private var currentTabItems: [Result] {
-        switch selectedTab {
-        case .movies:  return watchlistViewModel.savedMovies
-        case .series:  return watchlistViewModel.savedSeries
-        case .watched: return watchlistViewModel.savedWatched
-        }
+    private var filteredItems: [Result] {
+        watchlistViewModel.applyFolderFilter(watchlistViewModel.savedAll)
     }
 
     private var isGlobalEmpty: Bool {
-        watchlistViewModel.savedMovies.isEmpty
-            && watchlistViewModel.savedSeries.isEmpty
-            && watchlistViewModel.savedWatched.isEmpty
-    }
-
-    // MARK: - Copy
-
-    private var tabEmptyTitle: String {
-        switch selectedTab {
-        case .movies:  return "No saved movies"
-        case .series:  return "No saved series"
-        case .watched: return "Nothing watched yet"
-        }
-    }
-
-    private var tabEmptyIcon: String {
-        switch selectedTab {
-        case .movies:  return "film"
-        case .series:  return "tv"
-        case .watched: return "checkmark.circle"
-        }
-    }
-
-    private var tabEmptyDescription: String {
-        switch selectedTab {
-        case .movies:  return "Movies you bookmark will appear here."
-        case .series:  return "TV series you bookmark will appear here."
-        case .watched: return "Mark a title as watched from its detail page."
-        }
-    }
-
-    /// Returns a CTA that points to the first non-empty other tab, or nil when all are empty.
-    private var tabEmptyCTA: (title: String, destination: WatchlistModel.Tab)? {
-        let others = WatchlistModel.Tab.allCases.filter { $0 != selectedTab && count(for: $0) > 0 }
-        guard let dest = others.first else { return nil }
-        let n = count(for: dest)
-        return ("See \(dest.title) (\(n))", dest)
+        watchlistViewModel.savedAll.isEmpty
     }
 }
 
-// MARK: - UnderlineTab
+// MARK: - FolderChip
 
-private struct UnderlineTab: View {
-    let title: String
-    let count: Int
+/// Pill-shaped chip used in the folder filter row.
+///
+/// - `.standard` is the regular filter pill — filled accent when selected,
+///   hairline-outlined when not.
+/// - `.ghost` is a tinted accent outline used for the trailing "+ New"
+///   action chip so it reads as a button, not as another folder.
+private struct FolderChip: View {
+
+    enum Style { case standard, ghost }
+
+    let label: String
+    let symbol: String
     let isSelected: Bool
-    let tint: Color
-    let namespace: Namespace.ID
+    var style: Style = .standard
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                HStack(spacing: 5) {
-                    Text(title)
-                        .font(.system(size: 16, weight: .semibold))
-                    if count > 0 {
-                        Text("\(count)")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundStyle(isSelected ? Color.white : .secondary)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background {
-                                Capsule().fill(isSelected
-                                    ? tint
-                                    : Color.secondary.opacity(0.15))
-                            }
-                    }
-                }
-                .foregroundStyle(isSelected ? .primary : .secondary)
-
-                ZStack {
-                    if isSelected {
-                        Capsule()
-                            .fill(tint)
-                            .frame(height: 2)
-                            .matchedGeometryEffect(id: "watchlist-tab-underline",
-                                                   in: namespace)
-                    } else {
-                        Color.clear.frame(height: 2)
-                    }
-                }
-                .padding(.horizontal, 10)
+            HStack(spacing: 6) {
+                Image(systemName: symbol)
+                    .font(.system(size: 11, weight: .semibold))
+                Text(label)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
             }
-            .padding(.horizontal, 8)
-            .contentShape(Rectangle())
+            .foregroundStyle(foreground)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background {
+                Capsule()
+                    .fill(background)
+            }
+            .overlay {
+                Capsule()
+                    .strokeBorder(borderColor, lineWidth: 0.5)
+            }
         }
         .buttonStyle(.plain)
-        // Sized-based bounce when selection flips — light overshoot
-        // pop on the chosen tab (and a subtle settle on the previous
-        // one) makes the selection feel responsive without the
-        // matchedGeometryEffect being the only motion cue.
-        .scaleEffect(isSelected ? 1.03 : 1.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
+        .sensoryFeedback(.selection, trigger: isSelected)
+    }
+
+    private var foreground: Color {
+        switch style {
+        case .standard: return isSelected ? .white : .primary
+        case .ghost:    return .accentColor
+        }
+    }
+
+    private var background: Color {
+        switch style {
+        case .standard: return isSelected ? .accentColor : Color(.secondarySystemBackground)
+        case .ghost:    return .accentColor.opacity(0.1)
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .standard: return isSelected ? .clear : .primary.opacity(0.08)
+        case .ghost:    return .accentColor.opacity(0.35)
+        }
+    }
+}
+
+// MARK: - NewFolderSheet
+
+/// Used for both create and edit. When `initial` is non-nil the sheet
+/// pre-fills the name + selected symbol and uses "Save" as the primary
+/// action instead of "Create".
+private struct NewFolderSheet: View {
+
+    var initial: Folder? = nil
+    let onCommit: (_ name: String, _ symbol: String) -> Void
+
+    @State private var name: String
+    @State private var selectedSymbol: String
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var nameFocused: Bool
+
+    init(initial: Folder? = nil,
+         onCommit: @escaping (_ name: String, _ symbol: String) -> Void) {
+        self.initial = initial
+        self.onCommit = onCommit
+        _name = State(initialValue: initial?.name ?? "")
+        _selectedSymbol = State(initialValue: initial?.symbol ?? Folder.defaultSymbol)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Name") {
+                    TextField("Folder name", text: $name)
+                        .focused($nameFocused)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.done)
+                }
+                Section("Icon") {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8),
+                                             count: 4),
+                              spacing: 8) {
+                        ForEach(Folder.symbolPresets, id: \.self) { symbol in
+                            symbolTile(symbol)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .navigationTitle(initial == nil ? "New Folder" : "Edit Folder")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(initial == nil ? "Create" : "Save") {
+                        let trimmed = name.trimmingCharacters(in: .whitespaces)
+                        guard !trimmed.isEmpty else { return }
+                        onCommit(trimmed, selectedSymbol)
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+            .onAppear { nameFocused = true }
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func symbolTile(_ symbol: String) -> some View {
+        let isSelected = symbol == selectedSymbol
+        return Button {
+            selectedSymbol = symbol
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
+                .background {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                }
+        }
+        .buttonStyle(.plain)
     }
 }

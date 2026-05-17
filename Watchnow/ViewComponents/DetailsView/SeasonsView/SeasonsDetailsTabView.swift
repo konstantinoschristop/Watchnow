@@ -27,6 +27,7 @@ struct SeasonsDetailsTabView: View {
     @Namespace private var pillNamespace
     @State private var seasonReminderOn = false
     @State private var showReminderToast = false
+    @State private var showNotificationSettingsAlert = false
 
     init(seasons: [Season],
          selectedSeason: Binding<Season>,
@@ -51,6 +52,7 @@ struct SeasonsDetailsTabView: View {
         .background(Color(.background))
         .task(id: selectedSeason) {
             await episodesViewModel.getEpisodes(seasonNumber: selectedSeason.season_number ?? 0)
+            await ReminderManager.reconcileWithSystem()
             syncReminderState()
         }
         .onChange(of: selectedSeason) { _, _ in
@@ -61,6 +63,13 @@ struct SeasonsDetailsTabView: View {
             AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
             AlertToast(displayMode: .alert, type: .error(.red), title: "Reminder Removed")
         })
+        .alert("Notifications are off",
+               isPresented: $showNotificationSettingsAlert) {
+            Button("Open Settings") { ReminderManager.openNotificationSettings() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enable notifications for Watchnow in Settings to set season reminders.")
+        }
     }
 
     // MARK: - Sheet Header
@@ -236,18 +245,22 @@ struct SeasonsDetailsTabView: View {
         let seasonLabel = selectedSeason.name ?? "New season"
         let deepLink = DeepLink(id: seriesID, mediaType: .tv)
         Task {
-            let scheduled = await ReminderManager.schedule(
+            let result = await ReminderManager.schedule(
                 identifier: identifier,
                 title: "Premiering today",
                 body: "\(seasonLabel) of \(seriesName) starts today.",
                 on: airDate,
                 deepLink: deepLink
             )
-            seasonReminderOn = scheduled
-            showReminderToast = scheduled
-            if scheduled {
+            switch result {
+            case .scheduled:
+                seasonReminderOn = true
+                showReminderToast = true
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-            } else {
+            case .authorizationDenied:
+                showNotificationSettingsAlert = true
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            case .failed:
                 UINotificationFeedbackGenerator().notificationOccurred(.warning)
             }
         }

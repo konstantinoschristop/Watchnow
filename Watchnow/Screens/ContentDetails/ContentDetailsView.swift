@@ -15,10 +15,10 @@ struct ContentDetailsView: View {
     @Environment(\.dismiss) var dismiss
     @State var videoPresented = false
     @State private var showAlert = false
-    @State private var showWatchedAlert = false
     @State var isSeasonsSheetPresented = false
     @State private var isReminderOn = false
     @State private var showReminderAlert = false
+    @State private var showNotificationSettingsAlert = false
     @Namespace private var namespace
 
     var body: some View {
@@ -52,11 +52,13 @@ struct ContentDetailsView: View {
             AlertToast(displayMode: .alert, type: .error(.red), title: "Removed from Watchlist")  :
             AlertToast(displayMode: .alert, type: .complete(.green), title: "Added to Watchlist")
         })
-        .toast(isPresenting: $showWatchedAlert, alert: {
-            detailsViewModel.isInWatchedList ?
-            AlertToast(displayMode: .alert, type: .complete(.green), title: "Marked as Watched") :
-            AlertToast(displayMode: .alert, type: .error(.red), title: "Removed from Watched")
-        })
+        .alert("Notifications are off",
+               isPresented: $showNotificationSettingsAlert) {
+            Button("Open Settings") { ReminderManager.openNotificationSettings() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enable notifications for Watchnow in Settings to set release reminders.")
+        }
         .toast(isPresenting: $showReminderAlert, alert: {
             isReminderOn ?
             AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
@@ -147,10 +149,8 @@ extension ContentDetailsView {
     private var primaryActionRow: some View {
         PrimaryActionRow(
             isInWatchList: detailsViewModel.isInWatchList,
-            isInWatchedList: detailsViewModel.isInWatchedList,
             hasTrailer: detailsViewModel.videos?.getVideoURL() != nil,
             onWatchlistTap: toggleWatchlist,
-            onWatchedTap: toggleWatched,
             onTrailerTap: { videoPresented = true }
         )
     }
@@ -184,18 +184,22 @@ extension ContentDetailsView {
         let deepLink = detailsViewModel.reminderDeepLink
 
         Task {
-            let scheduled = await ReminderManager.schedule(
+            let result = await ReminderManager.schedule(
                 identifier: identifier,
                 title: "Out now",
                 body: body,
                 on: releaseDate,
                 deepLink: deepLink
             )
-            isReminderOn = scheduled
-            showReminderAlert = scheduled
-            if scheduled {
+            switch result {
+            case .scheduled:
+                isReminderOn = true
+                showReminderAlert = true
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-            } else {
+            case .authorizationDenied:
+                showNotificationSettingsAlert = true
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            case .failed:
                 UINotificationFeedbackGenerator().notificationOccurred(.warning)
             }
         }
@@ -216,18 +220,6 @@ extension ContentDetailsView {
             }
         }
         showAlert = true
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-    }
-
-    private func toggleWatched() {
-        if detailsViewModel.isInWatchedList {
-            WatchedManager.shared.removeFromWatched(result: detailsViewModel.result)
-            detailsViewModel.isInWatchedList = false
-        } else {
-            WatchedManager.shared.addToWatched(result: detailsViewModel.result)
-            detailsViewModel.isInWatchedList = true
-        }
-        showWatchedAlert = true
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
@@ -261,7 +253,10 @@ extension ContentDetailsView {
             }
         }
         .padding(.horizontal, 5)
-        .onAppear { syncReminderState() }
+        .task {
+            await ReminderManager.reconcileWithSystem()
+            syncReminderState()
+        }
         .onChange(of: detailsViewModel.reminderIdentifier) { _, _ in
             syncReminderState()
         }

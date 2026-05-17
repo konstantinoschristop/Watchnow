@@ -20,11 +20,6 @@ struct BottomCard: View {
     var content: Result
     var screenType: ScreenTypes
     @Namespace private var namespace
-    /// Observe the watched store so the green badge overlay re-evaluates
-    /// whenever the user toggles watched on a detail screen. Without this
-    /// the static call inside the overlay only ran once and the badge
-    /// went stale until the card was destroyed and recreated.
-    @ObservedObject private var watchedStore = WatchedManager.shared
 
     init(content: Result, screenType: ScreenTypes) {
         self.screenType = screenType
@@ -67,11 +62,6 @@ struct BottomCard: View {
             RoundedRectangle(cornerRadius: posterCornerRadius, style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 0.5)
         )
-        .overlay(alignment: .topTrailing) {
-            if watchedStore.existsInWatched(result: content) {
-                WatchedBadge().padding(6)
-            }
-        }
         .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
     }
 
@@ -136,20 +126,6 @@ struct BottomCard: View {
     private var yearString: String? {
         let raw = content.getReleaseDate(addSeparator: false)
         return raw.isEmpty ? nil : raw
-    }
-}
-
-// MARK: - WatchedBadge
-
-/// Small checkmark pill shown on poster/backdrop when the title has been
-/// marked as watched. Kept minimal — a filled capsule with a checkmark —
-/// so it reads at a glance without competing with rank or status badges.
-struct WatchedBadge: View {
-    var body: some View {
-        Image(systemName: "checkmark.circle.fill")
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(.white, .green)
-            .shadow(color: .black.opacity(0.4), radius: 3, y: 1)
     }
 }
 

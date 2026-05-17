@@ -21,6 +21,17 @@ struct GenericListView: View {
     @Binding var results: [Result]
     let viewModel: any BaseSwipeActionsProtocol
     var namespace: Namespace.ID
+    /// When non-nil, adds a "Move to folder" leading-swipe action to each
+    /// in-watchlist row. Only the Watchlist screen passes this — Search
+    /// results leave it nil so their rows keep a single trailing
+    /// Add / Remove action.
+    var onMoveToFolder: ((Result) -> Void)? = nil
+    /// When non-nil, enables drag-to-reorder via SwiftUI's `.onMove`.
+    /// Receives the IndexSet of dragged rows + the destination offset, in
+    /// terms of the currently-displayed `results` array. Watchlist passes
+    /// this only when the active sort is Date Added (other sorts would
+    /// overwrite the move on next re-sort, which would feel broken).
+    var onReorder: ((IndexSet, Int) -> Void)? = nil
 
     var body: some View {
         ForEach(Array(results.enumerated()), id: \.element) { _, result in
@@ -29,10 +40,14 @@ struct GenericListView: View {
                 .listRowSeparatorTint(.primary.opacity(0.08))
                 .listRowBackground(Color(.background))
                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .swipeActions(allowsFullSwipe: true) {
-                    swipeActions(for: result)
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    leadingSwipeActions(for: result)
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    trailingSwipeActions(for: result)
                 }
         }
+        .onMove(perform: onReorder)
     }
 
     /// Wraps actors in a tappable `ActorRow` that opens `PersonSheetView`,
@@ -58,8 +73,26 @@ struct GenericListView: View {
 
     // MARK: - Swipe actions
 
+    /// Leading swipe — non-destructive secondary actions. Currently just
+    /// "Move to folder", available only on watchlist rows when a move
+    /// handler is wired up.
     @ViewBuilder
-    private func swipeActions(for result: Result) -> some View {
+    private func leadingSwipeActions(for result: Result) -> some View {
+        if result.getMediaType() != "Actor",
+           WatchlistManager.existsInWatchList(result: result),
+           let onMoveToFolder {
+            Button {
+                onMoveToFolder(result)
+            } label: {
+                Label("Move", systemImage: "folder")
+            }
+            .tint(.indigo)
+        }
+    }
+
+    /// Trailing swipe — the primary Add / Remove action.
+    @ViewBuilder
+    private func trailingSwipeActions(for result: Result) -> some View {
         if result.getMediaType() == "Actor" {
             EmptyView()
         } else if WatchlistManager.existsInWatchList(result: result) {

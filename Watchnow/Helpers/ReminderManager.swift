@@ -16,6 +16,7 @@
 
 import Foundation
 import UserNotifications
+import UIKit
 
 @MainActor
 enum ReminderManager {
@@ -62,20 +63,27 @@ enum ReminderManager {
 
     // MARK: - Scheduling
 
+    /// Distinct outcomes of a `schedule(...)` call. The UI needs to tell
+    /// "user has notifications turned off" (offer a path to Settings)
+    /// apart from a generic failure (don't nag the user).
+    enum ScheduleResult {
+        case scheduled
+        case authorizationDenied
+        case failed
+    }
+
     /// Schedule a one-shot local notification at 09:00 local on `date`.
-    /// Returns false if authorization was denied, the date is in the
-    /// past, or the OS rejected the request.
+    /// Returns `.authorizationDenied` if the OS-level permission is off,
+    /// `.failed` for past dates or rejected requests, `.scheduled` on
+    /// success.
     @discardableResult
     static func schedule(identifier: String,
                          title: String,
                          body: String,
                          on date: Date,
-                         deepLink: DeepLink? = nil) async -> Bool {
+                         deepLink: DeepLink? = nil) async -> ScheduleResult {
 
-        guard await requestAuthorization() else { return false }
-
-        let fireDate = fireDateAt9AM(for: date)
-        guard fireDate > Date() else { return false }
+        guard await requestAuthorization() else { return .authorizationDenied }
 
         let content = UNMutableNotificationContent()
         content.title = title
@@ -85,11 +93,24 @@ enum ReminderManager {
             content.userInfo = deepLink.userInfo
         }
 
+        // Debug builds fire ~3s from scheduling regardless of `date`, so
+        // deeplink wiring can be tested end-to-end without waiting for
+        // real release/air dates. Release builds use the real date pinned
+        // to 09:00 local.
+        let trigger: UNNotificationTrigger
+        #if DEBUG
+        _ = date
+        trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        #else
+        let fireDate = fireDateAt9AM(for: date)
+        guard fireDate > Date() else { return .failed }
         let comps = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],
             from: fireDate
         )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        #endif
+
         let request = UNNotificationRequest(identifier: identifier,
                                             content: content,
                                             trigger: trigger)
@@ -99,9 +120,21 @@ enum ReminderManager {
             if !scheduledIDs.contains(identifier) {
                 scheduledIDs.append(identifier)
             }
-            return true
+            return .scheduled
         } catch {
-            return false
+            return .failed
+        }
+    }
+
+    // MARK: - Settings deeplink
+
+    /// Opens the system Settings app at this app's notification preferences.
+    /// Used by the "Notifications off" alert that surfaces when the user
+    /// taps a bell after previously denying notification permission.
+    @MainActor
+    static func openNotificationSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
         }
     }
 
@@ -113,6 +146,17 @@ enum ReminderManager {
 
     static func isScheduled(identifier: String) -> Bool {
         scheduledIDs.contains(identifier)
+    }
+
+    /// Sync our persisted identifier set with what iOS still has pending.
+    /// Once a notification fires, iOS removes the request from its pending
+    /// list but our cache doesn't know — so the bell would keep rendering
+    /// as "on" until the user manually toggled it off. Call this on view
+    /// appear (and on app foreground) so the UI catches up.
+    static func reconcileWithSystem() async {
+        let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        let pendingIDs = Set(pending.map(\.identifier))
+        scheduledIDs.removeAll { !pendingIDs.contains($0) }
     }
 
     // MARK: - Helpers
@@ -127,38 +171,6 @@ enum ReminderManager {
         return Calendar.current.date(from: comps) ?? date
     }
 
-    // MARK: - Debug
-
-    /// Fires a sample reminder ~3 seconds from now so the developer can
-    /// preview the banner / sound styling without waiting for a real
-    /// release date. Requires `NotificationCenterDelegate` to be installed
-    /// for the banner to appear while the app is foregrounded. Embeds a
-    /// dummy deeplink (Dune: Part Two, TMDB id 693134) so tapping the
-    /// banner exercises the deeplink path end-to-end.
-    @discardableResult
-    static func scheduleDebugTest() async -> Bool {
-        guard await requestAuthorization() else { return false }
-
-        let content = UNMutableNotificationContent()
-        content.title = "Out now"
-        content.body = "Dune: Part Two is out today — time to watch."
-        content.sound = .default
-        content.userInfo = DeepLink(id: 693134, mediaType: .movie).userInfo
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
-        let request = UNNotificationRequest(
-            identifier: "reminder.debug.\(UUID().uuidString)",
-            content: content,
-            trigger: trigger
-        )
-
-        do {
-            try await UNUserNotificationCenter.current().add(request)
-            return true
-        } catch {
-            return false
-        }
-    }
 }
 
 // MARK: - Foreground delegate

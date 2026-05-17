@@ -41,10 +41,19 @@ final class PersonViewModel: ObservableObject {
         isLoading = false
     }
 
-    /// Loads the person's combined credits and exposes the top-N most
-    /// popular acting credits as the "Known For" reel. Crew credits are
+    /// Loads the person's combined credits and exposes the top-N best-
+    /// known acting credits as the "Known For" reel. Crew credits are
     /// dropped — the section is meant to show titles the user might
     /// recognise the actor *from*, which is almost always cast work.
+    ///
+    /// "Best-known" here is `vote_count`: the number of TMDB users who
+    /// have actually rated the title. That correlates with real-world
+    /// reach far better than the volatile `popularity` field (a "what's
+    /// buzzy this week" score) — which previously buried iconic roles
+    /// under whatever the actor happened to be in last month. We also
+    /// filter unreleased / barely-rated / posterless entries that TMDB
+    /// returns as data noise.
+    ///
     /// Duplicates (same title, multiple roles) are folded by TMDB id so
     /// the row never repeats a poster.
     func loadCombinedCredits(id: Int, limit: Int = 8) async {
@@ -56,15 +65,28 @@ final class PersonViewModel: ObservableObject {
             let response = try await service.fetchCombinedCredits(personID: id)
             let cast = response.cast ?? []
 
+            // Threshold tuned for the long tail — fewer than ~25 votes
+            // typically means the title is either unreleased or a fringe
+            // credit the actor isn't really associated with.
+            let minVotes = 25
+
             var seen = Set<Int>()
-            let deduped = cast.filter { result in
+            let candidates = cast.filter { result in
                 guard let id = result.id else { return false }
+                guard let votes = result.vote_count, votes >= minVotes else { return false }
+                guard let poster = result.poster_path, !poster.isEmpty else { return false }
                 return seen.insert(id).inserted
             }
 
-            // Sort by popularity descending — TMDB's own ordering is
-            // sometimes by date which buries the headliner roles.
-            let sorted = deduped.sorted { ($0.popularity ?? 0) > ($1.popularity ?? 0) }
+            // Sort by vote_count desc; tiebreak on popularity so two
+            // similarly-watched titles still surface the currently-relevant
+            // one first.
+            let sorted = candidates.sorted { lhs, rhs in
+                let lv = lhs.vote_count ?? 0
+                let rv = rhs.vote_count ?? 0
+                if lv != rv { return lv > rv }
+                return (lhs.popularity ?? 0) > (rhs.popularity ?? 0)
+            }
             combinedCredits = Array(sorted.prefix(limit))
         } catch {
             // Soft-fail: the section just stays empty. The biography +

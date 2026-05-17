@@ -26,6 +26,7 @@ struct EpisodeView: View {
 
     @State private var isExpanded = false
     @State private var isReminderOn = false
+    @State private var showNotificationSettingsAlert = false
 
     private let thumbWidth: CGFloat = 128
     private let thumbHeight: CGFloat = 72
@@ -47,7 +48,17 @@ struct EpisodeView: View {
             Divider()
                 .padding(.leading, 16 + thumbWidth + 12)
         }
-        .onAppear(perform: syncReminderState)
+        .task {
+            await ReminderManager.reconcileWithSystem()
+            syncReminderState()
+        }
+        .alert("Notifications are off",
+               isPresented: $showNotificationSettingsAlert) {
+            Button("Open Settings") { ReminderManager.openNotificationSettings() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enable notifications for Watchnow in Settings to set episode reminders.")
+        }
     }
 
     // MARK: - Reminder
@@ -101,15 +112,23 @@ struct EpisodeView: View {
         let context = seriesName.map { " of \($0)" } ?? ""
         let deepLink = seriesID.map { DeepLink(id: $0, mediaType: .tv) }
         Task {
-            let ok = await ReminderManager.schedule(
+            let result = await ReminderManager.schedule(
                 identifier: identifier,
                 title: "Airing today",
                 body: "\(episodeLabel)\(context) airs today.",
                 on: airDate,
                 deepLink: deepLink
             )
-            isReminderOn = ok
-            UINotificationFeedbackGenerator().notificationOccurred(ok ? .success : .warning)
+            switch result {
+            case .scheduled:
+                isReminderOn = true
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            case .authorizationDenied:
+                showNotificationSettingsAlert = true
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            case .failed:
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            }
         }
     }
 

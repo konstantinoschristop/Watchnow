@@ -30,6 +30,9 @@ struct ResultDetailsResponse: Codable {
     let overview: String?
     let vote_average: Double?
     let vote_count: Int?
+    let poster_path: String?
+    let backdrop_path: String?
+    let title: String?
     
     func getSeasons() -> [Season]? {
         return seasons?.filter({ $0.season_number != 0 })

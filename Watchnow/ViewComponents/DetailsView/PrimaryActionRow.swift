@@ -21,27 +21,18 @@ import SwiftUI
 struct PrimaryActionRow: View {
 
     let isInWatchList: Bool
-    let isInWatchedList: Bool
     let hasTrailer: Bool
 
     let onWatchlistTap: () -> Void
-    let onWatchedTap: () -> Void
     let onTrailerTap: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
             ActionPill(
                 icon:    isInWatchList ? "bookmark.fill" : "bookmark",
-                label:   isInWatchList ? "Saved" : "Save",
+                label:   isInWatchList ? "Saved" : "Watch Later",
                 style:   isInWatchList ? .activeAccent : .neutral,
                 action:  onWatchlistTap
-            )
-
-            ActionPill(
-                icon:    isInWatchedList ? "eye.fill" : "eye",
-                label:   "Watched",
-                style:   isInWatchedList ? .activeGreen : .neutral,
-                action:  onWatchedTap
             )
 
             if hasTrailer {
@@ -64,7 +55,6 @@ private struct ActionPill: View {
     enum Style {
         case neutral       // material + primary label
         case activeAccent  // accent fill + white label
-        case activeGreen   // green fill + white label
     }
 
     let icon:   String
@@ -97,8 +87,7 @@ private struct ActionPill: View {
     private var foreground: Color {
         switch style {
         case .neutral:       return .primary
-        case .activeAccent,
-             .activeGreen:   return .white
+        case .activeAccent:  return .white
         }
     }
 }
@@ -110,10 +99,8 @@ private struct ActionPill: View {
 ///
 /// iOS 26 strategy:
 ///  • Neutral  → plain glass (`GlassEffect.regular`) — frosted, no tint.
-///  • Active   → tinted glass (`GlassEffect.regular.tinted()`) — the tint
-///    colour is driven by `.tint()` on the modifier output, so the accent
-///    pill gets accent glass and the green "Watched" pill gets green glass
-///    without any extra wiring.
+///  • Active   → tinted glass (`GlassEffect.regular.tinted()`) tinted with
+///    the accent colour.
 ///
 /// Pre-iOS 26 strategy (unchanged):
 ///  • `.ultraThinMaterial` base + optional solid colour overlay + stroke.
@@ -152,7 +139,6 @@ private struct ActionPillBackground: ViewModifier {
         switch style {
         case .neutral:       return .accentColor   // irrelevant — .regular has no tint
         case .activeAccent:  return .accentColor
-        case .activeGreen:   return .green
         }
     }
 
@@ -160,7 +146,6 @@ private struct ActionPillBackground: ViewModifier {
         switch style {
         case .neutral:       return nil
         case .activeAccent:  return .accentColor
-        case .activeGreen:   return .green
         }
     }
 
@@ -168,7 +153,6 @@ private struct ActionPillBackground: ViewModifier {
         switch style {
         case .neutral:       return .primary.opacity(0.12)
         case .activeAccent:  return .accentColor.opacity(0.35)
-        case .activeGreen:   return .green.opacity(0.35)
         }
     }
 }

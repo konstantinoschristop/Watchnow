@@ -51,11 +51,16 @@ enum WatchlistManager {
     }
     
     static func removeFromWatchList(result: Result) {
-        
+
         if WatchlistManager.watchlist.contains(result) == true {
             if let index = WatchlistManager.watchlist.firstIndex(of: result) {
                 WatchlistManager.watchlist.remove(at: index)
             }
+        }
+        // Drop the title's folder mapping too. If the user re-saves later
+        // it should reappear in Uncategorized, not in the old folder.
+        if let id = result.id {
+            FolderManager.shared.forget(resultID: id)
         }
     }
     

@@ -68,16 +68,6 @@ extension ContentView {
             MoviesView(moviesViewModel: moviesViewModel)
                 .background(Color(.background))
                 .navigationTitle("Movies")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            Task { await ReminderManager.scheduleDebugTest() }
-                        } label: {
-                            Image(systemName: "bell.badge")
-                        }
-                        .accessibilityLabel("Preview reminder notification")
-                    }
-                }
                 .navigationDestination(item: $moviesDeepLinkResult) { result in
                     detailsDestination(for: result, screenType: .movie)
                 }

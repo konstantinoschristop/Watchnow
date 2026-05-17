@@ -21,8 +21,7 @@ class ContentDetailsViewModel: ObservableObject {
         
         self.model = model
         self.service = service
-        self.model.isInWatchList   = WatchlistManager.existsInWatchList(result: result)
-        self.model.isInWatchedList = WatchedManager.shared.existsInWatched(result: result)
+        self.model.isInWatchList = WatchlistManager.existsInWatchList(result: result)
     }
     
     private func checkIfFetchingIsFinished() {
@@ -71,17 +70,56 @@ class ContentDetailsViewModel: ObservableObject {
     }
     
     func getDetails() async {
-       
+
         do {
-            self.details = try await service.fetchDetails(screenType: screenType, id: id)
-            if let firstSeason = details?.seasons?.first(where: { $0.air_date != nil }) {
+            let fetched = try await service.fetchDetails(screenType: screenType, id: id)
+            self.details = fetched
+            // Result may have been instantiated as a deeplink stub (only
+            // id + media_type populated). Backfill the fields the hero
+            // reads directly — title, poster/backdrop — from the freshly
+            // fetched details so the screen renders correctly instead of
+            // showing "- -" with a broken image.
+            self.model.result = mergeIntoResult(self.model.result, from: fetched)
+            if let firstSeason = fetched.seasons?.first(where: { $0.air_date != nil }) {
                 self.selectedSeason = firstSeason
             }
         } catch {
             apiError = true
         }
-        
+
         checkIfFetchingIsFinished()
+    }
+
+    /// Fills in any nil fields on `result` from the freshly-fetched
+    /// `details`. Used to recover from the deeplink stub case — the
+    /// regular navigation flow constructs a fully-populated Result from
+    /// list responses, so for those the merge is a no-op.
+    private func mergeIntoResult(_ result: Result,
+                                 from details: ResultDetailsResponse) -> Result {
+        Result(
+            backdrop_path:     result.backdrop_path     ?? details.backdrop_path,
+            first_air_date:    result.first_air_date    ?? details.first_air_date,
+            genre_ids:         result.genre_ids,
+            id:                result.id                ?? details.id,
+            original_title:    result.original_title,
+            name:              result.name              ?? details.name,
+            origin_country:    result.origin_country,
+            original_language: result.original_language,
+            original_name:     result.original_name,
+            overview:          result.overview          ?? details.overview,
+            popularity:        result.popularity,
+            poster_path:       result.poster_path       ?? details.poster_path,
+            release_date:      result.release_date      ?? details.release_date,
+            title:             result.title             ?? details.title,
+            video:             result.video,
+            vote_average:      result.vote_average      ?? details.vote_average,
+            vote_count:        result.vote_count        ?? details.vote_count,
+            media_type:        result.media_type,
+            profile_path:      result.profile_path,
+            castID:            result.castID,
+            runtime:           result.runtime,
+            known_for:         result.known_for
+        )
     }
     
     func getCollection() async {
@@ -152,11 +190,7 @@ extension ContentDetailsViewModel {
         set { model.isInWatchList = newValue }
     }
 
-    var isInWatchedList: Bool {
-        get { model.isInWatchedList }
-        set { model.isInWatchedList = newValue }
-    }
-    
+
     var viewModelFinishedFetching: Bool {
         get { model.viewModelFinishedFetching }
         set { model.viewModelFinishedFetching = newValue }

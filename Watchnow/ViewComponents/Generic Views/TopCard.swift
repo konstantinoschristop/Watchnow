@@ -26,9 +26,6 @@ struct TopCard: View {
     /// `ScrollableContentView` via the enumerated `ForEach`.
     var rank: Int
     @Namespace private var namespace
-    /// See note in BottomCard — observing the singleton keeps the watched
-    /// badge in sync with toggles made anywhere else in the app.
-    @ObservedObject private var watchedStore = WatchedManager.shared
 
     private let backdropHeight: CGFloat = 112
     private let cornerRadius: CGFloat = 12
@@ -79,11 +76,6 @@ struct TopCard: View {
             .overlay(alignment: .topTrailing) {
                 if let status = statusBadge {
                     StatusPill(status: status).padding(7)
-                }
-            }
-            .overlay(alignment: .bottomTrailing) {
-                if watchedStore.existsInWatched(result: content) {
-                    WatchedBadge().padding(7)
                 }
             }
     }
