@@ -412,39 +412,65 @@ private struct CategoryTile: View {
 
 // MARK: - RecentSearchChip
 
+/// Chip is split into two side-by-side tap zones so the X is reliably
+/// hittable. The previous nested-button layout fought SwiftUI's hit
+/// testing — the outer button's tap area swallowed touches near the X,
+/// and the X's 3-pt padding gave it a tap target well below Apple's
+/// 44-pt recommendation. Now both halves are sibling `Button`s sharing
+/// a single Capsule background, each with explicit `contentShape` so
+/// the entire half is tappable, not just the visible icon/text.
 private struct RecentSearchChip: View {
     let query: String
     let onTap: () -> Void
     let onRemove: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 5) {
-                Image(systemName: "clock")
-                    .font(.system(size: 11))
-                Text(query)
-                    .font(.system(size: 13, weight: .medium))
-                Button(action: onRemove) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .semibold))
+        HStack(spacing: 0) {
+            Button(action: onTap) {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 12, weight: .regular))
                         .foregroundStyle(.secondary)
-                        .padding(3)
+                    Text(query)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
                 }
-                .buttonStyle(.plain)
+                .padding(.leading, 14)
+                .padding(.trailing, 6)
+                .padding(.vertical, 10)
+                .contentShape(Rectangle())
             }
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background {
-                Capsule(style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
+            .buttonStyle(.plain)
+            .accessibilityLabel("Search \(query)")
+
+            // Hairline separator clarifies that the X is its own tap
+            // zone — without it the chip reads as one solid pill and
+            // the user's finger lands on the text half by default.
+            Rectangle()
+                .fill(Color.primary.opacity(0.08))
+                .frame(width: 0.5, height: 18)
+
+            Button(action: onRemove) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.leading, 10)
+                    .padding(.trailing, 12)
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
             }
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
-            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Remove \(query) from recent searches")
         }
-        .buttonStyle(.plain)
+        .background {
+            Capsule(style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        }
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+        }
     }
 }
 

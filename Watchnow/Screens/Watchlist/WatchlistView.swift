@@ -72,48 +72,116 @@ struct WatchlistView: View {
 
     // MARK: - Folder chips
 
+    /// Two-row chip layout. "All" anchors row 1; folders split roughly in
+    /// half between the rows. Row 2 gets extra leading padding so the
+    /// stack reads as deliberately tilted/staggered. The "+ New folder"
+    /// affordance is overlaid on the trailing edge so chips physically
+    /// scroll under it — keeps the action always reachable without
+    /// reading as "add to watchlist".
     private var folderChipsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
+            chipRows
+                .padding(.leading, 16)
+                // Reserve room on the trailing edge so the last chip
+                // can scroll fully under the "+ New" overlay (28 fade
+                // + 56 opaque block = 84pt) instead of butting up
+                // against it.
+                .padding(.trailing, 92)
+                .padding(.vertical, 10)
+        }
+        .background(Color(.background))
+        .overlay(alignment: .trailing) {
+            newFolderOverlay
+        }
+    }
+
+    /// Pinned "+" button overlaid on the trailing edge of the chip
+    /// scroll. The leading fade + opaque trailing block span the FULL
+    /// chip-area height so chips in either row are fully masked as they
+    /// scroll behind — without this they'd be visible above and below
+    /// the button itself.
+    private var newFolderOverlay: some View {
+        HStack(spacing: 0) {
+            LinearGradient(
+                colors: [Color(.background).opacity(0), Color(.background)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: 28)
+
+            Color(.background)
+                .frame(width: 56)
+                .overlay {
+                    Button {
+                        newFolderPresented = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(Color.accentColor)
+                            .frame(width: 32, height: 32)
+                            .background(Circle().fill(Color.accentColor.opacity(0.12)))
+                            .overlay(Circle().strokeBorder(Color.accentColor.opacity(0.35),
+                                                           lineWidth: 0.5))
+                    }
+                    .accessibilityLabel("New folder")
+                }
+        }
+        .frame(maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var chipRows: some View {
+        let folders = watchlistViewModel.folderStore.folders
+        let firstHalfCount = (folders.count + 1) / 2   // ceil(N/2)
+        let firstHalf = Array(folders.prefix(firstHalfCount))
+        let secondHalf = Array(folders.dropFirst(firstHalfCount))
+
+        VStack(alignment: .leading, spacing: 8) {
+            // Row 1 — always present, anchored by the "All" filter.
             HStack(spacing: 8) {
                 FolderChip(label: "All",
                            symbol: "tray.full",
                            isSelected: watchlistViewModel.selectedFilter == .all) {
                     setFilter(.all)
                 }
-
-                ForEach(watchlistViewModel.folderStore.folders) { folder in
-                    FolderChip(label: folder.name,
-                               symbol: folder.symbol,
-                               isSelected: watchlistViewModel.selectedFilter == .folder(folder.id)) {
-                        setFilter(.folder(folder.id))
-                    }
-                    .contextMenu {
-                        Button {
-                            folderToRename = folder
-                        } label: {
-                            Label("Rename", systemImage: "pencil")
-                        }
-                        Button(role: .destructive) {
-                            deleteFolder(folder)
-                        } label: {
-                            Label("Delete folder", systemImage: "trash")
-                        }
-                    }
-                }
-
-                // Action chip — visually distinct (ghost style) so it
-                // doesn't read as another filter folder.
-                FolderChip(label: "New",
-                           symbol: "plus",
-                           isSelected: false,
-                           style: .ghost) {
-                    newFolderPresented = true
+                ForEach(firstHalf) { folder in
+                    folderChip(folder)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+
+            // Row 2 — rendered only when there's a second half to show,
+            // so the chip area collapses cleanly with few folders. Extra
+            // leading padding gives the staggered/tilted look.
+            if !secondHalf.isEmpty {
+                HStack(spacing: 8) {
+                    ForEach(secondHalf) { folder in
+                        folderChip(folder)
+                    }
+                }
+                .padding(.leading, 24)
+            }
         }
-        .background(Color(.background))
+    }
+
+    @ViewBuilder
+    private func folderChip(_ folder: Folder) -> some View {
+        FolderChip(label: folder.name,
+                   symbol: folder.symbol,
+                   isSelected: watchlistViewModel.selectedFilter == .folder(folder.id)) {
+            setFilter(.folder(folder.id))
+        }
+        .contextMenu {
+            Button {
+                folderToRename = folder
+            } label: {
+                Label("Rename", systemImage: "pencil")
+            }
+            Button(role: .destructive) {
+                deleteFolder(folder)
+            } label: {
+                Label("Delete folder", systemImage: "trash")
+            }
+        }
     }
 
     private func setFilter(_ filter: WatchlistModel.FolderFilter) {
@@ -135,6 +203,17 @@ struct WatchlistView: View {
         }
     }
 
+    /// Returns a per-row folder lookup only when the user is viewing
+    /// the "All" set. Inside a specific folder every row would carry the
+    /// same badge, which adds visual noise without conveying anything.
+    private var folderBadgeProvider: ((Int) -> Folder?)? {
+        guard watchlistViewModel.selectedFilter == .all else { return nil }
+        return { resultID in
+            guard let folderID = folderStore.folderID(for: resultID) else { return nil }
+            return folderStore.folders.first(where: { $0.id == folderID })
+        }
+    }
+
     private func watchlistListView(items: [Result]) -> some View {
         // `.onMove` on the inner ForEach gives long-press-to-drag in iOS
         // 16+ without requiring `editMode = .active`, which would also
@@ -148,7 +227,8 @@ struct WatchlistView: View {
                                 watchlistViewModel.reorder(displayed: items,
                                                            from: source,
                                                            to: destination)
-                            })
+                            },
+                            folderProvider: folderBadgeProvider)
         }
         .listStyle(.plain)
     }

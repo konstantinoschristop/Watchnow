@@ -32,6 +32,11 @@ struct GenericListView: View {
     /// this only when the active sort is Date Added (other sorts would
     /// overwrite the move on next re-sort, which would feel broken).
     var onReorder: ((IndexSet, Int) -> Void)? = nil
+    /// When non-nil, the row's meta line shows a small badge identifying
+    /// which folder the item is in. Watchlist passes this only when the
+    /// "All" filter is active — when filtering by folder, every row is in
+    /// the same folder, so the badge would be visual noise.
+    var folderProvider: ((Int) -> Folder?)? = nil
 
     var body: some View {
         ForEach(Array(results.enumerated()), id: \.element) { _, result in
@@ -65,10 +70,21 @@ struct GenericListView: View {
                 ContentDetailsView(detailsViewModel: vm)
                     .navigationTransition(.zoom(sourceID: result.id, in: namespace))
             } label: {
-                ResultRow(result: result)
+                ResultRow(result: result, folderBadge: folderBadge(for: result))
             }
             .matchedTransitionSource(id: result.id, in: namespace)
         }
+    }
+
+    /// Resolve the small meta-line folder badge for a row, if one is
+    /// configured and the item belongs to a folder.
+    private func folderBadge(for result: Result) -> ResultRow.FolderBadge? {
+        guard let provider = folderProvider,
+              let id = result.id,
+              let folder = provider(id) else {
+            return nil
+        }
+        return ResultRow.FolderBadge(symbol: folder.symbol, name: folder.name)
     }
 
     // MARK: - Swipe actions
@@ -174,7 +190,16 @@ private struct ActorRow: View {
 /// system disclosure indicator automatically, so a custom one would
 /// double up.
 struct ResultRow: View {
+
+    /// Optional small badge appended to the meta line, used by the
+    /// Watchlist's "All" view to surface which folder a row belongs to.
+    struct FolderBadge {
+        let symbol: String
+        let name: String
+    }
+
     let result: Result
+    var folderBadge: FolderBadge? = nil
 
     private let posterWidth: CGFloat = 64
     private let posterHeight: CGFloat = 96
@@ -256,9 +281,9 @@ struct ResultRow: View {
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
-    /// Year + star rating. Rendered conditionally so a missing piece never
-    /// leaves a dangling separator. Actors skip this row entirely since
-    /// neither field applies.
+    /// Year + star rating + optional folder badge. Rendered conditionally
+    /// so a missing piece never leaves a dangling separator. Actors skip
+    /// this row entirely since none of the fields apply.
     @ViewBuilder
     private var metaRow: some View {
         if result.getMediaType() == "Actor" {
@@ -266,18 +291,19 @@ struct ResultRow: View {
         } else {
             let year = yearString
             let ratingText = rating.map { String(format: "%.1f", $0) }
+            let hasYear = year != nil
+            let hasRating = ratingText != nil
+            let hasBadge = folderBadge != nil
 
-            if ratingText != nil || year != nil {
+            if hasYear || hasRating || hasBadge {
                 HStack(spacing: 6) {
                     if let year {
                         Text(year)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
                     }
-                    if ratingText != nil, year != nil {
-                        Text("•")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary.opacity(0.5))
+                    if hasYear, hasRating {
+                        metaSeparator
                     }
                     if let ratingText {
                         HStack(spacing: 2) {
@@ -289,8 +315,44 @@ struct ResultRow: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    if hasBadge, hasYear || hasRating {
+                        metaSeparator
+                    }
+                    if let folderBadge {
+                        folderPill(folderBadge)
+                    }
                 }
             }
+        }
+    }
+
+    private var metaSeparator: some View {
+        Text("•")
+            .font(.system(size: 12))
+            .foregroundStyle(.secondary.opacity(0.5))
+    }
+
+    /// Tinted pill: folder icon + name. Reads as "this item lives in
+    /// folder X" — visually distinct from year/rating so the eye doesn't
+    /// mistake it for another piece of metadata.
+    private func folderPill(_ badge: FolderBadge) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: badge.symbol)
+                .font(.system(size: 10, weight: .semibold))
+            Text(badge.name)
+                .font(.system(size: 11, weight: .semibold))
+                .lineLimit(1)
+        }
+        .foregroundStyle(Color.accentColor)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 2)
+        .background {
+            Capsule(style: .continuous)
+                .fill(Color.accentColor.opacity(0.12))
+        }
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(Color.accentColor.opacity(0.3), lineWidth: 0.5)
         }
     }
 
