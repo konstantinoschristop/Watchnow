@@ -54,8 +54,8 @@ final class FolderManager: ObservableObject {
     /// Uncategorized.
     @Published private(set) var membership: [String: UUID]
 
-    private static let foldersKey = "watchlist_folders"
-    private static let membershipKey = "watchlist_folder_membership"
+    private nonisolated static let foldersKey = "watchlist_folders"
+    private nonisolated static let membershipKey = "watchlist_folder_membership"
 
     private init() {
         if let data = UserDefaults.standard.data(forKey: Self.foldersKey),
@@ -70,6 +70,18 @@ final class FolderManager: ObservableObject {
             self.membership = decoded
         } else {
             self.membership = [:]
+        }
+
+        // Reload + republish when folders/membership arrive from another
+        // device via iCloud.
+        NotificationCenter.default.addObserver(
+            forName: CloudSync.didMergeRemoteChanges,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            let keys = note.userInfo?[CloudSync.changedKeysKey] as? [String] ?? []
+            guard keys.contains(Self.foldersKey) || keys.contains(Self.membershipKey) else { return }
+            Task { @MainActor in self?.reloadFromStore() }
         }
     }
 
@@ -142,12 +154,29 @@ final class FolderManager: ObservableObject {
     private func persistFolders() {
         if let encoded = try? JSONEncoder().encode(folders) {
             UserDefaults.standard.set(encoded, forKey: Self.foldersKey)
+            CloudSync.pushIfSynced(Self.foldersKey)
         }
     }
 
     private func persistMembership() {
         if let encoded = try? JSONEncoder().encode(membership) {
             UserDefaults.standard.set(encoded, forKey: Self.membershipKey)
+            CloudSync.pushIfSynced(Self.membershipKey)
+        }
+    }
+
+    // MARK: - iCloud sync
+
+    /// Re-read folders + membership from the (cloud-updated) store and
+    /// republish, so a change synced from another device shows up live.
+    private func reloadFromStore() {
+        if let data = UserDefaults.standard.data(forKey: Self.foldersKey),
+           let decoded = try? JSONDecoder().decode([Folder].self, from: data) {
+            folders = decoded
+        }
+        if let data = UserDefaults.standard.data(forKey: Self.membershipKey),
+           let decoded = try? JSONDecoder().decode([String: UUID].self, from: data) {
+            membership = decoded
         }
     }
 }

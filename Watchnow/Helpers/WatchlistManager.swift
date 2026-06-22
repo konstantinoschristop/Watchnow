@@ -30,6 +30,9 @@ struct UserDefault<T: Codable> {
         set {
             if let encoded = try? JSONEncoder().encode(newValue) {
                 UserDefaults.standard.set(encoded, forKey: key)
+                // Mirror to iCloud for the keys that sync (watchlist, Movie
+                // Night prefs); no-op for everything else.
+                CloudSync.pushIfSynced(key)
             }
         }
     }

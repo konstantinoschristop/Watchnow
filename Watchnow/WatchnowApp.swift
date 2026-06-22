@@ -25,6 +25,10 @@ struct WatchnowApp: App {
         // and improves the UX for real reminders that fire while the user
         // happens to have the app open.
         UNUserNotificationCenter.current().delegate = NotificationCenterDelegate.shared
+
+        // Begin mirroring the watchlist / folders / Movie Night prefs to
+        // iCloud and reconcile with any data already in the user's account.
+        CloudSync.start()
     }
 
     var body: some Scene {

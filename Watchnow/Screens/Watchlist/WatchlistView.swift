@@ -26,6 +26,7 @@ struct WatchlistView: View {
     @State private var folderToRename: Folder?
     @State private var moveTarget: Result?
     @State private var movieNightPresented = false
+    @ObservedObject private var syncStatus = SyncStatus.shared
     @Namespace private var navigationNamespace
 
     var body: some View {
@@ -34,6 +35,7 @@ struct WatchlistView: View {
                 folderChipsRow
             }
             content
+            syncFooter
         }
         .background(Color(.background))
         .navigationBarTitleDisplayMode(.inline)
@@ -335,6 +337,36 @@ struct WatchlistView: View {
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(tint)
         }
+    }
+
+    // MARK: - iCloud sync footer
+
+    /// Quiet "Synced via iCloud" caption, pinned below the list. Shown only
+    /// when the device is actually signed into iCloud, so it never claims a
+    /// sync that isn't happening.
+    @ViewBuilder
+    private var syncFooter: some View {
+        if syncStatus.isAvailable {
+            HStack(spacing: 5) {
+                Image(systemName: "checkmark.icloud")
+                    .font(.system(size: 11, weight: .medium))
+                Text(syncCaption)
+                    .font(.system(size: 12))
+            }
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var syncCaption: String {
+        guard let date = syncStatus.lastSyncedAt else { return "Synced via iCloud" }
+        if Date().timeIntervalSince(date) < 5 {
+            return "Synced via iCloud · just now"
+        }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return "Synced via iCloud · \(formatter.localizedString(for: date, relativeTo: Date()))"
     }
 
     // MARK: - Data shaping

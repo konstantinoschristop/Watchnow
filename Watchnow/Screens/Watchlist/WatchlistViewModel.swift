@@ -23,6 +23,16 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     init(model: WatchlistModel) {
         self.model = model
         self.fetchResultsFromWatchList()
+
+        // Refresh when the watchlist (or its folders) sync in from another
+        // device, so the list updates live without needing a tab switch.
+        NotificationCenter.default.addObserver(
+            forName: CloudSync.didMergeRemoteChanges,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.refreshDataIfNeeded() }
+        }
     }
 
     private func fetchResultsFromWatchList() {

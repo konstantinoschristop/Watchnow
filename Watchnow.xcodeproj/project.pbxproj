@@ -97,6 +97,7 @@
 		EEDC84AE28ABE61900F3C171 /* PersonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDC84AD28ABE61900F3C171 /* PersonResponse.swift */; };
 		EEF45B272A79864400D3460E /* WatchProvidersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */; };
 		EEF45B292A7998D600D3460E /* WatchProviderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF45B282A7998D600D3460E /* WatchProviderView.swift */; };
+		F3A8723F1B3228E00FFA41D2 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95308A2C4242E7D3ACCEC284 /* CloudSync.swift */; };
 		FE1D0A01000000000000FB01 /* HeroOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A01000000000000FA01 /* HeroOverlayView.swift */; };
 		FE1D0A02000000000000FB02 /* PrimaryActionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A02000000000000FA02 /* PrimaryActionRow.swift */; };
 		FE1D0A03000000000000FB03 /* MoreLikeThisSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A03000000000000FA03 /* MoreLikeThisSection.swift */; };
@@ -121,6 +122,7 @@
 		49CD585C3EF98A630B7704F0 /* StreamingPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamingPreferences.swift; sourceTree = "<group>"; };
 		533392B3BF4FD260A3EF0539 /* MovieNightModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightModel.swift; sourceTree = "<group>"; };
 		5AC7E865D288BD8F5490BBCC /* MovieNightView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightView.swift; sourceTree = "<group>"; };
+		67FC41B9E54A43DE0293F7A9 /* Watchnow.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Watchnow.entitlements; sourceTree = "<group>"; };
 		8A036A7326BBC8C100A3D0FF /* TopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCard.swift; sourceTree = "<group>"; };
 		8A19B1A92E7EEE820083A094 /* BaseNetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseNetworkService.swift; sourceTree = "<group>"; };
 		8A19B1AB2E7EF7340083A094 /* BackdropImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackdropImage.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 		8AE787DF2E895FA900A6FF50 /* ContentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentService.swift; sourceTree = "<group>"; };
 		8AE787E12E89605B00A6FF50 /* ContentListResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListResult.swift; sourceTree = "<group>"; };
 		8AE787E42E8966E000A6FF50 /* ContentMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMainView.swift; sourceTree = "<group>"; };
+		95308A2C4242E7D3ACCEC284 /* CloudSync.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
 		9DD65EB43A2F4AAFC443413A /* MovieNightSwipeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightSwipeView.swift; sourceTree = "<group>"; };
 		AA000001000000000000AA01 /* WatchnowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchnowApp.swift; sourceTree = "<group>"; };
 		AA000001000000000000AA03 /* DetailServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailServiceProtocol.swift; sourceTree = "<group>"; };
@@ -299,6 +302,7 @@
 				8A981D5D26B5AF1100993232 /* LaunchScreen.storyboard */,
 				8A981D6026B5AF1100993232 /* Info.plist */,
 				8A981D5A26B5AF1100993232 /* Preview Content */,
+				67FC41B9E54A43DE0293F7A9 /* Watchnow.entitlements */,
 			);
 			path = Watchnow;
 			sourceTree = "<group>";
@@ -462,6 +466,7 @@
 				FE1D0A09000000000000FA09 /* DeepLinkRouter.swift */,
 				FE1D0A20000000000000FA20 /* FolderManager.swift */,
 				49CD585C3EF98A630B7704F0 /* StreamingPreferences.swift */,
+				95308A2C4242E7D3ACCEC284 /* CloudSync.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -702,6 +707,7 @@
 				7964C1A219919634D0BC3816 /* MovieNightSetupView.swift in Sources */,
 				67A91F0397FEB8E778E27F5F /* MovieNightSwipeView.swift in Sources */,
 				0536450B03E7ED86E450E3D7 /* MovieNightMatchView.swift in Sources */,
+				F3A8723F1B3228E00FFA41D2 /* CloudSync.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -851,6 +857,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Watchnow/Watchnow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
@@ -882,6 +889,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Watchnow/Watchnow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
