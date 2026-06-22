@@ -19,6 +19,11 @@ struct ContentView: View {
     @State private var moviesDeepLinkResult: Result?
     @State private var seriesDeepLinkResult: Result?
 
+    /// Opens straight into Movie Night when the app is launched with
+    /// `-MovieNightDemo` (e.g. `simctl launch … --args -MovieNightDemo`).
+    /// Inert without the argument, so it never affects a normal launch.
+    @State private var movieNightDemo = CommandLine.arguments.contains("-MovieNightDemo")
+
     enum AppTab: Hashable {
         case movies, series, search, watchlist
     }
@@ -40,6 +45,9 @@ struct ContentView: View {
         }
         .onChange(of: router.pending) { _, pending in
             applyDeepLink(pending)
+        }
+        .fullScreenCover(isPresented: $movieNightDemo) {
+            MovieNightView()
         }
     }
 

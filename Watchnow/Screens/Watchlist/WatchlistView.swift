@@ -25,6 +25,7 @@ struct WatchlistView: View {
     @State private var newFolderPresented = false
     @State private var folderToRename: Folder?
     @State private var moveTarget: Result?
+    @State private var movieNightPresented = false
     @Namespace private var navigationNamespace
 
     var body: some View {
@@ -67,6 +68,19 @@ struct WatchlistView: View {
                             ),
                             titleVisibility: .visible) {
             moveDialogButtons
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    movieNightPresented = true
+                } label: {
+                    Label("Movie Night", systemImage: "popcorn.fill")
+                        .labelStyle(.titleAndIcon)
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $movieNightPresented) {
+            MovieNightView()
         }
     }
 

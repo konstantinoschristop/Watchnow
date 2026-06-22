@@ -30,6 +30,9 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
     /// Currently active genre filter. nil = "All" (no filter).
     @State private var selectedGenreID: Int? = nil
 
+    /// Drives the Movie Night full-screen cover (Movies tab only).
+    @State private var movieNightPresented = false
+
     // MARK: - Screen-type helpers
 
     private var isMovieTab: Bool {
@@ -74,6 +77,13 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                     }
 
                     genreFilterBar
+
+                    // Movie Night entry point — Movies tab only (the feature
+                    // is movies-only for now). Sits high in the feed, under
+                    // the genre chips, so it's the first thing after the hero.
+                    if isMovieTab {
+                        MovieNightBanner { movieNightPresented = true }
+                    }
 
                     LazyVStack(spacing: 6) {
                         ForEach(sections, id: \.self) { section in
@@ -124,6 +134,9 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         .ignoresSafeArea(edges: .top)
         .onLoad { Task { await viewModel.loadContent(resetFirst: true) } }
         .toolbarTitleDisplayMode(.inlineLarge)
+        .fullScreenCover(isPresented: $movieNightPresented) {
+            MovieNightView()
+        }
     }
 
     // MARK: - Genre filter bar
@@ -235,6 +248,156 @@ private struct GenreChip: View {
                         .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                 }
             }
+    }
+}
+
+// MARK: - Movie Night banner
+
+/// Prominent entry point to the Movie Night flow, shown near the top of the
+/// Movies feed: an accent-filled card with the popcorn mark, a one-line pitch
+/// and a chevron, tappable across its whole surface.
+private struct MovieNightBanner: View {
+    let action: () -> Void
+
+    /// Drives the diagonal shine sweep across the card.
+    @State private var shimmer: CGFloat = -1
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                iconBadge
+                copy
+                Spacer(minLength: 8)
+                miniDeck
+            }
+            .padding(16)
+            .background { gradient }
+            .overlay { shine }
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .strokeBorder(.white.opacity(0.18), lineWidth: 0.5)
+            }
+            .shadow(color: Color.accentColor.opacity(0.45), radius: 16, y: 8)
+        }
+        .buttonStyle(PressableCardStyle())
+        .padding(.horizontal, 16)
+        .padding(.top, 2)
+        .padding(.bottom, 10)
+        .onAppear {
+            withAnimation(.linear(duration: 3.6).repeatForever(autoreverses: false)) {
+                shimmer = 1
+            }
+        }
+    }
+
+    // MARK: - Pieces
+
+    private var iconBadge: some View {
+        ZStack {
+            Circle().fill(.white.opacity(0.20))
+            Circle().strokeBorder(.white.opacity(0.30), lineWidth: 0.5)
+            Image(systemName: "popcorn.fill")
+                .font(.system(size: 23, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+        .frame(width: 52, height: 52)
+    }
+
+    private var copy: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text("Movie Night")
+                    .font(.system(size: 18, weight: .heavy))
+                Text("NEW")
+                    .font(.system(size: 10, weight: .heavy))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(.white.opacity(0.28)))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 0.5))
+            }
+            .foregroundStyle(.white)
+
+            Text("Can't decide? Swipe to find tonight's pick.")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.white.opacity(0.92))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
+        }
+    }
+
+    /// A little swipe-card stack with a heart — a visual nod to the
+    /// swipe-to-match mechanic the banner opens into.
+    private var miniDeck: some View {
+        ZStack {
+            miniCard(rotation: -14, dx: -11, fill: .white.opacity(0.22))
+            miniCard(rotation: 9,  dx: 9,  fill: .white.opacity(0.34))
+            miniCard(rotation: -2, dx: 0,  fill: .white)
+                .overlay {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Color.accentColor)
+                }
+        }
+        .frame(width: 56, height: 58)
+    }
+
+    private func miniCard(rotation: Double, dx: CGFloat, fill: Color) -> some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(fill)
+            .frame(width: 32, height: 46)
+            .rotationEffect(.degrees(rotation))
+            .offset(x: dx)
+    }
+
+    private var gradient: some View {
+        ZStack {
+            // Accent hue only — a light→dark sweep gives depth without
+            // introducing an off-brand colour.
+            LinearGradient(
+                colors: [Color.accentColor.mix(with: .white, by: 0.12),
+                         Color.accentColor.mix(with: .black, by: 0.22)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            // Soft light source in the top-left for depth.
+            RadialGradient(
+                colors: [.white.opacity(0.28), .clear],
+                center: .topLeading,
+                startRadius: 0,
+                endRadius: 170
+            )
+        }
+    }
+
+    /// Diagonal highlight band that sweeps across the card.
+    private var shine: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            LinearGradient(
+                colors: [.clear, .white.opacity(0.12), .clear],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: w * 0.28)
+            .rotationEffect(.degrees(22))
+            // Wider travel than the card → the band spends longer off-screen,
+            // so the wave reads as an occasional gentle glint, not a constant
+            // sweep.
+            .offset(x: shimmer * w * 1.8)
+            .blendMode(.plusLighter)
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+/// Gentle press-scale used by tappable card surfaces.
+private struct PressableCardStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 

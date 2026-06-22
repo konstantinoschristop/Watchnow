@@ -43,7 +43,10 @@
       "Bash(wait)",
       "Bash(sips --cropToHeightWidth 220 1200 notification-banner.jpg --out notification-banner-cropped.jpg)",
       "Bash(xargs -I {} stat -f \"%m %z %N\" {})",
-      "Bash(sips --cropToHeightWidth 190 1320 notification-banner.jpg --out notification-banner-cropped.jpg)"
+      "Bash(sips --cropToHeightWidth 190 1320 notification-banner.jpg --out notification-banner-cropped.jpg)",
+      "Bash(ls -la && echo \"---PARENT---\" && ls -la ..)",
+      "Bash(xcodebuild -project Watchnow.xcodeproj -scheme Watchnow -sdk iphonesimulator -destination 'platform=iOS Simulator,id=C0DD6E21-F632-4938-979B-18F324648189' -configuration Debug -derivedDataPath /tmp/wn_dd CODE_SIGNING_ALLOWED=NO build)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

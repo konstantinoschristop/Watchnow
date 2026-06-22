@@ -95,5 +95,20 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unche
                                                        page: page)
         return try await request(urlString: urlString)
     }
+
+    /// Movie Night candidate fetch — TMDB Discover for movies filtered by
+    /// the chosen moods (genre IDs), runtime cap and streaming services.
+    func discover(genreIDs: [Int],
+                  runtimeLTE: Int?,
+                  providerIDs: [Int],
+                  region: String,
+                  page: Int = 1) async throws -> GenericResultResponse {
+        let urlString = API.Common.discoverMovies(genreIDs: genreIDs,
+                                                  runtimeLTE: runtimeLTE,
+                                                  providerIDs: providerIDs,
+                                                  region: region,
+                                                  page: page)
+        return try await request(urlString: urlString)
+    }
 }
 

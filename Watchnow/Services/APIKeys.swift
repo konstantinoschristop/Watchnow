@@ -55,6 +55,31 @@ enum API {
         static func discoverByProvider(type: String, providerID: Int, region: String, page: Int = 1) -> String {
             return "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&watch_region=\(region)&with_watch_providers=\(providerID)&with_watch_monetization_types=flatrate&sort_by=popularity.desc&page=\(page)"
         }
+
+        /// Movie Night's candidate query. Genre IDs are OR'd (`a|b`),
+        /// `runtimeLTE` caps the length, and a supplied provider set scopes
+        /// to subscription (`flatrate`) availability in `region`. A
+        /// `vote_count` floor keeps obscure, barely-rated titles out of the
+        /// deck. Movies-only for now — Phase 1 scope.
+        static func discoverMovies(genreIDs: [Int],
+                                   runtimeLTE: Int?,
+                                   providerIDs: [Int],
+                                   region: String,
+                                   sortBy: String = "popularity.desc",
+                                   voteCountGTE: Int = 200,
+                                   page: Int = 1) -> String {
+            var url = "\(API.baseURL)/discover/movie?api_key=\(API.key)&language=\(API.language)&include_adult=false&sort_by=\(sortBy)&vote_count.gte=\(voteCountGTE)&page=\(page)"
+            if !genreIDs.isEmpty {
+                url += "&with_genres=\(genreIDs.map(String.init).joined(separator: "|"))"
+            }
+            if let runtimeLTE {
+                url += "&with_runtime.lte=\(runtimeLTE)"
+            }
+            if !providerIDs.isEmpty {
+                url += "&watch_region=\(region)&with_watch_providers=\(providerIDs.map(String.init).joined(separator: "|"))&with_watch_monetization_types=flatrate"
+            }
+            return url
+        }
         static func details(screenType: String, id: String) -> String {
             return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)"
         }
