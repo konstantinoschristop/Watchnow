@@ -19,43 +19,43 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     let viewSection: ViewSections
     let viewModel:   VM
 
-    /// Three items is enough to break the rhythm from the horizontal
-    /// carousels above without dwarfing them.
-    private let previewCount: Int = 3
+    /// Three rich rows per page; up to three pages (9 titles) the user can
+    /// swipe through horizontally. Three keeps each page from dwarfing the
+    /// poster carousels above, while paging lets the section surface far more
+    /// of the list than a single static trio.
+    private let pageSize: Int = 3
+    private let maxItems: Int = 9
 
     @Namespace private var namespace
 
+    /// Page index currently snapped to the leading edge of the pager, driven
+    /// two-way by `.scrollPosition` so the dots track swipes *and* dot taps
+    /// scroll the pager. `nil` only before the first layout pass.
+    @State private var pageID: Int? = 0
+    private var currentPage: Int { pageID ?? 0 }
+
     private var visibleResults: [Result] {
-        Array(results.prefix(previewCount)).map { result in
+        Array(results.prefix(maxItems)).map { result in
             var r = result
             r.media_type = screenType == .movie ? "movie" : "tv"
             return r
         }
     }
 
+    /// `visibleResults` split into pages of `pageSize` (the last page may be
+    /// short when fewer than `maxItems` titles came back).
+    private var pages: [[Result]] {
+        stride(from: 0, to: visibleResults.count, by: pageSize).map { start in
+            Array(visibleResults[start ..< min(start + pageSize, visibleResults.count)])
+        }
+    }
+
     var body: some View {
         Section {
-            VStack(spacing: 0) {
-                ForEach(Array(visibleResults.enumerated()), id: \.element) { idx, result in
-                    NavigationLink {
-                        let model = ContentDetailsModel(screenType: screenType, result: result)
-                        let vm = ContentDetailsViewModel(model: model)
-                        ContentDetailsView(detailsViewModel: vm)
-                            .navigationTransition(.zoom(sourceID: result.id, in: namespace))
-                    } label: {
-                        ListSectionRow(result: result)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .contentShape(Rectangle())
-                    }
-                    .matchedTransitionSource(id: result.id, in: namespace)
-                    .buttonStyle(.plain)
-
-                    if idx < visibleResults.count - 1 {
-                        Divider()
-                            .padding(.leading, 92)   // aligns under the title column
-                            .opacity(0.4)
-                    }
+            VStack(spacing: 12) {
+                pager
+                if pages.count > 1 {
+                    pageDots
                 }
             }
         } header: {
@@ -67,6 +67,81 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
             )
             .textCase(.none)
         }
+    }
+
+    // MARK: - Pager
+
+    /// Page-snapping horizontal scroll view. A non-lazy `HStack` measures
+    /// every page up front, which pins the section's height to the tallest
+    /// page — so the feed below it doesn't jump as the user swipes between
+    /// pages whose rows wrap to different heights.
+    private var pager: some View {
+        ScrollView(.horizontal) {
+            HStack(alignment: .top, spacing: 0) {
+                ForEach(Array(pages.enumerated()), id: \.offset) { index, pageItems in
+                    pageColumn(pageItems)
+                        .containerRelativeFrame(.horizontal)
+                        .id(index)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $pageID)
+        .scrollIndicators(.hidden)
+    }
+
+    /// One page: up to three rows, divided like the original static list.
+    private func pageColumn(_ items: [Result]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.element) { idx, result in
+                row(result)
+                if idx < items.count - 1 {
+                    Divider()
+                        .padding(.leading, 92)   // aligns under the title column
+                        .opacity(0.4)
+                }
+            }
+        }
+    }
+
+    private func row(_ result: Result) -> some View {
+        NavigationLink {
+            let model = ContentDetailsModel(screenType: screenType, result: result)
+            let vm = ContentDetailsViewModel(model: model)
+            ContentDetailsView(detailsViewModel: vm)
+                .navigationTransition(.zoom(sourceID: result.id, in: namespace))
+        } label: {
+            ListSectionRow(result: result)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .contentShape(Rectangle())
+        }
+        .matchedTransitionSource(id: result.id, in: namespace)
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Page indicator
+
+    /// Pill-style dots: the active page stretches into a short capsule in the
+    /// section tint. Tapping a dot scrolls to that page.
+    private var pageDots: some View {
+        HStack(spacing: 6) {
+            ForEach(pages.indices, id: \.self) { i in
+                Capsule(style: .continuous)
+                    .fill(i == currentPage ? viewSection.themeColor
+                                           : Color.secondary.opacity(0.3))
+                    .frame(width: i == currentPage ? 16 : 6, height: 6)
+                    .contentShape(Capsule())
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            pageID = i
+                        }
+                    }
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentPage)
+        .frame(maxWidth: .infinity)
     }
 }
 
