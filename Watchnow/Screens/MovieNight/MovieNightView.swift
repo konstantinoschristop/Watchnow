@@ -85,3 +85,18 @@ struct MovieNightView: View {
         }
     }
 }
+
+// MARK: - Shared style
+
+extension LinearGradient {
+    /// The Movie Night accent sweep (light → dark accent). Shared by the
+    /// setup CTA and the match-screen buttons so the whole flow reads as one.
+    static var movieNightAccent: LinearGradient {
+        LinearGradient(
+            colors: [Color.accentColor.mix(with: .white, by: 0.10),
+                     Color.accentColor.mix(with: .black, by: 0.20)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}

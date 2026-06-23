@@ -15,6 +15,7 @@ struct BottomView: View {
     var screenType: ScreenTypes
     var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
+    var adSlot: Int? = nil
 
     var body: some View {
         Section {
@@ -22,7 +23,8 @@ struct BottomView: View {
                                   screenType: screenType,
                                   viewModel: viewModel,
                                   viewSection: viewSection,
-                                  cardType: .bottom)
+                                  cardType: .bottom,
+                                  adSlot: adSlot)
             .background(LinearGradient(colors: [.clear, Color(.secondaryBackground).opacity(0.6)], startPoint: .center, endPoint: .bottom))
         } header: {
             SectionHeaderView(

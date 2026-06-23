@@ -36,7 +36,12 @@ struct SimilarsView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(alignment: .top, spacing: cardSpacing) {
-                ForEach(content, id: \.self) { item in
+                ForEach(Array(content.enumerated()), id: \.element) { index, item in
+                    // One native ad, slotted in like another poster card.
+                    if index == 3 {
+                        NativeAdCard(posterHeight: 175)
+                            .frame(width: cardWidth, height: cardHeight, alignment: .top)
+                    }
                     BottomCard(content: item, screenType: screenType)
                         .frame(width: cardWidth, height: cardHeight, alignment: .top)
                 }

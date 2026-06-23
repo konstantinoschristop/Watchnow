@@ -115,7 +115,8 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                                                viewTitle: section.title,
                                                screenType: section.screenType,
                                                viewModel: viewModel,
-                                               viewSection: section)
+                                               viewSection: section,
+                                               adSlot: adSlot(for: section))
                                 }
                             }
                         }
@@ -197,6 +198,17 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
 
         let filtered = raw.filter { $0.genre_ids?.contains(genreID) == true }
         return filtered.isEmpty ? nil : filtered
+    }
+
+    /// Where to slot the native ad card. Limited to the one prominent
+    /// "Most Watched" (popular) row, after the 3rd poster, so it reads as
+    /// part of the scroll without peppering ad requests across every row.
+    private func adSlot(for section: ViewSections) -> Int? {
+        switch section {
+        case .popularMovies, .popularSeries:   return 3
+        case .topRatedMovies, .topRatedSeries: return 3
+        default: return nil
+        }
     }
 }
 

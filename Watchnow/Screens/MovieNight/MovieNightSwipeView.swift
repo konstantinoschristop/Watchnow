@@ -289,7 +289,10 @@ struct MovieNightSwipeView: View {
 /// A single poster card. Bottom gradient carries the title, year, rating +
 /// votes, genre pills and a short synopsis; the top corners hold a watchlist
 /// badge and (on the top card) an "i" button to the full details.
-private struct SwipeCard: View {
+///
+/// Also reused as the hero on the match screen — the winning title shown as
+/// "the card that won" — so the payoff matches the deck exactly.
+struct SwipeCard: View {
 
     let result: Result
     var showInfoButton: Bool = false

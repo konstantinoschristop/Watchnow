@@ -24,7 +24,6 @@ struct MovieNightSetupView: View {
     @State private var length: LengthBucket = .any
     @State private var selectedProviders: Set<Int> = []
     @State private var playerCount = 2
-    @State private var editingServices = false
     @State private var didPrefill = false
     @State private var appeared = false
 
@@ -115,20 +114,7 @@ struct MovieNightSetupView: View {
 
     private var whereSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                sectionHeader("Where", icon: "tv.fill")
-                Spacer()
-                if StreamingPreferences.hasMadeSelection && !editingServices {
-                    Button {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            editingServices = true
-                        }
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                            .font(.footnote.weight(.semibold))
-                    }
-                }
-            }
+            sectionHeader("Where", icon: "tv.fill")
 
             if vm.availableProviders.isEmpty {
                 HStack(spacing: 8) {
@@ -137,8 +123,11 @@ struct MovieNightSetupView: View {
                         .font(.footnote)
                         .foregroundStyle(.tertiary)
                 }
-            } else if showFullServicePicker {
-                if !StreamingPreferences.hasMadeSelection {
+            } else {
+                // Always show every service; the user's saved ones just come
+                // up already selected. (Their picks are remembered on the next
+                // "Find our match".)
+                if selectedProviders.isEmpty {
                     Text("Which do you have? We'll remember it next time.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -148,24 +137,8 @@ struct MovieNightSetupView: View {
                         providerChip(provider)
                     }
                 }
-            } else {
-                FlowLayout(spacing: 8) {
-                    ForEach(savedProviders) { provider in
-                        providerChip(provider)
-                    }
-                }
             }
         }
-    }
-
-    /// Show the full catalogue when the user is editing or has never picked;
-    /// otherwise just their saved set (compact).
-    private var showFullServicePicker: Bool {
-        editingServices || !StreamingPreferences.hasMadeSelection
-    }
-
-    private var savedProviders: [WatchProvider] {
-        vm.availableProviders.filter { selectedProviders.contains($0.provider_id) }
     }
 
     private func providerChip(_ provider: WatchProvider) -> some View {
@@ -213,14 +186,7 @@ struct MovieNightSetupView: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 54)
-            .background {
-                LinearGradient(
-                    colors: [Color.accentColor.mix(with: .white, by: 0.10),
-                             Color.accentColor.mix(with: .black, by: 0.20)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
+            .background { LinearGradient.movieNightAccent }
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .shadow(color: Color.accentColor.opacity(0.4), radius: 12, y: 6)
         }
@@ -273,7 +239,6 @@ struct MovieNightSetupView: View {
         guard !didPrefill else { return }
         didPrefill = true
         selectedProviders = Set(StreamingPreferences.providerIDs)
-        editingServices = !StreamingPreferences.hasMadeSelection
     }
 }
 
@@ -358,8 +323,8 @@ private struct MNChip: View {
 
 // MARK: - Press style
 
-/// Gentle press-scale for the primary CTA.
-private struct MNPressableStyle: ButtonStyle {
+/// Gentle press-scale for the primary CTA (and the match-screen buttons).
+struct MNPressableStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)

@@ -25,7 +25,6 @@ struct WatchlistView: View {
     @State private var newFolderPresented = false
     @State private var folderToRename: Folder?
     @State private var moveTarget: Result?
-    @State private var movieNightPresented = false
     @ObservedObject private var syncStatus = SyncStatus.shared
     @Namespace private var navigationNamespace
 
@@ -70,19 +69,6 @@ struct WatchlistView: View {
                             ),
                             titleVisibility: .visible) {
             moveDialogButtons
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    movieNightPresented = true
-                } label: {
-                    Label("Movie Night", systemImage: "popcorn.fill")
-                        .labelStyle(.titleAndIcon)
-                }
-            }
-        }
-        .fullScreenCover(isPresented: $movieNightPresented) {
-            MovieNightView()
         }
     }
 
@@ -245,6 +231,13 @@ struct WatchlistView: View {
                                                            to: destination)
                             },
                             folderProvider: folderBadgeProvider)
+
+            // A simple banner block at the foot of the list — same treatment
+            // as the bottom of the home/details scroll pages.
+            InlineBannerSection()
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
         }
         .listStyle(.plain)
     }

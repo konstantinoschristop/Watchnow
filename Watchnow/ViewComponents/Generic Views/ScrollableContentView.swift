@@ -19,6 +19,9 @@ struct ScrollableContentView: View {
     var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
     var cardType: CardType
+    /// Index at which to slot a native ad card into the row (nil = none).
+    /// Only honoured for `.bottom` rows so it matches the poster-card style.
+    var adSlot: Int? = nil
 
     @State private var performFeedback: Bool = false
     @State private var thresholdReached: Bool = false
@@ -66,6 +69,11 @@ struct ScrollableContentView: View {
             Spacer().frame(width: cardType == .bottom ? 10 : 20)
 
             ForEach(Array(results.enumerated()), id: \.element) { index, movie in
+                // Native ad card, slotted in like just another poster.
+                if cardType == .bottom, let adSlot, index == adSlot {
+                    adCardSlot
+                }
+
                 cardSlot(for: movie, index: index,
                          screenHalfWidth: screenHalfWidth,
                          scaleType: scaleType)
@@ -76,6 +84,14 @@ struct ScrollableContentView: View {
                 }
             }
         }
+    }
+
+    /// The native ad framed exactly like a `.bottom` poster slot so it reads
+    /// as part of the scroll. Poster height matches `BottomCard` (175).
+    private var adCardSlot: some View {
+        NativeAdCard(posterHeight: 175)
+            .frame(width: cardWidth, height: cardHeight)
+            .frame(width: slotWidth, height: slotHeight, alignment: .top)
     }
 
     /// Card slot with a scale effect that magnifies the card nearest the

@@ -282,6 +282,13 @@ private extension SearchView {
             GenericListView(results: $viewModel.filteredResults,
                             viewModel: viewModel,
                             namespace: namespace)
+
+            // A simple banner block at the foot of the list — same treatment
+            // as the bottom of the home/details scroll pages.
+            InlineBannerSection()
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
         }
         .listStyle(.plain)
         .scrollDismissesKeyboard(.interactively)
