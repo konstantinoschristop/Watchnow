@@ -1,0 +1,11 @@
+Meet Movie Coach — a second opinion on whether a title is right for you.
+
+• Movie Coach: open any movie or series and get a quick, personal verdict — great pick, worth a watch, or save it for later — with a one-line reason. Runs entirely on your device.
+• Ask Coach: tap a suggested question like "Is it slow?" or "Is it worth the runtime?" for a straight answer.
+• "I like this": one tap tells Coach what you're into, so its picks keep getting sharper.
+• Smarter suggestions that learn from your watchlist, your likes, and what you skip in Movie Night.
+• Your taste now syncs across your devices via iCloud.
+• iOS 27 support.
+• Fewer empty gaps and smoother scrolling across Movies, Series and Search.
+
+Movie Coach requires iOS 26 or later on an Apple Intelligence–capable iPhone.

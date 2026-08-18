@@ -4,15 +4,19 @@
 //
 //  Self-contained banner row for the main content lists.
 //
-//  Reserves a fixed 50pt loading area until the ad resolves — this
-//  guarantees the section is laid out by the enclosing LazyVStack
-//  (a zero-size section can be skipped) and that the GeometryReader
-//  fires with a real width on the first pass.
+//  Three states, deliberately distinct:
 //
-//  Once the ad resolves, the section animates to the actual banner
-//  height. On failure, it stays at the placeholder height (~50pt) so
-//  the UI doesn't jump — Google often retries failed loads silently
-//  and the slot stays ready.
+//   - loading  Reserve a 50pt slot. The reservation isn't cosmetic: a
+//              zero-size section can be skipped entirely by the enclosing
+//              LazyVStack, so the banner would never mount and never
+//              request. Nothing is drawn in it — no "Ad" label — so a slot
+//              that never fills reads as blank space, not a broken ad.
+//   - loaded   Collapse to the creative's exact height, with hairlines.
+//   - failed   Render nothing at all: no dividers, no reserved height.
+//
+//  Previously the failed case kept the 50pt box (and an "Ad" label) forever,
+//  which left a dead grey band on the Movies, Series, Details, Search and
+//  Watchlist screens whenever a request didn't fill.
 //
 
 import SwiftUI
@@ -22,7 +26,7 @@ struct InlineBannerSection: View {
 
     private let placeholderHeight: CGFloat = 50
 
-    @State private var adHeight: CGFloat       = 0
+    @State private var state: BannerAdState = .loading
     @State private var containerWidth: CGFloat = 0
 
     /// Width of the key window — used as a fallback when GeometryReader
@@ -41,41 +45,30 @@ struct InlineBannerSection: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Divider().opacity(0.25)
+        if state == .failed {
+            // No fill — take up no space whatsoever.
+            EmptyView()
+        } else {
+            VStack(spacing: 0) {
+                Divider().opacity(state.height > 0 ? 0.25 : 0)
 
-            ZStack {
-                // Loading placeholder — visible until the ad resolves.
-                if adHeight == 0 {
-                    Color(.tertiarySystemFill)
-                        .opacity(0.15)
-                        .overlay {
-                            Text("Ad")
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundStyle(.tertiary)
-                        }
-                }
-
-                // Mount the banner with whichever width we can resolve.
-                // resolvedWidth never returns 0, so the banner always mounts.
-                BannerAdView(adHeight: $adHeight, width: resolvedWidth)
+                BannerAdView(state: $state, width: resolvedWidth)
                     .frame(maxWidth: .infinity)
-            }
-            .frame(height: max(adHeight, placeholderHeight))
-            .clipped()
+                    .frame(height: max(state.height, placeholderHeight))
+                    .clipped()
 
-            Divider().opacity(0.25)
-        }
-        .frame(maxWidth: .infinity)
-        // Read the container width without affecting layout.
-        .background(
-            GeometryReader { geo in
-                Color.clear
-                    .preference(key: BannerWidthKey.self, value: geo.size.width)
+                Divider().opacity(state.height > 0 ? 0.25 : 0)
             }
-        )
-        .onPreferenceChange(BannerWidthKey.self) { containerWidth = $0 }
-        .animation(.easeInOut(duration: 0.35), value: adHeight)
+            .frame(maxWidth: .infinity)
+            // Read the container width without affecting layout.
+            .background(
+                GeometryReader { geo in
+                    Color.clear
+                        .preference(key: BannerWidthKey.self, value: geo.size.width)
+                }
+            )
+            .onPreferenceChange(BannerWidthKey.self) { containerWidth = $0 }
+        }
     }
 }
 

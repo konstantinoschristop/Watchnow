@@ -19,6 +19,13 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unche
         return try await request(urlString: urlString)
     }
 
+    /// TMDB recommendations for a title — the seed data for `TasteProfile`'s
+    /// reverse-recommendation graph.
+    func fetchRecommendations(screenType: ScreenTypes, id: Int) async throws -> GenericResultResponse {
+        let urlString = API.Common.recommendations(type: screenType.rawValue, for: String(id))
+        return try await request(urlString: urlString)
+    }
+
     func fetchSimilars(screenType: ScreenTypes, id: String) async throws -> GetSimilarModel {
         let urlString = API.Common.similar(type: screenType.rawValue, for: id)
         return try await request(urlString: urlString)

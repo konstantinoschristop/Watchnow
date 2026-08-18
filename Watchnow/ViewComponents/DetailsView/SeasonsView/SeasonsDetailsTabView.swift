@@ -175,10 +175,20 @@ struct SeasonsDetailsTabView: View {
             let episodes = episodesViewModel.episodes?.episodes ?? []
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(episodes, id: \.self) { episode in
+                    ForEach(Array(episodes.enumerated()), id: \.element) { index, episode in
                         EpisodeView(episode: episode,
                                     seriesName: seriesName,
                                     seriesID: seriesID)
+
+                        // One native row a few episodes in. The episode list
+                        // was the only long scroll in the app with no ad at
+                        // all, which left Series under-monetised next to
+                        // Movies. `NativeAdRow` sizes itself, so an unfilled
+                        // request collapses instead of leaving a blank row.
+                        if index == 3, episodes.count > 5 {
+                            NativeAdRow()
+                                .padding(.vertical, 4)
+                        }
                     }
                 }
             }

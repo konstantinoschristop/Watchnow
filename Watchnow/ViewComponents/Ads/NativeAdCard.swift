@@ -81,26 +81,54 @@ extension NativeAdLoader: NativeAdLoaderDelegate {
 
 /// Poster-shaped native ad for the result rows. Collapses to nothing if the
 /// ad fails to load, so it never leaves a dead slot in the scroll.
+///
+/// The slot dimensions are applied *inside* this view on purpose. When a
+/// caller wrapped it in its own `.frame(width:height:)`, that frame sized the
+/// container regardless of the `EmptyView` within — so a no-fill left a
+/// poster-sized hole in the middle of the row. Passing the sizing in means
+/// the failure branch really does occupy zero space.
 struct NativeAdCard: View {
 
     let posterHeight: CGFloat
+    /// Card footprint, matching the neighbouring poster cards.
+    var cardWidth: CGFloat? = nil
+    var cardHeight: CGFloat? = nil
+    /// Optional outer slot (used by the home rows, which pad each card into
+    /// a slightly larger scale-effect slot).
+    var slotWidth: CGFloat? = nil
+    var slotHeight: CGFloat? = nil
+
     @StateObject private var loader = NativeAdLoader()
 
     var body: some View {
         Group {
             if let ad = loader.nativeAd {
-                NativeAdCardView(nativeAd: ad, posterHeight: posterHeight)
+                sized {
+                    NativeAdCardView(nativeAd: ad, posterHeight: posterHeight)
+                }
             } else if loader.failed {
+                // No fill — take up no space at all.
                 EmptyView()
             } else {
                 // Neutral placeholder keeps the row height steady while loading.
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
-                    .frame(height: posterHeight)
-                    .frame(maxHeight: .infinity, alignment: .top)
+                sized {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color(.secondarySystemBackground))
+                        .frame(height: posterHeight)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                }
             }
         }
         .onAppear { loader.loadIfNeeded() }
+    }
+
+    /// Applies the card (and optional outer slot) footprint, skipping either
+    /// when the caller didn't ask for one.
+    @ViewBuilder
+    private func sized(@ViewBuilder _ content: () -> some View) -> some View {
+        content()
+            .frame(width: cardWidth, height: cardHeight, alignment: .top)
+            .frame(width: slotWidth, height: slotHeight, alignment: .top)
     }
 }
 

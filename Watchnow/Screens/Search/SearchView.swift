@@ -281,7 +281,8 @@ private extension SearchView {
         List {
             GenericListView(results: $viewModel.filteredResults,
                             viewModel: viewModel,
-                            namespace: namespace)
+                            namespace: namespace,
+                            adSlot: 4)
 
             // A simple banner block at the foot of the list — same treatment
             // as the bottom of the home/details scroll pages.

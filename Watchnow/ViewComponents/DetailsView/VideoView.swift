@@ -51,5 +51,6 @@ struct WebViewSheet: View {
                     }
                 }
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 }

@@ -303,6 +303,7 @@ private struct AllReviewsSheet: View {
                 }
             }
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
         .sheet(isPresented: $isReviewPresented) {
             ReviewSheet(review: $selectedReview)
                 .presentationDetents([.medium, .large])

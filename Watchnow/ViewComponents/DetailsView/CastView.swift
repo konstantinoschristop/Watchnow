@@ -217,5 +217,6 @@ private struct CastSheet: View {
             .navigationTitle("Cast")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 }

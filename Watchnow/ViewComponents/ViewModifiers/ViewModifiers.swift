@@ -29,6 +29,16 @@ struct NavigationBarBackButtonModifier: ViewModifier {
     }
 }
 
+struct SoftScrollEdgeEffectStyleModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            content
+        }
+    }
+}
+
 // MARK: - ViewDidLoadModifier
 struct ViewDidLoadModifier: ViewModifier {
     

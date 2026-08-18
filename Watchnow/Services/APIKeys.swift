@@ -18,6 +18,12 @@ enum API {
         static func credits(type: String, for id: String) -> String {
             return "\(API.baseURL)/\(type)/\(id)/credits?api_key=\(API.key)&language=\(API.language)"
         }
+        /// TMDB's own "people who liked this also liked" list. Used to build
+        /// the taste graph — it's collaborative filtering we get for free,
+        /// and a far better signal than genre overlap.
+        static func recommendations(type: String, for id: String, page: Int = 1) -> String {
+            return "\(API.baseURL)/\(type)/\(id)/recommendations?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+        }
         static func similar(type: String, for id: String, page: Int = 1) -> String {
             return "\(API.baseURL)/\(type)/\(id)/similar?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }

@@ -2,15 +2,10 @@
 //  BannerAdView.swift
 //  Watchnow
 //
-//  UIViewRepresentable wrapper around AdManagerBannerView (Google Ad Manager).
-//  Uses an inline adaptive banner so the ad fills the available width and
-//  reports its resolved height back through a binding — the parent can
-//  then size itself exactly without reserving phantom space for a failed
-//  or pending request.
-//
-//  ⚠️  Replace AdUnit.banner with your real GAM ad unit ID before
-//      submitting to the App Store. The value below is Google's public
-//      test unit ID and will only ever serve test creatives.
+//  UIViewRepresentable wrapper around AdMob's BannerView. Uses an anchored
+//  adaptive banner so the ad fills the available width and reports its
+//  resolved state back through a binding — the parent can then size itself
+//  exactly, and collapse completely when a request fails.
 //
 //  API note: Google Mobile Ads SDK v13 dropped the GAD prefixes in
 //  Swift. Relevant renames used here:
@@ -27,27 +22,47 @@ import GoogleMobileAds
 // MARK: - Ad unit ID
 
 private enum AdUnit {
-    /// Your AdMob banner unit ID. Format: "ca-app-pub-XXXX/YYYY".
-    static let banner = "ca-app-pub-5275868523622377/3482420361"
+    /// Debug builds must never request live inventory — simulator and
+    /// dev-device impressions would count as invalid traffic. Mirrors the
+    /// split already used by `NativeAdCard`.
+    #if DEBUG
+    static let banner = "ca-app-pub-3940256099942544/2934735716"   // Google's test banner
+    #else
+    static let banner = "ca-app-pub-5275868523622377/3482420361"   // production
+    #endif
+}
+
+// MARK: - Load state
+
+/// Lifecycle of a banner request. The parent needs to tell "still loading"
+/// (reserve space so the banner can lay out and mount) apart from "failed"
+/// (collapse to nothing rather than leaving a dead grey box on screen).
+enum BannerAdState: Equatable {
+    case loading
+    case loaded(CGFloat)
+    case failed
+
+    var height: CGFloat {
+        if case .loaded(let h) = self { return h }
+        return 0
+    }
 }
 
 // MARK: - BannerAdView
 
-/// Inline adaptive banner. Zero height until the ad resolves; expands
-/// smoothly once a creative is ready. Pass a `@State var adHeight` from
-/// the parent and constrain the view's frame to that value.
+/// Anchored adaptive banner. Reports load state back to the parent so it can
+/// size itself exactly — and disappear entirely when there's no fill.
 struct BannerAdView: UIViewRepresentable {
 
-    /// Set to the banner's pixel height once the ad loads.
-    /// Stays 0 on error so the parent collapses the reserved space.
-    @Binding var adHeight: CGFloat
+    /// Reflects the request lifecycle: `.loading` → `.loaded(height)` / `.failed`.
+    @Binding var state: BannerAdState
     /// Container width passed in from SwiftUI layout — avoids the zero-width
     /// issue that occurs when UIScreen.main is read inside a LazyVStack before
     /// the cell has been laid out.
     let width: CGFloat
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(adHeight: $adHeight)
+        Coordinator(state: $state)
     }
 
     func makeUIView(context: Context) -> BannerView {
@@ -71,22 +86,22 @@ struct BannerAdView: UIViewRepresentable {
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, BannerViewDelegate {
-        @Binding private var adHeight: CGFloat
+        @Binding private var state: BannerAdState
 
-        init(adHeight: Binding<CGFloat>) {
-            _adHeight = adHeight
+        init(state: Binding<BannerAdState>) {
+            _state = state
         }
 
         // Ad loaded — tell the parent its real height.
         func bannerViewDidReceiveAd(_ bannerView: BannerView) {
             let height = bannerView.adSize.size.height
-            DispatchQueue.main.async { self.adHeight = height }
+            DispatchQueue.main.async { self.state = .loaded(height) }
         }
 
-        // Failed — keep height at 0 so the parent stays collapsed.
+        // No fill / error — the parent collapses the slot entirely.
         func bannerView(_ bannerView: BannerView,
                         didFailToReceiveAdWithError error: Error) {
-            DispatchQueue.main.async { self.adHeight = 0 }
+            DispatchQueue.main.async { self.state = .failed }
         }
     }
 }

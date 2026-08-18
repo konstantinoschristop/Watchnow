@@ -171,6 +171,7 @@ struct PersonSheetView: View {
                 ContentDetailsView(detailsViewModel: vm)
             }
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
         // `presentationBackground` colours the entire sheet container —
         // it survives the ScrollView's intrinsic-size shrinkage during
         // loading. The `.background` modifier on the ScrollView itself

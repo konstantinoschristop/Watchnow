@@ -15,7 +15,9 @@
 //  are harmless no-ops, so the app keeps working fully local-only.
 //
 //  Not synced (intentionally): reminders (device-local notifications),
-//  search history and any per-device UI state.
+//  search history, Movie Coach's generated answers and its recommendation
+//  graph (both derived caches, cheaper to rebuild than to ship around), and
+//  any per-device UI state.
 //
 
 import Foundation
@@ -31,9 +33,18 @@ enum CloudSync {
     /// The `UserDefaults` keys that mirror to iCloud.
     static let syncedKeys: Set<String> = [
         "watchlist",                    // WatchlistManager — saved titles
+        "watchlistAddedDates",          // WatchlistManager — when each was saved
         "watchlist_folders",            // FolderManager — folder definitions
         "watchlist_folder_membership",  // FolderManager — title → folder map
-        "movieNightProviderIDs"         // StreamingPreferences
+        "movieNightProviderIDs",        // StreamingPreferences
+
+        // TasteProfile — what the user actually likes. This is real user
+        // preference, not derived state, so it should follow them between
+        // devices exactly like the watchlist does.
+        "tasteLikedIDs",                // titles they said "I like this" to
+        "tasteLikedGenres",             // genre weights from those likes
+        "tasteLikedLanguages",          // languages they gravitate to
+        "tastePassedGenres"             // Movie Night passes (implicit dislikes)
     ]
 
     /// Whether the device is signed into iCloud, so the key-value store can

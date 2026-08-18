@@ -24,6 +24,10 @@ struct ContentDetailsModel {
     var watchProviders: WatchProvidersResponse?
     var isInWatchList:   Bool = false
     var viewModelFinishedFetching: Bool = false
+    /// Set once every parallel detail fetch has settled. Movie Coach waits
+    /// for this so it builds its context (and generates) exactly once,
+    /// instead of re-running as each individual request lands.
+    var allSectionsLoaded: Bool = false
     
     var screenType: ScreenTypes
     var result: Result

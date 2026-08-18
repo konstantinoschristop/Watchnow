@@ -22,27 +22,48 @@ struct PrimaryActionRow: View {
 
     let isInWatchList: Bool
     let hasTrailer: Bool
+    /// "movie" or "series" — only used to word the taste button.
+    let mediaKind: String
+    let isLiked: Bool
 
     let onWatchlistTap: () -> Void
     let onTrailerTap: () -> Void
+    let onLikeTap: () -> Void
 
     var body: some View {
-        HStack(spacing: 10) {
-            ActionPill(
-                icon:    isInWatchList ? "bookmark.fill" : "bookmark",
-                label:   isInWatchList ? "Saved" : "Watch Later",
-                style:   isInWatchList ? .activeAccent : .neutral,
-                action:  onWatchlistTap
-            )
-
-            if hasTrailer {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
                 ActionPill(
-                    icon:   "play.fill",
-                    label:  "Trailer",
-                    style:  .neutral,
-                    action: onTrailerTap
+                    icon:    isInWatchList ? "bookmark.fill" : "bookmark",
+                    label:   isInWatchList ? "Saved" : "Watch Later",
+                    style:   isInWatchList ? .activeAccent : .neutral,
+                    action:  onWatchlistTap
                 )
+
+                if hasTrailer {
+                    ActionPill(
+                        icon:   "play.fill",
+                        label:  "Trailer",
+                        style:  .neutral,
+                        action: onTrailerTap
+                    )
+                }
             }
+
+            // Taste signal. Given its own full-width row rather than a third
+            // pill: "I like this movie" doesn't fit in a third of the width,
+            // and squeezing it would also crush "Watch Later". Shorter and
+            // lighter than the row above so it reads as secondary.
+            ActionPill(
+                icon:   isLiked ? "heart.fill" : "heart",
+                label:  isLiked ? "Liked" : "I like this \(mediaKind)",
+                style:  isLiked ? .activeAccent : .neutral,
+                height: 44,
+                action: onLikeTap
+            )
+            .accessibilityLabel(isLiked
+                                ? "Liked. Tap to remove from your taste profile."
+                                : "I like this \(mediaKind)")
         }
         .padding(.horizontal, 16)
     }
@@ -60,9 +81,9 @@ private struct ActionPill: View {
     let icon:   String
     let label:  String
     let style:  Style
+    var height: CGFloat = 52
     let action: () -> Void
 
-    private let height: CGFloat = 52
     private let radius: CGFloat = 14
 
     var body: some View {

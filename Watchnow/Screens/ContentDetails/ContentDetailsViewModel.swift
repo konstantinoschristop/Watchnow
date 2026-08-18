@@ -195,6 +195,11 @@ extension ContentDetailsViewModel {
         get { model.viewModelFinishedFetching }
         set { model.viewModelFinishedFetching = newValue }
     }
+
+    var allSectionsLoaded: Bool {
+        get { model.allSectionsLoaded }
+        set { model.allSectionsLoaded = newValue }
+    }
     
     var screenType: ScreenTypes  {
         get { model.screenType }
@@ -339,5 +344,36 @@ extension ContentDetailsViewModel {
         guard let id = result.id else { return nil }
         let mediaType: DeepLink.MediaType = (screenType == .movie) ? .movie : .tv
         return DeepLink(id: id, mediaType: mediaType)
+    }
+
+    // MARK: - Taste
+
+    /// Genre ids to attribute an explicit "I like this" to. Prefers the
+    /// fetched details (always present) over `result.genre_ids`, which is nil
+    /// when the screen was opened from a deeplink stub.
+    var likeGenreIDs: [Int] {
+        let fromDetails = (details?.genres ?? []).compactMap(\.id)
+        return fromDetails.isEmpty ? (result.genre_ids ?? []) : fromDetails
+    }
+
+    /// "movie" or "series" — words the taste button.
+    var mediaKindLabel: String { screenType == .tv ? "series" : "movie" }
+
+    // MARK: - Movie Coach
+
+    /// Facts handed to Movie Coach, assembled from data this screen has
+    /// already fetched — no extra network calls.
+    ///
+    /// Nil until every parallel fetch has settled (and never for people), so
+    /// the card generates once with the full picture rather than re-running
+    /// as each request lands.
+    var coachContext: MovieCoachContext? {
+        guard screenType != .person, allSectionsLoaded, details != nil else { return nil }
+        return MovieCoachContext.build(result: result,
+                                       screenType: screenType,
+                                       details: details,
+                                       cast: castSafe,
+                                       similars: similarsSafe,
+                                       providerResults: watchProviderSafe)
     }
 }

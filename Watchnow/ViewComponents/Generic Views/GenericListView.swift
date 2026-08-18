@@ -37,22 +37,47 @@ struct GenericListView: View {
     /// "All" filter is active — when filtering by folder, every row is in
     /// the same folder, so the badge would be visual noise.
     var folderProvider: ((Int) -> Folder?)? = nil
+    /// When non-nil, splices a single native ad row in at this index. Only
+    /// Search passes it — the Watchlist is the user's own saved list, and an
+    /// ad in the middle of it reads as intrusive rather than as content.
+    /// Ignored when there aren't enough results to reach the slot.
+    var adSlot: Int? = nil
 
     var body: some View {
-        ForEach(Array(results.enumerated()), id: \.element) { _, result in
-            row(for: result)
-                .listRowSeparator(.visible)
-                .listRowSeparatorTint(.primary.opacity(0.08))
+        if let adSlot, adSlot < results.count {
+            // Ad-bearing layout. Reordering isn't offered on this path (only
+            // the Watchlist reorders, and it never passes `adSlot`), so the
+            // split into two ForEach blocks can't disturb `.onMove`.
+            ForEach(Array(results.prefix(adSlot)), id: \.self) { configuredRow($0) }
+
+            NativeAdRow()
+                .listRowSeparator(.hidden)
                 .listRowBackground(Color(.background))
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                    leadingSwipeActions(for: result)
-                }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    trailingSwipeActions(for: result)
-                }
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+
+            ForEach(Array(results.dropFirst(adSlot)), id: \.self) { configuredRow($0) }
+        } else {
+            ForEach(Array(results.enumerated()), id: \.element) { _, result in
+                configuredRow(result)
+            }
+            .onMove(perform: onReorder)
         }
-        .onMove(perform: onReorder)
+    }
+
+    /// A result row with its list styling and swipe actions applied.
+    @ViewBuilder
+    private func configuredRow(_ result: Result) -> some View {
+        row(for: result)
+            .listRowSeparator(.visible)
+            .listRowSeparatorTint(.primary.opacity(0.08))
+            .listRowBackground(Color(.background))
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                leadingSwipeActions(for: result)
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                trailingSwipeActions(for: result)
+            }
     }
 
     /// Wraps actors in a tappable `ActorRow` that opens `PersonSheetView`,

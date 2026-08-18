@@ -500,6 +500,7 @@ private struct NewFolderSheet: View {
             .onAppear { nameFocused = true }
         }
         .presentationDetents([.medium])
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 
     private func symbolTile(_ symbol: String) -> some View {

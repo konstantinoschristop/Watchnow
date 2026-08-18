@@ -63,25 +63,47 @@ struct ScrollableContentView: View {
         let screenHalfWidth = UIScreen.main.bounds.width / 2
         let scaleType: Scale.ScaleTypes = cardType == .bottom ? .vertical : .horizontal
 
+        // Where the native ad sits, when this row carries one and has enough
+        // cards to reach that position.
+        let adIndex: Int? = (cardType == .bottom)
+            ? adSlot.flatMap { $0 < results.count ? $0 : nil }
+            : nil
+
         return HStack(alignment: .top,
                spacing: cardType == .bottom ? 5 : 0) {
 
             Spacer().frame(width: cardType == .bottom ? 10 : 20)
 
-            ForEach(Array(results.enumerated()), id: \.element) { index, movie in
-                // Native ad card, slotted in like just another poster.
-                if cardType == .bottom, let adSlot, index == adSlot {
-                    adCardSlot
-                }
+            // The ad is emitted as its own sibling between two ForEach
+            // slices rather than from inside one of them. Inside the ForEach
+            // its identity was tied to whichever Result happened to occupy
+            // that index, so changing the genre filter rebuilt the card and
+            // fired a fresh ad request every time. As a stable sibling it
+            // keeps its loader across those updates.
+            if let adIndex {
+                cards(results[..<adIndex], screenHalfWidth: screenHalfWidth, scaleType: scaleType)
+                adCardSlot
+                cards(results[adIndex...], screenHalfWidth: screenHalfWidth, scaleType: scaleType)
+            } else {
+                cards(results[...], screenHalfWidth: screenHalfWidth, scaleType: scaleType)
+            }
+        }
+    }
 
-                cardSlot(for: movie, index: index,
-                         screenHalfWidth: screenHalfWidth,
-                         scaleType: scaleType)
+    /// Renders a contiguous run of poster cards, preserving each card's
+    /// index within the full `results` array (the scale effect depends on it).
+    @ViewBuilder
+    private func cards(_ slice: ArraySlice<Result>,
+                       screenHalfWidth: CGFloat,
+                       scaleType: Scale.ScaleTypes) -> some View {
+        ForEach(Array(slice.enumerated()), id: \.element) { offset, movie in
+            cardSlot(for: movie, index: slice.startIndex + offset,
+                     screenHalfWidth: screenHalfWidth,
+                     scaleType: scaleType)
 
-                if results.last == movie,
-                   viewModel.canLoadMoreContent(section: viewSection) {
-                    LoadMoreButtonView(tracker: loadMoreProgress)
-                }
+            if results.last == movie,
+               viewModel.canLoadMoreContent(section: viewSection) {
+                LoadMoreButtonView(tracker: loadMoreProgress)
             }
         }
     }
@@ -89,9 +111,13 @@ struct ScrollableContentView: View {
     /// The native ad framed exactly like a `.bottom` poster slot so it reads
     /// as part of the scroll. Poster height matches `BottomCard` (175).
     private var adCardSlot: some View {
-        NativeAdCard(posterHeight: 175)
-            .frame(width: cardWidth, height: cardHeight)
-            .frame(width: slotWidth, height: slotHeight, alignment: .top)
+        // Sizing is handed to the card rather than wrapped around it, so an
+        // unfilled request collapses instead of leaving a poster-sized hole.
+        NativeAdCard(posterHeight: 175,
+                     cardWidth: cardWidth,
+                     cardHeight: cardHeight,
+                     slotWidth: slotWidth,
+                     slotHeight: slotHeight)
     }
 
     /// Card slot with a scale effect that magnifies the card nearest the

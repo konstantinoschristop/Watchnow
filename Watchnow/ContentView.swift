@@ -80,6 +80,7 @@ extension ContentView {
                     detailsDestination(for: result, screenType: .movie)
                 }
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 
     private var seriesTabContent: some View {
@@ -91,6 +92,7 @@ extension ContentView {
                     detailsDestination(for: result, screenType: .tv)
                 }
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 
     @ViewBuilder
@@ -106,6 +108,8 @@ extension ContentView {
                 .background(Color(.background))
                 .navigationTitle("Search")
         }
+        .searchPresentationToolbarBehavior(.avoidHidingContent)
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 
     private var watchlistTabContent: some View {
@@ -114,5 +118,6 @@ extension ContentView {
                 .background(Color(.background))
                 .navigationTitle("Watchlist")
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 }

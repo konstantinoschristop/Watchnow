@@ -51,6 +51,11 @@ const IMAGE_PATHS = [
   "/screenshots/movies.png",
   "/screenshots/watchlist.png",
   "/screenshots/details.png",
+  "/screenshots/coach.png",
+  "/screenshots/personalization.png",
+  "/screenshots/movie-night.png",
+  "/screenshots/superman-details.png",
+  "/screenshots/reminder-banner.png",
   "/screenshots/streaming.png",
   "/screenshots/reminders.png",
   "/screenshots/notification-banner-cropped.jpg",
@@ -252,7 +257,7 @@ type SlideProps = { cW: number; cH: number };
 type SlideDef = { id: string; component: (p: SlideProps) => ReactElement };
 
 const SLIDE_1: SlideDef = {
-  id: "hero",
+  id: "discover",
   component: ({ cW, cH }) => {
     const fw = phoneW(cW, cH) * 100;
     return (
@@ -277,15 +282,15 @@ const SLIDE_1: SlideDef = {
         >
           <Caption
             cW={cW}
-            label="WATCHNOW"
+            label="DISCOVER"
             headline={
               <>
-                Find what to
+                Everything you
                 <br />
-                watch tonight.
+                want to watch.
               </>
             }
-            sub="Movies, shows, and where to stream them. One app."
+            sub="Find movies, series, actors, trailers, reviews, and more in one place."
           />
         </div>
         <div
@@ -305,7 +310,7 @@ const SLIDE_1: SlideDef = {
 };
 
 const SLIDE_3: SlideDef = {
-  id: "streaming",
+  id: "streaming-filter-retired",
   component: ({ cW, cH }) => {
     const fw = phoneW(cW, cH, 0.78) * 100;
     return (
@@ -374,7 +379,7 @@ const SLIDE_3: SlideDef = {
 };
 
 const SLIDE_4: SlideDef = {
-  id: "where-to-watch",
+  id: "streaming",
   component: ({ cW, cH }) => {
     const fw = phoneW(cW, cH) * 100;
     return (
@@ -398,15 +403,15 @@ const SLIDE_4: SlideDef = {
         >
           <Caption
             cW={cW}
-            label="EVERY TITLE"
+            label="STREAMING"
             headline={
               <>
-                See where it's
+                Know where
                 <br />
-                streaming.
+                to watch.
               </>
             }
-            sub="Stream, buy, or rent — plus trailers, cast, and episodes. All in one tap."
+            sub="Find it on Netflix, Prime Video, Disney+, Apple TV and more."
           />
         </div>
         <div
@@ -459,7 +464,7 @@ const SLIDE_5: SlideDef = {
                 Watch later.
               </>
             }
-            sub="Your personal watchlist — always synced, never lost."
+            sub="Your personal movie and TV library — organized, synced, and never lost."
           />
         </div>
         <div
@@ -509,33 +514,17 @@ const SLIDE_REMINDERS: SlideDef = {
               <>
                 Never miss
                 <br />
-                an episode.
+                what&apos;s next.
               </>
             }
-            sub="Tap the bell — we'll let you know the day it airs."
+            sub="Get notified when the movies and series you care about are released."
           />
         </div>
-        {/* Floating notification banner — clipped to capsule to hide source background */}
-        <div
-          style={{
-            position: "absolute",
-            top: cH * 0.32,
-            left: "50%",
-            width: "92%",
-            transform: "translateX(-50%)",
-            zIndex: 20,
-            borderRadius: 9999,
-            overflow: "hidden",
-            boxShadow: `0 ${cW * 0.02}px ${cW * 0.05}px rgba(0,0,0,0.6), 0 0 ${cW * 0.06}px rgba(80,131,245,0.3)`,
-          }}
-        >
-          <img
-            src={img("/screenshots/notification-banner-cropped.jpg")}
-            alt="Airing today notification"
-            style={{ width: "100%", display: "block" }}
-            draggable={false}
-          />
-        </div>
+        {/* Both pieces are real simulator captures of the production
+            reminder flow — the details screen and, floating over its top
+            edge, the actual iOS banner it fires. Scaled up from its native
+            size so the copy survives an App Store thumbnail; nothing here is
+            drawn or recreated. */}
         <div
           style={{
             position: "absolute",
@@ -545,7 +534,30 @@ const SLIDE_REMINDERS: SlideDef = {
             transform: "translateX(-50%) translateY(13%)",
           }}
         >
-          <Phone src={img("/screenshots/reminders.png")} alt="Upcoming episodes with bell reminders" />
+          <Phone
+            src={img("/screenshots/superman-details.png")}
+            alt="Superman details screen in WatchNow"
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: cH * 0.345,
+            left: "50%",
+            width: "92%",
+            transform: "translateX(-50%)",
+            zIndex: 20,
+            borderRadius: cW * 0.055,
+            overflow: "hidden",
+            boxShadow: `0 ${cW * 0.022}px ${cW * 0.055}px rgba(0,0,0,0.55), 0 0 ${cW * 0.07}px rgba(80,131,245,0.28)`,
+          }}
+        >
+          <img
+            src={img("/screenshots/reminder-banner.png")}
+            alt="Out now — Superman is out today, time to watch"
+            style={{ width: "100%", display: "block" }}
+            draggable={false}
+          />
         </div>
       </div>
     );
@@ -633,7 +645,7 @@ const SLIDE_6: SlideDef = {
               marginInline: "auto",
             }}
           >
-            Free to download. No subscription. Just discover and watch.
+            Your personal movie &amp; TV companion.
           </div>
         </div>
         <div
@@ -649,10 +661,10 @@ const SLIDE_6: SlideDef = {
           }}
         >
           {[
-            "Trending",
+            "Movie Coach",
+            "Movie Night",
             "Streaming guide",
             "Watchlist",
-            "Cast & crew",
             "Reminders",
             "Episode tracking",
           ].map((t) => (
@@ -666,7 +678,158 @@ const SLIDE_6: SlideDef = {
   },
 };
 
-const SLIDES: SlideDef[] = [SLIDE_1, SLIDE_3, SLIDE_4, SLIDE_5, SLIDE_REMINDERS, SLIDE_6];
+const SLIDE_COACH: SlideDef = {
+  id: "coach",
+  component: ({ cW, cH }) => {
+    const fw = phoneW(cW, cH) * 100;
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          overflow: "hidden",
+          background: "linear-gradient(180deg, #0A1429 0%, #050816 60%, #04060F 100%)",
+        }}
+      >
+        <BgGlow x="78%" y="40%" size={cW * 1.05} color={THEME.accent} opacity={0.42} />
+        <div
+          style={{
+            position: "absolute",
+            top: cH * 0.07,
+            left: cW * 0.07,
+            right: cW * 0.07,
+          }}
+        >
+          <Caption
+            cW={cW}
+            label="MOVIE COACH"
+            headline={
+              <>
+                Should you
+                <br />
+                watch it?
+              </>
+            }
+            sub={
+              <>
+                A personal second opinion for every movie and series, shaped by
+                what you like.
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: cW * 0.018,
+                    color: THEME.accent,
+                    fontWeight: 600,
+                  }}
+                >
+                  Powered entirely on-device.
+                </span>
+              </>
+            }
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            width: `${fw}%`,
+            transform: "translateX(-50%) translateY(13%)",
+          }}
+        >
+          <Phone src={img("/screenshots/coach.png")} alt="Movie Coach verdict on a series" />
+        </div>
+      </div>
+    );
+  },
+};
+
+const SLIDE_PERSONALIZATION: SlideDef = {
+  id: "personalization",
+  component: ({ cW, cH }) => {
+    const fw = phoneW(cW, cH) * 100;
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          overflow: "hidden",
+          background: "linear-gradient(180deg, #0A1429 0%, #050816 60%, #04060F 100%)",
+        }}
+      >
+        <BgGlow x="24%" y="38%" size={cW * 1.05} color={THEME.accent} opacity={0.42} />
+        <div style={{ position: "absolute", top: cH * 0.07, left: cW * 0.07, right: cW * 0.07 }}>
+          <Caption
+            cW={cW}
+            label="PERSONALIZATION"
+            headline={
+              <>
+                It knows what
+                <br />
+                you like.
+              </>
+            }
+            sub="Get smarter advice based on your watchlist, likes, and the titles you care about."
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            width: `${fw}%`,
+            transform: "translateX(-50%) translateY(13%)",
+          }}
+        >
+          <Phone src={img("/screenshots/personalization.png")} alt="Movie Coach referencing the genres you save" />
+        </div>
+      </div>
+    );
+  },
+};
+
+const SLIDE_MOVIENIGHT: SlideDef = {
+  id: "movie-night",
+  component: ({ cW, cH }) => {
+    const fw = phoneW(cW, cH) * 100;
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          overflow: "hidden",
+          background: "linear-gradient(180deg, #0A1429 0%, #050816 60%, #04060F 100%)",
+        }}
+      >
+        <BgGlow x="72%" y="52%" size={cW * 1.0} color={THEME.accent} opacity={0.44} />
+        <div style={{ position: "absolute", top: cH * 0.07, left: cW * 0.07, right: cW * 0.07 }}>
+          <Caption
+            cW={cW}
+            label="MOVIE NIGHT"
+            headline={<>Can&apos;t decide?</>}
+            sub="Swipe to match. Find something that fits tonight."
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            width: `${fw}%`,
+            transform: "translateX(-50%) translateY(13%)",
+          }}
+        >
+          <Phone src={img("/screenshots/movie-night.png")} alt="Movie Night swipe matching" />
+        </div>
+      </div>
+    );
+  },
+};
+
+const SLIDES: SlideDef[] = [SLIDE_COACH, SLIDE_MOVIENIGHT, SLIDE_4, SLIDE_REMINDERS, SLIDE_5];
 
 // =========================================================
 // Preview card (scaled via ResizeObserver)
@@ -821,6 +984,26 @@ export default function ScreenshotsPage() {
     el.style.zIndex = "";
     return dataUrl;
   }
+
+  // Writes a rendered slide straight into ./exports via the save route,
+  // instead of going through a browser download. Handy for scripted/agent
+  // runs and for regenerating a single slide without touching the others.
+  async function saveSlideToDisk(i: number) {
+    const el = exportRefs.current[i];
+    if (!el) return { error: "no slide element" };
+    const dataUrl = await captureSlide(el, currentSize.w, currentSize.h);
+    const filename = `${String(i + 1).padStart(2, "0")}-${SLIDES[i].id}-${currentSize.w}x${currentSize.h}.png`;
+    const res = await fetch("/api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename, dataUrl }),
+    });
+    return res.json();
+  }
+
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).saveSlideToDisk = saveSlideToDisk;
+  });
 
   async function exportOne(i: number) {
     const el = exportRefs.current[i];

@@ -136,8 +136,15 @@ final class MovieNightViewModel: ObservableObject {
     /// Record the current player's verdict on the current card and advance.
     func swipe(liked: Bool) {
         guard cardIndex < deck.count else { return }
-        if liked, let id = deck[cardIndex].id {
+        let card = deck[cardIndex]
+        if liked, let id = card.id {
             likes[currentPlayer - 1].insert(id)
+        }
+        // A pass is the one explicit "no" the app ever sees. Record it as a
+        // light negative for Movie Coach — but only on player 1's turn, since
+        // in pass-and-play the later turns belong to other people.
+        if !liked, currentPlayer == 1 {
+            TasteProfile.recordPass(card)
         }
         cardIndex += 1
         if cardIndex >= deck.count {

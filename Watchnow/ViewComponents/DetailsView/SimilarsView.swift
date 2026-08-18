@@ -39,8 +39,9 @@ struct SimilarsView: View {
                 ForEach(Array(content.enumerated()), id: \.element) { index, item in
                     // One native ad, slotted in like another poster card.
                     if index == 3 {
-                        NativeAdCard(posterHeight: 175)
-                            .frame(width: cardWidth, height: cardHeight, alignment: .top)
+                        NativeAdCard(posterHeight: 175,
+                                     cardWidth: cardWidth,
+                                     cardHeight: cardHeight)
                     }
                     BottomCard(content: item, screenType: screenType)
                         .frame(width: cardWidth, height: cardHeight, alignment: .top)

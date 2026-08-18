@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated App Store exports (kept outside the repo)
+/exports
+
+# source captures used only by the screenshot generator
+/public/screenshots/coach.png
+/public/screenshots/personalization.png
+/public/screenshots/movie-night.png
+/public/screenshots/superman-details.png
+/public/screenshots/reminder-banner.png
+/public/screenshots/reminder-notification.png

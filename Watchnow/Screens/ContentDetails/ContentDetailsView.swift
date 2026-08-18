@@ -19,6 +19,7 @@ struct ContentDetailsView: View {
     @State private var isReminderOn = false
     @State private var showReminderAlert = false
     @State private var showNotificationSettingsAlert = false
+    @State private var isLiked = false
     @Namespace private var namespace
 
     var body: some View {
@@ -78,6 +79,10 @@ struct ContentDetailsView: View {
             async let reviews: Void = detailsViewModel.getReviews()
             async let collection: Void = detailsViewModel.getCollection()
             _ = await (credits, videos, providers, similars, reviews, collection)
+
+            // Everything Movie Coach reads is now in place — let it build its
+            // context and generate exactly once.
+            detailsViewModel.allSectionsLoaded = true
         }
     }
 }
@@ -112,6 +117,7 @@ extension ContentDetailsView {
 
             primaryActionRow
                 .padding(.top, -32)
+            movieCoachSection()
             watchProvidersSection()
             detailsSection()
             seasonsSection()
@@ -150,9 +156,43 @@ extension ContentDetailsView {
         PrimaryActionRow(
             isInWatchList: detailsViewModel.isInWatchList,
             hasTrailer: detailsViewModel.videos?.getVideoURL() != nil,
+            mediaKind: detailsViewModel.mediaKindLabel,
+            isLiked: isLiked,
             onWatchlistTap: toggleWatchlist,
-            onTrailerTap: { videoPresented = true }
+            onTrailerTap: { videoPresented = true },
+            onLikeTap: toggleLike
         )
+        .onAppear { syncLikeState() }
+        .onChange(of: detailsViewModel.result.id) { _, _ in syncLikeState() }
+        // A like made on another device can land while this screen is open.
+        .onReceive(NotificationCenter.default.publisher(for: CloudSync.didMergeRemoteChanges)) { note in
+            let keys = note.userInfo?[CloudSync.changedKeysKey] as? [String] ?? []
+            if keys.contains("tasteLikedIDs") { syncLikeState() }
+        }
+    }
+
+    private func syncLikeState() {
+        isLiked = TasteProfile.isLiked(detailsViewModel.result.id)
+    }
+
+    /// Records an explicit taste signal for this title. Kept separate from
+    /// the watchlist: saving is "I might watch this", liking is "this is my
+    /// kind of thing" — Movie Coach weighs them very differently.
+    private func toggleLike() {
+        guard let id = detailsViewModel.result.id else { return }
+        let genreIDs = detailsViewModel.likeGenreIDs
+        let language = detailsViewModel.result.original_language
+
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            if isLiked {
+                TasteProfile.unlike(id: id, genreIDs: genreIDs, language: language)
+                isLiked = false
+            } else {
+                TasteProfile.like(id: id, genreIDs: genreIDs, language: language)
+                isLiked = true
+            }
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     private func syncReminderState() {
@@ -286,6 +326,16 @@ extension ContentDetailsView {
 
 // MARK: - Sections
 extension ContentDetailsView {
+
+    /// On-device read on whether this title suits the user. Renders nothing
+    /// at all when Foundation Models isn't available, and never blocks the
+    /// rest of the screen.
+    @ViewBuilder
+    private func movieCoachSection() -> some View {
+        if detailsViewModel.screenType != .person {
+            MovieCoachView(context: detailsViewModel.coachContext)
+        }
+    }
 
     @ViewBuilder
     private func detailsSection() -> some View {

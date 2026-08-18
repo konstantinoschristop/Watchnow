@@ -38,7 +38,19 @@ struct MovieNightView: View {
                 let model = ContentDetailsModel(screenType: .movie, result: result)
                 ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
             }
+            // The app's only fullscreen ad. Warmed up while the user swipes
+            // so it's instant, and shown once the session completes — a real
+            // "you're done" boundary rather than an interruption. Frequency
+            // caps and the no-creative case are handled by the manager.
+            .onChange(of: vm.phase) { _, phase in
+                switch phase {
+                case .swiping: InterstitialAdManager.shared.preload()
+                case .results: InterstitialAdManager.shared.presentIfAllowed()
+                default: break
+                }
+            }
         }
+        .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 
     @ViewBuilder
