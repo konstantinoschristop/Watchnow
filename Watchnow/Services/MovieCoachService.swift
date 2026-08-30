@@ -111,7 +111,7 @@ struct MovieCoachAnswer: Codable, Sendable, Equatable {
 @Generable
 struct MovieCoachResponse {
 
-    @Guide(description: "One to three short sentences explaining the verdict in a warm, direct voice. No spoilers, no synopsis retelling, no mention of data or preferences as a concept.")
+    @Guide(description: "One to three short sentences explaining the verdict in a warm, direct voice with real personality — specific and vivid, like a friend who knows exactly what you love. Never generic, never templated. No spoilers, no synopsis retelling, no mention of data or preferences as a concept.")
     let message: String
 }
 
@@ -131,8 +131,15 @@ enum MovieCoachService {
     /// nearly everything) and is now decided in `MovieCoachContext`.
     /// v4 — added disqualifiers (shorts, uncredible ratings, taste/language
     /// mismatch) and stopped demoting already-saved titles for being long.
+    /// v5 — TMDB keywords joined the context: the title's themes plus the
+    /// themes recurring across the user's watchlist, so answers can connect
+    /// the two ("you keep saving time-travel mysteries — this is one").
+    /// v6 — every card was opening with the same "you clearly go…" pattern
+    /// (the model parroted an example phrase from the v5 instructions).
+    /// Dropped the quotable example, banned stock openers, added a rotating
+    /// opening angle per generation, and raised temperature.
     /// Bumping discards answers generated under any older prompt.
-    static let promptVersion = 4
+    static let promptVersion = 6
 
     /// Coach only speaks up once it has enough saved titles to actually know
     /// the user's taste. Below this it would be guessing dressed up as advice,
@@ -198,6 +205,14 @@ enum MovieCoachService {
     - Use personal context only when it genuinely sharpens the answer. If the \
     context shows little personal signal, give a useful assessment of the \
     title itself and do not pretend it is personalised.
+    - When the context says this title hits themes the user keeps saving, \
+    that connection is the most useful thing you can say. Weave one or two \
+    of those shared themes into a sentence — never recite them as a list, \
+    and only ever connect themes the context itself pairs up.
+    - Never open with a stock phrase. Openers like "you clearly", "you seem \
+    to", "based on your", or restating the title's name read as canned — \
+    find an angle that fits this specific title instead, and let each answer \
+    sound different from the last.
     - Weigh practical fit: runtime, number of seasons, and whether it is \
     already out or still unreleased.
     - Never mention data, context, preferences-as-a-concept, algorithms, or \
@@ -206,6 +221,18 @@ enum MovieCoachService {
     """
 
     // MARK: Verdict
+
+    /// One of these is appended to every verdict prompt so consecutive cards
+    /// don't all open the same way. The verdict and the facts stay fixed —
+    /// only the angle of attack rotates. Picked at random per generation, so
+    /// "Ask again" genuinely re-rolls the voice too.
+    private static let openingAngles = [
+        "Open with the story's hook itself, then land the recommendation.",
+        "Open by speaking to the user's taste directly — but never by narrating it back as data.",
+        "Open with how this fits tonight practically, then why it suits them.",
+        "Open with the single strongest fact in the context, stated plainly.",
+        "Open mid-thought, like you're continuing a chat about what to watch tonight."
+    ]
 
     /// Generate the card's verdict + explanation for a title.
     static func verdict(for context: MovieCoachContext) async throws -> MovieCoachAnswer {
@@ -229,14 +256,18 @@ enum MovieCoachService {
 
         Write one to three short sentences telling the user that, in your own \
         natural wording. Agree with the verdict — do not argue against it or \
-        soften it into a different conclusion. Lead with what matters most, \
-        and only mention facts from the context.
+        soften it into a different conclusion. Only mention facts from the \
+        context. \(openingAngles.randomElement() ?? "")
         """
 
+        // Temperature runs hotter than the ask-sheet's: the facts and the
+        // verdict are pinned by the prompt, so the extra heat only buys
+        // wording variety between cards — the thing that stops every answer
+        // sounding like the same sentence with nouns swapped.
         let response = try await session.respond(
             to: prompt,
             generating: MovieCoachResponse.self,
-            options: GenerationOptions(temperature: 0.5, maximumResponseTokens: 220)
+            options: GenerationOptions(temperature: 0.8, maximumResponseTokens: 220)
         )
         let message = response.content.message.trimmingCharacters(in: .whitespacesAndNewlines)
         return MovieCoachAnswer(verdict: call.verdict, message: message)

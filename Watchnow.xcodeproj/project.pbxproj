@@ -63,6 +63,9 @@
 		930F8936E2288DE1DF08C0F0 /* MovieCoachContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627719F4572F2D36F86931F /* MovieCoachContext.swift */; };
 		9C8510C7C0C8C273C71D2936 /* MovieCoachService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0054A7E564BE2422966531 /* MovieCoachService.swift */; };
 		A0C3C285883E3C8BACABC7F2 /* MovieCoachCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F5C5278F31A07A439B3CE4 /* MovieCoachCache.swift */; };
+		FE1D0A21000000000000FB21 /* KeywordsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A21000000000000FA21 /* KeywordsResponse.swift */; };
+		FE1D0A22000000000000FB22 /* KeywordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A22000000000000FA22 /* KeywordStore.swift */; };
+		FE1D0A23000000000000FB23 /* KeywordEnricher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A23000000000000FA23 /* KeywordEnricher.swift */; };
 		AA000001000000000000AA02 /* WatchnowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000AA01 /* WatchnowApp.swift */; };
 		AA000001000000000000AA04 /* DetailServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000AA03 /* DetailServiceProtocol.swift */; };
 		AD000001000000000000AD02 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD000001000000000000AD01 /* BannerAdView.swift */; };
@@ -134,6 +137,9 @@
 		5AC7E865D288BD8F5490BBCC /* MovieNightView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightView.swift; sourceTree = "<group>"; };
 		67FC41B9E54A43DE0293F7A9 /* Watchnow.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Watchnow.entitlements; sourceTree = "<group>"; };
 		86F5C5278F31A07A439B3CE4 /* MovieCoachCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieCoachCache.swift; sourceTree = "<group>"; };
+		FE1D0A21000000000000FA21 /* KeywordsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordsResponse.swift; sourceTree = "<group>"; };
+		FE1D0A22000000000000FA22 /* KeywordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordStore.swift; sourceTree = "<group>"; };
+		FE1D0A23000000000000FA23 /* KeywordEnricher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordEnricher.swift; sourceTree = "<group>"; };
 		8A036A7326BBC8C100A3D0FF /* TopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCard.swift; sourceTree = "<group>"; };
 		8A19B1A92E7EEE820083A094 /* BaseNetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseNetworkService.swift; sourceTree = "<group>"; };
 		8A19B1AB2E7EF7340083A094 /* BackdropImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackdropImage.swift; sourceTree = "<group>"; };
@@ -347,6 +353,7 @@
 				FE1D0A0E000000000000FA0E /* ProvidersListResponse.swift */,
 				EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */,
 				EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */,
+				FE1D0A21000000000000FA21 /* KeywordsResponse.swift */,
 			);
 			path = Responses;
 			sourceTree = "<group>";
@@ -486,6 +493,8 @@
 				4627719F4572F2D36F86931F /* MovieCoachContext.swift */,
 				86F5C5278F31A07A439B3CE4 /* MovieCoachCache.swift */,
 				AEF8DA916076DC2F2D86DC4C /* TasteProfile.swift */,
+				FE1D0A22000000000000FA22 /* KeywordStore.swift */,
+				FE1D0A23000000000000FA23 /* KeywordEnricher.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -739,6 +748,9 @@
 				424E6F282BA9524F322F99C5 /* MovieCoachAskSheet.swift in Sources */,
 				38094BC8EA4E4015094EF9ED /* InterstitialAdManager.swift in Sources */,
 				04B3F76DF715A7544AD36F91 /* TasteProfile.swift in Sources */,
+				FE1D0A21000000000000FB21 /* KeywordsResponse.swift in Sources */,
+				FE1D0A22000000000000FB22 /* KeywordStore.swift in Sources */,
+				FE1D0A23000000000000FB23 /* KeywordEnricher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

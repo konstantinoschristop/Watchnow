@@ -49,6 +49,13 @@ enum API {
             return "\(API.baseURL)/\(type)/\(id)/watch/providers?api_key=\(API.key)"
         }
 
+        /// Thematic tags TMDB attaches to a title ("time travel",
+        /// "dystopia"). Feeds Movie Coach's theme matching. No language
+        /// parameter — the endpoint ignores it.
+        static func keywords(type: String, for id: String) -> String {
+            return "\(API.baseURL)/\(type)/\(id)/keywords?api_key=\(API.key)"
+        }
+
         /// Region-scoped catalogue of streaming services TMDB knows about,
         /// used to populate the "Browse by streaming service" tile row.
         static func providersList(type: String, region: String) -> String {

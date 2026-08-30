@@ -12,7 +12,8 @@
 //  sent as "unknown". That's what keeps the output honest.
 //
 //  Nothing here touches the network: the details screen has already fetched
-//  every field this uses.
+//  every field this uses (including the title's keywords), and the user's
+//  recurring themes come from whatever `KeywordEnricher` has cached so far.
 //
 
 import Foundation
@@ -45,6 +46,9 @@ struct MovieCoachContext {
     let releaseDateText: String?
     /// Subscription services carrying it in the user's region.
     let providers: [String]
+    /// This title's thematic TMDB keywords ("time travel", "dystopia"),
+    /// noise-filtered and capped — what the story is *about*, beyond genre.
+    let titleThemes: [String]
 
     // MARK: User signals
 
@@ -58,6 +62,12 @@ struct MovieCoachContext {
     let topUserGenres: [String]
     /// This title's genres that the user demonstrably saves a lot of.
     let genreOverlap: [String]
+    /// Themes recurring across the user's saved titles (each appears in at
+    /// least two of them) — inferred from cached TMDB keywords.
+    let userThemes: [String]
+    /// This title's themes that also recur in the watchlist — the sharpest
+    /// "why *you*, why *this*" signal Coach has.
+    let themeOverlap: [String]
     /// Similar titles already sitting in the user's watchlist.
     let similarSaved: [String]
     /// Services the user says they have that also carry this title.
@@ -94,7 +104,8 @@ struct MovieCoachContext {
                       details: ResultDetailsResponse?,
                       cast: [Cast],
                       similars: [Result],
-                      providerResults: ProviderResults?) -> MovieCoachContext {
+                      providerResults: ProviderResults?,
+                      keywords: [String]) -> MovieCoachContext {
 
         let isSeries = (screenType == .tv)
         let watchlist = WatchlistManager.watchlist
@@ -156,6 +167,15 @@ struct MovieCoachContext {
                 .compactMap(\.providerName)
         )
 
+        // --- Themes ------------------------------------------------------
+        // The title's keywords were fetched (or served from cache) by the
+        // details screen; the user's side is inferred from whatever the
+        // background enrichment has cached so far. Both are already
+        // lowercase-normalised, so overlap is a straight set intersection.
+        let titleThemes = Array(KeywordStore.thematic(keywords).prefix(8))
+        let userThemes = KeywordStore.recurringThemes(in: watchlist)
+        let themeOverlap = titleThemes.filter(Set(userThemes).contains)
+
         return MovieCoachContext(
             tmdbID: titleID ?? -1,
             title: result.getResultTitle(),
@@ -177,6 +197,7 @@ struct MovieCoachContext {
             isUnreleased: unreleased,
             releaseDateText: unreleased ? Self.nonEmpty(details?.getDate()) ?? releaseRaw : nil,
             providers: flatrate,
+            titleThemes: titleThemes,
             isInWatchlist: reallySaved,
             savedAgo: savedAgo,
             folderName: folderName,
@@ -184,6 +205,8 @@ struct MovieCoachContext {
             watchlistSize: watchlist.count,
             topUserGenres: userGenres,
             genreOverlap: overlap,
+            userThemes: userThemes,
+            themeOverlap: themeOverlap,
             similarSaved: Array(similarSaved),
             matchedProviders: Array(userProviderNames),
             dayContext: Self.dayContext(),
@@ -209,6 +232,7 @@ struct MovieCoachContext {
         lines.append("TITLE: \(title) (\(kind))")
         if let year { lines.append("YEAR: \(year)") }
         if !genres.isEmpty { lines.append("GENRES: \(genres.joined(separator: ", "))") }
+        if !titleThemes.isEmpty { lines.append("THEMES: \(titleThemes.joined(separator: ", "))") }
         if let runtimeMinutes { lines.append("RUNTIME_MINUTES: \(runtimeMinutes)") }
         if let seasonCount { lines.append("SEASONS: \(seasonCount)") }
         if let episodeCount { lines.append("EPISODES: \(episodeCount)") }
@@ -246,6 +270,12 @@ struct MovieCoachContext {
         }
         if !genreOverlap.isEmpty {
             lines.append("- This title overlaps those favourites: \(genreOverlap.joined(separator: ", "))")
+        }
+        if !userThemes.isEmpty {
+            lines.append("- Themes that keep recurring across their saved titles: \(userThemes.joined(separator: ", "))")
+        }
+        if !themeOverlap.isEmpty {
+            lines.append("- This title hits themes they keep saving: \(themeOverlap.joined(separator: ", "))")
         }
         if !similarSaved.isEmpty {
             lines.append("- Similar titles already in their watchlist: \(similarSaved.joined(separator: ", "))")
@@ -337,12 +367,17 @@ struct MovieCoachContext {
         }
 
         // ---- Taste fit ----------------------------------------------------
-        let stronglyFits = genreAffinity >= 0.30 || !similarSaved.isEmpty || recommendationHits >= 1
-        let looselyFits  = genreAffinity >= 0.12
+        // Two shared recurring themes is as strong as genre affinity: the
+        // user demonstrably keeps saving stories about exactly this.
+        let stronglyFits = genreAffinity >= 0.30 || !similarSaved.isEmpty
+            || recommendationHits >= 1 || themeOverlap.count >= 2
+        let looselyFits  = genreAffinity >= 0.12 || !themeOverlap.isEmpty
         let wellRated    = (rating ?? 0) >= 7.0
 
         // Actively wrong for this user: nothing they save looks like this.
-        if genreAffinity <= 0.02, similarSaved.isEmpty {
+        // A shared theme rescues a genre mismatch — a space documentary can
+        // still land with someone whose watchlist is full of space fiction.
+        if genreAffinity <= 0.02, similarSaved.isEmpty, themeOverlap.isEmpty {
             let genreText = genres.isEmpty ? "this kind of thing" : genres.prefix(2).joined(separator: "/")
             return VerdictCall(verdict: .notIdealRightNow,
                                reason: "\(genreText) is nothing like what they actually save, however it's rated")
@@ -355,10 +390,14 @@ struct MovieCoachContext {
                                reason: "it's outside the languages they normally watch and doesn't otherwise match their taste")
         }
 
-        // Genuinely strong fit.
+        // Genuinely strong fit. Shared themes are the sharpest thing Coach
+        // can say — "you keep saving time-travel mysteries and this is one"
+        // beats a genre match — so they lead the reason when present.
         if stronglyFits, wellRated {
             var why = "it's well rated"
-            if !genreOverlap.isEmpty {
+            if !themeOverlap.isEmpty {
+                why += " and leans into \(themeOverlap.prefix(2).joined(separator: " and ")) — themes they keep saving"
+            } else if !genreOverlap.isEmpty {
                 why += " and sits right in the \(genreOverlap.prefix(2).joined(separator: " / ")) territory they keep saving"
             } else if !similarSaved.isEmpty {
                 why += " and is close to \(similarSaved.joined(separator: " and ")), already on their list"
@@ -391,6 +430,7 @@ struct MovieCoachContext {
     var hasMeaningfulPersonalSignal: Bool {
         isInWatchlist || hasReminder || !genreOverlap.isEmpty
             || !similarSaved.isEmpty || !matchedProviders.isEmpty
+            || !themeOverlap.isEmpty
     }
 
     // MARK: - Cache signature
@@ -413,6 +453,11 @@ struct MovieCoachContext {
             hasReminder ? "rm1" : "rm0",
             topUserGenres.joined(separator: ","),
             genreOverlap.joined(separator: ","),
+            // Theme signals move as the background enrichment fills the
+            // keyword cache — including them here is what makes a cached
+            // answer regenerate once Coach genuinely knows more.
+            titleThemes.joined(separator: ","),
+            userThemes.joined(separator: ","),
             similarSaved.sorted().joined(separator: ","),
             matchedProviders.sorted().joined(separator: ","),
             dayContext

@@ -39,6 +39,14 @@ struct WatchnowApp: App {
                     // a guaranteed root view controller for the form.
                     await Self.requestConsent()
                 }
+                .task {
+                    // Top up the keyword cache for saved titles so Movie
+                    // Coach can reason about themes. Waits a couple of
+                    // seconds so the home screens' own requests go first,
+                    // and costs zero requests once the watchlist is fully
+                    // enriched.
+                    await KeywordEnricher.enrichWatchlist()
+                }
         }
     }
 

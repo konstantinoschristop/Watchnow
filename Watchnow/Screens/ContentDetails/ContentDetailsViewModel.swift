@@ -142,6 +142,28 @@ class ContentDetailsViewModel: ObservableObject {
             apiError = true
         }
     }
+
+    /// Keywords for the current title, cache-first. Unlike the other
+    /// fetchers this never sets `apiError`: keywords only sharpen Movie
+    /// Coach, so a failure quietly falls back to whatever (possibly stale)
+    /// cache exists and the screen carries on.
+    func getKeywords() async {
+        guard screenType != .person, let numericID = result.id else { return }
+
+        if KeywordStore.isFresh(type: screenType, id: numericID) {
+            self.keywords = KeywordStore.keywords(type: screenType, id: numericID) ?? []
+            return
+        }
+
+        do {
+            let response = try await service.fetchKeywords(screenType: screenType, id: id)
+            let names = response.all.compactMap(\.name)
+            KeywordStore.store(names, type: screenType, id: numericID)
+            self.keywords = names
+        } catch {
+            self.keywords = KeywordStore.keywords(type: screenType, id: numericID) ?? []
+        }
+    }
     
     func createShareLink() -> String {
         return "https://www.themoviedb.org/" + screenType.rawValue + "/\(id)"
@@ -183,6 +205,11 @@ extension ContentDetailsViewModel {
     var watchProviders: WatchProvidersResponse? {
         get { model.watchProviders }
         set { model.watchProviders = newValue }
+    }
+
+    var keywords: [String]? {
+        get { model.keywords }
+        set { model.keywords = newValue }
     }
     
     var isInWatchList: Bool {
@@ -374,6 +401,7 @@ extension ContentDetailsViewModel {
                                        details: details,
                                        cast: castSafe,
                                        similars: similarsSafe,
-                                       providerResults: watchProviderSafe)
+                                       providerResults: watchProviderSafe,
+                                       keywords: keywords ?? [])
     }
 }

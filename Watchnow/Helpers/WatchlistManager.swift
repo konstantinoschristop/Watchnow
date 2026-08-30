@@ -63,6 +63,11 @@ enum WatchlistManager {
             if let id = result.id {
                 addedDates[String(id)] = Date().timeIntervalSince1970
             }
+            // Fetch the title's TMDB keywords in the background so Movie
+            // Coach's theme profile stays current. Fire-and-forget — the
+            // save itself is already done, and a failure just leaves the
+            // title for the next launch's enrichment pass.
+            Task { await KeywordEnricher.enrich(result) }
             return true
         }
         return false

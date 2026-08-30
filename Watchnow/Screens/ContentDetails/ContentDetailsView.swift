@@ -78,7 +78,8 @@ struct ContentDetailsView: View {
             async let similars: Void = detailsViewModel.getSimilars()
             async let reviews: Void = detailsViewModel.getReviews()
             async let collection: Void = detailsViewModel.getCollection()
-            _ = await (credits, videos, providers, similars, reviews, collection)
+            async let keywords: Void = detailsViewModel.getKeywords()
+            _ = await (credits, videos, providers, similars, reviews, collection, keywords)
 
             // Everything Movie Coach reads is now in place — let it build its
             // context and generate exactly once.

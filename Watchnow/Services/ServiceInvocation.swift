@@ -82,6 +82,15 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unche
         return try await request(urlString: urlString)
     }
 
+    /// TMDB keywords for a title — the thematic signals behind Movie Coach's
+    /// "this matches what you keep saving" reasoning. Movie and TV share the
+    /// endpoint shape; TV nests the array under `results` instead of
+    /// `keywords`, which `KeywordsResponse` normalises.
+    func fetchKeywords(screenType: ScreenTypes, id: String) async throws -> KeywordsResponse {
+        let urlString = API.Common.keywords(type: screenType.rawValue, for: id)
+        return try await request(urlString: urlString)
+    }
+
     /// Streaming services available in `region` for the given content type.
     /// Used to build the provider tile row on the home tabs.
     func fetchProviders(screenType: ScreenTypes, region: String) async throws -> ProvidersListResponse {

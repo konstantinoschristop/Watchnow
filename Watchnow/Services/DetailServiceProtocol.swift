@@ -15,4 +15,5 @@ protocol DetailServiceProtocol: AnyObject, Sendable {
     func fetchEpisodes(seriesID: Int, seasonNumber: Int) async throws -> EpisodesResponse
     func fetchCollection(collectionID: Int) async throws -> CollectionResponse
     func fetchWatchProviders(screenType: ScreenTypes, id: String) async throws -> WatchProvidersResponse
+    func fetchKeywords(screenType: ScreenTypes, id: String) async throws -> KeywordsResponse
 }

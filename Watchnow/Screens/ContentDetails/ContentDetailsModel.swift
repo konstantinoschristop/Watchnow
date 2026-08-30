@@ -22,6 +22,9 @@ struct ContentDetailsModel {
     var details: ResultDetailsResponse?
     var collection: CollectionResponse?
     var watchProviders: WatchProvidersResponse?
+    /// Raw TMDB keyword names for this title, from cache or a fresh fetch.
+    /// Nil until `getKeywords` has settled; empty when the title has none.
+    var keywords: [String]?
     var isInWatchList:   Bool = false
     var viewModelFinishedFetching: Bool = false
     /// Set once every parallel detail fetch has settled. Movie Coach waits
