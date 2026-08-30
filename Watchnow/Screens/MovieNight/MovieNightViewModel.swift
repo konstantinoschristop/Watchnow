@@ -38,10 +38,25 @@ final class MovieNightViewModel: ObservableObject {
     // MARK: - Private session state
 
     private var criteria = MovieNightCriteria()
+    /// What the last session was started with, if any. The setup screen's
+    /// selections live in its own @State, which SwiftUI recreates whenever
+    /// the flow returns to setup ("Start over", the empty screen) — this is
+    /// what lets it restore the user's picks instead of showing cleared
+    /// chips.
+    private(set) var lastCriteria: MovieNightCriteria?
     /// Per-player sets of liked result IDs. `likes[i]` belongs to player i+1.
     private var likes: [Set<Int>] = []
     /// Discover page last fetched, so "Deal again" pulls fresh titles.
     private var lastPage = 0
+    /// Total Discover pages for the current criteria (0 = not known yet).
+    /// A narrow filter combo often has a single page — without this,
+    /// "Deal again" walked past the end of the filtered results and came
+    /// back with nothing, silently dropping the user's filters.
+    private var totalPages = 0
+    /// Every card dealt under the current criteria, so wrapped-around pages
+    /// and the watchlist blend don't redeal the same titles until the
+    /// filtered pool is genuinely exhausted.
+    private var dealtIDs: Set<Int> = []
 
     private let service = ServiceInvocation()
     private var region: String { Locale.current.region?.identifier ?? "US" }
@@ -115,8 +130,11 @@ final class MovieNightViewModel: ObservableObject {
     /// Persist the chosen services and build the first deck.
     func start(with criteria: MovieNightCriteria) {
         self.criteria = criteria
+        self.lastCriteria = criteria
         StreamingPreferences.save(criteria.providerIDs)
         lastPage = 0
+        totalPages = 0
+        dealtIDs = []
         Task { await dealDeck() }
     }
 
@@ -207,9 +225,16 @@ final class MovieNightViewModel: ObservableObject {
         awaitingHandoff = false
         likes = Array(repeating: [], count: max(criteria.playerCount, 1))
 
-        lastPage += 1
+        // Advance through Discover's pages, wrapping back to page 1 once the
+        // filtered result set runs out. TMDB returns an empty array for a
+        // page past the end, and a narrow combo (mood + runtime + service +
+        // the vote floor) frequently has exactly one page — so without the
+        // wrap, "Deal again" dealt a deck that ignored the filters (whatever
+        // watchlist titles were left) or dropped to the empty screen.
+        lastPage = (totalPages > 0 && lastPage >= totalPages) ? 1 : lastPage + 1
 
         var pool: [Result] = []
+        var fetchFailed = false
         if let response = try? await service.discover(
             genreIDs: criteria.genreIDs,
             runtimeLTE: criteria.length.runtimeLTE,
@@ -218,6 +243,11 @@ final class MovieNightViewModel: ObservableObject {
             page: lastPage
         ) {
             pool = response.results
+            totalPages = response.total_pages ?? 1
+        } else {
+            // Retry the same page on the next deal instead of skipping it.
+            fetchFailed = true
+            lastPage -= 1
         }
 
         // Blend in watchlist movies that fit the chosen moods so the user's
@@ -225,14 +255,23 @@ final class MovieNightViewModel: ObservableObject {
         let merged = dedupedMovies(watchlistCandidates() + pool)
 
         guard !merged.isEmpty else {
-            phase = .empty
+            phase = fetchFailed ? .error : .empty
             return
         }
 
-        // Cap the deck to a short, decisive round (not a chore). "Deal again"
-        // pulls the next page, so there's always more if they want it.
-        // Shuffled so repeat deals (and repeat players) see a fresh order.
-        deck = Array(merged.shuffled().prefix(8))
+        // Cap the deck to a short, decisive round (not a chore), dealing
+        // titles this session hasn't shown yet first and topping up with
+        // repeats only once the filtered pool runs low — never a thin deck.
+        // Both halves shuffled so repeat deals see a fresh order.
+        let fresh = merged.filter { !dealtIDs.contains($0.id ?? -1) }.shuffled()
+        let repeats = merged.filter { dealtIDs.contains($0.id ?? -1) }.shuffled()
+        deck = Array((fresh + repeats).prefix(8))
+
+        // This deal used up the last unseen titles — start the rotation over
+        // so the next one cycles the pool again instead of repeating this
+        // exact deck.
+        if fresh.count <= 8 { dealtIDs = [] }
+        dealtIDs.formUnion(deck.compactMap(\.id))
         phase = .swiping
     }
 

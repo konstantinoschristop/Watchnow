@@ -238,7 +238,18 @@ struct MovieNightSetupView: View {
     private func prefillFromPreferences() {
         guard !didPrefill else { return }
         didPrefill = true
-        selectedProviders = Set(StreamingPreferences.providerIDs)
+        // Coming back mid-session ("Start over", the empty screen) restores
+        // everything the user picked last, so setup reads as "tweak the
+        // filters" rather than starting from cleared chips. A fresh session
+        // only carries over the saved streaming services.
+        if let previous = vm.lastCriteria {
+            selectedMoods = previous.moodIDs
+            length = previous.length
+            selectedProviders = previous.providerIDs
+            playerCount = previous.playerCount
+        } else {
+            selectedProviders = Set(StreamingPreferences.providerIDs)
+        }
     }
 }
 
