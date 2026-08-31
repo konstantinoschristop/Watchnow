@@ -101,6 +101,18 @@ enum API {
             }
             return url
         }
+        /// Discover scoped to one genre, for either media type. Powers the
+        /// search screen's "Browse by genre" chips. The `vote_count` floor
+        /// keeps the shelf to titles enough people have actually rated —
+        /// without it a genre browse leads with obscure entries that happen
+        /// to carry the tag.
+        static func discoverByGenre(type: String,
+                                    genreID: Int,
+                                    page: Int = 1,
+                                    voteCountGTE: Int = 150) -> String {
+            return "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&include_adult=false&sort_by=popularity.desc&vote_count.gte=\(voteCountGTE)&with_genres=\(genreID)&page=\(page)"
+        }
+
         static func details(screenType: String, id: String) -> String {
             return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)"
         }

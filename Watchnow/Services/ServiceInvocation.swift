@@ -12,7 +12,10 @@ import Foundation
 // conformance through subclasses automatically. The concrete subclass has
 // to opt in explicitly that *it* upholds the same invariants — which it
 // does, since this class adds no mutable state of its own.
-final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unchecked Sendable {
+final class ServiceInvocation: BaseNetworkService,
+                              DetailServiceProtocol,
+                              SearchDiscoveryServiceProtocol,
+                              @unchecked Sendable {
 
     func fetchCredits(screenType: ScreenTypes, id: String) async throws -> ResultCreditsResponse {
         let urlString = API.Common.credits(type: screenType.rawValue, for: id)
@@ -138,5 +141,29 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unche
                                                   page: page)
         return try await request(urlString: urlString)
     }
-}
 
+    // MARK: - SearchDiscoveryServiceProtocol
+
+    /// Today's trending movies. Same endpoint the Movies tab uses — the
+    /// search start screen reads it through `TrendingServiceProtocol` so it
+    /// doesn't have to depend on the whole `MovieService`/`SeriesService`
+    /// pair just to fill one poster row.
+    func fetchTrendingMovies(page: Int) async throws -> GenericResultResponse {
+        try await request(urlString: API.Movie.trending(page: page))
+    }
+
+    /// Today's trending series. Counterpart to `fetchTrendingMovies`.
+    func fetchTrendingSeries(page: Int) async throws -> GenericResultResponse {
+        try await request(urlString: API.TV.trending(page: page))
+    }
+
+    /// Popular titles carrying a single genre tag, for either media type.
+    func fetchByGenre(screenType: ScreenTypes,
+                      genreID: Int,
+                      page: Int = 1) async throws -> GenericResultResponse {
+        let urlString = API.Common.discoverByGenre(type: screenType.rawValue,
+                                                   genreID: genreID,
+                                                   page: page)
+        return try await request(urlString: urlString)
+    }
+}
