@@ -104,6 +104,13 @@ struct SearchModel {
         ]
     }
 
+    /// The text in the search field.
+    ///
+    /// Lives here rather than as `@State` in `SearchView` so that leaving
+    /// the tab can clear it — the view's own state is out of reach from
+    /// `ContentView`, which is where a tab change is observed.
+    var query: String = ""
+
     var searchResponse: SearchResponse?
     var recentSearches: [String] = []
     var results: [Result]? {

@@ -64,10 +64,19 @@ struct StretchEffectModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .visualEffect { effect, geometry in
-                let currentHeight = geometry.size.height
+                // Guarded against a zero height (which would divide to NaN
+                // and drop the view entirely) and against an implausible
+                // offset. `frame(in: .scrollView).minY` can report a large
+                // value for a frame or two while a scroll view's geometry
+                // is still resolving — on a tab switch, for instance —
+                // which without a cap scales the content far past the
+                // screen and leaves the header looking broken until it
+                // settles. One band-height of stretch is already more than
+                // any real overscroll produces.
+                let currentHeight = max(geometry.size.height, 1)
                 let scrollOffset = geometry.frame(in: .scrollView).minY
-                let positiveOffset = max (0, scrollOffset)
-                
+                let positiveOffset = min(max(0, scrollOffset), currentHeight)
+
                 let newHeight = currentHeight + positiveOffset
                 let scaleFactor = newHeight / currentHeight
                 

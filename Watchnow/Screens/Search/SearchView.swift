@@ -23,7 +23,6 @@ import AlertToast
 struct SearchView: View {
 
     @ObservedObject var viewModel: SearchViewModel
-    @State private var searchInput = ""
     @FocusState private var searchFieldFocused: Bool
     @Namespace private var namespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -35,7 +34,7 @@ struct SearchView: View {
     @State private var searchTask: Task<Void, Never>?
     /// The query most recently handed to the view model. Lets a tap on a
     /// recent chip fire immediately *and* keeps the resulting
-    /// `searchInput` change from scheduling a duplicate debounced fetch.
+    /// `viewModel.query` change from scheduling a duplicate debounced fetch.
     @State private var dispatchedQuery = ""
 
     /// Debounce window for typed input. Short enough to feel live, long
@@ -54,7 +53,7 @@ struct SearchView: View {
                 // input or returned results) and bails out of search
                 // entirely on tap, including dismissing the search field
                 // focus via the SwiftUI `dismissSearch` environment action.
-                if !searchInput.isEmpty || viewModel.results != nil {
+                if !viewModel.query.isEmpty || viewModel.results != nil {
                     ToolbarItem(placement: .topBarTrailing) {
                         SearchCancelButton {
                             cancelSearch()
@@ -72,11 +71,15 @@ struct SearchView: View {
                            type: .error(.red),
                            title: "Removed from Watchlist")
             }
-            .searchable(text: $searchInput,
+            .searchable(text: $viewModel.query,
                         placement: .navigationBarDrawer(displayMode: .always),
                         prompt: "Movies, TV series, actors")
             .searchFocused($searchFieldFocused)
-            .onChange(of: searchInput) { _, newValue in
+            // Hands the top of the screen to the hero before anything has
+            // been typed. See `SearchChromeModifier` for why this only
+            // happens on iOS 26.
+            .modifier(SearchChromeModifier(hidesNavigationBar: phase == .initial))
+            .onChange(of: viewModel.query) { _, newValue in
                 queryChanged(to: newValue)
             }
             .onDisappear {
@@ -151,8 +154,37 @@ private extension SearchView {
     func cancelSearch() {
         searchTask?.cancel()
         dispatchedQuery = ""
-        searchInput = ""
+        viewModel.query = ""
         viewModel.clearResults()
+    }
+}
+
+// MARK: - SearchChromeModifier
+
+/// Drops the navigation bar on the start screen so the poster band starts
+/// at the top of the display instead of below a bar and a large title.
+///
+/// Gated to iOS 26 and later, and not out of caution about the API: on
+/// iOS 18 `.searchable(placement: .navigationBarDrawer)` renders the search
+/// field *inside* the navigation bar, so hiding the bar there would take
+/// the search field with it and leave the screen with no way to search. On
+/// 26 the system relocates the field to the bottom glass bar for a tab
+/// with `role: .search`, which leaves the navigation bar holding nothing
+/// but the title — and the hero already says "Find what to watch" more
+/// usefully than the word "Search" does.
+///
+/// Bound to the initial phase only. As soon as there are results the bar
+/// comes back, because that's where Cancel lives.
+private struct SearchChromeModifier: ViewModifier {
+    let hidesNavigationBar: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.toolbarVisibility(hidesNavigationBar ? .hidden : .visible,
+                                      for: .navigationBar)
+        } else {
+            content
+        }
     }
 }
 
@@ -261,7 +293,7 @@ private extension SearchView {
                 Text("Nothing came back for this genre. Try another one.")
             }
         } else {
-            ContentUnavailableView.search(text: searchInput)
+            ContentUnavailableView.search(text: viewModel.query)
         }
     }
 
@@ -269,15 +301,25 @@ private extension SearchView {
     /// live trending shelf. See `SearchStartView`.
     var initialState: some View {
         SearchStartView(viewModel: viewModel,
+                        bleedsUnderStatusBar: heroOwnsTopEdge,
                         isSearchFieldFocused: searchFieldFocused,
                         onSelectQuery: { query in
-                            searchInput = query
+                            viewModel.query = query
                             runSearch(query, immediate: true)
                             searchFieldFocused = false
                         },
                         onSelectGenre: { genre in
                             browseGenre(genre)
                         })
+    }
+
+    /// Whether the start screen's art reaches the top of the display.
+    /// Tracks exactly when `SearchChromeModifier` hides the navigation bar,
+    /// so the hero's extra height and its status-bar scrim only appear on
+    /// the platform where there's actually a bar missing.
+    var heroOwnsTopEdge: Bool {
+        if #available(iOS 26.0, *) { return true }
+        return false
     }
 
     /// Shared empty-state label builder. `ContentUnavailableView`'s

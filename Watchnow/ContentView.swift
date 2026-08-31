@@ -50,6 +50,12 @@ struct ContentView: View {
                 watchlistTabContent
             }
         }
+        .onChange(of: selectedTab) { previous, _ in
+            // Leaving Search returns it to its start screen. See
+            // `SearchViewModel.endSearchSession()` for why this is observed
+            // here rather than in the search view itself.
+            if previous == .search { searchViewModel.endSearchSession() }
+        }
         .onChange(of: router.pending) { _, pending in
             applyDeepLink(pending)
         }

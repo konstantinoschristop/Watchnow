@@ -63,6 +63,23 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
         selectedChooser = .all
     }
 
+    /// Returns the tab to its start screen.
+    ///
+    /// Called when the user navigates away from Search. Without this, a
+    /// query and its results outlive the tab switch — so coming back landed
+    /// on a stale results list rather than the start screen, and the hero
+    /// appeared to have vanished. Nothing is actually lost by clearing: the
+    /// query is already in Recent, one tap away.
+    ///
+    /// Deliberately driven by a tab change rather than `onDisappear`, which
+    /// also fires when pushing a details screen — that would wipe the
+    /// results the user was about to come back to.
+    func endSearchSession() {
+        guard !query.isEmpty || results != nil else { return }
+        query = ""
+        clearResults()
+    }
+
     // MARK: - Genre browse
 
     /// Fills the results list from a genre tap instead of a typed query.
@@ -219,6 +236,11 @@ extension SearchViewModel {
     var selectedChooser: SearchModel.SearchChooserOptions {
         get { model.selectedChooser }
         set { model.selectedChooser = newValue }
+    }
+
+    var query: String {
+        get { model.query }
+        set { model.query = newValue }
     }
 
     var recentSearches: [String] {

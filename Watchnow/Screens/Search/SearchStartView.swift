@@ -23,6 +23,10 @@ import SwiftUI
 struct SearchStartView: View {
 
     @ObservedObject var viewModel: SearchViewModel
+    /// True when the navigation bar is hidden and the band reaches the top
+    /// of the display. Owned by `SearchView`, which decides that — see
+    /// `SearchChromeModifier`.
+    var bleedsUnderStatusBar: Bool = false
     /// Drives the hero collapse. Owned by `SearchView` because the focus
     /// state belongs to the `.searchable` field, not to this subtree.
     let isSearchFieldFocused: Bool
@@ -208,55 +212,65 @@ private extension SearchStartView {
         ZStack(alignment: .bottom) {
             HeroMarquee(rowOne: marqueeRowOne,
                         rowTwo: marqueeRowTwo,
+                        rowThree: marqueeRowThree,
                         reduceMotion: reduceMotion)
-                // Grows with an overscroll pull, the same way the home
-                // tabs' hero does. Applied to the art alone — stretching
-                // the whole band would scale the headline with it.
-                .stretchy()
+                // No `.stretchy()` here, deliberately. That modifier scales
+                // by `frame(in: .scrollView).minY` from a `.bottom` anchor,
+                // and on returning to this tab the scroll geometry reports a
+                // large minY for a beat before it settles. The band came
+                // back magnified and pinned to its lower edge — blank at the
+                // top, posters far too big — and only looked right once the
+                // offset resolved a second later. The two counter-drifting
+                // rows already give this header its motion; a rubber band
+                // isn't worth a header that renders wrong every time you
+                // open the tab.
+                //
                 // Feathers the top edge. Applied here rather than inside
                 // the marquee because the fade has to be measured against
                 // the band's own bounds — that's the edge that clips, and
                 // the marquee's intrinsic height doesn't match it.
-                .frame(height: Self.heroHeight)
+                .frame(height: heroHeight)
                 .clipped()
                 .mask {
                     LinearGradient(stops: [
                         .init(color: .clear,              location: 0.00),
-                        .init(color: .black.opacity(0.5), location: 0.10),
-                        .init(color: .black,              location: 0.26),
+                        .init(color: .black.opacity(0.5), location: maskFeather * 0.4),
+                        .init(color: .black,              location: maskFeather),
                         .init(color: .black,              location: 1.00),
                     ], startPoint: .top, endPoint: .bottom)
                 }
 
             // Fades the art out into the page so the band has no hard
             // bottom edge, and gives the headline a solid ground to sit on.
-            LinearGradient(stops: [
-                .init(color: Color(.background).opacity(0.00), location: 0.00),
-                .init(color: Color(.background).opacity(0.05), location: 0.26),
-                .init(color: Color(.background).opacity(0.20), location: 0.44),
-                .init(color: Color(.background).opacity(0.50), location: 0.57),
-                .init(color: Color(.background).opacity(0.80), location: 0.67),
-                .init(color: Color(.background).opacity(0.96), location: 0.77),
-                // Solid well before the band's bottom edge, so the clip
-                // lands on flat background instead of cutting a poster in
-                // half.
-                .init(color: Color(.background),               location: 0.85),
-                .init(color: Color(.background),               location: 1.00),
-            ], startPoint: .top, endPoint: .bottom)
-            .allowsHitTesting(false)
+            LinearGradient(stops: bottomFadeStops,
+                           startPoint: .top,
+                           endPoint: .bottom)
+                .allowsHitTesting(false)
+
+            if bleedsUnderStatusBar {
+                statusBarScrim
+            }
 
             VStack(spacing: 10) {
                 Text("Find what to watch")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(.primary)
-                    .shadow(color: Color(.background).opacity(0.6), radius: 6)
+                    // Two shadows in the page colour rather than one, and
+                    // both opaque: a wide soft pass to lift the text off
+                    // whatever poster is behind it, and a tight pass to
+                    // keep the letterforms crisp. Doing the separation
+                    // locally leaves the band-wide gradient free to stay
+                    // gentle — pushing *that* hard enough to ground the
+                    // headline was washing out the artwork 150pt above it.
+                    .shadow(color: Color(.background), radius: 14)
+                    .shadow(color: Color(.background), radius: 5)
 
                 hintChip
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 4)
         }
-        .frame(height: Self.heroHeight)
+        .frame(height: heroHeight)
         .frame(maxWidth: .infinity)
         .clipped()
         .scaleEffect(isSearchFieldFocused ? 0.94 : 1, anchor: .top)
@@ -273,17 +287,113 @@ private extension SearchStartView {
     /// ~86pt between them, and the gradient needs roughly that much again
     /// above it to reach full opacity before the text starts. Tighter than
     /// this and the chip clips against the band's bottom edge.
-    static var heroHeight: CGFloat { 238 }
+    /// Taller when the band owns the top of the display: the scrim over
+    /// the status bar consumes the first ~110pt, so without the extra
+    /// height there was barely 60pt of unobscured art between it and the
+    /// bottom fade — which is what made the band read as a sliced-off
+    /// sliver rather than a window onto artwork. Where the navigation bar
+    /// is still present nothing eats the top and the band keeps its
+    /// original size.
+    var heroHeight: CGFloat { bleedsUnderStatusBar ? 340 : 238 }
+
+    /// How far down the band its own top clip is feathered.
+    ///
+    /// Barely any when the status-bar scrim is present — that gradient
+    /// already hides the art up there, and stacking a second fade on top
+    /// of it left the top third blank and then produced art abruptly, the
+    /// hard horizontal line this was meant to avoid. Longer when there's
+    /// no scrim, where this is the only thing softening the clip.
+    var maskFeather: CGFloat { bleedsUnderStatusBar ? 0.05 : 0.26 }
+
+    /// Fades the art out into the page so the band has no hard bottom edge
+    /// and the headline has solid ground.
+    ///
+    /// Starts noticeably later on the taller band. The proportions that
+    /// suited a 238pt band began dimming the art 60pt in, which on a 360pt
+    /// band meant it was fading almost as soon as the top scrim let go.
+    var bottomFadeStops: [Gradient.Stop] {
+        let page = Color(.background)
+        guard bleedsUnderStatusBar else {
+            return [
+                .init(color: page.opacity(0.00), location: 0.00),
+                .init(color: page.opacity(0.05), location: 0.26),
+                .init(color: page.opacity(0.20), location: 0.44),
+                .init(color: page.opacity(0.50), location: 0.57),
+                .init(color: page.opacity(0.80), location: 0.67),
+                .init(color: page.opacity(0.96), location: 0.77),
+                .init(color: page,               location: 0.85),
+                .init(color: page,               location: 1.00),
+            ]
+        }
+        // Reaches near-solid by ~0.80, which is where the headline block
+        // starts. With three rows of art now filling the band edge to edge
+        // there is always a poster behind that text, so it needs real
+        // ground rather than the thin wash that sufficed when the lower
+        // half of the band was mostly empty.
+        return [
+            .init(color: page.opacity(0.00), location: 0.00),
+            .init(color: page.opacity(0.05), location: 0.31),
+            .init(color: page.opacity(0.22), location: 0.45),
+            .init(color: page.opacity(0.50), location: 0.57),
+            .init(color: page.opacity(0.79), location: 0.68),
+            .init(color: page.opacity(0.95), location: 0.78),
+            // Solid well before the band's bottom edge, so the clip lands
+            // on flat background instead of cutting a poster in half.
+            .init(color: page,               location: 0.86),
+            .init(color: page,               location: 1.00),
+        ]
+    }
+
+    /// Softens the art directly under the status bar.
+    ///
+    /// With the navigation bar hidden the band reaches the top of the
+    /// display, which puts the clock and the battery on top of whatever
+    /// poster happens to be drifting past — black glyphs on a bright red
+    /// one-sheet is not a readable combination, and unlike the app's own
+    /// text these aren't ours to restyle. iOS 26's soft scroll-edge effect
+    /// helps, but it's tuned for content scrolling *under* a bar rather
+    /// than content resting at the top, so it doesn't go far enough alone.
+    ///
+    /// Fades to the page colour rather than to black so it stays correct
+    /// in both appearances: the status bar's glyphs invert with the system
+    /// theme, and so does `Color(.background)`.
+    var statusBarScrim: some View {
+        VStack(spacing: 0) {
+            LinearGradient(stops: [
+                .init(color: Color(.background).opacity(0.96), location: 0.00),
+                .init(color: Color(.background).opacity(0.88), location: 0.55),
+                .init(color: Color(.background).opacity(0.62), location: 0.72),
+                .init(color: Color(.background).opacity(0.30), location: 0.86),
+                .init(color: Color(.background).opacity(0.00), location: 1.00),
+            ], startPoint: .top, endPoint: .bottom)
+            // Holds near-opaque across the status bar's own height (~59pt
+            // of these 96), then releases. Shaped as hold-then-ramp rather
+            // than a straight line so the clock stays legible without
+            // spending the whole gradient dimming artwork nobody is
+            // reading over.
+            .frame(height: 96)
+
+            Spacer(minLength: 0)
+        }
+        .allowsHitTesting(false)
+    }
 
     /// Top drift row: trending movies.
     var marqueeRowOne: [URL] {
         viewModel.trendingMovies.prefix(6).map { $0.getPosterURL() }
     }
 
-    /// Bottom drift row: trending series, so the two rows never show the
-    /// same poster passing itself in opposite directions.
+    /// Middle drift row: trending series, so neighbouring rows never show
+    /// the same poster passing itself in opposite directions.
     var marqueeRowTwo: [URL] {
         viewModel.trendingSeries.prefix(6).map { $0.getPosterURL() }
+    }
+
+    /// Bottom drift row: further down the movie feed, so it repeats
+    /// neither of the rows above it. Short slices are fine — `DriftRow`
+    /// tiles whatever it's given up to a full screen width.
+    var marqueeRowThree: [URL] {
+        viewModel.trendingMovies.dropFirst(3).prefix(6).map { $0.getPosterURL() }
     }
 
     /// The rotating suggestion, typed out as a real control.
@@ -343,178 +453,6 @@ private extension SearchStartView {
                 .multilineTextAlignment(.center)
                 .transition(.opacity)
                 .frame(height: 38)
-        }
-    }
-}
-
-// MARK: - BlinkingCaret
-
-/// Text cursor for the typed hint.
-///
-/// Its own view with its own `@State` on purpose: the parent re-renders on
-/// every keystroke of the typewriter, and an animation started in the
-/// parent would be torn down and restarted forty times a second. Nothing
-/// here depends on the typed text, so SwiftUI leaves the blink alone.
-private struct BlinkingCaret: View {
-    @State private var dim = false
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 0.5, style: .continuous)
-            .frame(width: 1.5, height: 15)
-            .foregroundStyle(Color.accentColor)
-            .opacity(dim ? 0 : 1)
-            .onAppear {
-                withAnimation(.linear(duration: 0.55).repeatForever(autoreverses: true)) {
-                    dim = true
-                }
-            }
-            .accessibilityHidden(true)
-    }
-}
-
-// MARK: - HeroMarquee
-
-/// Two rows of poster art, tilted off-axis and drifting past each other in
-/// opposite directions.
-///
-/// Counter-drift rather than two rows going the same way: parallel motion
-/// reads as one sliding sheet, while opposed motion reads as depth, and
-/// it's what stops a slow drift from looking like a stuck carousel. The
-/// pair is rotated and over-scaled so neither the tilt nor the wrap seam
-/// ever exposes a corner of the band.
-private struct HeroMarquee: View {
-    let rowOne: [URL]
-    let rowTwo: [URL]
-    let reduceMotion: Bool
-
-    private let tilt: Double = -11
-    private let overscale: CGFloat = 1.45
-
-    var body: some View {
-        VStack(spacing: 8) {
-            DriftRow(posters: rowOne, reversed: false, speed: 13, reduceMotion: reduceMotion)
-            DriftRow(posters: rowTwo, reversed: true,  speed: 10, reduceMotion: reduceMotion)
-        }
-        .rotationEffect(.degrees(tilt))
-        // Both are render transforms, so the rows still lay out at the
-        // band's own width — the tilt costs nothing in layout terms.
-        .scaleEffect(overscale)
-        // A whisper of blur — enough to keep the art from competing with
-        // the headline for focus, not enough to read as out-of-focus. The
-        // legibility work is done by the scrim in `hero`, so the art
-        // itself stays at full strength; dropping its opacity instead
-        // washed it out to grey against the light background.
-        .blur(radius: 0.3)
-        .frame(maxWidth: .infinity)
-        .clipped()
-        .accessibilityHidden(true)
-    }
-}
-
-// MARK: - DriftRow
-
-/// One endlessly drifting row of poster art.
-///
-/// Driven by a single `.repeatForever` animation on one `offset` rather
-/// than a per-frame `TimelineView`: the timeline approach would rebuild a
-/// dozen `KFImage`s sixty times a second, while animating one offset hands
-/// the whole thing to the render server and costs nothing per frame. The
-/// row is duplicated end to end and travels exactly one copy's width, so
-/// the wrap is seamless.
-private struct DriftRow: View {
-    let posters: [URL]
-    /// `true` sends this row right instead of left.
-    let reversed: Bool
-    /// Points per second. Slow enough to read as ambience rather than as a
-    /// carousel the user is expected to track.
-    let speed: CGFloat
-    let reduceMotion: Bool
-
-    @State private var offset: CGFloat = 0
-
-    private let posterWidth: CGFloat = 80
-    private let posterHeight: CGFloat = 120
-    private let spacing: CGFloat = 8
-
-    /// Width of one full copy — the exact distance to travel before the
-    /// duplicate lines up with the original.
-    private var loopWidth: CGFloat {
-        CGFloat(posters.count) * (posterWidth + spacing)
-    }
-
-    var body: some View {
-        // A disabled horizontal ScrollView, not a bare `.clipped()` frame.
-        // `.clipped()` only trims what's *drawn* — the stack underneath
-        // still reports its full width to the parent, which stretched the
-        // enclosing VStack and dragged the genre grid and trending row
-        // off-screen with it. A ScrollView reports the width it was
-        // offered and keeps the overflow to itself.
-        ScrollView(.horizontal, showsIndicators: false) {
-            content
-                .frame(height: posterHeight)
-        }
-        .scrollDisabled(true)
-        .frame(height: posterHeight)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if posters.isEmpty {
-            placeholder
-        } else {
-            HStack(spacing: spacing) {
-                ForEach(0..<(posters.count * 2), id: \.self) { index in
-                    PosterImage(url: posters[index % posters.count],
-                                width: posterWidth * 2,
-                                height: posterHeight * 2,
-                                cornerRadius: 9,
-                                shadowRadius: 0)
-                        .frame(width: posterWidth, height: posterHeight)
-                        // Fill behind each poster so a slot that hasn't
-                        // decoded yet reads as a card still loading rather
-                        // than a hole punched in the strip.
-                        .background {
-                            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                .fill(Color(.tertiarySystemFill))
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
-                        // Hairline edge so neighbouring posters stay
-                        // distinct where two dark ones meet.
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                .strokeBorder(.white.opacity(0.10), lineWidth: 0.5)
-                        }
-                }
-            }
-            .offset(x: reversed ? offset - loopWidth : -offset)
-            .onAppear { startDrift() }
-            .onChange(of: posters.count) { _, _ in startDrift() }
-        }
-    }
-
-    private var placeholder: some View {
-        InlineShimmerContainer {
-            HStack(spacing: spacing) {
-                ForEach(0..<7, id: \.self) { _ in
-                    ShimmerBox(cornerRadius: 9)
-                        .frame(width: posterWidth, height: posterHeight)
-                }
-            }
-        }
-    }
-
-    /// Restarts the loop from zero. Called on appear and whenever the
-    /// poster count changes, because `loopWidth` — and therefore the
-    /// duration that makes the wrap seamless — depends on it.
-    private func startDrift() {
-        guard !reduceMotion, loopWidth > 0 else {
-            offset = 0
-            return
-        }
-        offset = 0
-        withAnimation(.linear(duration: Double(loopWidth / speed))
-            .repeatForever(autoreverses: false)) {
-            offset = loopWidth
         }
     }
 }
@@ -771,326 +709,3 @@ private struct EntranceModifier: ViewModifier {
     }
 }
 
-// MARK: - TrendingPosterCard
-
-/// Compact poster tile for the trending row.
-///
-/// Narrower than the home feed's `BottomCard` (108pt vs 150pt) on purpose:
-/// this shelf is a shortcut on a screen whose primary action is typing, so
-/// it should read as a secondary offer and let four-and-a-bit posters peek
-/// in, which is what signals "scrollable" without a chevron.
-private struct TrendingPosterCard: View {
-    let result: Result
-    let screenType: ScreenTypes
-    let reduceMotion: Bool
-
-    @Namespace private var namespace
-    @State private var isPressed = false
-
-    static let posterWidth: CGFloat = 108
-    static let posterHeight: CGFloat = 162
-    /// Poster + spacing + two text lines. Pinned so the enclosing
-    /// ScrollView has a fixed height and the sections below it don't shift
-    /// as posters stream in.
-    static let totalHeight: CGFloat = 218
-
-    private let cornerRadius: CGFloat = 12
-
-    var body: some View {
-        NavigationLink {
-            let model = ContentDetailsModel(screenType: screenType, result: result)
-            let vm = ContentDetailsViewModel(model: model)
-            ContentDetailsView(detailsViewModel: vm)
-                .navigationTransition(.zoom(sourceID: result.id ?? 0, in: namespace))
-        } label: {
-            VStack(alignment: .leading, spacing: 7) {
-                poster
-                title
-                Spacer(minLength: 0)
-            }
-            .frame(width: Self.posterWidth, height: Self.totalHeight, alignment: .top)
-        }
-        .buttonStyle(PressableCardStyle(reduceMotion: reduceMotion))
-        .matchedTransitionSource(id: result.id ?? 0, in: namespace)
-        .accessibilityLabel(result.getResultTitle())
-        .accessibilityHint("Opens details")
-    }
-
-    private var poster: some View {
-        PosterImage(url: result.getPosterURL(),
-                    width: Self.posterWidth * 2,
-                    height: Self.posterHeight * 2,
-                    cornerRadius: cornerRadius,
-                    shadowRadius: 0)
-            .frame(width: Self.posterWidth, height: Self.posterHeight)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(.white.opacity(0.08), lineWidth: 0.5)
-            }
-            .shadow(color: .black.opacity(0.30), radius: 5, y: 3)
-    }
-
-    private var title: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(result.getResultTitle())
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-
-            let year = result.getReleaseDate(addSeparator: false)
-            if !year.isEmpty {
-                Text(year)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .frame(width: Self.posterWidth, alignment: .leading)
-    }
-}
-
-// MARK: - PressableCardStyle
-
-/// Spring scale-down on press. Uses a `ButtonStyle` rather than a
-/// `DragGesture` so it composes with `NavigationLink` without competing
-/// with the scroll view's own gesture recognition.
-private struct PressableCardStyle: ButtonStyle {
-    let reduceMotion: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.94 : 1)
-            .opacity(configuration.isPressed ? 0.85 : 1)
-            .animation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.7),
-                       value: configuration.isPressed)
-    }
-}
-
-// MARK: - TrendingSkeletonRow
-
-/// Shimmer placeholder matching `TrendingPosterCard`'s exact geometry, so
-/// the real posters land in place instead of nudging the layout when the
-/// fetch returns.
-private struct TrendingSkeletonRow: View {
-
-    var body: some View {
-        InlineShimmerContainer {
-            // Same ScrollView wrapper as `trendingRow`, not a bare HStack.
-            // A bare stack five cards wide overflows the screen and reports
-            // that width up to the enclosing vertical ScrollView, which
-            // knocked the whole start screen's layout sideways for a frame.
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 12) {
-                    ForEach(0..<5, id: \.self) { _ in
-                        VStack(alignment: .leading, spacing: 7) {
-                            ShimmerBox(cornerRadius: 12)
-                                .frame(width: TrendingPosterCard.posterWidth,
-                                       height: TrendingPosterCard.posterHeight)
-                            ShimmerBox(cornerRadius: 4)
-                                .frame(width: TrendingPosterCard.posterWidth * 0.85, height: 10)
-                            ShimmerBox(cornerRadius: 4)
-                                .frame(width: TrendingPosterCard.posterWidth * 0.45, height: 9)
-                            Spacer(minLength: 0)
-                        }
-                        .frame(width: TrendingPosterCard.posterWidth,
-                               height: TrendingPosterCard.totalHeight, alignment: .top)
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-            .scrollDisabled(true)
-        }
-        .frame(height: TrendingPosterCard.totalHeight, alignment: .top)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-}
-
-// MARK: - GenreBrowseChip
-
-/// Icon + label pill for a browsable genre.
-///
-/// Tinted rather than neutral so the grid reads as a palette of choices
-/// instead of a wall of identical grey pills — but tinted *quietly* (12%
-/// fill, hierarchical icon), because unlike `FilterChip` none of these is
-/// ever in a selected state on this screen: tapping one leaves for the
-/// results list.
-private struct GenreBrowseChip: View {
-    let genre: SearchModel.Genre
-    let action: () -> Void
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: genre.symbol)
-                    .font(.system(size: 12, weight: .semibold))
-                    .symbolRenderingMode(.hierarchical)
-                Text(genre.name)
-                    .font(.system(size: 14, weight: .medium))
-            }
-            .foregroundStyle(Color.accentColor)
-            .padding(.horizontal, 13)
-            .padding(.vertical, 10)
-            .background {
-                Capsule(style: .continuous)
-                    .fill(Color.accentColor.opacity(0.12))
-            }
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(Color.accentColor.opacity(0.22), lineWidth: 0.5)
-            }
-            .contentShape(Capsule(style: .continuous))
-        }
-        .buttonStyle(GenreChipPressStyle(reduceMotion: reduceMotion))
-        .accessibilityLabel("Browse \(genre.name)")
-        .accessibilityHint("Shows popular \(genre.name.lowercased()) titles")
-    }
-}
-
-/// Springy press for the genre chips. Scales further than
-/// `ChipPressStyle` because a genre tap navigates away — the extra travel
-/// is the acknowledgement that something is about to happen.
-private struct GenreChipPressStyle: ButtonStyle {
-    let reduceMotion: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.93 : 1)
-            .opacity(configuration.isPressed ? 0.75 : 1)
-            .animation(reduceMotion ? nil : .spring(response: 0.26, dampingFraction: 0.6),
-                       value: configuration.isPressed)
-    }
-}
-
-// MARK: - RecentSearchChip
-
-/// Chip is split into two side-by-side tap zones so the X is reliably
-/// hittable. The previous nested-button layout fought SwiftUI's hit
-/// testing — the outer button's tap area swallowed touches near the X,
-/// and the X's 3-pt padding gave it a tap target well below Apple's
-/// 44-pt recommendation. Now both halves are sibling `Button`s sharing
-/// a single Capsule background, each with explicit `contentShape` so
-/// the entire half is tappable, not just the visible icon/text.
-private struct RecentSearchChip: View {
-    let query: String
-    let onTap: () -> Void
-    let onRemove: () -> Void
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isPressed = false
-
-    var body: some View {
-        HStack(spacing: 0) {
-            Button(action: onTap) {
-                HStack(spacing: 6) {
-                    Image(systemName: "clock")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundStyle(.secondary)
-                    Text(query)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                }
-                .padding(.leading, 14)
-                .padding(.trailing, 6)
-                .padding(.vertical, 10)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(ChipPressStyle(reduceMotion: reduceMotion))
-            .accessibilityLabel("Search \(query)")
-
-            // Hairline separator clarifies that the X is its own tap
-            // zone — without it the chip reads as one solid pill and
-            // the user's finger lands on the text half by default.
-            Rectangle()
-                .fill(Color.primary.opacity(0.08))
-                .frame(width: 0.5, height: 18)
-
-            Button(action: onRemove) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 10)
-                    .padding(.trailing, 12)
-                    .padding(.vertical, 10)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(ChipPressStyle(reduceMotion: reduceMotion))
-            .accessibilityLabel("Remove \(query) from recent searches")
-        }
-        .background {
-            Capsule(style: .continuous)
-                .fill(Color(.secondarySystemBackground))
-        }
-        .overlay {
-            Capsule(style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
-        }
-        // Chips leave by shrinking into their own centre, so removing one
-        // reads as it collapsing out of the flow rather than the whole row
-        // re-flowing around a hole.
-        .transition(.scale(scale: 0.8).combined(with: .opacity))
-    }
-}
-
-/// Press treatment for the two halves of a recent chip. Scoped tighter
-/// than `PressableCardStyle` — a chip is small enough that a 0.94 scale
-/// reads as a wobble, so this only dips the opacity and eases the tint.
-private struct ChipPressStyle: ButtonStyle {
-    let reduceMotion: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .opacity(configuration.isPressed ? 0.55 : 1)
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.15),
-                       value: configuration.isPressed)
-    }
-}
-
-// MARK: - FlowLayout
-
-/// A simple wrapping layout that flows chips into rows.
-private struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? 0
-        var height: CGFloat = 0
-        var x: CGFloat = 0
-        var rowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > width, x > 0 {
-                height += rowHeight + spacing
-                x = 0
-                rowHeight = 0
-            }
-            x += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
-        }
-        height += rowHeight
-        return CGSize(width: width, height: height)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX
-        var y = bounds.minY
-        var rowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > bounds.maxX, x > bounds.minX {
-                y += rowHeight + spacing
-                x = bounds.minX
-                rowHeight = 0
-            }
-            subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
-            x += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
-        }
-    }
-}

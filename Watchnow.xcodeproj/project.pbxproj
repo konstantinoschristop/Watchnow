@@ -85,6 +85,9 @@
 		EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */; };
 		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
 		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
+		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
+		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
+		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
 		EE2732F1287AF4AE00B066C7 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F0287AF4AE00B066C7 /* SearchView.swift */; };
 		EE2732F3287B259E00B066C7 /* GenresResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F2287B259E00B066C7 /* GenresResponse.swift */; };
 		EE27E298284D2A890055E25A /* GenericImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE27E297284D2A890055E25A /* GenericImageView.swift */; };
@@ -217,6 +220,9 @@
 		EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
 		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
+		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
+		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
+		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		EE2732F0287AF4AE00B066C7 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		EE2732F2287B259E00B066C7 /* GenresResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenresResponse.swift; sourceTree = "<group>"; };
 		EE27E297284D2A890055E25A /* GenericImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericImageView.swift; sourceTree = "<group>"; };
@@ -489,6 +495,8 @@
 				EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */,
 				8AA98D882ADB1650007963E3 /* SearchModel.swift */,
 				FE2A0B01000000000000FA01 /* SearchStartView.swift */,
+				FE4C0D02000000000000FA02 /* SearchStartComponents.swift */,
+				FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -522,6 +530,7 @@
 				8A19B1B72E7EF99B0083A094 /* LoadMoreButtonView.swift */,
 				8A19B1B52E7EF98F0083A094 /* ScrollableContentView.swift */,
 				8A19B1B32E7EF97B0083A094 /* SectionHeaderView.swift */,
+				FE4C0D03000000000000FA03 /* FlowLayout.swift */,
 				8A19B1B12E7EF7DC0083A094 /* PosterImage.swift */,
 				8A19B1AF2E7EF7540083A094 /* RatingView.swift */,
 				8A19B1AD2E7EF7490083A094 /* TitleText.swift */,
@@ -796,6 +805,9 @@
 				EE9595C7289EBAAE0016EC25 /* WatchlistView.swift in Sources */,
 				EE8B692628C4A63700AD6B8D /* CollectionResponse.swift in Sources */,
 				EE2732F1287AF4AE00B066C7 /* SearchView.swift in Sources */,
+				FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */,
+				FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */,
+				FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */,
 				FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */,
 				FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */,
 				EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */,
