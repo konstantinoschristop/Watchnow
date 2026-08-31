@@ -56,6 +56,14 @@ enum API {
             return "\(API.baseURL)/\(type)/\(id)/keywords?api_key=\(API.key)"
         }
 
+        /// Edits TMDB recorded for a title inside a date window (max 14
+        /// days per TMDB's docs; dates are yyyy-MM-dd). What's New uses it
+        /// as a cheap "did anything move at all?" pre-filter before
+        /// re-fetching a title's details.
+        static func changes(type: String, for id: String, startDate: String, endDate: String) -> String {
+            return "\(API.baseURL)/\(type)/\(id)/changes?api_key=\(API.key)&start_date=\(startDate)&end_date=\(endDate)"
+        }
+
         /// Region-scoped catalogue of streaming services TMDB knows about,
         /// used to populate the "Browse by streaming service" tile row.
         static func providersList(type: String, region: String) -> String {

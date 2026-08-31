@@ -14,10 +14,17 @@ struct ContentView: View {
     @StateObject private var searchViewModel = SearchViewModel(model: SearchModel())
     @StateObject private var watchlistViewModel = WatchlistViewModel(model: WatchlistModel())
     @StateObject private var router = DeepLinkRouter.shared
+    /// Shared (like the router) so the DEBUG test bench can drive the same
+    /// instance this view presents from.
+    @ObservedObject private var whatsNew = WhatsNewViewModel.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab: AppTab = .movies
     @State private var moviesDeepLinkResult: Result?
     @State private var seriesDeepLinkResult: Result?
+    #if DEBUG
+    @State private var whatsNewDebugPresented = false
+    #endif
 
     /// Opens straight into Movie Night when the app is launched with
     /// `-MovieNightDemo` (e.g. `simctl launch … --args -MovieNightDemo`).
@@ -48,6 +55,20 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $movieNightDemo) {
             MovieNightView()
+        }
+        // "While You Were Away": evaluated on launch and on each return to
+        // the foreground. The view model owns every decision — this view
+        // just hosts the sheet.
+        .sheet(isPresented: $whatsNew.isPresented, onDismiss: { whatsNew.briefingDismissed() }) {
+            WhatsNewView(vm: whatsNew)
+        }
+        .task {
+            await whatsNew.checkOnLaunch()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task { await whatsNew.checkOnLaunch() }
+            }
         }
     }
 
@@ -117,6 +138,23 @@ extension ContentView {
             WatchlistView(watchlistViewModel: watchlistViewModel)
                 .background(Color(.background))
                 .navigationTitle("Watchlist")
+            #if DEBUG
+                // Dev-only test bench for the What's New briefing; the
+                // whole affordance compiles away in Release.
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            whatsNewDebugPresented = true
+                        } label: {
+                            Image(systemName: "hammer.circle")
+                        }
+                        .accessibilityLabel("What's New Testing")
+                    }
+                }
+                .sheet(isPresented: $whatsNewDebugPresented) {
+                    WhatsNewDebugView()
+                }
+            #endif
         }
         .modifier(SoftScrollEdgeEffectStyleModifier())
     }

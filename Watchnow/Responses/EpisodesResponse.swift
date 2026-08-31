@@ -23,6 +23,9 @@ struct Episode: Codable, Hashable {
     let vote_count: Int?
     let air_date: String?
     let episode_number: Int?
+    /// Present on `last_episode_to_air` / `next_episode_to_air` payloads;
+    /// the season-episodes endpoint implies it from the request instead.
+    let season_number: Int?
 
     /// Parses `air_date` (yyyy-MM-dd) into a `Date`. Returns nil when the
     /// field is missing or unparseable.

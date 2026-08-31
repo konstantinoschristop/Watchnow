@@ -33,7 +33,12 @@ struct ResultDetailsResponse: Codable {
     let poster_path: String?
     let backdrop_path: String?
     let title: String?
-    
+    /// TV only — the most recently aired episode. What's New diffs its id
+    /// to detect "a new episode is available".
+    let last_episode_to_air: Episode?
+    /// TV only — the next scheduled episode, if TMDB knows one.
+    let next_episode_to_air: Episode?
+
     func getSeasons() -> [Season]? {
         return seasons?.filter({ $0.season_number != 0 })
     }

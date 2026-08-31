@@ -88,3 +88,10 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+## Claude Code
+# Installed skills/plugins — editor tooling, not project source (~4.5MB of data files)
+**/.claude/skills/
+**/.claude/plugins/
+# Per-machine settings; the shared .claude/launch.json stays tracked
+**/.claude/settings.local.json

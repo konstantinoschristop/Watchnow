@@ -246,7 +246,8 @@ struct EpisodeView_Previews: PreviewProvider {
                               vote_average: 8.4,
                               vote_count: 1000,
                               air_date: "2002-02-10",
-                              episode_number: 1)
+                              episode_number: 1,
+                              season_number: 1)
 
         EpisodeView(episode: episode)
             .preferredColorScheme(.dark)

@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB10C001000000000000F101 /* ChangesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C001000000000000F001 /* ChangesResponse.swift */; };
+		AB10C002000000000000F102 /* WhatsNewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C002000000000000F002 /* WhatsNewModel.swift */; };
+		AB10C003000000000000F103 /* WhatsNewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C003000000000000F003 /* WhatsNewViewModel.swift */; };
+		AB10C004000000000000F104 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C004000000000000F004 /* WhatsNewView.swift */; };
+		AB10C005000000000000F105 /* WhatsNewDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C005000000000000F005 /* WhatsNewDebugView.swift */; };
+		AB10C006000000000000F106 /* ChangeClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C006000000000000F006 /* ChangeClassifier.swift */; };
+		AB10C007000000000000F107 /* WatchlistChangeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C007000000000000F007 /* WatchlistChangeStore.swift */; };
+		AB10C008000000000000F108 /* WatchlistChangeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */; };
+		AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C012000000000000F012 /* WhatsNewTests.swift */; };
 		04B3F76DF715A7544AD36F91 /* TasteProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF8DA916076DC2F2D86DC4C /* TasteProfile.swift */; };
 		0536450B03E7ED86E450E3D7 /* MovieNightMatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B9E57E118591C8396B0DC92 /* MovieNightMatchView.swift */; };
 		286AC7771CB197563374DBA3 /* StreamingPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49CD585C3EF98A630B7704F0 /* StreamingPreferences.swift */; };
@@ -127,6 +136,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AB10C001000000000000F001 /* ChangesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesResponse.swift; sourceTree = "<group>"; };
+		AB10C002000000000000F002 /* WhatsNewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewModel.swift; sourceTree = "<group>"; };
+		AB10C003000000000000F003 /* WhatsNewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewViewModel.swift; sourceTree = "<group>"; };
+		AB10C004000000000000F004 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
+		AB10C005000000000000F005 /* WhatsNewDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewDebugView.swift; sourceTree = "<group>"; };
+		AB10C006000000000000F006 /* ChangeClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeClassifier.swift; sourceTree = "<group>"; };
+		AB10C007000000000000F007 /* WatchlistChangeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistChangeStore.swift; sourceTree = "<group>"; };
+		AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistChangeMonitor.swift; sourceTree = "<group>"; };
+		AB10C012000000000000F012 /* WhatsNewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
+		AB10C014000000000000F014 /* WatchnowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchnowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		10679FBCEE0A3D870C15848E /* MovieNightViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightViewModel.swift; sourceTree = "<group>"; };
 		1B9E57E118591C8396B0DC92 /* MovieNightMatchView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightMatchView.swift; sourceTree = "<group>"; };
 		2C57C412E060B071E7D5564C /* MovieNightSetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightSetupView.swift; sourceTree = "<group>"; };
@@ -245,7 +264,24 @@
 		FE1D0A20000000000000FA20 /* FolderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXContainerItemProxy section */
+		AB10C018000000000000F018 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8A981D4726B5AF0F00993232 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8A981D4E26B5AF1000993232;
+			remoteInfo = Watchnow;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		AB10C017000000000000F017 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8A981D4C26B5AF1000993232 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -294,6 +330,7 @@
 			isa = PBXGroup;
 			children = (
 				8A981D5126B5AF1000993232 /* Watchnow */,
+				AB10C011000000000000F011 /* WatchnowTests */,
 				8AD1C2162FAA27AD004BA60F /* Frameworks */,
 				8A981D5026B5AF1000993232 /* Products */,
 			);
@@ -303,6 +340,7 @@
 			isa = PBXGroup;
 			children = (
 				8A981D4F26B5AF1000993232 /* Watchnow.app */,
+				AB10C014000000000000F014 /* WatchnowTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -354,6 +392,7 @@
 				EE8B692528C4A63700AD6B8D /* CollectionResponse.swift */,
 				EEF45B262A79864400D3460E /* WatchProvidersResponse.swift */,
 				FE1D0A21000000000000FA21 /* KeywordsResponse.swift */,
+				AB10C001000000000000F001 /* ChangesResponse.swift */,
 			);
 			path = Responses;
 			sourceTree = "<group>";
@@ -394,8 +433,28 @@
 				8AA98D802ADB155E007963E3 /* Series */,
 				8AA98D7F2ADB1550007963E3 /* Movies */,
 				2E7F253ADA28D44A0B7A4403 /* MovieNight */,
+				AB10C010000000000000F010 /* WhatsNew */,
 			);
 			path = Screens;
+			sourceTree = "<group>";
+		};
+		AB10C010000000000000F010 /* WhatsNew */ = {
+			isa = PBXGroup;
+			children = (
+				AB10C002000000000000F002 /* WhatsNewModel.swift */,
+				AB10C003000000000000F003 /* WhatsNewViewModel.swift */,
+				AB10C004000000000000F004 /* WhatsNewView.swift */,
+				AB10C005000000000000F005 /* WhatsNewDebugView.swift */,
+			);
+			path = WhatsNew;
+			sourceTree = "<group>";
+		};
+		AB10C011000000000000F011 /* WatchnowTests */ = {
+			isa = PBXGroup;
+			children = (
+				AB10C012000000000000F012 /* WhatsNewTests.swift */,
+			);
+			path = WatchnowTests;
 			sourceTree = "<group>";
 		};
 		8AA98D7F2ADB1550007963E3 /* Movies */ = {
@@ -479,6 +538,9 @@
 		8AC338FF2752931E00834B46 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				AB10C006000000000000F006 /* ChangeClassifier.swift */,
+				AB10C007000000000000F007 /* WatchlistChangeStore.swift */,
+				AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */,
 				8AE787E12E89605B00A6FF50 /* ContentListResult.swift */,
 				8AE787DF2E895FA900A6FF50 /* ContentService.swift */,
 				8AC339002752932D00834B46 /* Scale.swift */,
@@ -561,6 +623,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AB10C015000000000000F015 /* WatchnowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB10C01C000000000000F01C /* Build configuration list for PBXNativeTarget "WatchnowTests" */;
+			buildPhases = (
+				AB10C016000000000000F016 /* Sources */,
+				AB10C017000000000000F017 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AB10C019000000000000F019 /* PBXTargetDependency */,
+			);
+			name = WatchnowTests;
+			productName = WatchnowTests;
+			productReference = AB10C014000000000000F014 /* WatchnowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8A981D4E26B5AF1000993232 /* Watchnow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8A981D6326B5AF1100993232 /* Build configuration list for PBXNativeTarget "Watchnow" */;
@@ -597,6 +676,10 @@
 					8A981D4E26B5AF1000993232 = {
 						CreatedOnToolsVersion = 12.4;
 					};
+					AB10C015000000000000F015 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 8A981D4E26B5AF1000993232;
+					};
 				};
 			};
 			buildConfigurationList = 8A981D4A26B5AF0F00993232 /* Build configuration list for PBXProject "Watchnow" */;
@@ -619,6 +702,7 @@
 			projectRoot = "";
 			targets = (
 				8A981D4E26B5AF1000993232 /* Watchnow */,
+				AB10C015000000000000F015 /* WatchnowTests */,
 			);
 		};
 /* End PBXProject section */
@@ -637,10 +721,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AB10C016000000000000F016 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8A981D4B26B5AF1000993232 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB10C001000000000000F101 /* ChangesResponse.swift in Sources */,
+				AB10C002000000000000F102 /* WhatsNewModel.swift in Sources */,
+				AB10C003000000000000F103 /* WhatsNewViewModel.swift in Sources */,
+				AB10C004000000000000F104 /* WhatsNewView.swift in Sources */,
+				AB10C005000000000000F105 /* WhatsNewDebugView.swift in Sources */,
+				AB10C006000000000000F106 /* ChangeClassifier.swift in Sources */,
+				AB10C007000000000000F107 /* WatchlistChangeStore.swift in Sources */,
+				AB10C008000000000000F108 /* WatchlistChangeMonitor.swift in Sources */,
 				EE94209428A6AFFF00577629 /* ResultDetailsResponse.swift in Sources */,
 				8A981D7326B6920700993232 /* APIKeys.swift in Sources */,
 				8AE787E22E89605B00A6FF50 /* ContentListResult.swift in Sources */,
@@ -755,6 +855,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AB10C019000000000000F019 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8A981D4E26B5AF1000993232 /* Watchnow */;
+			targetProxy = AB10C018000000000000F018 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		8A981D5D26B5AF1100993232 /* LaunchScreen.storyboard */ = {
@@ -958,9 +1066,56 @@
 			};
 			name = Release;
 		};
+		AB10C01A000000000000F01A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YC87BA998K;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.WatchnowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Watchnow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Watchnow";
+			};
+			name = Debug;
+		};
+		AB10C01B000000000000F01B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YC87BA998K;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.WatchnowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Watchnow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Watchnow";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AB10C01C000000000000F01C /* Build configuration list for PBXNativeTarget "WatchnowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB10C01A000000000000F01A /* Debug */,
+				AB10C01B000000000000F01B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		8A981D4A26B5AF0F00993232 /* Build configuration list for PBXProject "Watchnow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

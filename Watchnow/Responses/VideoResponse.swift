@@ -21,7 +21,11 @@ struct VideoResponse: Codable {
 }
 
 struct VideoModelResult: Codable {
+    /// TMDB's stable video id — what the What's New snapshot diff keys on.
+    var id: String?
     var key: String?
+    var name: String?
+    var site: String?
     var official: Bool?
     var type: String?
 }

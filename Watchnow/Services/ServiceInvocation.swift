@@ -91,6 +91,18 @@ final class ServiceInvocation: BaseNetworkService, DetailServiceProtocol, @unche
         return try await request(urlString: urlString)
     }
 
+    /// Edits TMDB recorded for a title in a date window — What's New's
+    /// pre-filter for deciding whether a watchlist title needs a real
+    /// re-fetch. Dates are yyyy-MM-dd; TMDB caps the window at 14 days.
+    func fetchChanges(screenType: ScreenTypes,
+                      id: String,
+                      startDate: String,
+                      endDate: String) async throws -> TitleChangesResponse {
+        let urlString = API.Common.changes(type: screenType.rawValue, for: id,
+                                           startDate: startDate, endDate: endDate)
+        return try await request(urlString: urlString)
+    }
+
     /// Streaming services available in `region` for the given content type.
     /// Used to build the provider tile row on the home tabs.
     func fetchProviders(screenType: ScreenTypes, region: String) async throws -> ProvidersListResponse {
