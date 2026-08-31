@@ -408,24 +408,58 @@ struct ResultRow: View {
 
 // MARK: - MediaTypeBadge
 
-/// Quiet outlined pill indicating Movie / TV Series / Actor. The pill
-/// labels the type but no longer colour-codes it — colour was redundant
-/// in single-type contexts (Watchlist tabs, ListSection rows) and added
-/// to the visual noise globally. In mixed-type contexts (Search results)
-/// the text label still does the disambiguation work.
+/// Quiet outlined pill indicating Movie / TV Series / Actor.
+///
+/// Deliberately uncoloured. A tinted version — accent for movies, purple
+/// for series, matching the two home tabs — was tried and rejected: the
+/// palette is already carrying the tab identity and the selected-chip
+/// state, and spending it again on a per-row label made mixed lists busy
+/// without telling the reader anything the word doesn't.
+///
+/// The glyph is the part that earns its place. At this size the word alone
+/// has to be *read* to be understood, whereas a film reel or a television
+/// registers peripherally, which is what makes a mixed search result or
+/// watchlist scannable rather than parseable.
 struct MediaTypeBadge: View {
     let kind: String
 
     var body: some View {
-        Text(kind.uppercased())
-            .font(.system(size: 10, weight: .bold, design: .rounded))
-            .tracking(0.5)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 3)
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
-            }
+        HStack(spacing: 4) {
+            Image(systemName: MediaTypeBadge.symbol(for: kind))
+                .font(.system(size: 9, weight: .bold))
+            Text(label)
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .tracking(0.5)
+        }
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(kind)
+    }
+
+    /// Shorter than `getMediaType()`'s wording — "TV SERIES" pushes the
+    /// pill past the width a narrow row or a grid cell can spare, and
+    /// "SERIES" loses nothing sitting next to a television glyph.
+    private var label: String {
+        switch kind {
+        case "TV Series": return "SERIES"
+        case "Actor":     return "ACTOR"
+        default:          return "MOVIE"
+        }
+    }
+
+    /// Shared so the poster-grid corner badge and the grid's meta line mark
+    /// a media type with the same glyph instead of each picking their own.
+    static func symbol(for kind: String) -> String {
+        switch kind {
+        case "TV Series": return "tv.fill"
+        case "Actor":     return "person.fill"
+        default:          return "film.fill"
+        }
     }
 }

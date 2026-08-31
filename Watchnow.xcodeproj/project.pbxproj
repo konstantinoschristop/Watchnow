@@ -85,6 +85,8 @@
 		EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */; };
 		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
 		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
+		FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C01000000000000FA01 /* WatchlistGridView.swift */; };
+		FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */; };
 		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
 		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
 		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
@@ -220,6 +222,8 @@
 		EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
 		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
+		FE3B0C01000000000000FA01 /* WatchlistGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistGridView.swift; sourceTree = "<group>"; };
+		FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderAlbumRow.swift; sourceTree = "<group>"; };
 		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
 		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
 		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
@@ -507,6 +511,8 @@
 				EE9595C6289EBAAE0016EC25 /* WatchlistView.swift */,
 				EE9595C4289EBA9E0016EC25 /* WatchlistViewModel.swift */,
 				8AA98D8A2ADB165D007963E3 /* WatchlistModel.swift */,
+				FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */,
+				FE3B0C01000000000000FA01 /* WatchlistGridView.swift */,
 			);
 			path = Watchlist;
 			sourceTree = "<group>";
@@ -808,6 +814,8 @@
 				FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */,
 				FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */,
 				FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */,
+				FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */,
+				FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */,
 				FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */,
 				FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */,
 				EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */,
