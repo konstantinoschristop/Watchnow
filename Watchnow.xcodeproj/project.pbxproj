@@ -37,6 +37,7 @@
 		8A19B1B62E7EF98F0083A094 /* ScrollableContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1B52E7EF98F0083A094 /* ScrollableContentView.swift */; };
 		8A19B1B82E7EF99B0083A094 /* LoadMoreButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1B72E7EF99B0083A094 /* LoadMoreButtonView.swift */; };
 		8A19B1BB2E7F00490083A094 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */; };
+		AB20D002000000000000F002 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB20D001000000000000F001 /* DesignTokens.swift */; };
 		8A19B1BE2E7F006A0083A094 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BD2E7F006A0083A094 /* View+Extension.swift */; };
 		8A19B1C02E8085330083A094 /* StretchingActionScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */; };
 		8A4DDFC42EDCC20700F0E8DC /* UINavigationController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extension.swift */; };
@@ -176,6 +177,7 @@
 		8A19B1B52E7EF98F0083A094 /* ScrollableContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableContentView.swift; sourceTree = "<group>"; };
 		8A19B1B72E7EF99B0083A094 /* LoadMoreButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreButtonView.swift; sourceTree = "<group>"; };
 		8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
+		AB20D001000000000000F001 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		8A19B1BD2E7F006A0083A094 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 		8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StretchingActionScrollView.swift; sourceTree = "<group>"; };
 		8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Extension.swift"; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 			isa = PBXGroup;
 			children = (
 				8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */,
+				AB20D001000000000000F001 /* DesignTokens.swift */,
 			);
 			path = ViewModifiers;
 			sourceTree = "<group>";
@@ -845,6 +848,7 @@
 				8AB23AA22EC112BE00AAA7A1 /* ScrollableTabBar.swift in Sources */,
 				8A036A7426BBC8C100A3D0FF /* TopCard.swift in Sources */,
 				8A19B1BB2E7F00490083A094 /* ViewModifiers.swift in Sources */,
+				AB20D002000000000000F002 /* DesignTokens.swift in Sources */,
 				AA000001000000000000AA02 /* WatchnowApp.swift in Sources */,
 				AA000001000000000000AA04 /* DetailServiceProtocol.swift in Sources */,
 				FE1D0A05000000000000FB05 /* SearchHistoryManager.swift in Sources */,
