@@ -145,8 +145,8 @@ final class ServiceInvocation: BaseNetworkService,
     // MARK: - SearchDiscoveryServiceProtocol
 
     /// Today's trending movies. Same endpoint the Movies tab uses — the
-    /// search start screen reads it through `TrendingServiceProtocol` so it
-    /// doesn't have to depend on the whole `MovieService`/`SeriesService`
+    /// search start screen reads it through `SearchDiscoveryServiceProtocol`
+    /// so it doesn't have to depend on the whole `MovieService`/`SeriesService`
     /// pair just to fill one poster row.
     func fetchTrendingMovies(page: Int) async throws -> GenericResultResponse {
         try await request(urlString: API.Movie.trending(page: page))

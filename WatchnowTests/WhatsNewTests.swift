@@ -470,6 +470,195 @@ final class WhatsNewViewModelTests: XCTestCase {
     }
 }
 
+// MARK: - Regressions
+
+/// Locks the behaviour fixed after the v1.6 review. Each of these describes
+/// a bug that shipped in the branch, so they exist to stop it coming back
+/// rather than to describe an intention.
+@MainActor
+final class WhatsNewRegressionTests: XCTestCase {
+
+    /// Unsaving a title used to leave its change in the queue: the store
+    /// pruned snapshots but not pending changes, so the next briefing led
+    /// with a card that opened something the user had removed.
+    func testPruningChangesDropsUnsavedTitles() {
+        WatchlistChangeStore.reset()
+        WatchlistChangeStore.add([
+            makeChange(kind: .newTrailer, id: 1, mediaType: "movie"),
+            makeChange(kind: .newEpisode, id: 2, mediaType: "tv")
+        ], now: fixedNow)
+
+        WatchlistChangeStore.pruneChanges(
+            keeping: [WatchlistSnapshot.key(mediaType: "tv", mediaID: 2)])
+
+        XCTAssertEqual(WatchlistChangeStore.unseenChanges(now: fixedNow).map(\.mediaID), [2])
+    }
+
+    /// Pruning keys on media type as well as id, so a movie and a series
+    /// sharing a TMDB id don't take each other down.
+    func testPruningDistinguishesMediaTypes() {
+        WatchlistChangeStore.reset()
+        WatchlistChangeStore.add([
+            makeChange(kind: .newTrailer, id: 7, mediaType: "movie"),
+            makeChange(kind: .newEpisode, id: 7, mediaType: "tv")
+        ], now: fixedNow)
+
+        WatchlistChangeStore.pruneChanges(
+            keeping: [WatchlistSnapshot.key(mediaType: "movie", mediaID: 7)])
+
+        let survivors = WatchlistChangeStore.unseenChanges(now: fixedNow)
+        XCTAssertEqual(survivors.count, 1)
+        XCTAssertEqual(survivors.first?.mediaType, "movie")
+    }
+
+    /// `isPresented = true` is a request UIKit can decline — when Movie
+    /// Night's cover or another sheet already owns the scene. The briefing
+    /// used to be stuck true for the rest of the session, unable to retry.
+    /// Now it rolls back, and the changes stay owed.
+    func testUnpresentedBriefingRollsBackAndKeepsItsChanges() async {
+        WatchlistChangeStore.reset()
+        let vm = WhatsNewViewModel()
+        WatchlistChangeStore.add([makeChange(kind: .newTrailer)], now: fixedNow)
+
+        XCTAssertTrue(vm.attemptPresentation(wasAway: true, now: fixedNow))
+        XCTAssertTrue(vm.isPresented)
+
+        // The sheet never reports appearing.
+        try? await Task.sleep(for: .milliseconds(1600))
+
+        XCTAssertFalse(vm.isPresented, "a presentation that never happened must not stay latched")
+        XCTAssertFalse(WatchlistChangeStore.unseenChanges(now: fixedNow).isEmpty,
+                       "changes the user never saw must stay unseen")
+        // …and the next return can present them.
+        XCTAssertTrue(vm.attemptPresentation(wasAway: true, now: fixedNow))
+    }
+
+    /// The counterpart: once the sheet says it appeared, the presentation
+    /// stands and dismissal spends the batch as normal.
+    func testAppearedBriefingIsNotRolledBack() async {
+        WatchlistChangeStore.reset()
+        let vm = WhatsNewViewModel()
+        WatchlistChangeStore.add([makeChange(kind: .newTrailer)], now: fixedNow)
+
+        XCTAssertTrue(vm.attemptPresentation(wasAway: true, now: fixedNow))
+        vm.briefingDidAppear()
+
+        try? await Task.sleep(for: .milliseconds(1600))
+        XCTAssertTrue(vm.isPresented)
+
+        vm.isPresented = false
+        vm.briefingDismissed()
+        XCTAssertTrue(WatchlistChangeStore.unseenChanges(now: fixedNow).isEmpty)
+    }
+
+    /// The sheet's content stays mounted for the length of the dismiss
+    /// animation, so clearing the cards in `briefingDismissed` rewrote the
+    /// header to "0 UPDATES" while it was still sliding away.
+    func testDismissalLeavesCardsMountedForTheAnimation() {
+        WatchlistChangeStore.reset()
+        let vm = WhatsNewViewModel()
+        WatchlistChangeStore.add([makeChange(kind: .newTrailer)], now: fixedNow)
+
+        XCTAssertTrue(vm.attemptPresentation(wasAway: true, now: fixedNow))
+        vm.briefingDidAppear()
+        vm.isPresented = false
+        vm.briefingDismissed()
+
+        XCTAssertEqual(vm.briefing.count, 1)
+        XCTAssertTrue(WatchlistChangeStore.unseenChanges(now: fixedNow).isEmpty,
+                      "the batch is still spent — only the rendering survives")
+    }
+}
+
+// MARK: - Result identity
+
+/// `Result` declares `==` by hand, which does not stop the compiler
+/// synthesizing `hash(into:)` over every stored property. The two
+/// disagreed, and SwiftUI's `ForEach(…, id: \.self)` paid for it.
+final class ResultIdentityTests: XCTestCase {
+
+    private func result(id: Int?, title: String?, mediaType: String? = nil) -> Result {
+        var value = Result.stub(id: id ?? 0, mediaType: mediaType ?? "movie")
+        if id == nil || title != nil {
+            value = Result(backdrop_path: nil, first_air_date: nil, genre_ids: nil,
+                           id: id, original_title: nil, name: nil, origin_country: nil,
+                           original_language: nil, original_name: nil, overview: nil,
+                           popularity: nil, poster_path: nil, release_date: nil,
+                           title: title, video: nil, vote_average: nil, vote_count: nil,
+                           media_type: mediaType, profile_path: nil, castID: nil,
+                           runtime: nil, known_for: nil)
+        }
+        return value
+    }
+
+    func testEqualValuesHashEqually() {
+        let a = result(id: 42, title: "As decoded")
+        let b = result(id: 42, title: "After an iCloud merge", mediaType: "movie")
+        XCTAssertEqual(a, b)
+        XCTAssertEqual(a.hashValue, b.hashValue)
+    }
+
+    func testSetAndDictionaryAgreeOnIdentity() {
+        let a = result(id: 42, title: "One")
+        let b = result(id: 42, title: "Two")
+
+        // Before the fix these landed in different buckets: the set kept two
+        // entries while the dictionary kept one, from the same pair of
+        // values.
+        XCTAssertEqual(Set([a, b]).count, 1)
+
+        // Built by subscript, not a literal — a dictionary literal with two
+        // keys that are `==` traps rather than failing an assertion.
+        var byResult: [Result: Int] = [:]
+        byResult[a] = 1
+        byResult[b] = 2
+        XCTAssertEqual(byResult.count, 1)
+        XCTAssertEqual(byResult[a], 2, "the second write must find the first key")
+    }
+
+    func testDifferentIdsStayDistinct() {
+        let a = result(id: 1, title: "A")
+        let b = result(id: 2, title: "A")
+        XCTAssertNotEqual(a, b)
+        XCTAssertEqual(Set([a, b]).count, 2)
+    }
+}
+
+// MARK: - Inferred media type
+
+/// Saved titles from builds that didn't stamp `media_type` must not be
+/// mistaken for people: `getMediaType()` answers "Actor" for them, which
+/// put a person glyph on films in the poster wall and routed watchlist rows
+/// into the actor UI, where they had no way to be removed.
+final class InferredMediaTypeTests: XCTestCase {
+
+    private func untagged(name: String?, title: String?) -> Result {
+        Result(backdrop_path: nil, first_air_date: nil, genre_ids: nil, id: 1,
+               original_title: nil, name: name, origin_country: nil,
+               original_language: nil, original_name: nil, overview: nil,
+               popularity: nil, poster_path: nil, release_date: nil, title: title,
+               video: nil, vote_average: nil, vote_count: nil, media_type: nil,
+               profile_path: nil, castID: nil, runtime: nil, known_for: nil)
+    }
+
+    func testUntaggedSeriesInfersTV() {
+        XCTAssertEqual(untagged(name: "Severance", title: nil).inferredScreenType, .tv)
+    }
+
+    func testUntaggedFilmInfersMovie() {
+        XCTAssertEqual(untagged(name: nil, title: "Dune").inferredScreenType, .movie)
+    }
+
+    func testUntaggedTitleIsNotAPerson() {
+        XCTAssertFalse(untagged(name: "Severance", title: nil).isPerson)
+        XCTAssertFalse(untagged(name: nil, title: "Dune").isPerson)
+    }
+
+    func testTaggedPersonIsAPerson() {
+        XCTAssertTrue(Result.stub(id: 5, mediaType: "person").isPerson)
+    }
+}
+
 // MARK: - Fetch-failure contract
 
 /// The monitor must express "this domain could not be fetched" as nil, never

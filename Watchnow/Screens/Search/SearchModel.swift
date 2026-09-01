@@ -138,6 +138,19 @@ struct SearchModel {
     /// which otherwise refer to a search string that doesn't exist here.
     var activeGenre: Genre?
 
+    /// Discover page the active genre browse has reached. A typed search
+    /// stays on page 1 — TMDB's multi endpoint returns the matches worth
+    /// showing in one page, and nobody pages through a title match.
+    var genrePage: Int = 1
+
+    /// Whether the genre's feeds have another page. Drives the footer
+    /// button; false also covers "we don't know yet".
+    var genreHasMore: Bool = false
+
+    /// Set only for the append, so the footer can show a spinner without
+    /// the whole screen dropping to the loading skeleton.
+    var isLoadingMoreGenre: Bool = false
+
     /// The feed matching the active scope. Empty until the fetch lands.
     var trending: [Result] {
         switch trendingScope {

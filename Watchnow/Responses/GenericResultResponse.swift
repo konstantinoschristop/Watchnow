@@ -184,7 +184,23 @@ struct Result: Codable, Hashable, Equatable {
     static func == (lhs: Result, rhs: Result) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
+    /// Hashes the TMDB id alone, matching `==`.
+    ///
+    /// Must be written out: declaring `==` by hand does *not* suppress the
+    /// compiler's synthesis of `hash(into:)`, so without this the two
+    /// disagreed — two values with the same id but any differing field
+    /// (a re-decode, an iCloud merge, a `media_type` stamp) compared equal
+    /// yet hashed differently, which breaks `Hashable`'s contract. The
+    /// visible cost was in SwiftUI: every `ForEach(…, id: \.self)` over
+    /// results keyed cell identity on the whole value, so a cell was torn
+    /// down and rebuilt — poster re-fading, per-cell `@State` reset —
+    /// whenever an unrelated field changed underneath it.
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+
     func getResultTitle() -> String {
         return (name ?? title) ?? "- -"
     }
@@ -207,6 +223,13 @@ struct Result: Codable, Hashable, Equatable {
             ?? URL(string: API.baseURL)!
     }
     
+    /// Raw TMDB media kind as a display string.
+    ///
+    /// Note the fall-through: *anything* without a recognised `media_type`
+    /// reads as "Actor". That's correct for multi-search, where people
+    /// always arrive tagged `person`, but wrong for a saved title from a
+    /// build that didn't stamp the field — prefer `isPerson` for routing
+    /// decisions and `inferredScreenType` for saved titles.
     func getMediaType() -> String {
         if media_type == "movie" {
             return "Movie"
@@ -215,6 +238,19 @@ struct Result: Codable, Hashable, Equatable {
         } else {
             return "Actor"
         }
+    }
+
+    /// Whether this result is genuinely a person.
+    ///
+    /// Tested positively rather than as "not a movie or series". Search's
+    /// multi endpoint always tags people `person` (and `cleanUpResults`
+    /// drops any that don't have both that tag and a profile image), so the
+    /// positive test is exact — while the negative one swept up untagged
+    /// saved titles and routed them to the person UI, where a watchlist row
+    /// lost its rating, its overview and, because actors have no trailing
+    /// swipe action, any way to remove it.
+    var isPerson: Bool {
+        media_type == "person"
     }
     
     func getReleaseDate(addSeparator: Bool = true) -> String {

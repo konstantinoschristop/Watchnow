@@ -32,10 +32,11 @@ struct Folder: Identifiable, Codable, Hashable {
 
     /// Curated SF Symbol set surfaced in the folder editor's icon picker.
     ///
-    /// Twelve, laid out as two rows of six. The previous eight were mostly
-    /// abstract marks — a folder, a star, a bolt — which made two folders
-    /// hard to tell apart at album-card size. These lean on the kinds of
-    /// collection people actually make: a night in, a genre, a mood.
+    /// Twelve, in one horizontally scrolling row. The previous eight were
+    /// mostly abstract marks — a folder, a star, a bolt — which made two
+    /// folders hard to tell apart at album-card size. These lean on the
+    /// kinds of collection people actually make: a night in, a genre, a
+    /// mood.
     static let symbolPresets = [
         "folder",
         "film.fill",

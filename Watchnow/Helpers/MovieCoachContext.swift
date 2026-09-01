@@ -453,11 +453,18 @@ struct MovieCoachContext {
             hasReminder ? "rm1" : "rm0",
             topUserGenres.joined(separator: ","),
             genreOverlap.joined(separator: ","),
-            // Theme signals move as the background enrichment fills the
-            // keyword cache — including them here is what makes a cached
-            // answer regenerate once Coach genuinely knows more.
+            // This title's own themes belong in the signature: they change
+            // only when its keywords first land, and they change what Coach
+            // can say about it.
             titleThemes.joined(separator: ","),
-            userThemes.joined(separator: ","),
+            // The user's themes are deliberately reduced to a sorted top
+            // few. In full they are a ranking over the *whole* watchlist, so
+            // every keyword the background enrichment fetched — for any
+            // title — reshuffled the tail and invalidated every cached
+            // answer in the app, over and over, for the whole first run.
+            // The leading themes are what actually reaches the prompt, and
+            // sorting drops the recency reshuffles that don't.
+            userThemes.prefix(4).sorted().joined(separator: ","),
             similarSaved.sorted().joined(separator: ","),
             matchedProviders.sorted().joined(separator: ","),
             dayContext

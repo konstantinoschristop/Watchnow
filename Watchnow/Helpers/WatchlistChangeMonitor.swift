@@ -74,9 +74,11 @@ enum WatchlistChangeMonitor {
         guard !Task.isCancelled else { return false }
 
         let watchlist = WatchlistManager.watchlist.filter { $0.id != nil }
-        WatchlistChangeStore.pruneSnapshots(keeping: Set(watchlist.compactMap { item in
+        let liveKeys = Set(watchlist.compactMap { item in
             item.id.map { WatchlistSnapshot.key(mediaType: item.inferredScreenType.rawValue, mediaID: $0) }
-        }))
+        })
+        WatchlistChangeStore.pruneSnapshots(keeping: liveKeys)
+        WatchlistChangeStore.pruneChanges(keeping: liveKeys)
         guard !watchlist.isEmpty else {
             WatchlistChangeStore.recordSync(now: now)
             return false

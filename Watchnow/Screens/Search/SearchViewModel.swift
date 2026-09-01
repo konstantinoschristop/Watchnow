@@ -44,6 +44,11 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     func getResults(search: String) async {
         apiError = false
         activeGenre = nil
+        // A filter belongs to the result set it was applied to. Carrying
+        // "Actors" over from the last query onto a new one meant a search
+        // that returned twenty films landed on "0 of 20" and the
+        // filtered-away empty state, with nothing on screen explaining why.
+        selectedChooser = .all
         isSearching = true
         defer { isSearching = false }
         do {
@@ -61,6 +66,8 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
         apiError = false
         activeGenre = nil
         selectedChooser = .all
+        genrePage = 1
+        genreHasMore = false
     }
 
     /// Returns the tab to its start screen.
@@ -103,47 +110,93 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
         defer { isSearching = false }
 
         do {
-            let feeds = try await withThrowingTaskGroup(of: (Int, [Result]).self) { group in
-                for (offset, query) in genre.queries.enumerated() {
-                    let (screenType, genreID) = query
-                    group.addTask { [service] in
-                        let response = try await service.fetchByGenre(screenType: screenType,
-                                                                      genreID: genreID,
-                                                                      page: 1)
-                        return (offset, Self.postered(response.results, as: screenType))
-                    }
-                }
-                // Re-sorted by the task's own index: a task group yields in
-                // completion order, and letting network timing decide which
-                // media type leads the list would make the same tap produce
-                // a different order each time.
-                var collected: [(Int, [Result])] = []
-                for try await feed in group { collected.append(feed) }
-                return collected.sorted { $0.0 < $1.0 }.map(\.1)
-            }
-
+            let page = try await fetchGenrePage(genre, page: 1)
             selectedChooser = .all
-            results = Self.interleaved(feeds)
+            genrePage = 1
+            genreHasMore = page.hasMore
+            results = Self.interleaved(page.feeds)
         } catch {
             apiError = true
         }
     }
 
-    /// Round-robins across the feeds, keeping each feed's internal order.
-    private nonisolated static func interleaved(_ feeds: [[Result]]) -> [Result] {
-        guard feeds.count > 1 else { return feeds.first ?? [] }
+    /// Appends the genre's next Discover page.
+    ///
+    /// Only the footer shows a spinner: swapping the whole screen to the
+    /// loading skeleton would throw away the user's scroll position and the
+    /// results they were reading, which is the opposite of what "show me
+    /// more" asks for. A failure just re-enables the button — the results
+    /// already on screen are untouched.
+    func loadMoreGenreResults() async {
+        guard let genre = activeGenre, genreHasMore, !isLoadingMoreGenre else { return }
+        isLoadingMoreGenre = true
+        defer { isLoadingMoreGenre = false }
 
+        let next = genrePage + 1
+        do {
+            let page = try await fetchGenrePage(genre, page: next)
+            genrePage = next
+            genreHasMore = page.hasMore
+            // Dedupe against what's already listed, not just within the new
+            // page: Discover sorts by popularity, which drifts between
+            // requests, so a title on page 1 can reappear on page 2.
+            let existing = Set((results ?? []).compactMap(\.id))
+            let appended = Self.interleaved(page.feeds, excluding: existing)
+            guard !appended.isEmpty else {
+                // Nothing new came back — treat the feed as exhausted rather
+                // than leaving a button that does nothing.
+                genreHasMore = false
+                return
+            }
+            results = (results ?? []) + appended
+        } catch {
+            // Leave `genrePage` where it was so the button retries this page.
+        }
+    }
+
+    /// One Discover page for every media type the genre exists on.
+    private func fetchGenrePage(_ genre: SearchModel.Genre,
+                                page: Int) async throws -> (feeds: [[Result]], hasMore: Bool) {
+        try await withThrowingTaskGroup(of: (Int, [Result], Int).self) { group in
+            for (offset, query) in genre.queries.enumerated() {
+                let (screenType, genreID) = query
+                group.addTask { [service] in
+                    let response = try await service.fetchByGenre(screenType: screenType,
+                                                                  genreID: genreID,
+                                                                  page: page)
+                    return (offset, Self.postered(response.results, as: screenType),
+                            response.total_pages ?? 1)
+                }
+            }
+            // Re-sorted by the task's own index: a task group yields in
+            // completion order, and letting network timing decide which
+            // media type leads the list would make the same tap produce
+            // a different order each time.
+            var collected: [(Int, [Result], Int)] = []
+            for try await feed in group { collected.append(feed) }
+            collected.sort { $0.0 < $1.0 }
+            // More to come while *any* side still has pages — the interleave
+            // already copes with one feed running out before the other.
+            // TMDB refuses pages past 500, so stop there regardless.
+            let hasMore = collected.contains { page < min($0.2, 500) }
+            return (collected.map(\.1), hasMore)
+        }
+    }
+
+    /// Round-robins across the feeds, keeping each feed's internal order.
+    /// `excluding` holds ids already on screen, for the paged append.
+    private nonisolated static func interleaved(_ feeds: [[Result]],
+                                                excluding: Set<Int> = []) -> [Result] {
         var out: [Result] = []
-        var seen = Set<Int>()
+        var seen = excluding
         let longest = feeds.map(\.count).max() ?? 0
 
         for index in 0..<longest {
             for feed in feeds where index < feed.count {
                 let result = feed[index]
-                // Movie and TV genre queries can surface the same TMDB id
-                // for unrelated titles only rarely, but `Result` hashes on
-                // id alone — a duplicate would collapse the `ForEach` that
-                // renders these rows.
+                // `Result` compares and hashes on id alone, so two entries
+                // sharing an id are one row as far as `ForEach` is
+                // concerned — a duplicate would collapse the list.
                 guard let id = result.id, seen.insert(id).inserted else { continue }
                 out.append(result)
             }
@@ -276,6 +329,21 @@ extension SearchViewModel {
     var activeGenre: SearchModel.Genre? {
         get { model.activeGenre }
         set { model.activeGenre = newValue }
+    }
+
+    var genrePage: Int {
+        get { model.genrePage }
+        set { model.genrePage = newValue }
+    }
+
+    var genreHasMore: Bool {
+        get { model.genreHasMore }
+        set { model.genreHasMore = newValue }
+    }
+
+    var isLoadingMoreGenre: Bool {
+        get { model.isLoadingMoreGenre }
+        set { model.isLoadingMoreGenre = newValue }
     }
 
     var trending: [Result] { model.trending }

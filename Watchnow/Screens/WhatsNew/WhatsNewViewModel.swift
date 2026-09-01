@@ -49,6 +49,16 @@ final class WhatsNewViewModel: ObservableObject {
     /// it was assembled. Dismissal retires exactly these.
     private var presentedBatchIDs: [String] = []
 
+    /// Set by the sheet's own `onAppear`. Distinguishes "the user saw the
+    /// briefing and dismissed it" from "the presentation never happened",
+    /// which are the same state as far as the `isPresented` binding is
+    /// concerned but must not spend the same batch.
+    private var sheetDidAppear = false
+
+    /// How long to give UIKit to actually put the sheet on screen before
+    /// concluding it isn't going to.
+    private static let presentationGrace: Duration = .milliseconds(1200)
+
     // Internal (not private) so tests can build isolated instances;
     // production code uses `shared`.
     init() {}
@@ -86,6 +96,8 @@ final class WhatsNewViewModel: ObservableObject {
         let wasAway = WatchlistChangeStore.wasAway()
         let launchedAt = Date()
 
+        dropChangesForUnsavedTitles()
+
         // Anything already banked can be shown right now.
         var presented = attemptPresentation(wasAway: wasAway)
 
@@ -113,6 +125,29 @@ final class WhatsNewViewModel: ObservableObject {
         }
     }
 
+    /// Forget changes for titles that have left the watchlist.
+    ///
+    /// The monitor prunes these on its own sync, but that's up to twelve
+    /// hours away — so a title unsaved this morning could still lead
+    /// tonight's briefing, and tapping the card would open something the
+    /// user had deliberately removed. Done here rather than inside
+    /// `presentUnseen` so the presentation pipeline stays a pure function of
+    /// the store: the DEBUG bench fabricates changes for titles nobody has
+    /// saved, and it is supposed to run the identical path.
+    ///
+    /// Skipped on an empty watchlist. That's indistinguishable from a launch
+    /// where iCloud hasn't merged yet, and wiping the queue on that reading
+    /// would lose findings the user is owed.
+    private func dropChangesForUnsavedTitles() {
+        let watchlist = WatchlistManager.watchlist
+        guard !watchlist.isEmpty else { return }
+        WatchlistChangeStore.pruneChanges(keeping: Set(watchlist.compactMap { item in
+            item.id.map {
+                WatchlistSnapshot.key(mediaType: item.inferredScreenType.rawValue, mediaID: $0)
+            }
+        }))
+    }
+
     /// The one place the sheet decides to appear. Returns whether it did.
     @discardableResult
     func attemptPresentation(wasAway: Bool, now: Date = Date()) -> Bool {
@@ -137,8 +172,39 @@ final class WhatsNewViewModel: ObservableObject {
         // launch sync often lands while the sheet is open) belongs to the
         // next briefing, not this one.
         presentedBatchIDs = unseen.map(\.id)
+        sheetDidAppear = false
         isPresented = true
+        verifyPresentation()
         return true
+    }
+
+    /// Rolls the presentation back if the sheet never actually appeared.
+    ///
+    /// `isPresented = true` is a request, not a guarantee: when something is
+    /// already presented from this scene — Movie Night's `fullScreenCover`,
+    /// a trailer sheet on a details screen — UIKit declines it. The binding
+    /// stayed true, `onDismiss` never fired, and because `attemptPresentation`
+    /// bails on `!isPresented` the briefing could not be shown again for the
+    /// rest of the session. Undoing the request instead leaves the changes
+    /// pending and lets the next foreground return try again.
+    private func verifyPresentation() {
+        Task { [weak self] in
+            try? await Task.sleep(for: Self.presentationGrace)
+            guard let self, self.isPresented, !self.sheetDidAppear else { return }
+            // Batch first, binding last. Flipping `isPresented` can bring
+            // `onDismiss` with it, and a dismissal that finds an empty batch
+            // retires nothing — which is exactly right for a briefing the
+            // user never saw.
+            self.presentedBatchIDs = []
+            self.briefing = []
+            self.totalUnseenCount = 0
+            self.isPresented = false
+        }
+    }
+
+    /// Called from the sheet's `onAppear` — the only proof it is on screen.
+    func briefingDidAppear() {
+        sheetDidAppear = true
     }
 
     // MARK: - Dismissal
@@ -148,10 +214,18 @@ final class WhatsNewViewModel: ObservableObject {
     /// wasn't shown. Changes discovered *after* it was assembled survive and
     /// lead the next briefing.
     func briefingDismissed() {
+        sheetDidAppear = false
+        // `markSeen` no-ops on an empty batch, which is how a rolled-back
+        // presentation (see `verifyPresentation`) passes through here
+        // harmlessly without needing a special case.
         WatchlistChangeStore.markSeen(presentedBatchIDs)
         presentedBatchIDs = []
-        briefing = []
-        totalUnseenCount = 0
+        // `briefing` and `totalUnseenCount` deliberately survive. SwiftUI
+        // keeps the sheet's content mounted for the length of the dismiss
+        // animation, so clearing them here emptied the card list and rewrote
+        // the header to "0 UPDATES" while it was still sliding off screen.
+        // The next `presentUnseen` overwrites both, and nothing reads them
+        // while `isPresented` is false.
     }
 
     /// Tap-through on a card: close the sheet, then route through the
@@ -185,7 +259,9 @@ final class WhatsNewViewModel: ObservableObject {
             .prefix(3)
             .map(\.key)
 
-        let titleGenres = watchlist.first { $0.id == change.mediaID }?.genre_ids ?? []
+        let titleGenres = watchlist.first {
+            $0.id == change.mediaID && $0.inferredScreenType == change.screenType
+        }?.genre_ids ?? []
         let overlap = titleGenres.compactMap { tmdbGenreNames[$0] }.filter(topGenres.contains)
 
         guard let genre = overlap.first else { return nil }

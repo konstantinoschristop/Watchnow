@@ -62,6 +62,20 @@ enum WatchlistChangeStore {
 
     static var snapshotCount: Int { snapshots.count }
 
+    /// Drop *detected* changes for titles no longer in the watchlist.
+    ///
+    /// Separate from `pruneSnapshots` because the two answer different
+    /// questions: a snapshot going means "stop checking this title", while a
+    /// pending change going means "stop telling the user about it". Only the
+    /// first was being done, so unsaving a title left its change in the
+    /// queue and the next briefing led with a card for something the user
+    /// had already removed.
+    static func pruneChanges(keeping keys: Set<String>) {
+        pending = pending.filter {
+            keys.contains(WatchlistSnapshot.key(mediaType: $0.mediaType, mediaID: $0.mediaID))
+        }
+    }
+
     // MARK: - Changes
 
     /// Add freshly detected changes. Anything already seen, already pending,

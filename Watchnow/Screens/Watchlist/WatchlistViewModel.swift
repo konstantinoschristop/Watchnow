@@ -109,18 +109,20 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     /// record are cleaned up identically either way.
     func remove(_ result: Result) {
         WatchlistManager.removeFromWatchList(result: result)
+        // Re-publishes the list; see `itemRemoved`.
         itemRemoved(result: result)
         showRemovedAlert = true
-        refreshDataIfNeeded()
     }
 
-
+    /// Called by `GenericListView`'s trailing swipe once the title is out of
+    /// storage. Has to re-publish: `savedAll` reads the cached `results`
+    /// copy rather than `WatchlistManager.watchlist`, so without this the
+    /// swiped row stayed on screen (with its swipe action flipped to "Add to
+    /// Watchlist") and the album cards kept their old counts until the tab
+    /// was left and re-entered.
     func itemRemoved(result: Result) {
-        // No-op: there are no derived per-type arrays to prune anymore.
-        // The view re-reads `savedAll` (which pulls from
-        // `WatchlistManager.watchlist`) on the next render, so removed
-        // items disappear automatically.
         _ = result
+        refreshDataIfNeeded()
     }
 
     // MARK: - Reorder
