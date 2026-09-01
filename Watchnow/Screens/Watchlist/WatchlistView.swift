@@ -215,6 +215,7 @@ struct WatchlistView: View {
         case .grid:
             WatchlistGridView(items: items,
                               folderProvider: folderBadgeProvider,
+                              streamingProvider: streamingBadgeProvider,
                               onMoveToFolder: { moveTarget = $0 },
                               onRemove: { removeFromGrid($0) },
                               namespace: navigationNamespace,
@@ -305,6 +306,14 @@ struct WatchlistView: View {
             guard let folderID = folderStore.folderID(for: resultID) else { return nil }
             return folderStore.folders.first(where: { $0.id == folderID })
         }
+    }
+
+    /// One decode of the provider table per render, closed over for every
+    /// cover in the wall. `WatchlistManager.providers` is a `@UserDefault`, so
+    /// the alternative is a full `JSONDecoder` pass per cell.
+    private var streamingBadgeProvider: (Int) -> SavedProvider? {
+        let table = WatchlistManager.providers
+        return { table[String($0)] }
     }
 
     private func watchlistListView(items: [Result]) -> some View {

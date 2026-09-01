@@ -83,6 +83,11 @@ struct ContentDetailsView: View {
             async let keywords: Void = detailsViewModel.getKeywords()
             _ = await (credits, videos, providers, similars, reviews, collection, keywords)
 
+            // If this title is saved, reconcile the stored copy with what we
+            // just fetched — fresher poster, rating, dates, and which service
+            // it streams on.
+            detailsViewModel.syncWatchlistEntry()
+
             // Everything Movie Coach reads is now in place — let it build its
             // context and generate exactly once.
             detailsViewModel.allSectionsLoaded = true
@@ -257,6 +262,11 @@ extension ContentDetailsView {
         } else {
             let added = WatchlistManager.addToWatchList(result: detailsViewModel.result)
             detailsViewModel.isInWatchList = true
+            // Saved from a details screen, so the fresh facts and the
+            // streaming service are already in hand — bank them now rather
+            // than waiting for the next visit. The entry may well have come
+            // from a list row carrying months-old artwork.
+            detailsViewModel.syncWatchlistEntry()
             if added {
                 ReviewRequestManager.recordWatchlistAdd()
                 ReviewRequestManager.requestReviewIfAppropriate()

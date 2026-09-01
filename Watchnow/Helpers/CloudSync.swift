@@ -45,6 +45,13 @@ enum CloudSync {
         "tasteLikedGenres",             // genre weights from those likes
         "tasteLikedLanguages",          // languages they gravitate to
         "tastePassedGenres"             // Movie Night passes (implicit dislikes)
+
+        // Deliberately absent: "watchlistProviders". Which service a title
+        // streams on is answered per region, so an iPhone set to Greece and
+        // an iPad set to the US would each overwrite the other with an
+        // answer that is wrong for the other device. Each device re-learns
+        // it from the details screen, cheaply and correctly — the same
+        // reasoning that keeps the What's New snapshots device-local.
     ]
 
     /// Whether the device is signed into iCloud, so the key-value store can

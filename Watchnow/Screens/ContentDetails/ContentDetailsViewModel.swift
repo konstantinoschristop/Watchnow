@@ -165,6 +165,24 @@ class ContentDetailsViewModel: ObservableObject {
         }
     }
     
+    /// Push what this screen has just learned back into the saved copy.
+    ///
+    /// The details endpoint is the only place the app sees a title's current
+    /// artwork, rating and availability, and the watchlist can hold an entry
+    /// for years — long enough for TMDB to replace the poster it was saved
+    /// with. Opening a saved title is therefore the natural moment to
+    /// reconcile the two, and it costs no extra requests: everything used
+    /// here was already fetched to render this screen.
+    ///
+    /// A no-op when the title isn't saved, so the caller doesn't have to ask.
+    @discardableResult
+    func syncWatchlistEntry() -> Bool {
+        guard isInWatchList, let id = result.id else { return false }
+        return WatchlistManager.refreshSavedEntry(id: id,
+                                                  details: details,
+                                                  providerResults: watchProviderSafe)
+    }
+
     func createShareLink() -> String {
         return "https://www.themoviedb.org/" + screenType.rawValue + "/\(id)"
     }

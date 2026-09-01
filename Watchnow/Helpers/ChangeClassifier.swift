@@ -27,15 +27,22 @@ enum ChangeClassifier {
         var providerIDs: [Int]?
         /// provider id → display name, for the card copy.
         var providerNames: [Int: String] = [:]
+        /// The region's raw availability, kept so the watchlist can record
+        /// which service a saved title streams on. The monitor already pays
+        /// for this request on every saved title, so the badge comes free
+        /// rather than waiting for the user to open each one.
+        var providerResults: ProviderResults?
 
         init(details: ResultDetailsResponse? = nil,
              videos: [VideoModelResult]? = nil,
              providerIDs: [Int]? = nil,
-             providerNames: [Int: String] = [:]) {
+             providerNames: [Int: String] = [:],
+             providerResults: ProviderResults? = nil) {
             self.details = details
             self.videos = videos
             self.providerIDs = providerIDs
             self.providerNames = providerNames
+            self.providerResults = providerResults
         }
     }
 

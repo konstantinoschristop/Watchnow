@@ -62,8 +62,9 @@ private func makeDetails(releaseDate: String? = nil,
                          lastEpisode: Episode? = nil,
                          nextEpisode: Episode? = nil,
                          posterPath: String? = nil,
-                         overview: String? = nil) -> ResultDetailsResponse {
-    ResultDetailsResponse(genres: nil, seasons: nil, number_of_episodes: episodes,
+                         overview: String? = nil,
+                         genres: [Genres]? = nil) -> ResultDetailsResponse {
+    ResultDetailsResponse(genres: genres, seasons: nil, number_of_episodes: episodes,
                           number_of_seasons: seasons, name: nil, id: nil, imdb_id: nil,
                           tagline: nil, spoken_languages: nil, revenue: nil, budget: nil,
                           runtime: nil, belongs_to_collection: nil, status: status,
@@ -656,6 +657,152 @@ final class InferredMediaTypeTests: XCTestCase {
 
     func testTaggedPersonIsAPerson() {
         XCTAssertTrue(Result.stub(id: 5, mediaType: "person").isPerson)
+    }
+}
+
+// MARK: - Saved provider
+
+/// The service remembered for a saved title, and the merge that keeps a
+/// stored entry from going stale.
+final class SavedProviderTests: XCTestCase {
+
+    private func flatrate(_ id: Int, _ name: String, priority: Int? = nil) -> Flatrate {
+        Flatrate(logoPath: "/\(id).png", providerID: id,
+                 providerName: name, displayPriority: priority)
+    }
+
+    func testPrefersAServiceTheUserSubscribesTo() {
+        let results = ProviderResults(link: nil,
+                                      flatrate: [flatrate(8, "Netflix", priority: 0),
+                                                 flatrate(350, "Apple TV+", priority: 5)],
+                                      rent: nil, buy: nil)
+        let picked = SavedProvider.main(from: results, subscribedTo: [350])
+        XCTAssertEqual(picked?.name, "Apple TV+",
+                       "an owned service beats TMDB's display priority")
+    }
+
+    func testFallsBackToDisplayPriority() {
+        let results = ProviderResults(link: nil,
+                                      flatrate: [flatrate(350, "Apple TV+", priority: 5),
+                                                 flatrate(8, "Netflix", priority: 0)],
+                                      rent: nil, buy: nil)
+        XCTAssertEqual(SavedProvider.main(from: results)?.name, "Netflix")
+    }
+
+    /// A subscription always beats a rental — "included" is a better answer
+    /// than "available to rent".
+    func testSubscriptionBeatsRental() {
+        let results = ProviderResults(link: nil,
+                                      flatrate: [flatrate(350, "Apple TV+", priority: 9)],
+                                      rent: [flatrate(2, "Apple TV", priority: 0)],
+                                      buy: nil)
+        let picked = SavedProvider.main(from: results)
+        XCTAssertEqual(picked?.name, "Apple TV+")
+        XCTAssertEqual(picked?.availability, .stream)
+    }
+
+    /// Rent-only titles still get a badge, marked as a rental. TMDB files the
+    /// Apple TV *storefront* under rent/buy and only Apple TV+ under
+    /// flatrate, so ignoring rentals silently dropped the commonest case.
+    func testRentOnlyIsRecordedAsARental() {
+        let results = ProviderResults(link: nil,
+                                      flatrate: [],
+                                      rent: [flatrate(2, "Apple TV")],
+                                      buy: [flatrate(3, "Google Play")])
+        let picked = SavedProvider.main(from: results)
+        XCTAssertEqual(picked?.name, "Apple TV")
+        XCTAssertEqual(picked?.availability, .rent)
+    }
+
+    func testFallsBackToBuyWhenNothingIsRentable() {
+        let results = ProviderResults(link: nil, flatrate: nil, rent: nil,
+                                      buy: [flatrate(2, "Apple TV")])
+        XCTAssertEqual(SavedProvider.main(from: results)?.availability, .rent)
+    }
+
+    func testNoProvidersAtAll() {
+        XCTAssertNil(SavedProvider.main(from: nil))
+        XCTAssertNil(SavedProvider.main(from: ProviderResults(link: nil, flatrate: nil,
+                                                             rent: nil, buy: nil)))
+    }
+
+    /// Records written before `kind` existed were subscription-only by
+    /// construction, so they must decode as `.stream` rather than fail.
+    func testLegacyRecordDecodesAsStreaming() throws {
+        let json = Data("{\"id\":8,\"name\":\"Netflix\",\"logoPath\":\"/n.jpg\",\"capturedAt\":0}".utf8)
+        let decoded = try JSONDecoder().decode(SavedProvider.self, from: json)
+        XCTAssertEqual(decoded.availability, .stream)
+        XCTAssertEqual(decoded.name, "Netflix")
+    }
+
+    func testEntriesMissingIdOrNameAreSkipped() {
+        let results = ProviderResults(
+            link: nil,
+            flatrate: [Flatrate(logoPath: nil, providerID: nil, providerName: "Broken", displayPriority: 0),
+                       flatrate(8, "Netflix", priority: 9)],
+            rent: nil, buy: nil)
+        XCTAssertEqual(SavedProvider.main(from: results)?.name, "Netflix")
+    }
+}
+
+// MARK: - Stored entry refresh
+
+final class SavedEntryRefreshTests: XCTestCase {
+
+    private func saved() -> Result {
+        Result(backdrop_path: "/old-backdrop.jpg", first_air_date: nil, genre_ids: [28],
+               id: 42, original_title: nil, name: nil, origin_country: nil,
+               original_language: nil, original_name: nil, overview: "Old synopsis.",
+               popularity: 12.5, poster_path: "/old-poster.jpg", release_date: "2026-01-01",
+               title: "Old Title", video: nil, vote_average: 6.0, vote_count: 100,
+               media_type: "movie", profile_path: nil, castID: nil, runtime: 100,
+               known_for: nil)
+    }
+
+    func testFreshFactsReplaceStaleOnes() {
+        var entry = saved()
+        entry.refresh(from: makeDetails(releaseDate: "2026-03-04", posterPath: "/new-poster.jpg",
+                                        overview: "New synopsis."))
+        XCTAssertEqual(entry.poster_path, "/new-poster.jpg")
+        XCTAssertEqual(entry.overview, "New synopsis.")
+        XCTAssertEqual(entry.release_date, "2026-03-04")
+    }
+
+    /// A half-failed details response must never blank what we already knew.
+    func testMissingFieldsLeaveStoredValuesAlone() {
+        var entry = saved()
+        entry.refresh(from: makeDetails())
+        XCTAssertEqual(entry.poster_path, "/old-poster.jpg")
+        XCTAssertEqual(entry.overview, "Old synopsis.")
+        XCTAssertEqual(entry.backdrop_path, "/old-backdrop.jpg")
+        XCTAssertEqual(entry.vote_average, 6.0)
+        XCTAssertEqual(entry.genre_ids, [28])
+    }
+
+    func testEmptyStringsAreTreatedAsMissing() {
+        var entry = saved()
+        entry.refresh(from: makeDetails(posterPath: "", overview: ""))
+        XCTAssertEqual(entry.poster_path, "/old-poster.jpg")
+        XCTAssertEqual(entry.overview, "Old synopsis.")
+    }
+
+    /// The refresh must not disturb anything keyed off the entry: `==` and
+    /// `hash` are id-only precisely so folders, saved dates and `ForEach`
+    /// identity survive it.
+    func testIdentityIsUnchangedByARefresh() {
+        let before = saved()
+        var after = before
+        after.refresh(from: makeDetails(posterPath: "/new-poster.jpg", overview: "New."))
+        XCTAssertEqual(before, after)
+        XCTAssertEqual(before.hashValue, after.hashValue)
+        XCTAssertEqual(after.id, 42)
+    }
+
+    func testGenreObjectsBecomeIds() {
+        var entry = saved()
+        entry.refresh(from: makeDetails(genres: [Genres(id: 18, name: "Drama"),
+                                                Genres(id: 53, name: "Thriller")]))
+        XCTAssertEqual(entry.genre_ids, [18, 53])
     }
 }
 

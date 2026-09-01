@@ -114,6 +114,16 @@ enum WatchlistChangeMonitor {
                     guard let id = item.id, let fresh else { continue }
                     let type = item.inferredScreenType.rawValue
 
+                    // Record where the title streams while we have the answer
+                    // in hand. Nothing about What's New needs this — it's the
+                    // watchlist's cover badge — but this loop already asks
+                    // every saved title for its availability twice a day, and
+                    // the alternative is a badge that stays blank until the
+                    // user opens each title individually.
+                    WatchlistManager.refreshSavedEntry(id: id,
+                                                       details: nil,
+                                                       providerResults: fresh.providerResults)
+
                     if let snapshot {
                         let hasReminder = ReminderManager.isScheduled(
                             identifier: ReminderManager.titleIdentifier(resultID: id))
@@ -169,6 +179,7 @@ enum WatchlistChangeMonitor {
         // success an absent region / empty flatrate list is a real (empty)
         // state; only a failed request leaves the domain nil and undiffed.
         if let response = try? await service.fetchWatchProviders(screenType: type, id: String(id)) {
+            fresh.providerResults = response.results?[region]
             let flatrate = response.results?[region]?.flatrate ?? []
             fresh.providerIDs = flatrate.compactMap(\.providerID)
             fresh.providerNames = Dictionary(uniqueKeysWithValues: flatrate.compactMap { entry in

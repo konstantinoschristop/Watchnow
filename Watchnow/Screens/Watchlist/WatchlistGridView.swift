@@ -25,6 +25,14 @@ struct WatchlistGridView<Header: View>: View {
     /// Resolves a title's folder for the corner badge. `nil` while a single
     /// folder is selected, where every badge would say the same thing.
     let folderProvider: ((Int) -> Folder?)?
+    /// Resolves the service a title streams on, for the cover badge.
+    ///
+    /// Injected rather than read per cell: `WatchlistManager.providers` is a
+    /// `@UserDefault`, so every access decodes the whole dictionary. Reading
+    /// it from inside a cell would put one full `JSONDecoder` pass per cover
+    /// per render — the same cost the watchlist already paid once for
+    /// `savedAll` and stopped paying.
+    let streamingProvider: ((Int) -> SavedProvider?)?
     let onMoveToFolder: (Result) -> Void
     let onRemove: (Result) -> Void
 
@@ -86,6 +94,7 @@ struct WatchlistGridView<Header: View>: View {
             ForEach(items, id: \.self) { result in
                 WatchlistPosterCell(result: result,
                                     folder: folder(for: result),
+                                    provider: provider(for: result),
                                     namespace: namespace,
                                     reduceMotion: reduceMotion,
                                     onMoveToFolder: { onMoveToFolder(result) },
@@ -97,8 +106,13 @@ struct WatchlistGridView<Header: View>: View {
     }
 
     private func folder(for result: Result) -> Folder? {
-        guard let provider = folderProvider, let id = result.id else { return nil }
-        return provider(id)
+        guard let folderProvider, let id = result.id else { return nil }
+        return folderProvider(id)
+    }
+
+    private func provider(for result: Result) -> SavedProvider? {
+        guard let streamingProvider, let id = result.id else { return nil }
+        return streamingProvider(id)
     }
 }
 
@@ -109,6 +123,7 @@ private struct WatchlistPosterCell: View {
 
     let result: Result
     let folder: Folder?
+    let provider: SavedProvider?
     var namespace: Namespace.ID
     let reduceMotion: Bool
     let onMoveToFolder: () -> Void
@@ -202,6 +217,7 @@ private struct WatchlistPosterCell: View {
             }
             .overlay(alignment: .topLeading) { typeBadge }
             .overlay(alignment: .topTrailing) { folderBadge }
+            .overlay(alignment: .bottomLeading) { providerBadge }
             .shadow(color: .black.opacity(0.28), radius: 5, y: 3)
     }
 
@@ -260,6 +276,83 @@ private struct WatchlistPosterCell: View {
                 }
                 .padding(5)
         }
+    }
+
+    /// The service this title is available on, as its own logo in the
+    /// cover's lower corner.
+    ///
+    /// Answers the question a watchlist is actually for — "can I watch this
+    /// tonight, and where?" — without opening anything. A brand mark does
+    /// that faster than any label could, which is the whole reason to spend
+    /// space on the artwork.
+    ///
+    /// Absent means we haven't looked yet, never "unavailable", so a blank
+    /// corner claims nothing. Rentals are marked with a small glyph rather
+    /// than shown identically to a subscription — the badge has to mean what
+    /// it looks like it means.
+    ///
+    /// Sits on an opaque white plate: provider logos are drawn for light
+    /// backgrounds and several are near-black, so they vanish on a dark
+    /// poster without one. The plate carries its own border and drop shadow
+    /// because it has to read against arbitrary artwork — anything from a
+    /// black one-sheet to a white one.
+    @ViewBuilder
+    private var providerBadge: some View {
+        if let provider {
+            HStack(spacing: 3) {
+                providerMark(provider)
+
+                if provider.availability == .rent {
+                    // Marks "you pay for this one" without a word of copy.
+                    Image(systemName: "creditcard.fill")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .padding(.trailing, 3)
+                }
+            }
+            .padding(3)
+            .background {
+                AppRadius.shape(AppRadius.small)
+                    .fill(.white)
+            }
+            .overlay {
+                AppRadius.shape(AppRadius.small)
+                    .strokeBorder(.black.opacity(0.18), lineWidth: 0.5)
+            }
+            .shadow(color: .black.opacity(0.45), radius: 3, y: 1)
+            .padding(6)
+            .accessibilityHidden(true)
+        }
+    }
+
+    /// The logo, or the service's initial when there is no artwork for it.
+    /// A named fallback beats an empty plate, which reads as a broken image.
+    @ViewBuilder
+    private func providerMark(_ provider: SavedProvider) -> some View {
+        if let path = provider.logoPath, !path.isEmpty,
+           let url = URL(string: API.Common.imageUrl(imageId: path)) {
+            KFImage.url(url)
+                .downsampling(size: CGSize(width: 96, height: 96))
+                .loadImmediately()
+                .loadDiskFileSynchronously()
+                .fromMemoryCacheOrRefresh()
+                .cacheOriginalImage()
+                .fade(duration: AppMotion.quick)
+                .placeholder { providerInitial(provider) }
+                .resizable()
+                .scaledToFit()
+                .frame(width: 22, height: 22)
+                .clipShape(AppRadius.shape(AppRadius.micro))
+        } else {
+            providerInitial(provider)
+        }
+    }
+
+    private func providerInitial(_ provider: SavedProvider) -> some View {
+        Text(provider.name.prefix(1).uppercased())
+            .font(.system(size: 13, weight: .heavy))
+            .foregroundStyle(.black.opacity(0.7))
+            .frame(width: 22, height: 22)
     }
 
     // MARK: Text
@@ -361,6 +454,11 @@ private struct WatchlistPosterCell: View {
         var parts = [result.getResultTitle(), typeLabel]
         if !year.isEmpty { parts.append(year) }
         if let rating { parts.append("rated \(rating)") }
+        if let provider {
+            parts.append(provider.availability == .rent
+                         ? "rent on \(provider.name)"
+                         : "streaming on \(provider.name)")
+        }
         if let folder { parts.append("in \(folder.name)") }
         return parts.joined(separator: ", ")
     }

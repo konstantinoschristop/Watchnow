@@ -158,25 +158,38 @@ struct GenericResultResponse: Codable, Equatable {
 
 // MARK: - Result
 struct Result: Codable, Hashable, Equatable {
-    let backdrop_path: String?
-    let first_air_date: String?
-    let genre_ids: [Int]?
+
+    // A saved watchlist entry is a long-lived copy of a TMDB record, and TMDB
+    // keeps editing the record: posters get replaced, ratings drift, dates
+    // get announced, titles get corrected. The fields the app actually
+    // *renders* are therefore `var`, so a stored entry can be brought up to
+    // date from a details fetch — see `refresh(from:)`.
+    //
+    // `id` stays immutable, which is what makes the refresh safe: `==` and
+    // `hash(into:)` are defined on `id` alone, so nothing that keys off a
+    // Result — `ForEach` identity, folder membership, saved dates, provider
+    // records — notices a metadata change.
+
+    var backdrop_path: String?
+    var first_air_date: String?
+    var genre_ids: [Int]?
     let id: Int?
     let original_title: String?
-    let name: String?
+    var name: String?
     let origin_country: [String]?
-    let original_language, original_name, overview: String?
+    let original_language, original_name: String?
+    var overview: String?
     let popularity: Double?
-    let poster_path: String?
-    let release_date: String?
-    let title: String?
+    var poster_path: String?
+    var release_date: String?
+    var title: String?
     let video: Bool?
-    let vote_average: Double?
-    let vote_count: Int?
+    var vote_average: Double?
+    var vote_count: Int?
     var media_type: String?
     let profile_path: String?
     let castID: Int?
-    let runtime: Int?
+    var runtime: Int?
     /// Populated by TMDB's multi-search endpoint for person results.
     /// Contains a short reel of the actor's most notable work.
     let known_for: [Result]?
@@ -238,6 +251,33 @@ struct Result: Codable, Hashable, Equatable {
         } else {
             return "Actor"
         }
+    }
+
+    /// Brings this copy up to date from a details fetch.
+    ///
+    /// Only ever *adds* information: every assignment is guarded on the fresh
+    /// value being present, and non-empty for strings, so a partial or
+    /// half-failed response can never blank out something the app already
+    /// knew. Same rule `ChangeClassifier.updatedSnapshot` follows, and for
+    /// the same reason — a missing field means "not fetched", not "empty".
+    ///
+    /// Deliberately narrow: identity, popularity and the person-only fields
+    /// are left alone. This exists to stop a saved poster going stale, not to
+    /// re-derive the entry.
+    mutating func refresh(from details: ResultDetailsResponse) {
+        if let path = details.poster_path, !path.isEmpty { poster_path = path }
+        if let path = details.backdrop_path, !path.isEmpty { backdrop_path = path }
+        if let value = details.title, !value.isEmpty { title = value }
+        if let value = details.name, !value.isEmpty { name = value }
+        if let value = details.overview, !value.isEmpty { overview = value }
+        if let value = details.release_date, !value.isEmpty { release_date = value }
+        if let value = details.first_air_date, !value.isEmpty { first_air_date = value }
+        if let value = details.vote_average { vote_average = value }
+        if let value = details.vote_count { vote_count = value }
+        if let value = details.runtime { runtime = value }
+        // The details endpoint returns genre objects where the list
+        // endpoints return bare ids; the app reads ids everywhere else.
+        if let ids = details.genres?.compactMap(\.id), !ids.isEmpty { genre_ids = ids }
     }
 
     /// Whether this result is genuinely a person.
