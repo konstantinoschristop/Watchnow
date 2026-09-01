@@ -7,15 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AB10C001000000000000F101 /* ChangesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C001000000000000F001 /* ChangesResponse.swift */; };
-		AB10C002000000000000F102 /* WhatsNewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C002000000000000F002 /* WhatsNewModel.swift */; };
-		AB10C003000000000000F103 /* WhatsNewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C003000000000000F003 /* WhatsNewViewModel.swift */; };
-		AB10C004000000000000F104 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C004000000000000F004 /* WhatsNewView.swift */; };
-		AB10C005000000000000F105 /* WhatsNewDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C005000000000000F005 /* WhatsNewDebugView.swift */; };
-		AB10C006000000000000F106 /* ChangeClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C006000000000000F006 /* ChangeClassifier.swift */; };
-		AB10C007000000000000F107 /* WatchlistChangeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C007000000000000F007 /* WatchlistChangeStore.swift */; };
-		AB10C008000000000000F108 /* WatchlistChangeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */; };
-		AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C012000000000000F012 /* WhatsNewTests.swift */; };
 		04B3F76DF715A7544AD36F91 /* TasteProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF8DA916076DC2F2D86DC4C /* TasteProfile.swift */; };
 		0536450B03E7ED86E450E3D7 /* MovieNightMatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B9E57E118591C8396B0DC92 /* MovieNightMatchView.swift */; };
 		286AC7771CB197563374DBA3 /* StreamingPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49CD585C3EF98A630B7704F0 /* StreamingPreferences.swift */; };
@@ -37,7 +28,6 @@
 		8A19B1B62E7EF98F0083A094 /* ScrollableContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1B52E7EF98F0083A094 /* ScrollableContentView.swift */; };
 		8A19B1B82E7EF99B0083A094 /* LoadMoreButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1B72E7EF99B0083A094 /* LoadMoreButtonView.swift */; };
 		8A19B1BB2E7F00490083A094 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */; };
-		AB20D002000000000000F002 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB20D001000000000000F001 /* DesignTokens.swift */; };
 		8A19B1BE2E7F006A0083A094 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BD2E7F006A0083A094 /* View+Extension.swift */; };
 		8A19B1C02E8085330083A094 /* StretchingActionScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */; };
 		8A4DDFC42EDCC20700F0E8DC /* UINavigationController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extension.swift */; };
@@ -73,24 +63,24 @@
 		930F8936E2288DE1DF08C0F0 /* MovieCoachContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627719F4572F2D36F86931F /* MovieCoachContext.swift */; };
 		9C8510C7C0C8C273C71D2936 /* MovieCoachService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0054A7E564BE2422966531 /* MovieCoachService.swift */; };
 		A0C3C285883E3C8BACABC7F2 /* MovieCoachCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F5C5278F31A07A439B3CE4 /* MovieCoachCache.swift */; };
-		FE1D0A21000000000000FB21 /* KeywordsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A21000000000000FA21 /* KeywordsResponse.swift */; };
-		FE1D0A22000000000000FB22 /* KeywordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A22000000000000FA22 /* KeywordStore.swift */; };
-		FE1D0A23000000000000FB23 /* KeywordEnricher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A23000000000000FA23 /* KeywordEnricher.swift */; };
 		AA000001000000000000AA02 /* WatchnowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000AA01 /* WatchnowApp.swift */; };
 		AA000001000000000000AA04 /* DetailServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000AA03 /* DetailServiceProtocol.swift */; };
+		AB10C001000000000000F101 /* ChangesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C001000000000000F001 /* ChangesResponse.swift */; };
+		AB10C002000000000000F102 /* WhatsNewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C002000000000000F002 /* WhatsNewModel.swift */; };
+		AB10C003000000000000F103 /* WhatsNewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C003000000000000F003 /* WhatsNewViewModel.swift */; };
+		AB10C004000000000000F104 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C004000000000000F004 /* WhatsNewView.swift */; };
+		AB10C005000000000000F105 /* WhatsNewDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C005000000000000F005 /* WhatsNewDebugView.swift */; };
+		AB10C006000000000000F106 /* ChangeClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C006000000000000F006 /* ChangeClassifier.swift */; };
+		AB10C007000000000000F107 /* WatchlistChangeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C007000000000000F007 /* WatchlistChangeStore.swift */; };
+		AB10C008000000000000F108 /* WatchlistChangeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */; };
+		AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10C012000000000000F012 /* WhatsNewTests.swift */; };
+		AB20D002000000000000F002 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB20D001000000000000F001 /* DesignTokens.swift */; };
 		AD000001000000000000AD02 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD000001000000000000AD01 /* BannerAdView.swift */; };
 		AD000001000000000000AD04 /* InlineBannerSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD000001000000000000AD03 /* InlineBannerSection.swift */; };
 		B3F69CA687867031D8DCA990 /* MovieCoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB6162F1CAB69DB8D71B48E /* MovieCoachView.swift */; };
 		D28CA41D0A3B396B63DA828A /* MovieNightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC7E865D288BD8F5490BBCC /* MovieNightView.swift */; };
 		EE2732ED287AF11000B066C7 /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732EC287AF11000B066C7 /* SearchResponse.swift */; };
 		EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */; };
-		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
-		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
-		FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C01000000000000FA01 /* WatchlistGridView.swift */; };
-		FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */; };
-		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
-		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
-		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
 		EE2732F1287AF4AE00B066C7 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F0287AF4AE00B066C7 /* SearchView.swift */; };
 		EE2732F3287B259E00B066C7 /* GenresResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2732F2287B259E00B066C7 /* GenresResponse.swift */; };
 		EE27E298284D2A890055E25A /* GenericImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE27E297284D2A890055E25A /* GenericImageView.swift */; };
@@ -141,19 +131,29 @@
 		FE1D0A0E000000000000FB0E /* ProvidersListResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0E000000000000FA0E /* ProvidersListResponse.swift */; };
 		FE1D0A0F000000000000FB0F /* StreamingServicesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A0F000000000000FA0F /* StreamingServicesSection.swift */; };
 		FE1D0A20000000000000FB20 /* FolderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A20000000000000FA20 /* FolderManager.swift */; };
+		FE1D0A21000000000000FB21 /* KeywordsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A21000000000000FA21 /* KeywordsResponse.swift */; };
+		FE1D0A22000000000000FB22 /* KeywordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A22000000000000FA22 /* KeywordStore.swift */; };
+		FE1D0A23000000000000FB23 /* KeywordEnricher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A23000000000000FA23 /* KeywordEnricher.swift */; };
+		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
+		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
+		FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C01000000000000FA01 /* WatchlistGridView.swift */; };
+		FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */; };
+		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
+		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
+		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		AB10C018000000000000F018 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8A981D4726B5AF0F00993232 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8A981D4E26B5AF1000993232;
+			remoteInfo = Watchnow;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		AB10C001000000000000F001 /* ChangesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesResponse.swift; sourceTree = "<group>"; };
-		AB10C002000000000000F002 /* WhatsNewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewModel.swift; sourceTree = "<group>"; };
-		AB10C003000000000000F003 /* WhatsNewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewViewModel.swift; sourceTree = "<group>"; };
-		AB10C004000000000000F004 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
-		AB10C005000000000000F005 /* WhatsNewDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewDebugView.swift; sourceTree = "<group>"; };
-		AB10C006000000000000F006 /* ChangeClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeClassifier.swift; sourceTree = "<group>"; };
-		AB10C007000000000000F007 /* WatchlistChangeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistChangeStore.swift; sourceTree = "<group>"; };
-		AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistChangeMonitor.swift; sourceTree = "<group>"; };
-		AB10C012000000000000F012 /* WhatsNewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
-		AB10C014000000000000F014 /* WatchnowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchnowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		10679FBCEE0A3D870C15848E /* MovieNightViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightViewModel.swift; sourceTree = "<group>"; };
 		1B9E57E118591C8396B0DC92 /* MovieNightMatchView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightMatchView.swift; sourceTree = "<group>"; };
 		2C57C412E060B071E7D5564C /* MovieNightSetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightSetupView.swift; sourceTree = "<group>"; };
@@ -164,9 +164,6 @@
 		5AC7E865D288BD8F5490BBCC /* MovieNightView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightView.swift; sourceTree = "<group>"; };
 		67FC41B9E54A43DE0293F7A9 /* Watchnow.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Watchnow.entitlements; sourceTree = "<group>"; };
 		86F5C5278F31A07A439B3CE4 /* MovieCoachCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieCoachCache.swift; sourceTree = "<group>"; };
-		FE1D0A21000000000000FA21 /* KeywordsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordsResponse.swift; sourceTree = "<group>"; };
-		FE1D0A22000000000000FA22 /* KeywordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordStore.swift; sourceTree = "<group>"; };
-		FE1D0A23000000000000FA23 /* KeywordEnricher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordEnricher.swift; sourceTree = "<group>"; };
 		8A036A7326BBC8C100A3D0FF /* TopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCard.swift; sourceTree = "<group>"; };
 		8A19B1A92E7EEE820083A094 /* BaseNetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseNetworkService.swift; sourceTree = "<group>"; };
 		8A19B1AB2E7EF7340083A094 /* BackdropImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackdropImage.swift; sourceTree = "<group>"; };
@@ -177,7 +174,6 @@
 		8A19B1B52E7EF98F0083A094 /* ScrollableContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableContentView.swift; sourceTree = "<group>"; };
 		8A19B1B72E7EF99B0083A094 /* LoadMoreButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreButtonView.swift; sourceTree = "<group>"; };
 		8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
-		AB20D001000000000000F001 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		8A19B1BD2E7F006A0083A094 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 		8A19B1BF2E8085330083A094 /* StretchingActionScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StretchingActionScrollView.swift; sourceTree = "<group>"; };
 		8A4DDFC32EDCC20700F0E8DC /* UINavigationController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Extension.swift"; sourceTree = "<group>"; };
@@ -215,6 +211,17 @@
 		9DD65EB43A2F4AAFC443413A /* MovieNightSwipeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovieNightSwipeView.swift; sourceTree = "<group>"; };
 		AA000001000000000000AA01 /* WatchnowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchnowApp.swift; sourceTree = "<group>"; };
 		AA000001000000000000AA03 /* DetailServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailServiceProtocol.swift; sourceTree = "<group>"; };
+		AB10C001000000000000F001 /* ChangesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesResponse.swift; sourceTree = "<group>"; };
+		AB10C002000000000000F002 /* WhatsNewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewModel.swift; sourceTree = "<group>"; };
+		AB10C003000000000000F003 /* WhatsNewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewViewModel.swift; sourceTree = "<group>"; };
+		AB10C004000000000000F004 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
+		AB10C005000000000000F005 /* WhatsNewDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewDebugView.swift; sourceTree = "<group>"; };
+		AB10C006000000000000F006 /* ChangeClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeClassifier.swift; sourceTree = "<group>"; };
+		AB10C007000000000000F007 /* WatchlistChangeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistChangeStore.swift; sourceTree = "<group>"; };
+		AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistChangeMonitor.swift; sourceTree = "<group>"; };
+		AB10C012000000000000F012 /* WhatsNewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewTests.swift; sourceTree = "<group>"; };
+		AB10C014000000000000F014 /* WatchnowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchnowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB20D001000000000000F001 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		AD000001000000000000AD01 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
 		AD000001000000000000AD03 /* InlineBannerSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineBannerSection.swift; sourceTree = "<group>"; };
 		AEF8DA916076DC2F2D86DC4C /* TasteProfile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TasteProfile.swift; sourceTree = "<group>"; };
@@ -222,13 +229,6 @@
 		D52ABA301314F5822DAF329C /* NativeAdCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeAdCard.swift; sourceTree = "<group>"; };
 		EE2732EC287AF11000B066C7 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
 		EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
-		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
-		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
-		FE3B0C01000000000000FA01 /* WatchlistGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistGridView.swift; sourceTree = "<group>"; };
-		FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderAlbumRow.swift; sourceTree = "<group>"; };
-		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
-		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
-		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		EE2732F0287AF4AE00B066C7 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		EE2732F2287B259E00B066C7 /* GenresResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenresResponse.swift; sourceTree = "<group>"; };
 		EE27E297284D2A890055E25A /* GenericImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericImageView.swift; sourceTree = "<group>"; };
@@ -278,26 +278,19 @@
 		FE1D0A0E000000000000FA0E /* ProvidersListResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersListResponse.swift; sourceTree = "<group>"; };
 		FE1D0A0F000000000000FA0F /* StreamingServicesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingServicesSection.swift; sourceTree = "<group>"; };
 		FE1D0A20000000000000FA20 /* FolderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderManager.swift; sourceTree = "<group>"; };
+		FE1D0A21000000000000FA21 /* KeywordsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordsResponse.swift; sourceTree = "<group>"; };
+		FE1D0A22000000000000FA22 /* KeywordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordStore.swift; sourceTree = "<group>"; };
+		FE1D0A23000000000000FA23 /* KeywordEnricher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordEnricher.swift; sourceTree = "<group>"; };
+		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
+		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
+		FE3B0C01000000000000FA01 /* WatchlistGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistGridView.swift; sourceTree = "<group>"; };
+		FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderAlbumRow.swift; sourceTree = "<group>"; };
+		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
+		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
+		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXContainerItemProxy section */
-		AB10C018000000000000F018 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 8A981D4726B5AF0F00993232 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8A981D4E26B5AF1000993232;
-			remoteInfo = Watchnow;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFrameworksBuildPhase section */
-		AB10C017000000000000F017 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8A981D4C26B5AF1000993232 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -306,6 +299,13 @@
 				8A036A7826BBE23700A3D0FF /* Kingfisher in Frameworks */,
 				8AD1C21A2FAA27DE004BA60F /* GoogleUserMessagingPlatform in Frameworks */,
 				EE9595CC289FB5550016EC25 /* AlertToast in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AB10C017000000000000F017 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -456,25 +456,6 @@
 			path = Screens;
 			sourceTree = "<group>";
 		};
-		AB10C010000000000000F010 /* WhatsNew */ = {
-			isa = PBXGroup;
-			children = (
-				AB10C002000000000000F002 /* WhatsNewModel.swift */,
-				AB10C003000000000000F003 /* WhatsNewViewModel.swift */,
-				AB10C004000000000000F004 /* WhatsNewView.swift */,
-				AB10C005000000000000F005 /* WhatsNewDebugView.swift */,
-			);
-			path = WhatsNew;
-			sourceTree = "<group>";
-		};
-		AB10C011000000000000F011 /* WatchnowTests */ = {
-			isa = PBXGroup;
-			children = (
-				AB10C012000000000000F012 /* WhatsNewTests.swift */,
-			);
-			path = WatchnowTests;
-			sourceTree = "<group>";
-		};
 		8AA98D7F2ADB1550007963E3 /* Movies */ = {
 			isa = PBXGroup;
 			children = (
@@ -600,6 +581,25 @@
 			path = MainListView;
 			sourceTree = "<group>";
 		};
+		AB10C010000000000000F010 /* WhatsNew */ = {
+			isa = PBXGroup;
+			children = (
+				AB10C002000000000000F002 /* WhatsNewModel.swift */,
+				AB10C003000000000000F003 /* WhatsNewViewModel.swift */,
+				AB10C004000000000000F004 /* WhatsNewView.swift */,
+				AB10C005000000000000F005 /* WhatsNewDebugView.swift */,
+			);
+			path = WhatsNew;
+			sourceTree = "<group>";
+		};
+		AB10C011000000000000F011 /* WatchnowTests */ = {
+			isa = PBXGroup;
+			children = (
+				AB10C012000000000000F012 /* WhatsNewTests.swift */,
+			);
+			path = WatchnowTests;
+			sourceTree = "<group>";
+		};
 		AD000001000000000000AD05 /* Ads */ = {
 			isa = PBXGroup;
 			children = (
@@ -647,23 +647,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AB10C015000000000000F015 /* WatchnowTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AB10C01C000000000000F01C /* Build configuration list for PBXNativeTarget "WatchnowTests" */;
-			buildPhases = (
-				AB10C016000000000000F016 /* Sources */,
-				AB10C017000000000000F017 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				AB10C019000000000000F019 /* PBXTargetDependency */,
-			);
-			name = WatchnowTests;
-			productName = WatchnowTests;
-			productReference = AB10C014000000000000F014 /* WatchnowTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		8A981D4E26B5AF1000993232 /* Watchnow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8A981D6326B5AF1100993232 /* Build configuration list for PBXNativeTarget "Watchnow" */;
@@ -686,6 +669,23 @@
 			productName = Watchnow;
 			productReference = 8A981D4F26B5AF1000993232 /* Watchnow.app */;
 			productType = "com.apple.product-type.application";
+		};
+		AB10C015000000000000F015 /* WatchnowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB10C01C000000000000F01C /* Build configuration list for PBXNativeTarget "WatchnowTests" */;
+			buildPhases = (
+				AB10C016000000000000F016 /* Sources */,
+				AB10C017000000000000F017 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AB10C019000000000000F019 /* PBXTargetDependency */,
+			);
+			name = WatchnowTests;
+			productName = WatchnowTests;
+			productReference = AB10C014000000000000F014 /* WatchnowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -745,14 +745,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AB10C016000000000000F016 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8A981D4B26B5AF1000993232 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -883,6 +875,14 @@
 				FE1D0A21000000000000FB21 /* KeywordsResponse.swift in Sources */,
 				FE1D0A22000000000000FB22 /* KeywordStore.swift in Sources */,
 				FE1D0A23000000000000FB23 /* KeywordEnricher.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AB10C016000000000000F016 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1043,7 +1043,7 @@
 				CODE_SIGN_ENTITLEMENTS = Watchnow/Watchnow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
 				ENABLE_PREVIEWS = YES;
@@ -1053,7 +1053,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1075,7 +1075,7 @@
 				CODE_SIGN_ENTITLEMENTS = Watchnow/Watchnow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
 				ENABLE_PREVIEWS = YES;
@@ -1085,7 +1085,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1139,15 +1139,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AB10C01C000000000000F01C /* Build configuration list for PBXNativeTarget "WatchnowTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AB10C01A000000000000F01A /* Debug */,
-				AB10C01B000000000000F01B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		8A981D4A26B5AF0F00993232 /* Build configuration list for PBXProject "Watchnow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1162,6 +1153,15 @@
 			buildConfigurations = (
 				8A981D6426B5AF1100993232 /* Debug */,
 				8A981D6526B5AF1100993232 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AB10C01C000000000000F01C /* Build configuration list for PBXNativeTarget "WatchnowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB10C01A000000000000F01A /* Debug */,
+				AB10C01B000000000000F01B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
