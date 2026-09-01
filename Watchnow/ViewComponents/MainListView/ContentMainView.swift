@@ -22,6 +22,8 @@ let tmdbGenreNames: [Int: String] = [
 ]
 
 struct ContentMainView<VM: BaseContentViewModel>: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @ObservedObject var viewModel: VM
     @Namespace private var namespace
 
@@ -126,12 +128,12 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                         InlineBannerSection()
                             .padding(.top, 4)
                     }
-                    .animation(.easeInOut(duration: 0.25), value: selectedGenreID)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: selectedGenreID)
                 }
                 .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.4), value: viewModel.finishedLoadingContent)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.emphasis), value: viewModel.finishedLoadingContent)
         .ignoresSafeArea(edges: .top)
         .onLoad { Task { await viewModel.loadContent(resetFirst: true) } }
         .toolbarTitleDisplayMode(.inlineLarge)
@@ -149,7 +151,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                 GenreChip(name: "All",
                           isSelected: selectedGenreID == nil,
                           tint: tint) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.75)) {
                         selectedGenreID = nil
                     }
                 }
@@ -158,7 +160,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                     GenreChip(name: genre.name,
                               isSelected: selectedGenreID == genre.id,
                               tint: tint) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.75)) {
                             // Tapping the active chip toggles it off (back to All)
                             selectedGenreID = selectedGenreID == genre.id ? nil : genre.id
                         }
@@ -225,6 +227,8 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
 /// with a translucent, depth-aware surface that reacts to the content
 /// behind it. Pre-iOS 26 devices keep the existing solid-fill style.
 private struct GenreChip: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     let name: String
     let isSelected: Bool
     let tint: Color   // unused — see note above
@@ -236,7 +240,7 @@ private struct GenreChip: View {
         }
         .buttonStyle(.plain)
         .scaleEffect(isSelected ? 1.03 : 1.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
+        .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 
     // Glass is intentionally omitted here — genre chips sit inside the
@@ -246,7 +250,7 @@ private struct GenreChip: View {
     // scrolling container are not.
     private var chipLabel: some View {
         Text(name)
-            .font(.system(size: 13, weight: .semibold))
+            .appFont(13, weight: .semibold, relativeTo: .footnote)
             .foregroundStyle(isSelected ? .white : .secondary)
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
@@ -274,20 +278,29 @@ private struct MovieNightBanner: View {
     /// Drives the diagonal shine sweep across the card.
     @State private var shimmer: CGFloat = -1
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 14) {
                 iconBadge
                 copy
                 Spacer(minLength: 8)
-                miniDeck
+                // The card fan is decoration. At accessibility text sizes it
+                // was squeezing the pitch into a two-character column
+                // ("Movi / e"), and a headline that has to be decoded is a
+                // worse outcome than a missing flourish. Copy wins.
+                if !typeSize.isAccessibilitySize {
+                    miniDeck
+                }
             }
             .padding(16)
             .background { gradient }
             .overlay { shine }
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous)
                     .strokeBorder(.white.opacity(0.18), lineWidth: 0.5)
             }
             .shadow(color: Color.accentColor.opacity(0.45), radius: 16, y: 8)
@@ -297,7 +310,11 @@ private struct MovieNightBanner: View {
         .padding(.top, 2)
         .padding(.bottom, 10)
         .onAppear {
-            withAnimation(.linear(duration: 3.6).repeatForever(autoreverses: false)) {
+            // A banner that sweeps forever on the home screen is exactly the
+            // kind of perpetual decoration Reduce Motion asks us to stop. The
+            // banner still reads as a banner without it.
+            guard !reduceMotion else { return }
+            withAnimation(reduceMotion ? nil : .linear(duration: 3.6).repeatForever(autoreverses: false)) {
                 shimmer = 1
             }
         }
@@ -310,7 +327,7 @@ private struct MovieNightBanner: View {
             Circle().fill(.white.opacity(0.20))
             Circle().strokeBorder(.white.opacity(0.30), lineWidth: 0.5)
             Image(systemName: "popcorn.fill")
-                .font(.system(size: 23, weight: .semibold))
+                .appFont(23, weight: .semibold, relativeTo: .title2)
                 .foregroundStyle(.white)
         }
         .frame(width: 52, height: 52)
@@ -320,9 +337,13 @@ private struct MovieNightBanner: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 Text("Movie Night")
-                    .font(.system(size: 18, weight: .heavy))
+                    .appFont(18, weight: .heavy, relativeTo: .title3)
+                    // One line, always. This is the banner's name — breaking
+                    // it mid-word is the one outcome worse than shrinking it.
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Text("NEW")
-                    .font(.system(size: 10, weight: .heavy))
+                    .appFont(10, weight: .heavy, relativeTo: .caption2)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(Capsule().fill(.white.opacity(0.28)))
@@ -331,7 +352,7 @@ private struct MovieNightBanner: View {
             .foregroundStyle(.white)
 
             Text("Can't decide? Swipe to find tonight's pick.")
-                .font(.system(size: 13, weight: .medium))
+                .appFont(13, weight: .medium, relativeTo: .footnote)
                 .foregroundStyle(.white.opacity(0.92))
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -348,7 +369,7 @@ private struct MovieNightBanner: View {
             miniCard(rotation: -2, dx: 0,  fill: .white)
                 .overlay {
                     Image(systemName: "heart.fill")
-                        .font(.system(size: 13, weight: .bold))
+                        .appFont(13, weight: .bold, relativeTo: .footnote)
                         .foregroundStyle(Color.accentColor)
                 }
         }
@@ -356,7 +377,7 @@ private struct MovieNightBanner: View {
     }
 
     private func miniCard(rotation: Double, dx: CGFloat, fill: Color) -> some View {
-        RoundedRectangle(cornerRadius: 6, style: .continuous)
+        RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)
             .fill(fill)
             .frame(width: 32, height: 46)
             .rotationEffect(.degrees(rotation))
@@ -409,7 +430,12 @@ private struct PressableCardStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            // Press feedback stays on under Reduce Motion, deliberately. A
+            // `ButtonStyle` can't read `@Environment`, but more importantly
+            // this is a 0.3s scale confined to the control the finger is
+            // already on — it's tactile response, not motion the setting is
+            // asking us to remove. Apple's own controls behave the same way.
+            .animation(AppMotion.springSnappy, value: configuration.isPressed)
     }
 }
 
@@ -462,7 +488,7 @@ extension ContentMainView {
 
                 // Title
                 Text(content.getResultTitle())
-                    .font(.system(size: 22, weight: .bold))
+                    .appFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .shadow(color: .black.opacity(0.6), radius: 4)
@@ -472,7 +498,7 @@ extension ContentMainView {
                     if let rating = content.vote_average, rating > 0 {
                         HStack(spacing: 3) {
                             Image(systemName: "star.fill")
-                                .font(.system(size: 10))
+                                .appFont(10, relativeTo: .caption2)
                                 .foregroundStyle(RatingStyle.tint(for: rating))
                             Text(String(format: "%.1f", rating))
                         }
@@ -483,7 +509,7 @@ extension ContentMainView {
                         Text(year)
                     }
                 }
-                .font(.system(size: 13, weight: .medium))
+                .appFont(13, weight: .medium, relativeTo: .footnote)
                 .foregroundStyle(.white.opacity(0.9))
                 .shadow(color: .black.opacity(0.5), radius: 2)
 
@@ -498,7 +524,11 @@ extension ContentMainView {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 22)
+            // Clears the centred page indicator instead of sharing its band.
+            // Only the carousel uses this overlay — the details hero is a
+            // single slide with no indicator, and keeps its own lower, more
+            // cinematic placement.
+            .padding(.bottom, FeaturedHeroMetrics.indicatorReserve + 8)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -515,14 +545,14 @@ extension ContentMainView {
     private func heroPill(name: String) -> some View {
         if #available(iOS 26.0, *) {
             Text(name)
-                .font(.system(size: 11, weight: .semibold))
+                .appFont(11, weight: .semibold, relativeTo: .caption2)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
                 .glassEffect(.regular, in: Capsule())
         } else {
             Text(name)
-                .font(.system(size: 11, weight: .semibold))
+                .appFont(11, weight: .semibold, relativeTo: .caption2)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)

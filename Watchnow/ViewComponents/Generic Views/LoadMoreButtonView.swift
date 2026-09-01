@@ -90,7 +90,7 @@ struct LoadMoreButtonView: View {
             Image(systemName: "arrow.right")
                 .font(.system(size: 14 + easedP * 12, weight: .bold))
                 .foregroundStyle(isArmed ? Color.white : Color.accentColor)
-                .animation(.easeInOut(duration: 0.15), value: isArmed)
+                .animation(.easeInOut(duration: AppMotion.quick), value: isArmed)
         }
         .frame(width: size, height: size)
         // Soft accent glow that intensifies with progress — stays out of

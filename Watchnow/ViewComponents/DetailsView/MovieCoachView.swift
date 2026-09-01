@@ -19,6 +19,8 @@
 import SwiftUI
 
 struct MovieCoachView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     /// Nil until the details screen has finished loading the data Coach
     /// reads. Passing nil keeps the card in its loading state.
@@ -55,9 +57,9 @@ struct MovieCoachView: View {
     private var eyebrow: some View {
         HStack(spacing: 5) {
             Image(systemName: "sparkles")
-                .font(.system(size: 10, weight: .bold))
+                .appFont(10, weight: .bold, relativeTo: .caption2)
             Text("COACH")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .appFont(11, weight: .heavy, relativeTo: .caption2, design: .rounded)
                 .tracking(1.1)
         }
         .foregroundStyle(Color.accentColor)
@@ -76,15 +78,15 @@ struct MovieCoachView: View {
             HStack(alignment: .top) {
                 eyebrow
                 Spacer(minLength: 0)
-                Text("🎬").font(.system(size: 26)).accessibilityHidden(true)
+                Text("🎬").appFont(26, relativeTo: .title).accessibilityHidden(true)
             }
 
             Text("Getting to know your taste")
-                .font(.system(size: 20, weight: .heavy))
+                .appFont(20, weight: .heavy, relativeTo: .title3)
                 .foregroundStyle(.primary)
 
             Text("Save \(remaining) more \(remaining == 1 ? "title" : "titles") to your watchlist and Movie Coach will start telling you whether something's a good fit for you.")
-                .font(.system(size: 14))
+                .appFont(14, relativeTo: .subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -92,7 +94,7 @@ struct MovieCoachView: View {
                 ProgressView(value: Double(saved), total: Double(target))
                     .tint(Color.accentColor)
                 Text("\(saved) of \(target)")
-                    .font(.system(size: 12, weight: .semibold))
+                    .appFont(12, weight: .semibold, relativeTo: .caption)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
@@ -113,7 +115,7 @@ struct MovieCoachView: View {
                 verdictBlock(answer)
 
                 Text(answer.message)
-                    .font(.system(size: 15))
+                    .appFont(15, relativeTo: .subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                     .lineSpacing(1.5)
@@ -132,8 +134,8 @@ struct MovieCoachView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .modifier(CoachCardSurface(prominence: prominence))
-        .animation(.easeInOut(duration: 0.25), value: answer)
-        .animation(.easeInOut(duration: 0.25), value: didFail)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: answer)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: didFail)
         .sheet(isPresented: $showAsk) {
             if let context {
                 MovieCoachAskSheet(context: context)
@@ -148,18 +150,18 @@ struct MovieCoachView: View {
                 eyebrow
                 Spacer(minLength: 0)
                 Text(answer.verdict.emoji)
-                    .font(.system(size: 30))
+                    .appFont(30, relativeTo: .title)
                     .accessibilityHidden(true)
             }
 
             Text(answer.verdict.headline)
-                .font(.system(size: 26, weight: .heavy))
+                .appFont(26, weight: .heavy, relativeTo: .title)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
 
             Text(answer.verdict.subhead)
-                .font(.system(size: 14, weight: .semibold))
+                .appFont(14, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(Color.accentColor)
         }
     }
@@ -170,7 +172,7 @@ struct MovieCoachView: View {
                 showAsk = true
             } label: {
                 Label("Ask Coach", systemImage: "bubble.left.and.text.bubble.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .appFont(14, weight: .semibold, relativeTo: .subheadline)
                     .foregroundStyle(Color.accentColor)
             }
             .buttonStyle(.plain)
@@ -182,7 +184,7 @@ struct MovieCoachView: View {
                 Task { await regenerate() }
             } label: {
                 Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 13, weight: .semibold))
+                    .appFont(13, weight: .semibold, relativeTo: .footnote)
                     .foregroundStyle(Color.secondary)
             }
             .buttonStyle(.plain)
@@ -193,11 +195,11 @@ struct MovieCoachView: View {
     private var failureRow: some View {
         HStack(spacing: 10) {
             Text("Couldn't get a read on this one.")
-                .font(.system(size: 14))
+                .appFont(14, relativeTo: .subheadline)
                 .foregroundStyle(.secondary)
             Spacer(minLength: 0)
             Button("Retry") { Task { await regenerate() } }
-                .font(.system(size: 13, weight: .semibold))
+                .appFont(13, weight: .semibold, relativeTo: .footnote)
                 .foregroundStyle(Color.accentColor)
                 .buttonStyle(.plain)
         }
@@ -208,9 +210,9 @@ struct MovieCoachView: View {
     private var skeleton: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Great pick")
-                .font(.system(size: 15, weight: .bold))
+                .appFont(15, weight: .bold, relativeTo: .subheadline)
             Text("Checking whether this is a good match for you right now and how it fits your evening.")
-                .font(.system(size: 14))
+                .appFont(14, relativeTo: .subheadline)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .redacted(reason: .placeholder)
@@ -376,6 +378,7 @@ private struct IntelligenceBorder: View {
     private let lapDuration: Double = 16
 
     @State private var phase: Double = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let magenta = Color(red: 1.00, green: 0.24, blue: 0.62)
     private static let purple  = Color(red: 0.66, green: 0.33, blue: 1.00)
@@ -441,7 +444,11 @@ private struct IntelligenceBorder: View {
         .opacity(opacity)
         .allowsHitTesting(false)
         .onAppear {
-            withAnimation(.linear(duration: lapDuration).repeatForever(autoreverses: false)) {
+            // The rim light is a flourish on a card the user is reading. It
+            // laps forever, so Reduce Motion parks it — the border stays,
+            // it just stops travelling.
+            guard !reduceMotion else { return }
+            withAnimation(reduceMotion ? nil : .linear(duration: lapDuration).repeatForever(autoreverses: false)) {
                 phase = 360
             }
         }

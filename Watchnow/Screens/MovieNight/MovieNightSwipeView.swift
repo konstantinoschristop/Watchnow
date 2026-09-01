@@ -33,6 +33,7 @@ struct MovieNightSwipeView: View {
     @State private var outgoingOffset: CGSize = .zero
     /// Guards against a second swipe firing while a card is flying off.
     @State private var isAnimating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let swipeThreshold: CGFloat = 110
     /// Top card + this many peeks behind it.
@@ -154,11 +155,11 @@ struct MovieNightSwipeView: View {
 
     private func stamp(_ text: String, color: Color, rotation: Double, alignment: Alignment) -> some View {
         Text(text)
-            .font(.system(size: 30, weight: .heavy))
+            .appFont(30, weight: .heavy, relativeTo: .title)
             .foregroundStyle(color)
             .padding(.horizontal, 12)
             .padding(.vertical, 5)
-            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(color, lineWidth: 4))
+            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).strokeBorder(color, lineWidth: 4))
             .rotationEffect(.degrees(rotation))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
     }
@@ -167,16 +168,24 @@ struct MovieNightSwipeView: View {
 
     private var actionButtons: some View {
         HStack(spacing: 44) {
-            circleButton(icon: "xmark", tint: .red) { fling(liked: false) }
-            circleButton(icon: "heart.fill", tint: .green) { fling(liked: true) }
+            circleButton(icon: "xmark", label: "Pass", tint: .red) { fling(liked: false) }
+            circleButton(icon: "heart.fill", label: "Keep", tint: .green) { fling(liked: true) }
         }
         .padding(.bottom, 8)
     }
 
-    private func circleButton(icon: String, tint: Color, action: @escaping () -> Void) -> some View {
+    /// These two are also the accessible route through the deck: the swipe is
+    /// the headline gesture, but a drag can't be performed with VoiceOver or
+    /// Switch Control, so every decision has to be reachable as a button too.
+    /// They were previously icon-only and unlabelled, which left the whole
+    /// screen unusable with a screen reader.
+    private func circleButton(icon: String,
+                              label: String,
+                              tint: Color,
+                              action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 22, weight: .bold))
+                .appFont(22, weight: .bold, relativeTo: .title2)
                 .foregroundStyle(tint)
                 .frame(width: 62, height: 62)
                 .background(Circle().fill(Color(.secondarySystemBackground)))
@@ -184,6 +193,10 @@ struct MovieNightSwipeView: View {
         }
         .buttonStyle(.plain)
         .disabled(isAnimating || vm.cardIndex >= vm.deck.count)
+        .accessibilityLabel(label)
+        .accessibilityHint(label == "Keep"
+                           ? "Adds this title to your picks"
+                           : "Skips this title")
     }
 
     // MARK: - Handoff
@@ -195,7 +208,7 @@ struct MovieNightSwipeView: View {
                 .ignoresSafeArea()
             VStack(spacing: 16) {
                 Image(systemName: "hand.wave.fill")
-                    .font(.system(size: 44))
+                    .appFont(44, relativeTo: .largeTitle)
                     .foregroundStyle(.accent)
                 Text("Pass to Player \(vm.currentPlayer + 1)")
                     .font(.title2.weight(.bold))
@@ -204,7 +217,9 @@ struct MovieNightSwipeView: View {
                     .foregroundStyle(.secondary)
                 Button("I'm ready") {
                     drag = .zero
-                    withAnimation { vm.beginNextPlayer() }
+                    withAnimation(reduceMotion ? nil : .default) {
+                        vm.beginNextPlayer()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
@@ -229,7 +244,9 @@ struct MovieNightSwipeView: View {
                 } else if value.translation.width < -swipeThreshold {
                     fling(liked: false, from: value.translation)
                 } else {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(reduceMotion
+                                  ? nil
+                                  : .spring(response: 0.3, dampingFraction: 0.7)) {
                         drag = .zero
                     }
                 }
@@ -244,6 +261,27 @@ struct MovieNightSwipeView: View {
     private func fling(liked: Bool, from start: CGSize = .zero) {
         guard !isAnimating, vm.cardIndex < vm.deck.count else { return }
         isAnimating = true
+
+        // A decision you make with your thumb should be confirmed by your
+        // thumb. This is the one screen in the app built entirely on a
+        // gesture, and it was the only interactive surface with no haptic at
+        // all — keep lands heavier than pass, so the two feel different
+        // without looking away from the card.
+        UIImpactFeedbackGenerator(style: liked ? .medium : .light)
+            .impactOccurred()
+
+        // Reduce Motion: no fly-off, no rise. The card is replaced and the
+        // deck advances — the outcome is identical, the choreography isn't.
+        guard !reduceMotion else {
+            var swap = Transaction()
+            swap.disablesAnimations = true
+            withTransaction(swap) {
+                drag = .zero
+                vm.swipe(liked: liked)
+                isAnimating = false
+            }
+            return
+        }
 
         // Hand the top card to the fly-off layer with no animation, so it
         // appears exactly where the finger left it (a seamless takeover from
@@ -267,7 +305,7 @@ struct MovieNightSwipeView: View {
         // Slide the handed-off card off the side, slightly faster than the
         // rise so the next card is settling in just as it clears.
         let direction: CGFloat = liked ? 1 : -1
-        withAnimation(.easeIn(duration: 0.26)) {
+        withAnimation(.easeIn(duration: AppMotion.standard)) {
             outgoingOffset = CGSize(width: direction * 900, height: start.height)
         }
 
@@ -327,11 +365,11 @@ struct SwipeCard: View {
             }
             .overlay { gradient }
             .overlay(alignment: .bottomLeading) { info }
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous))
             .overlay(alignment: .topTrailing) { savedBadge }
             .overlay(alignment: .topLeading) { infoButton }
             .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous)
                     .strokeBorder(.white.opacity(0.08), lineWidth: 1)
             )
             .shadow(color: .black.opacity(0.35), radius: 14, y: 8)
@@ -363,7 +401,7 @@ struct SwipeCard: View {
         if showInfoButton {
             Button(action: onInfo) {
                 Image(systemName: "info.circle.fill")
-                    .font(.system(size: 25))
+                    .appFont(25, relativeTo: .title)
                     .foregroundStyle(.white, .black.opacity(0.4))
                     .padding(12)
             }

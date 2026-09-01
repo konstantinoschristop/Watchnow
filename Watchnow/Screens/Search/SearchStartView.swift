@@ -47,14 +47,10 @@ struct SearchStartView: View {
     /// the only way to stagger an appearance in SwiftUI without a
     /// per-element timer.
     @State private var appeared = false
-    /// What the hint is currently showing — a growing or shrinking prefix
-    /// of `hintTarget` while the typewriter runs, or the whole title once
-    /// it's finished typing.
-    @State private var typedHint = ""
-    /// The full title behind `typedHint`. Kept separate so a tap during
-    /// the typing animation searches the whole title rather than whatever
-    /// half of it happens to be on screen.
-    @State private var hintTarget: String?
+    /// Matches `TrendingPosterCard`'s own scaled height so the shelf's fixed
+    /// row frame grows with the text inside it instead of cropping it.
+    @ScaledMetric(relativeTo: .caption)
+    private var trendingTextBox: CGFloat = TrendingPosterCard.textHeight
 
     var body: some View {
         ScrollView {
@@ -71,10 +67,20 @@ struct SearchStartView: View {
             }
             .padding(.bottom, 32)
         }
+        // Runs the band to the physical top of the display rather than
+        // stopping at the status bar.
+        //
+        // Only where the navigation bar is already hidden — with a bar and a
+        // search field up there the art would sit behind both, which is the
+        // one thing this hero has always refused to do. The status bar itself
+        // is different: its glyphs are small, high-contrast and system-drawn,
+        // and iOS 26's soft scroll-edge effect (applied to this tab in
+        // `ContentView`) keeps them legible as content passes under, without
+        // the app painting anything over the artwork.
+        .bleedingSafeArea(bleedsUnderStatusBar, edges: .top)
         .scrollDismissesKeyboard(.interactively)
         .onAppear { appeared = true }
         .task { await viewModel.loadTrendingIfNeeded() }
-        .task { await runHints() }
     }
 
     // MARK: - Motion helpers
@@ -85,63 +91,11 @@ struct SearchStartView: View {
         reduceMotion ? nil : animation
     }
 
-    /// Types each trending title out a character at a time, holds it, then
-    /// backspaces it away before starting the next one.
-    ///
-    /// A `Task` loop rather than a `Timer`: it's cancelled automatically
-    /// when the view goes away, so backing out of search doesn't leave a
-    /// timer ticking against a detached view.
-    ///
-    /// Under Reduce Motion the titles still rotate — the suggestion is
-    /// useful information, not decoration — but they swap whole rather
-    /// than animating in letter by letter. Text that rewrites itself
-    /// thirty times a second is exactly what that setting is asking us to
-    /// stop doing.
-    func runHints() async {
-        while !Task.isCancelled {
-            let titles = hintTitles
-
-            guard !titles.isEmpty else {
-                // Trending hasn't landed — or the fetch failed outright, in
-                // which case this waits for the rest of the view's life.
-                // Slow enough that the standing case costs nothing, quick
-                // enough that the normal case starts typing right after the
-                // feed arrives.
-                try? await Task.sleep(for: .seconds(1))
-                continue
-            }
-
-            for title in titles {
-                guard !Task.isCancelled else { return }
-                hintTarget = title
-
-                if reduceMotion {
-                    typedHint = title
-                    try? await Task.sleep(for: .seconds(3.4))
-                    continue
-                }
-
-                await type(title)
-                try? await Task.sleep(for: .seconds(1.9))
-                await backspace(title)
-
-                // `hintTarget` deliberately outlives the text it typed. It
-                // gates the chip against the fallback description, so
-                // clearing it here dropped the whole pill for the length of
-                // the gap and flashed "Movies, series and the people who
-                // make them." in its place between every title. Holding it
-                // also means a tap landing in the gap searches the title
-                // the user just watched finish, rather than nothing.
-                //
-                // Beat on the empty caret before the next title starts, so
-                // the two runs read as separate words rather than one
-                // continuous scramble.
-                try? await Task.sleep(for: .milliseconds(280))
-            }
-        }
+    private var trendingRowHeight: CGFloat {
+        TrendingPosterCard.posterHeight + 7 + trendingTextBox
     }
 
-    /// Titles the typewriter draws from.
+    /// Titles the hint chip draws from.
     ///
     /// Filtered by length: the chip is capped at the screen width, so a
     /// long title truncates to an ellipsis part-way through typing, which
@@ -155,28 +109,7 @@ struct SearchStartView: View {
         return Array((short.isEmpty ? all : short).prefix(6))
     }
 
-    /// Reveals `title` one character at a time.
-    func type(_ title: String) async {
-        for index in 1...max(title.count, 1) {
-            guard !Task.isCancelled else { return }
-            typedHint = String(title.prefix(index))
-            try? await Task.sleep(for: .milliseconds(42))
-        }
-    }
-
-    /// Removes `title` one character at a time. Faster than typing —
-    /// deleting is the part nobody's reading, and matching the two speeds
-    /// makes the whole cycle feel twice as long as it is.
-    func backspace(_ title: String) async {
-        guard title.count > 0 else { return }
-        for index in stride(from: title.count - 1, through: 0, by: -1) {
-            guard !Task.isCancelled else { return }
-            typedHint = String(title.prefix(index))
-            try? await Task.sleep(for: .milliseconds(20))
-        }
-    }
-
-    /// Per-item entrance delay, capped so a long row's tail doesn't arrive    /// Per-item entrance delay, capped so a long row's tail doesn't arrive
+    /// Per-item entrance delay, capped so a long row's tail doesn't arrive
     /// noticeably after the user has already started scrolling it.
     private func stagger(_ index: Int) -> Double {
         reduceMotion ? 0 : min(Double(index) * 0.05, 0.4)
@@ -210,50 +143,11 @@ private extension SearchStartView {
     /// the placeholder in is a bad trade for a taller image.
     var hero: some View {
         ZStack(alignment: .bottom) {
-            HeroMarquee(rowOne: marqueeRowOne,
-                        rowTwo: marqueeRowTwo,
-                        rowThree: marqueeRowThree,
-                        reduceMotion: reduceMotion)
-                // No `.stretchy()` here, deliberately. That modifier scales
-                // by `frame(in: .scrollView).minY` from a `.bottom` anchor,
-                // and on returning to this tab the scroll geometry reports a
-                // large minY for a beat before it settles. The band came
-                // back magnified and pinned to its lower edge — blank at the
-                // top, posters far too big — and only looked right once the
-                // offset resolved a second later. The two counter-drifting
-                // rows already give this header its motion; a rubber band
-                // isn't worth a header that renders wrong every time you
-                // open the tab.
-                //
-                // Feathers the top edge. Applied here rather than inside
-                // the marquee because the fade has to be measured against
-                // the band's own bounds — that's the edge that clips, and
-                // the marquee's intrinsic height doesn't match it.
-                .frame(height: heroHeight)
-                .clipped()
-                .mask {
-                    LinearGradient(stops: [
-                        .init(color: .clear,              location: 0.00),
-                        .init(color: .black.opacity(0.5), location: maskFeather * 0.4),
-                        .init(color: .black,              location: maskFeather),
-                        .init(color: .black,              location: 1.00),
-                    ], startPoint: .top, endPoint: .bottom)
-                }
-
-            // Fades the art out into the page so the band has no hard
-            // bottom edge, and gives the headline a solid ground to sit on.
-            LinearGradient(stops: bottomFadeStops,
-                           startPoint: .top,
-                           endPoint: .bottom)
-                .allowsHitTesting(false)
-
-            if bleedsUnderStatusBar {
-                statusBarScrim
-            }
+            artBand
 
             VStack(spacing: 10) {
                 Text("Find what to watch")
-                    .font(.system(size: 28, weight: .bold))
+                    .appFont(28, weight: .bold, relativeTo: .title)
                     .foregroundStyle(.primary)
                     // Two shadows in the page colour rather than one, and
                     // both opaque: a wide soft pass to lift the text off
@@ -265,45 +159,89 @@ private extension SearchStartView {
                     .shadow(color: Color(.background), radius: 14)
                     .shadow(color: Color(.background), radius: 5)
 
-                hintChip
+                HintChip(titles: hintTitles,
+                         reduceMotion: reduceMotion,
+                         onSelect: onSelectQuery)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 4)
         }
         .frame(height: heroHeight)
         .frame(maxWidth: .infinity)
-        .clipped()
         .scaleEffect(isSearchFieldFocused ? 0.94 : 1, anchor: .top)
         .opacity(isSearchFieldFocused ? 0 : 1)
         .frame(height: isSearchFieldFocused ? 0 : nil, alignment: .top)
-        .clipped()
+        // Clipped only while collapsing. The band needs to draw *above* its
+        // own frame for the overscroll stretch, so an unconditional clip
+        // here would swallow the effect.
+        .clipped(isSearchFieldFocused)
         .accessibilityHidden(isSearchFieldFocused)
         .animation(motion(.spring(response: 0.42, dampingFraction: 0.85)),
                    value: isSearchFieldFocused)
         .modifier(entrance(0))
     }
 
+    /// The artwork half of the header: drifting posters, the fades that
+    /// blend them into the page, and the status-bar scrim.
+    ///
+    /// Split from the headline so the overscroll stretch can apply to the
+    /// art alone. `MenuFeaturedView` stretches its whole hero, copy
+    /// included, but that hero is a single still image with one line of
+    /// title over it — here a `.bottom`-anchored scale of up to 1.4× would
+    /// haul a 28pt headline and a text-filled pill up with it.
+    ///
+    /// `.clipped()` before `.stretchy()` is the order that matters: the
+    /// band trims its own overflow first, then the *trimmed* band is scaled,
+    /// so the growth escapes into the gap the rubber band opens above it
+    /// instead of being cut off at the band's edge.
+    ///
+    /// The earlier note here said `.stretchy()` was unusable because the
+    /// scroll geometry reports a large `minY` for a beat on tab re-entry and
+    /// the band came back magnified. That was a real bug and it is fixed at
+    /// the source — `StretchEffectModifier` now clamps the offset to one
+    /// band-height — so the effect is back.
+    var artBand: some View {
+        HeroMarquee(rowOne: marqueeRowOne,
+                    rowTwo: marqueeRowTwo,
+                    rowThree: marqueeRowThree,
+                    reduceMotion: reduceMotion)
+            // Cropped to the band first, so the fade below is measured
+            // against the band's own bounds rather than the marquee's taller
+            // intrinsic height.
+            .frame(height: heroHeight)
+            .clipped()
+            // Bottom fade only.
+            //
+            // There were two tinted layers over the top of this band — a
+            // feather on the clip and a near-opaque scrim across the status
+            // bar — and between them they spent the first third of a 340pt
+            // band painting page colour over poster art. The band exists to
+            // be a window onto artwork; a window with a curtain over the top
+            // third is a smaller window. Both are gone.
+            .overlay { bottomFade }
+            .stretchy()
+    }
+
+    /// Fades the art out into the page so the band has no hard bottom edge,
+    /// and gives the headline a solid ground to sit on.
+    var bottomFade: some View {
+        LinearGradient(stops: bottomFadeStops,
+                       startPoint: .top,
+                       endPoint: .bottom)
+            .allowsHitTesting(false)
+    }
+
     /// Sized from the bottom up: the headline and the hint chip need
     /// ~86pt between them, and the gradient needs roughly that much again
     /// above it to reach full opacity before the text starts. Tighter than
     /// this and the chip clips against the band's bottom edge.
-    /// Taller when the band owns the top of the display: the scrim over
-    /// the status bar consumes the first ~110pt, so without the extra
-    /// height there was barely 60pt of unobscured art between it and the
-    /// bottom fade — which is what made the band read as a sliced-off
-    /// sliver rather than a window onto artwork. Where the navigation bar
-    /// is still present nothing eats the top and the band keeps its
-    /// original size.
+    /// Taller when the band owns the top of the display, because it now
+    /// starts behind the status bar rather than below it — the first ~59pt
+    /// sit under the clock and the battery, so the extra height is what
+    /// keeps a full window of art in clear view beneath them. Where the
+    /// navigation bar is still present nothing eats the top and the band
+    /// keeps its original size.
     var heroHeight: CGFloat { bleedsUnderStatusBar ? 340 : 238 }
-
-    /// How far down the band its own top clip is feathered.
-    ///
-    /// Barely any when the status-bar scrim is present — that gradient
-    /// already hides the art up there, and stacking a second fade on top
-    /// of it left the top third blank and then produced art abruptly, the
-    /// hard horizontal line this was meant to avoid. Longer when there's
-    /// no scrim, where this is the only thing softening the clip.
-    var maskFeather: CGFloat { bleedsUnderStatusBar ? 0.05 : 0.26 }
 
     /// Fades the art out into the page so the band has no hard bottom edge
     /// and the headline has solid ground.
@@ -344,40 +282,6 @@ private extension SearchStartView {
         ]
     }
 
-    /// Softens the art directly under the status bar.
-    ///
-    /// With the navigation bar hidden the band reaches the top of the
-    /// display, which puts the clock and the battery on top of whatever
-    /// poster happens to be drifting past — black glyphs on a bright red
-    /// one-sheet is not a readable combination, and unlike the app's own
-    /// text these aren't ours to restyle. iOS 26's soft scroll-edge effect
-    /// helps, but it's tuned for content scrolling *under* a bar rather
-    /// than content resting at the top, so it doesn't go far enough alone.
-    ///
-    /// Fades to the page colour rather than to black so it stays correct
-    /// in both appearances: the status bar's glyphs invert with the system
-    /// theme, and so does `Color(.background)`.
-    var statusBarScrim: some View {
-        VStack(spacing: 0) {
-            LinearGradient(stops: [
-                .init(color: Color(.background).opacity(0.96), location: 0.00),
-                .init(color: Color(.background).opacity(0.88), location: 0.55),
-                .init(color: Color(.background).opacity(0.62), location: 0.72),
-                .init(color: Color(.background).opacity(0.30), location: 0.86),
-                .init(color: Color(.background).opacity(0.00), location: 1.00),
-            ], startPoint: .top, endPoint: .bottom)
-            // Holds near-opaque across the status bar's own height (~59pt
-            // of these 96), then releases. Shaped as hold-then-ramp rather
-            // than a straight line so the clock stays legible without
-            // spending the whole gradient dimming artwork nobody is
-            // reading over.
-            .frame(height: 96)
-
-            Spacer(minLength: 0)
-        }
-        .allowsHitTesting(false)
-    }
-
     /// Top drift row: trending movies.
     var marqueeRowOne: [URL] {
         viewModel.trendingMovies.prefix(6).map { $0.getPosterURL() }
@@ -395,66 +299,6 @@ private extension SearchStartView {
     var marqueeRowThree: [URL] {
         viewModel.trendingMovies.dropFirst(3).prefix(6).map { $0.getPosterURL() }
     }
-
-    /// The rotating suggestion, typed out as a real control.
-    ///
-    /// The title types itself in, holds, then backspaces away before the
-    /// next one starts — the chip is the caret's field. It stays tappable
-    /// throughout and always searches `hintTarget`, the *whole* title, so
-    /// a tap landing mid-animation never runs a half-typed query.
-    ///
-    /// Falls back to a plain description before trending arrives, so the
-    /// line is never an empty pill.
-    @ViewBuilder
-    var hintChip: some View {
-        if hintTarget != nil || !typedHint.isEmpty {
-            Button {
-                if let hintTarget { onSelectQuery(hintTarget) }
-            } label: {
-                HStack(spacing: 7) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 12, weight: .semibold))
-
-                    HStack(spacing: 1) {
-                        Text(typedHint)
-                            .font(.system(size: 14, weight: .semibold))
-                            .lineLimit(1)
-                        if !reduceMotion {
-                            BlinkingCaret()
-                        }
-                    }
-                }
-                .foregroundStyle(Color.accentColor)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                // Floor on the width so the pill doesn't collapse to a
-                // stub between titles, and no implicit animation on the
-                // resize — a capsule easing out one character-width at a
-                // time lags behind the text and reads as a wobble.
-                .frame(minWidth: 150)
-                .animation(nil, value: typedHint)
-                .background {
-                    Capsule(style: .continuous)
-                        .fill(.ultraThinMaterial)
-                }
-                .overlay {
-                    Capsule(style: .continuous)
-                        .strokeBorder(Color.accentColor.opacity(0.30), lineWidth: 0.5)
-                }
-                .contentShape(Capsule(style: .continuous))
-            }
-            .buttonStyle(GenreChipPressStyle(reduceMotion: reduceMotion))
-            .accessibilityLabel(hintTarget.map { "Search for \($0)" } ?? "Suggestion")
-            .frame(height: 38)
-        } else {
-            Text("Movies, series and the people who make them.")
-                .font(.system(size: 14))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .transition(.opacity)
-                .frame(height: 38)
-        }
-    }
 }
 
 // MARK: - Recent searches
@@ -471,7 +315,7 @@ private extension SearchStartView {
                         viewModel.clearRecentSearches()
                     }
                 }
-                .font(.system(size: 13, weight: .medium))
+                .appFont(13, weight: .medium, relativeTo: .footnote)
                 .foregroundStyle(Color.accentColor)
             }
             .padding(.horizontal, 16)
@@ -552,6 +396,10 @@ private extension SearchStartView {
             trendingContent
         }
         .modifier(entrance(3))
+        // The shelf is a fixed-height row of covers; past the first
+        // accessibility size the titles under them stop fitting beside the
+        // artwork. Each cover still opens an unclamped details screen.
+        .artworkTypeClamp()
     }
 
     /// Two-pill segmented control. The selected fill is a single capsule
@@ -579,7 +427,7 @@ private extension SearchStartView {
             }
         } label: {
             Text(scope.title)
-                .font(.system(size: 13, weight: .semibold))
+                .appFont(13, weight: .semibold, relativeTo: .footnote)
                 .foregroundStyle(isSelected ? .white : .secondary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
@@ -629,7 +477,7 @@ private extension SearchStartView {
             }
             .padding(.horizontal, 16)
         }
-        .frame(height: TrendingPosterCard.totalHeight)
+        .frame(height: trendingRowHeight)
         // Without this the row can come up already scrolled a card or two
         // in: the skeleton it replaces is a different width, and SwiftUI
         // preserves the *proportional* offset across the swap rather than
@@ -640,7 +488,7 @@ private extension SearchStartView {
         // same shelf silently re-labelled.
         .id(viewModel.trendingScope)
         .transition(.opacity.combined(with: .offset(y: 8)))
-        .animation(motion(.easeOut(duration: 0.28)), value: viewModel.trendingScope)
+        .animation(motion(.easeOut(duration: AppMotion.standard)), value: viewModel.trendingScope)
     }
 
     /// Inline, row-shaped failure. Deliberately not a full-screen
@@ -649,13 +497,13 @@ private extension SearchStartView {
     var trendingErrorRow: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Couldn't load trending titles.")
-                .font(.system(size: 14))
+                .appFont(14, relativeTo: .subheadline)
                 .foregroundStyle(.secondary)
             Button {
                 Task { await viewModel.loadTrending() }
             } label: {
                 Label("Try Again", systemImage: "arrow.clockwise")
-                    .font(.system(size: 13, weight: .semibold))
+                    .appFont(13, weight: .semibold, relativeTo: .footnote)
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -675,7 +523,7 @@ private extension SearchStartView {
                       pulses: Bool = false) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
+                .appFont(13, weight: .semibold, relativeTo: .footnote)
                 .foregroundStyle(tint)
                 .symbolRenderingMode(.hierarchical)
                 // Marks the shelf as a live feed rather than a fixed
@@ -684,7 +532,7 @@ private extension SearchStartView {
                 .symbolEffect(.pulse, options: reduceMotion ? .nonRepeating : .repeating,
                               isActive: pulses)
             Text(title)
-                .font(.system(size: 14, weight: .semibold))
+                .appFont(14, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(.secondary)
         }
         .accessibilityElement(children: .combine)

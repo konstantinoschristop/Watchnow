@@ -64,16 +64,26 @@ struct InlineShimmerContainer<Content: View>: View {
 
     @ViewBuilder var content: () -> Content
     @State private var phase: CGFloat = -1
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         content()
-            .environment(\.shimmerPhase, phase)
-            .onAppear {
-                phase = -1
-                withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) {
-                    phase = 1.5
-                }
-            }
+            // Held mid-sweep rather than parked off-screen: a shimmer frozen
+            // at -1 is an invisible placeholder, which reads as a blank
+            // screen instead of as content loading.
+            .environment(\.shimmerPhase, reduceMotion ? 0.15 : phase)
+            .onAppear { startSweep() }
+    }
+
+    private func startSweep() {
+        guard !reduceMotion else { return }
+        phase = -1
+        // A sweep that never ends is the clearest case Reduce Motion exists
+        // for: perpetual, purely decorative, and nothing is lost by stopping
+        // it — the skeleton still says "loading" by its shape alone.
+        withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) {
+            phase = 1.5
+        }
     }
 }
 
@@ -88,10 +98,10 @@ private struct SkeletonBottomCard: View {
             ShimmerBox(cornerRadius: radius)
                 .frame(width: width, height: 175)
 
-            ShimmerBox(cornerRadius: 5)
+            ShimmerBox(cornerRadius: AppRadius.micro)
                 .frame(width: width * 0.85, height: 11)
 
-            ShimmerBox(cornerRadius: 4)
+            ShimmerBox(cornerRadius: AppRadius.micro)
                 .frame(width: width * 0.55, height: 9)
 
             Spacer(minLength: 0)
@@ -109,10 +119,10 @@ private struct SkeletonTopCard: View {
             ShimmerBox(cornerRadius: radius)
                 .frame(width: width, height: 112)
 
-            ShimmerBox(cornerRadius: 5)
+            ShimmerBox(cornerRadius: AppRadius.micro)
                 .frame(width: width * 0.80, height: 11)
 
-            ShimmerBox(cornerRadius: 4)
+            ShimmerBox(cornerRadius: AppRadius.micro)
                 .frame(width: width * 0.50, height: 9)
 
             Spacer(minLength: 0)
@@ -159,8 +169,8 @@ private struct SkeletonSection: View {
             SkeletonCardRow(kind: kind)
         } header: {
             HStack(spacing: 10) {
-                ShimmerBox(cornerRadius: 6).frame(width: 26, height: 26)
-                ShimmerBox(cornerRadius: 5).frame(width: 110, height: 13)
+                ShimmerBox(cornerRadius: AppRadius.small).frame(width: 26, height: 26)
+                ShimmerBox(cornerRadius: AppRadius.micro).frame(width: 110, height: 13)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -180,6 +190,7 @@ struct SkeletonContentView: View {
 
     let sections: [ViewSections]
     @State private var phase: CGFloat = -1
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
@@ -192,7 +203,7 @@ struct SkeletonContentView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(0..<6, id: \.self) { i in
-                        ShimmerBox(cornerRadius: 20)
+                        ShimmerBox(cornerRadius: AppRadius.hero)
                             .frame(width: CGFloat(50 + (i % 3) * 15), height: 32)
                     }
                 }
@@ -208,8 +219,9 @@ struct SkeletonContentView: View {
             }
         }
         // Inject the single shared phase into the whole subtree.
-        .environment(\.shimmerPhase, phase)
+        .environment(\.shimmerPhase, reduceMotion ? 0.15 : phase)
         .onAppear {
+            guard !reduceMotion else { return }
             phase = -1
             withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) {
                 phase = 1.5

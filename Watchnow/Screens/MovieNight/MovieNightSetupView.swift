@@ -17,6 +17,8 @@ import SwiftUI
 import Kingfisher
 
 struct MovieNightSetupView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     @ObservedObject var vm: MovieNightViewModel
 
@@ -54,7 +56,7 @@ struct MovieNightSetupView: View {
             ZStack {
                 Circle().fill(Color.accentColor.opacity(0.15))
                 Image(systemName: "popcorn.fill")
-                    .font(.system(size: 22))
+                    .appFont(22, relativeTo: .title2)
                     .foregroundStyle(.accent)
                     .symbolEffect(.bounce, value: appeared)
             }
@@ -101,7 +103,7 @@ struct MovieNightSetupView: View {
                            symbol: bucket.symbol,
                            fillWidth: true,
                            isSelected: length == bucket) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
                             length = bucket
                         }
                     }
@@ -159,7 +161,7 @@ struct MovieNightSetupView: View {
                     MNChip(label: count == 1 ? "Just me" : "\(count)",
                            symbol: count == 1 ? "person.fill" : "person.2.fill",
                            isSelected: playerCount == count) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
                             playerCount = count
                         }
                     }
@@ -182,12 +184,12 @@ struct MovieNightSetupView: View {
                     .symbolEffect(.bounce, value: appeared)
                 Text(playerCount == 1 ? "Find my pick" : "Find our match")
             }
-            .font(.system(size: 17, weight: .bold))
+            .appFont(17, weight: .bold, relativeTo: .body)
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 54)
             .background { LinearGradient.movieNightAccent }
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous))
             .shadow(color: Color.accentColor.opacity(0.4), radius: 12, y: 6)
         }
         .buttonStyle(MNPressableStyle())
@@ -211,7 +213,7 @@ struct MovieNightSetupView: View {
     private func sectionHeader(_ text: String, icon: String) -> some View {
         HStack(spacing: 7) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .bold))
+                .appFont(13, weight: .bold, relativeTo: .footnote)
                 .foregroundStyle(.accent)
             Text(text)
                 .font(.subheadline.weight(.semibold))
@@ -219,14 +221,14 @@ struct MovieNightSetupView: View {
     }
 
     private func toggleMood(_ id: String) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.6)) {
             if selectedMoods.contains(id) { selectedMoods.remove(id) }
             else { selectedMoods.insert(id) }
         }
     }
 
     private func toggleProvider(_ id: Int) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
             if selectedProviders.contains(id) { selectedProviders.remove(id) }
             else { selectedProviders.insert(id) }
         }
@@ -260,6 +262,8 @@ struct MovieNightSetupView: View {
 /// for the service's real logo. Optional caption renders as a smaller second
 /// line (used by the length buckets).
 private struct MNChip: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     let label: String
     var caption: String? = nil
@@ -277,10 +281,10 @@ private struct MNChip: View {
                 leadingIcon
                 VStack(alignment: .leading, spacing: 1) {
                     Text(label)
-                        .font(.system(size: 14, weight: .semibold))
+                        .appFont(14, weight: .semibold, relativeTo: .subheadline)
                     if let caption {
                         Text(caption)
-                            .font(.system(size: 11, weight: .regular))
+                            .appFont(11, weight: .regular, relativeTo: .caption2)
                             .opacity(0.85)
                     }
                 }
@@ -301,7 +305,7 @@ private struct MNChip: View {
             .scaleEffect(isSelected && !fillWidth ? 1.05 : 1.0)
         }
         .buttonStyle(.plain)
-        .animation(.spring(response: 0.3, dampingFraction: 0.55), value: isSelected)
+        .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.55), value: isSelected)
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 
@@ -312,21 +316,21 @@ private struct MNChip: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 20, height: 20)
-                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.micro, style: .continuous))
                 .overlay {
                     if isSelected {
-                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        RoundedRectangle(cornerRadius: AppRadius.micro, style: .continuous)
                             .fill(Color.accentColor.opacity(0.55))
                             .overlay(
                                 Image(systemName: "checkmark")
-                                    .font(.system(size: 11, weight: .heavy))
+                                    .appFont(11, weight: .heavy, relativeTo: .caption2)
                                     .foregroundStyle(.white)
                             )
                     }
                 }
         } else if symbol != nil || isSelected {
             Image(systemName: isSelected ? "checkmark" : (symbol ?? "checkmark"))
-                .font(.system(size: 12, weight: .semibold))
+                .appFont(12, weight: .semibold, relativeTo: .caption)
                 .contentTransition(.symbolEffect(.replace))
         }
     }
@@ -339,7 +343,12 @@ struct MNPressableStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            // Press feedback stays on under Reduce Motion, deliberately. A
+            // `ButtonStyle` can't read `@Environment`, but more importantly
+            // this is a 0.3s scale confined to the control the finger is
+            // already on — it's tactile response, not motion the setting is
+            // asking us to remove. Apple's own controls behave the same way.
+            .animation(AppMotion.springSnappy, value: configuration.isPressed)
     }
 }
 
@@ -348,6 +357,8 @@ struct MNPressableStyle: ButtonStyle {
 /// Fades + lifts a section into place with a per-index delay so the screen
 /// assembles top-to-bottom when it appears.
 private struct AppearStagger: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     let index: Int
     let appeared: Bool
 
@@ -355,7 +366,7 @@ private struct AppearStagger: ViewModifier {
         content
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 16)
-            .animation(.easeOut(duration: 0.45).delay(Double(index) * 0.07), value: appeared)
+            .animation(reduceMotion ? nil : .easeOut(duration: AppMotion.slow).delay(Double(index) * 0.07), value: appeared)
     }
 }
 
@@ -365,8 +376,3 @@ private extension View {
     }
 }
 
-// MARK: - FlowLayout
-
-/// Minimal wrapping layout: lays subviews left-to-right, wrapping to a new
-/// row when the next subview would overflow the proposed width. Used for
-/// every chip group on the setup screen.

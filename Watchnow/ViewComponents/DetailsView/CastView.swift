@@ -80,17 +80,17 @@ private struct CastCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 portrait
                     .frame(width: cardWidth, height: imageHeight)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
                     .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
 
                 Text(member.getName())
-                    .font(.system(size: 13, weight: .semibold))
+                    .appFont(13, weight: .semibold, relativeTo: .footnote)
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
                 if let character = member.character, !character.isEmpty {
                     Text(character)
-                        .font(.system(size: 11, weight: .regular))
+                        .appFont(11, weight: .regular, relativeTo: .caption2)
                         .foregroundColor(.secondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -140,7 +140,7 @@ private struct CastCard: View {
                 endPoint: .bottomTrailing
             )
             Text(initials(from: member.getName()))
-                .font(.system(size: 28, weight: .semibold, design: .rounded))
+                .appFont(28, weight: .semibold, relativeTo: .title, design: .rounded)
                 .foregroundColor(.white.opacity(0.9))
         }
     }
@@ -165,24 +165,24 @@ private struct SeeAllCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 6) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                         .fill(.ultraThinMaterial)
                     VStack(spacing: 6) {
                         Image(systemName: "person.2.fill")
-                            .font(.system(size: 24, weight: .semibold))
+                            .appFont(24, weight: .semibold, relativeTo: .title2)
                             .foregroundColor(.primary.opacity(0.8))
                         Text("+\(remaining)")
-                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .appFont(16, weight: .heavy, relativeTo: .body, design: .rounded)
                             .foregroundColor(.primary)
                     }
                 }
                 .frame(width: cardWidth, height: imageHeight)
 
                 Text("See all")
-                    .font(.system(size: 13, weight: .semibold))
+                    .appFont(13, weight: .semibold, relativeTo: .footnote)
                     .foregroundColor(.blue)
                 Text("Full cast")
-                    .font(.system(size: 11))
+                    .appFont(11, relativeTo: .caption2)
                     .foregroundColor(.secondary)
             }
             .frame(width: cardWidth, alignment: .leading)

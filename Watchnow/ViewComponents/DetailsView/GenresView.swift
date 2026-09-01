@@ -17,7 +17,7 @@ struct GenresView: View {
                 ForEach(genres, id: \.self) { genre in
                     Text(genre.name ?? "- -")
                         .padding()
-                        .font(.system(size: 11))
+                        .appFont(11, relativeTo: .caption2)
                         .background(.ultraThinMaterial)
                         .cornerRadius(20)
                 }

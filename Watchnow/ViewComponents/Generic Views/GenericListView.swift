@@ -85,7 +85,7 @@ struct GenericListView: View {
     /// by the row itself, so the link's default disclosure indicator is hidden.
     @ViewBuilder
     private func row(for result: Result) -> some View {
-        if result.getMediaType() == "Actor" {
+        if result.isPerson {
             ActorRow(result: result)
         } else {
             NavigationLink {
@@ -119,7 +119,7 @@ struct GenericListView: View {
     /// handler is wired up.
     @ViewBuilder
     private func leadingSwipeActions(for result: Result) -> some View {
-        if result.getMediaType() != "Actor",
+        if !result.isPerson,
            WatchlistManager.existsInWatchList(result: result),
            let onMoveToFolder {
             Button {
@@ -134,7 +134,7 @@ struct GenericListView: View {
     /// Trailing swipe — the primary Add / Remove action.
     @ViewBuilder
     private func trailingSwipeActions(for result: Result) -> some View {
-        if result.getMediaType() == "Actor" {
+        if result.isPerson {
             EmptyView()
         } else if WatchlistManager.existsInWatchList(result: result) {
             removeSwipeAction(result: result).tint(.red)
@@ -255,7 +255,7 @@ struct ResultRow: View {
                     .fill(Color.secondary.opacity(0.15))
                     .overlay {
                         Image(systemName: placeholderIcon)
-                            .font(.system(size: 20, weight: .light))
+                            .appFont(20, weight: .light, relativeTo: .title3)
                             .foregroundStyle(.secondary)
                     }
             }
@@ -271,21 +271,27 @@ struct ResultRow: View {
     }
 
     private var placeholderIcon: String {
-        switch result.getMediaType() {
-        case "Actor":    return "person.fill"
-        case "TV Series": return "tv"
-        default:         return "film"
-        }
+        if result.isPerson { return "person.fill" }
+        return result.inferredScreenType == .tv ? "tv" : "film"
+    }
+
+    /// What the row's pill should say. A person is a person; everything
+    /// else is resolved through `inferredScreenType` so an untagged saved
+    /// title is labelled by what it actually is rather than by the
+    /// "Actor" fall-through in `getMediaType()`.
+    private var badgeKind: String {
+        if result.isPerson { return "Actor" }
+        return result.inferredScreenType == .tv ? "TV Series" : "Movie"
     }
 
     // MARK: Text column
 
     private var textColumn: some View {
         VStack(alignment: .leading, spacing: 6) {
-            MediaTypeBadge(kind: result.getMediaType())
+            MediaTypeBadge(kind: badgeKind)
 
             Text(result.getResultTitle())
-                .font(.system(size: 16, weight: .semibold))
+                .appFont(16, weight: .semibold, relativeTo: .body)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -295,7 +301,7 @@ struct ResultRow: View {
 
             if let overview = overviewSnippet {
                 Text(overview)
-                    .font(.system(size: 13))
+                    .appFont(13, relativeTo: .footnote)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -311,7 +317,7 @@ struct ResultRow: View {
     /// this row entirely since none of the fields apply.
     @ViewBuilder
     private var metaRow: some View {
-        if result.getMediaType() == "Actor" {
+        if result.isPerson {
             EmptyView()
         } else {
             let year = yearString
@@ -324,7 +330,7 @@ struct ResultRow: View {
                 HStack(spacing: 6) {
                     if let year {
                         Text(year)
-                            .font(.system(size: 12, weight: .medium))
+                            .appFont(12, weight: .medium, relativeTo: .caption)
                             .foregroundStyle(.secondary)
                     }
                     if hasYear, hasRating {
@@ -333,10 +339,10 @@ struct ResultRow: View {
                     if let ratingText {
                         HStack(spacing: 2) {
                             Image(systemName: "star.fill")
-                                .font(.system(size: 10, weight: .semibold))
+                                .appFont(10, weight: .semibold, relativeTo: .caption2)
                                 .foregroundStyle(RatingStyle.tint(for: rating))
                             Text(ratingText)
-                                .font(.system(size: 12, weight: .semibold))
+                                .appFont(12, weight: .semibold, relativeTo: .caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -353,7 +359,7 @@ struct ResultRow: View {
 
     private var metaSeparator: some View {
         Text("•")
-            .font(.system(size: 12))
+            .appFont(12, relativeTo: .caption)
             .foregroundStyle(.secondary.opacity(0.5))
     }
 
@@ -363,9 +369,9 @@ struct ResultRow: View {
     private func folderPill(_ badge: FolderBadge) -> some View {
         HStack(spacing: 3) {
             Image(systemName: badge.symbol)
-                .font(.system(size: 10, weight: .semibold))
+                .appFont(10, weight: .semibold, relativeTo: .caption2)
             Text(badge.name)
-                .font(.system(size: 11, weight: .semibold))
+                .appFont(11, weight: .semibold, relativeTo: .caption2)
                 .lineLimit(1)
         }
         .foregroundStyle(Color.accentColor)
@@ -426,9 +432,9 @@ struct MediaTypeBadge: View {
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: MediaTypeBadge.symbol(for: kind))
-                .font(.system(size: 9, weight: .bold))
+                .appFont(9, weight: .bold, relativeTo: .caption2)
             Text(label)
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.5)
         }
         .foregroundStyle(.secondary)
@@ -453,9 +459,7 @@ struct MediaTypeBadge: View {
         }
     }
 
-    /// Shared so the poster-grid corner badge and the grid's meta line mark
-    /// a media type with the same glyph instead of each picking their own.
-    static func symbol(for kind: String) -> String {
+    private static func symbol(for kind: String) -> String {
         switch kind {
         case "TV Series": return "tv.fill"
         case "Actor":     return "person.fill"

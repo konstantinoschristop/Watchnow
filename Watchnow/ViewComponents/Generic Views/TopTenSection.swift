@@ -132,7 +132,7 @@ private struct TopTenCard: View {
     private var textColumn: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(result.getResultTitle())
-                .font(.system(size: 12, weight: .semibold))
+                .appFont(12, weight: .semibold, relativeTo: .caption)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -152,21 +152,21 @@ private struct TopTenCard: View {
                 if let ratingText {
                     HStack(spacing: 2) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 9, weight: .semibold))
+                            .appFont(9, weight: .semibold, relativeTo: .caption2)
                             .foregroundStyle(RatingStyle.tint(for: rating))
                         Text(ratingText)
-                            .font(.system(size: 10, weight: .semibold))
+                            .appFont(10, weight: .semibold, relativeTo: .caption2)
                             .foregroundStyle(.secondary)
                     }
                 }
                 if ratingText != nil, year != nil {
                     Text("•")
-                        .font(.system(size: 10))
+                        .appFont(10, relativeTo: .caption2)
                         .foregroundStyle(.secondary.opacity(0.6))
                 }
                 if let year {
                     Text(year)
-                        .font(.system(size: 10, weight: .medium))
+                        .appFont(10, weight: .medium, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -232,20 +232,20 @@ private struct TopTenCard: View {
             .cacheOriginalImage()
             .fade(duration: 0.2)
             .placeholder {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                     .fill(Color.secondary.opacity(0.15))
                     .overlay {
                         Image(systemName: "film")
-                            .font(.system(size: 22, weight: .light))
+                            .appFont(22, weight: .light, relativeTo: .title2)
                             .foregroundStyle(.secondary)
                     }
             }
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(width: posterWidth, height: posterHeight)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                     .stroke(.white.opacity(0.12), lineWidth: 0.5)
             }
             // Strong shadow so the poster reads as "in front of" the

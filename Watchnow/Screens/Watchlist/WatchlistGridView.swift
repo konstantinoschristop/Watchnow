@@ -73,6 +73,12 @@ struct WatchlistGridView<Header: View>: View {
                     .padding(.top, 20)
             }
         }
+        // Three covers across is the whole point of this layout, and past the
+        // first accessibility size a two-line title no longer fits beside
+        // two neighbours without the grid collapsing to one column. Capped
+        // here rather than everywhere: tapping any cover opens a details
+        // screen that scales without a ceiling, so nothing is unreachable.
+        .artworkTypeClamp()
     }
 
     private var wall: some View {
@@ -109,13 +115,14 @@ private struct WatchlistPosterCell: View {
     let onRemove: () -> Void
 
     @State private var confirmingRemove = false
+    /// Two lines of the 12pt title, tracking the reader's text size.
+    @ScaledMetric(relativeTo: .caption) private var titleBoxHeight: CGFloat = 32
 
-    private let cornerRadius: CGFloat = 12
+    private let cornerRadius: CGFloat = AppRadius.card
 
     var body: some View {
         NavigationLink {
-            let screenType: ScreenTypes = result.media_type == "movie" ? .movie : .tv
-            let model = ContentDetailsModel(screenType: screenType, result: result)
+            let model = ContentDetailsModel(screenType: result.inferredScreenType, result: result)
             let vm = ContentDetailsViewModel(model: model)
             ContentDetailsView(detailsViewModel: vm)
                 .navigationTransition(.zoom(sourceID: result.id ?? 0, in: namespace))
@@ -203,8 +210,8 @@ private struct WatchlistPosterCell: View {
     /// a bare grey tile, so a permanently missing poster reads as "no
     /// artwork" instead of as a broken cell.
     private var placeholderArt: some View {
-        Image(systemName: MediaTypeBadge.symbol(for: result.getMediaType()))
-            .font(.system(size: 24, weight: .light))
+        Image(systemName: typeSymbol)
+            .appFont(24, weight: .light, relativeTo: .title2)
             .foregroundStyle(.secondary)
     }
 
@@ -221,8 +228,8 @@ private struct WatchlistPosterCell: View {
     /// tint, because poster art is arbitrary and a translucent colour would
     /// land on anything from black to white.
     private var typeBadge: some View {
-        Image(systemName: MediaTypeBadge.symbol(for: result.getMediaType()))
-            .font(.system(size: 9, weight: .bold))
+        Image(systemName: typeSymbol)
+            .appFont(9, weight: .bold, relativeTo: .caption2)
             .foregroundStyle(.white)
             .frame(width: 20, height: 20)
             .background {
@@ -242,7 +249,7 @@ private struct WatchlistPosterCell: View {
     private var folderBadge: some View {
         if let folder {
             Image(systemName: folder.symbol)
-                .font(.system(size: 9, weight: .bold))
+                .appFont(9, weight: .bold, relativeTo: .caption2)
                 .foregroundStyle(.white)
                 .frame(width: 20, height: 20)
                 .background {
@@ -259,13 +266,16 @@ private struct WatchlistPosterCell: View {
 
     private var title: some View {
         Text(result.getResultTitle())
-            .font(.system(size: 12, weight: .semibold))
+            .appFont(12, weight: .semibold, relativeTo: .caption)
             .foregroundStyle(.primary)
             .lineLimit(2)
             .multilineTextAlignment(.leading)
             // Reserves both lines up front so cells with one-line titles
             // don't sit higher than their neighbours in the same row.
-            .frame(height: 32, alignment: .top)
+            // Scaled, not fixed: at 32pt flat the second line was clipped
+            // as soon as the text grew at all, which turned a reserved box
+            // into a truncation box.
+            .frame(height: titleBoxHeight, alignment: .top)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -279,14 +289,14 @@ private struct WatchlistPosterCell: View {
     /// showing a lone unexplained glyph floating under the title.
     private var metaLine: some View {
         HStack(spacing: 4) {
-            Image(systemName: MediaTypeBadge.symbol(for: result.getMediaType()))
-                .font(.system(size: 9, weight: .semibold))
+            Image(systemName: typeSymbol)
+                .appFont(9, weight: .semibold, relativeTo: .caption2)
                 .foregroundStyle(.secondary)
 
             if hasFacts {
                 if !year.isEmpty {
                     Text(year)
-                        .font(.system(size: 11))
+                        .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
@@ -294,25 +304,42 @@ private struct WatchlistPosterCell: View {
                 if let rating {
                     if !year.isEmpty {
                         Text("·")
-                            .font(.system(size: 11))
+                            .appFont(11, relativeTo: .caption2)
                             .foregroundStyle(.tertiary)
                     }
                     Image(systemName: "star.fill")
-                        .font(.system(size: 8))
+                        .appFont(8, relativeTo: .caption2)
                         .foregroundStyle(.yellow)
                     Text(rating)
-                        .font(.system(size: 11))
+                        .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
             } else {
-                Text(result.media_type == "tv" ? "Series" : "Movie")
-                    .font(.system(size: 11))
+                Text(typeLabel)
+                    .appFont(11, relativeTo: .caption2)
                     .foregroundStyle(.secondary)
             }
 
             Spacer(minLength: 0)
         }
+    }
+
+    /// Media kind for everything this cell draws.
+    ///
+    /// `getMediaType()` is the wrong source here: it answers "Actor" for any
+    /// result with no `media_type`, which is exactly the shape of a title
+    /// saved by a build before that field was stamped on save. A saved film
+    /// then wore a person glyph on its cover, in its meta line and in its
+    /// placeholder art. `inferredScreenType` reads the same signals the
+    /// watchlist's own membership checks use, and the watchlist never holds
+    /// a person to begin with.
+    private var typeSymbol: String {
+        result.inferredScreenType == .tv ? "tv.fill" : "film.fill"
+    }
+
+    private var typeLabel: String {
+        result.inferredScreenType == .tv ? "Series" : "Movie"
     }
 
     private var hasFacts: Bool {
@@ -331,7 +358,7 @@ private struct WatchlistPosterCell: View {
     }
 
     private var accessibilityDescription: String {
-        var parts = [result.getResultTitle(), result.getMediaType()]
+        var parts = [result.getResultTitle(), typeLabel]
         if !year.isEmpty { parts.append(year) }
         if let rating { parts.append("rated \(rating)") }
         if let folder { parts.append("in \(folder.name)") }

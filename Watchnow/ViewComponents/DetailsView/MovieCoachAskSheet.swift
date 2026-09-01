@@ -27,7 +27,7 @@ struct MovieCoachAskSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Text(context.title)
-                        .font(.system(size: 15, weight: .semibold))
+                        .appFont(15, weight: .semibold, relativeTo: .subheadline)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal)
 
@@ -38,7 +38,7 @@ struct MovieCoachAskSheet: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text(asked == nil ? "What do you want to know?" : "Ask something else")
-                            .font(.system(size: 13, weight: .semibold))
+                            .appFont(13, weight: .semibold, relativeTo: .footnote)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal)
 
@@ -46,18 +46,18 @@ struct MovieCoachAskSheet: View {
                             Button { ask(question) } label: {
                                 HStack(spacing: 10) {
                                     Text(question)
-                                        .font(.system(size: 15, weight: .medium))
+                                        .appFont(15, weight: .medium, relativeTo: .subheadline)
                                         .foregroundStyle(.primary)
                                         .multilineTextAlignment(.leading)
                                     Spacer(minLength: 0)
                                     Image(systemName: "arrow.up.right")
-                                        .font(.system(size: 11, weight: .bold))
+                                        .appFont(11, weight: .bold, relativeTo: .caption2)
                                         .foregroundStyle(.tertiary)
                                 }
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 12)
                                 .background {
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                                         .fill(Color(.secondarySystemBackground))
                                 }
                                 .contentShape(Rectangle())
@@ -89,27 +89,27 @@ struct MovieCoachAskSheet: View {
     private func answerCard(for question: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(question)
-                .font(.system(size: 15, weight: .bold))
+                .appFont(15, weight: .bold, relativeTo: .subheadline)
                 .foregroundStyle(Color.accentColor)
 
             if isGenerating {
                 Text("Thinking that through for you right now.")
-                    .font(.system(size: 14))
+                    .appFont(14, relativeTo: .subheadline)
                     .foregroundStyle(.secondary)
                     .redacted(reason: .placeholder)
             } else if didFail {
                 HStack(spacing: 10) {
                     Text("Couldn't answer that one.")
-                        .font(.system(size: 14))
+                        .appFont(14, relativeTo: .subheadline)
                         .foregroundStyle(.secondary)
                     Spacer(minLength: 0)
                     Button("Retry") { ask(question) }
-                        .font(.system(size: 13, weight: .semibold))
+                        .appFont(13, weight: .semibold, relativeTo: .footnote)
                         .buttonStyle(.plain)
                 }
             } else if let answer {
                 Text(answer)
-                    .font(.system(size: 14))
+                    .appFont(14, relativeTo: .subheadline)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -117,7 +117,7 @@ struct MovieCoachAskSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous)
                 .fill(Color.accentColor.opacity(0.10))
         }
     }

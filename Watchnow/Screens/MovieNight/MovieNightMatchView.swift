@@ -14,6 +14,8 @@ import SwiftUI
 import Kingfisher
 
 struct MovieNightMatchView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     @ObservedObject var vm: MovieNightViewModel
     @State private var appeared = false
@@ -48,7 +50,7 @@ struct MovieNightMatchView: View {
             ZStack {
                 Circle().fill(LinearGradient.movieNightAccent)
                 Image(systemName: "party.popper.fill")
-                    .font(.system(size: 28, weight: .semibold))
+                    .appFont(28, weight: .semibold, relativeTo: .title)
                     .foregroundStyle(.white)
                     .symbolEffect(.bounce, value: appeared)
             }
@@ -76,7 +78,7 @@ struct MovieNightMatchView: View {
             .shadow(color: .accentColor.opacity(0.3), radius: 22, y: 10)
             .scaleEffect(appeared ? 1 : 0.96)
             .opacity(appeared ? 1 : 0)
-            .animation(.spring(response: 0.5, dampingFraction: 0.82), value: appeared)
+            .animation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.82), value: appeared)
     }
 
     private func actionRow(for result: Result) -> some View {
@@ -99,7 +101,7 @@ struct MovieNightMatchView: View {
                 ZStack {
                     Circle().fill(Color(.secondarySystemBackground))
                     Image(systemName: "questionmark")
-                        .font(.system(size: 26, weight: .semibold))
+                        .appFont(26, weight: .semibold, relativeTo: .title)
                         .foregroundStyle(.secondary)
                 }
                 .frame(width: 64, height: 64)
@@ -147,12 +149,12 @@ struct MovieNightMatchView: View {
     private func primaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
-                .font(.system(size: 17, weight: .bold))
+                .appFont(17, weight: .bold, relativeTo: .body)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
                 .background { LinearGradient.movieNightAccent }
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous))
                 .shadow(color: .accentColor.opacity(0.4), radius: 12, y: 6)
         }
         .buttonStyle(MNPressableStyle())
@@ -161,14 +163,14 @@ struct MovieNightMatchView: View {
     private func secondaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
-                .font(.system(size: 15, weight: .semibold))
+                .appFont(15, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
                 .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous)
                         .strokeBorder(.primary.opacity(0.06), lineWidth: 0.5)
                 )
         }
@@ -191,9 +193,9 @@ private struct PosterThumb: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: 112, height: 168)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                             .strokeBorder(.white.opacity(0.08), lineWidth: 0.5)
                     )
                     .shadow(color: .black.opacity(0.2), radius: 5, y: 3)

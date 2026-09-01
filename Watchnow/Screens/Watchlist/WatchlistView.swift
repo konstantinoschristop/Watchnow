@@ -119,7 +119,7 @@ struct WatchlistView: View {
             get: { layout },
             set: { newValue in
                 guard newValue != layout else { return }
-                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.28)) {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard)) {
                     layoutRaw = newValue.rawValue
                 }
             }
@@ -168,7 +168,7 @@ struct WatchlistView: View {
         // Quick and flat rather than springy: the album card's selection
         // plate springs between cards, but a spring on a cross-fading wall
         // of posters reads as a wobble.
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.24)) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: AppMotion.standard)) {
             watchlistViewModel.setFilter(filter)
         }
     }
@@ -195,7 +195,7 @@ struct WatchlistView: View {
         // agree on which views exist at the moment of the swap — the same
         // reason Files and Photos cross-fade this transition rather than
         // morphing it.
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.28), value: layout)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: layout)
     }
 
     /// The saved titles, with the folder picker riding along as the first
@@ -233,9 +233,9 @@ struct WatchlistView: View {
     /// see the note in `watchlistListView` for why the list uses the plain
     /// row instead.
     ///
-    /// Both effects are render-pass only — `scrollTransition` and
+    /// Both effects are transform-only — `scrollTransition` and
     /// `visualEffect` run during drawing and never write state, so a scroll
-    /// costs no view updates at all. The previous version derived the same
+    /// costs no view updates and no offscreen passes. The previous version derived the same
     /// look from an `onScrollGeometryChange` handler writing `@State` on
     /// every frame, which re-rendered this whole screen (grid included)
     /// sixty times a second.
@@ -252,10 +252,14 @@ struct WatchlistView: View {
                 .scrollTransition(topLeading: .interactive,
                                   bottomTrailing: .identity,
                                   axis: .vertical) { view, phase in
+                    // Opacity and scale only. A `.blur` here read well but
+                    // put the row — album cards, each fanning three posters
+                    // — through an offscreen render pass on every frame of
+                    // every scroll, for an effect the fade and the scale
+                    // already carry between them.
                     view
                         .opacity(1 + phase.value)
                         .scaleEffect(1 + phase.value * 0.14, anchor: .top)
-                        .blur(radius: -phase.value * 2.5)
                 }
                 // Stretches when the collection is dragged past the top.
                 // Reads its own position rather than a published offset, so
@@ -379,7 +383,11 @@ struct WatchlistView: View {
 
             Button("New folder…") {
                 moveTarget = nil
-                createAndEditFolder()
+                // Files the title into the folder it's about to create —
+                // "move this somewhere new" is one intention, and dropping
+                // the title on the way to the name prompt left the user with
+                // an empty folder and their title still unfiled.
+                createAndEditFolder(filing: id)
             }
 
             Button("Cancel", role: .cancel) {
@@ -399,10 +407,16 @@ struct WatchlistView: View {
     /// shelf is the Finder model, and it means the thing you're naming is
     /// visible while you name it. A folder left untouched is just an empty
     /// "New Folder" — one long-press from gone.
-    private func createAndEditFolder() {
+    /// `filing` is the id of a title to drop straight into the new folder —
+    /// set when this is reached from a row's "Move to Folder → New folder…",
+    /// where creating the folder is only half of what the user asked for.
+    private func createAndEditFolder(filing resultID: Int? = nil) {
         let store = watchlistViewModel.folderStore
         let created = store.createFolder(name: "New Folder",
                                          symbol: Folder.defaultSymbol)
+        if let resultID {
+            store.assign(resultID: resultID, to: created.id)
+        }
         setFilter(.folder(created.id))
         beginEditing(created, startEmpty: true)
     }
@@ -454,7 +468,7 @@ struct WatchlistView: View {
               let folder = folderStore.folders.first(where: { $0.id == id })
         else { return }
 
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.24)) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: AppMotion.standard)) {
             editingFolderID = nil
             deleteFolder(folder)
         }
@@ -536,9 +550,9 @@ struct WatchlistView: View {
         if syncStatus.isAvailable {
             HStack(spacing: 5) {
                 Image(systemName: "checkmark.icloud")
-                    .font(.system(size: 11, weight: .medium))
+                    .appFont(11, weight: .medium, relativeTo: .caption2)
                 Text(syncCaption)
-                    .font(.system(size: 12))
+                    .appFont(12, relativeTo: .caption)
             }
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity)

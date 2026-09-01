@@ -48,13 +48,13 @@ struct AdditionalInfoView: View {
     private var sectionHeader: some View {
         HStack(spacing: 10) {
             Image(systemName: "info.circle.fill")
-                .font(.system(size: 20, weight: .semibold))
+                .appFont(20, weight: .semibold, relativeTo: .title3)
                 .foregroundStyle(Color.accentColor)
                 .symbolRenderingMode(.hierarchical)
                 .frame(width: 26, height: 26)
 
             Text("About")
-                .font(.system(size: 25, weight: .heavy))
+                .appFont(25, weight: .heavy, relativeTo: .title)
                 .foregroundStyle(.primary)
         }
     }
@@ -65,7 +65,7 @@ struct AdditionalInfoView: View {
     /// because it's editorial flavour, not a fact users should read first.
     private func taglineRow(_ tagline: String) -> some View {
         Text("\u{201C}\(tagline)\u{201D}")
-            .font(.system(size: 15, weight: .regular, design: .serif))
+            .appFont(15, weight: .regular, relativeTo: .subheadline, design: .serif)
             .italic()
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -159,12 +159,12 @@ private struct StatTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label.uppercased())
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.6)
                 .foregroundStyle(.secondary)
 
             Text(value)
-                .font(.system(size: 15, weight: .semibold))
+                .appFont(15, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -173,11 +173,11 @@ private struct StatTile: View {
         .padding(.vertical, 12)
         .frame(minWidth: 90, alignment: .leading)
         .background {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
         }
     }
@@ -192,11 +192,11 @@ private struct LabelledRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label.uppercased())
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.6)
                 .foregroundStyle(.secondary)
             Text(value)
-                .font(.system(size: 15))
+                .appFont(15, relativeTo: .subheadline)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
@@ -216,18 +216,18 @@ private struct LabelledLinkRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label.uppercased())
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.6)
                 .foregroundStyle(.secondary)
             Button(action: onTap) {
                 HStack(spacing: 4) {
                     Text(value)
-                        .font(.system(size: 15))
+                        .appFont(15, relativeTo: .subheadline)
                         .foregroundStyle(Color.accentColor)
                         .multilineTextAlignment(.leading)
                         .lineLimit(1)
                     Image(systemName: "arrow.up.forward.app")
-                        .font(.system(size: 12, weight: .semibold))
+                        .appFont(12, weight: .semibold, relativeTo: .caption)
                         .foregroundStyle(Color.accentColor)
                 }
             }

@@ -100,6 +100,8 @@ final class PersonViewModel: ObservableObject {
 // MARK: - Sheet
 
 struct PersonSheetView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     let personID:    Int
     let name:        String
@@ -131,7 +133,11 @@ struct PersonSheetView: View {
                     headerSection
 
                     if vm.isLoading {
-                        ProgressView()
+                        // The sheet already had a shimmer skeleton for its
+                        // filmography row; the biography above it was still a
+                        // spinner, so one load showed two different loading
+                        // languages stacked on top of each other.
+                        biographySkeleton
                             .padding(.top, 8)
                     } else if vm.hasError {
                         ContentUnavailableView(
@@ -203,11 +209,31 @@ struct PersonSheetView: View {
         }
     }
 
+    /// Three lines of prose plus a short tail — the shape of a biography,
+    /// not a spinner.
+    private var biographySkeleton: some View {
+        InlineShimmerContainer {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(0..<3, id: \.self) { _ in
+                    ShimmerBox(cornerRadius: AppRadius.micro)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 12)
+                }
+                ShimmerBox(cornerRadius: AppRadius.micro)
+                    .frame(width: 180, height: 12)
+            }
+            .padding(.horizontal, 20)
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement()
+        .accessibilityLabel("Loading biography")
+    }
+
     private var knownForSkeleton: some View {
         InlineShimmerContainer {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Known For")
-                    .font(.system(size: 16, weight: .bold))
+                    .appFont(16, weight: .bold, relativeTo: .body)
                     .foregroundStyle(.primary)
                     .padding(.horizontal, 24)
 
@@ -215,9 +241,9 @@ struct PersonSheetView: View {
                     HStack(alignment: .top, spacing: 12) {
                         ForEach(0..<5, id: \.self) { _ in
                             VStack(alignment: .leading, spacing: 6) {
-                                ShimmerBox(cornerRadius: 10)
+                                ShimmerBox(cornerRadius: AppRadius.card)
                                     .frame(width: 90, height: 135)
-                                ShimmerBox(cornerRadius: 4)
+                                ShimmerBox(cornerRadius: AppRadius.micro)
                                     .frame(width: 70, height: 10)
                             }
                         }
@@ -245,7 +271,7 @@ struct PersonSheetView: View {
                 .padding(.horizontal, 24)
 
             Text("ACTOR")
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.8)
                 .foregroundStyle(.orange)
                 .padding(.horizontal, 10)
@@ -285,7 +311,7 @@ struct PersonSheetView: View {
                 .frame(width: size, height: size)
                 .overlay {
                     Text(initials)
-                        .font(.system(size: 38, weight: .semibold, design: .rounded))
+                        .appFont(38, weight: .semibold, relativeTo: .largeTitle, design: .rounded)
                         .foregroundStyle(.white.opacity(0.9))
                 }
         }
@@ -299,11 +325,11 @@ struct PersonSheetView: View {
             ForEach(buildMetaItems(person), id: \.label) { item in
                 HStack(spacing: 12) {
                     Image(systemName: item.icon)
-                        .font(.system(size: 14))
+                        .appFont(14, relativeTo: .subheadline)
                         .foregroundStyle(.orange)
                         .frame(width: 22)
                     Text(item.label)
-                        .font(.system(size: 14))
+                        .appFont(14, relativeTo: .subheadline)
                         .foregroundStyle(.primary)
                     Spacer()
                 }
@@ -343,26 +369,26 @@ struct PersonSheetView: View {
     private func bioSection(_ bio: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Biography")
-                .font(.system(size: 16, weight: .bold))
+                .appFont(16, weight: .bold, relativeTo: .body)
                 .foregroundStyle(.primary)
                 .padding(.horizontal, 24)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(bio)
-                    .font(.system(size: 14))
+                    .appFont(14, relativeTo: .subheadline)
                     .foregroundStyle(.secondary)
                     .lineSpacing(4)
                     .lineLimit(isBioExpanded ? nil : 4)
-                    .animation(.easeInOut(duration: 0.2), value: isBioExpanded)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: isBioExpanded)
                     .multilineTextAlignment(.leading)
 
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick)) {
                         isBioExpanded.toggle()
                     }
                 } label: {
                     Text(isBioExpanded ? "Show less" : "Read more")
-                        .font(.system(size: 13, weight: .semibold))
+                        .appFont(13, weight: .semibold, relativeTo: .footnote)
                         .foregroundStyle(.orange)
                 }
                 .buttonStyle(.plain)
@@ -377,7 +403,7 @@ struct PersonSheetView: View {
     private func knownForSection(_ works: [Result]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Known For")
-                .font(.system(size: 16, weight: .bold))
+                .appFont(16, weight: .bold, relativeTo: .body)
                 .foregroundStyle(.primary)
                 .padding(.horizontal, 24)
 
@@ -466,11 +492,11 @@ private struct KnownForCard: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: cardWidth, height: cardHeight)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
 
             Text(result.getResultTitle())
-                .font(.system(size: 11, weight: .medium))
+                .appFont(11, weight: .medium, relativeTo: .caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)

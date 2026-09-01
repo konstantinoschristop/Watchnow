@@ -14,7 +14,7 @@ struct RatingView: View {
 
     var body: some View {
         (Text(Image(systemName: "star.fill")) + Text(" ") + Text(rating.map { String(format: "%.1f", $0) } ?? "-"))
-            .font(.system(size: 11, weight: .bold))
+            .appFont(11, weight: .bold, relativeTo: .caption2)
             .foregroundColor(.orange)
             .padding(.vertical, 5)
             .padding(.horizontal, 9)

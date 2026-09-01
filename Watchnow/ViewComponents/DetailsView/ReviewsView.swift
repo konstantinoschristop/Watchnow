@@ -46,7 +46,7 @@ struct ReviewsView: View {
                         Text("See all \(reviews.count) reviews")
                         Image(systemName: "chevron.right")
                     }
-                    .font(.system(size: 14, weight: .semibold))
+                    .appFont(14, weight: .semibold, relativeTo: .subheadline)
                     .foregroundStyle(Color.accentColor)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 8)
@@ -69,6 +69,8 @@ struct ReviewsView: View {
 // MARK: - Review Card
 
 private struct ReviewCard: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     let review: Reviews
     let onTap: () -> Void
@@ -85,13 +87,13 @@ private struct ReviewCard: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(review.author_details?.username ?? review.author ?? "Anonymous")
-                            .font(.system(size: 13, weight: .bold))
+                            .appFont(13, weight: .bold, relativeTo: .footnote)
                             .foregroundStyle(.primary)
                             .lineLimit(1)
 
                         if let date = formattedDate(review.created_at) {
                             Text(date)
-                                .font(.system(size: 11))
+                                .appFont(11, relativeTo: .caption2)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -107,19 +109,19 @@ private struct ReviewCard: View {
                 if let content = review.content, !content.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(content)
-                            .font(.system(size: 13))
+                            .appFont(13, relativeTo: .footnote)
                             .foregroundStyle(.secondary)
                             .lineLimit(isExpanded ? nil : 3)
                             .multilineTextAlignment(.leading)
-                            .animation(.easeInOut(duration: 0.2), value: isExpanded)
+                            .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: isExpanded)
 
                         Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick)) {
                                 isExpanded.toggle()
                             }
                         } label: {
                             Text(isExpanded ? "Show less" : "Read more")
-                                .font(.system(size: 12, weight: .semibold))
+                                .appFont(12, weight: .semibold, relativeTo: .caption)
                                 .foregroundStyle(Color.accentColor)
                         }
                         .buttonStyle(.plain)
@@ -131,11 +133,11 @@ private struct ReviewCard: View {
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous)
                     .fill(Color(.secondarySystemBackground))
             }
             .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
             }
         }
@@ -162,7 +164,7 @@ private struct ReviewCard: View {
                 .frame(width: 36, height: 36)
                 .overlay {
                     Text(initials)
-                        .font(.system(size: 14, weight: .bold))
+                        .appFont(14, weight: .bold, relativeTo: .subheadline)
                         .foregroundStyle(.secondary)
                 }
         }
@@ -171,9 +173,9 @@ private struct ReviewCard: View {
     private func ratingBadge(_ rating: Int) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "star.fill")
-                .font(.system(size: 9, weight: .bold))
+                .appFont(9, weight: .bold, relativeTo: .caption2)
             Text("\(rating)/10")
-                .font(.system(size: 12, weight: .bold))
+                .appFont(12, weight: .bold, relativeTo: .caption)
         }
         .foregroundStyle(.orange)
         .padding(.horizontal, 9)
@@ -205,6 +207,8 @@ private struct ReviewCard: View {
 // MARK: - All Reviews Sheet
 
 private struct AllReviewsSheet: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     let reviews: [Reviews]
     @State private var selectedReview: Reviews?
@@ -291,8 +295,8 @@ private struct AllReviewsSheet: View {
                     }
                 }
                 .padding(16)
-                .animation(.easeInOut(duration: 0.2), value: sortOrder)
-                .animation(.easeInOut(duration: 0.2), value: ratedOnly)
+                .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: sortOrder)
+                .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: ratedOnly)
             }
             .background(Color(.background))
             .navigationTitle("Reviews")
@@ -354,12 +358,12 @@ struct ReviewSheet: View {
                     avatarView
                     VStack(alignment: .leading, spacing: 3) {
                         Text(review?.author_details?.username ?? review?.author ?? "Anonymous")
-                            .font(.system(size: 16, weight: .bold))
+                            .appFont(16, weight: .bold, relativeTo: .body)
                             .foregroundStyle(.primary)
 
                         if let date = formattedDate(review?.created_at) {
                             Text(date)
-                                .font(.system(size: 12))
+                                .appFont(12, relativeTo: .caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -369,9 +373,9 @@ struct ReviewSheet: View {
                     if let rating = review?.author_details?.rating {
                         HStack(spacing: 4) {
                             Image(systemName: "star.fill")
-                                .font(.system(size: 11, weight: .bold))
+                                .appFont(11, weight: .bold, relativeTo: .caption2)
                             Text("\(rating)/10")
-                                .font(.system(size: 14, weight: .bold))
+                                .appFont(14, weight: .bold, relativeTo: .subheadline)
                         }
                         .foregroundStyle(.orange)
                         .padding(.horizontal, 10)
@@ -390,7 +394,7 @@ struct ReviewSheet: View {
             // Full content
             ScrollView {
                 Text(review?.content ?? "")
-                    .font(.system(size: 15))
+                    .appFont(15, relativeTo: .subheadline)
                     .foregroundStyle(.primary)
                     .lineSpacing(5)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -417,7 +421,7 @@ struct ReviewSheet: View {
                 .frame(width: 44, height: 44)
                 .overlay {
                     Text(String(name.prefix(1)).uppercased())
-                        .font(.system(size: 18, weight: .bold))
+                        .appFont(18, weight: .bold, relativeTo: .title3)
                         .foregroundStyle(.secondary)
                 }
         }

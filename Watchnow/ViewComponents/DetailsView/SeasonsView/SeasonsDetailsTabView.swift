@@ -18,6 +18,8 @@ import SwiftUI
 import AlertToast
 
 struct SeasonsDetailsTabView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     @StateObject private var episodesViewModel: EpisodesViewModel
     let seasons: [Season]
@@ -77,9 +79,9 @@ struct SeasonsDetailsTabView: View {
     private var sheetHeader: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(selectedSeason.name ?? "Season")
-                .font(.system(size: 20, weight: .bold))
+                .appFont(20, weight: .bold, relativeTo: .title3)
                 .foregroundStyle(.primary)
-                .animation(.easeInOut(duration: 0.2), value: selectedSeason)
+                .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: selectedSeason)
 
             // Prefer live episode count from the fetched response; fall back
             // to the season model's own count while loading.
@@ -87,7 +89,7 @@ struct SeasonsDetailsTabView: View {
                         ?? selectedSeason.episode_count
                         ?? 0
             Text("\(count) Episodes")
-                .font(.system(size: 13))
+                .appFont(13, relativeTo: .footnote)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -114,7 +116,7 @@ struct SeasonsDetailsTabView: View {
                 proxy.scrollTo(selectedSeason, anchor: .center)
             }
             .onChange(of: selectedSeason) { _, season in
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
                     proxy.scrollTo(season, anchor: .center)
                 }
             }
@@ -127,12 +129,12 @@ struct SeasonsDetailsTabView: View {
         let isSelected = selectedSeason == season
 
         Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.75)) {
                 selectedSeason = season
             }
         } label: {
             Text(season.name ?? "")
-                .font(.system(size: 13, weight: .semibold))
+                .appFont(13, weight: .semibold, relativeTo: .footnote)
                 .foregroundStyle(isSelected ? .white : .secondary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
@@ -149,7 +151,7 @@ struct SeasonsDetailsTabView: View {
         }
         .buttonStyle(.plain)
         .scaleEffect(isSelected ? 1.03 : 1.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
+        .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
         .id(season)
     }
 
@@ -158,8 +160,8 @@ struct SeasonsDetailsTabView: View {
     @ViewBuilder
     private var episodeContent: some View {
         if episodesViewModel.isLoading {
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EpisodeListSkeleton()
+                .frame(maxWidth: .infinity, alignment: .top)
 
         } else if episodesViewModel.apiError {
             ContentUnavailableView {

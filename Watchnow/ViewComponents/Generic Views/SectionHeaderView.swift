@@ -54,7 +54,7 @@ struct SectionHeaderView<Accessory: View>: View {
             if let icon {
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .appFont(20, weight: .semibold, relativeTo: .title3)
                         .foregroundStyle(tint)
                         .symbolRenderingMode(.hierarchical)
                         .frame(width: 26, height: 26)
@@ -68,11 +68,11 @@ struct SectionHeaderView<Accessory: View>: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 25, weight: .heavy))
+                    .appFont(25, weight: .heavy, relativeTo: .title)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if let subtitle {
                     Text(subtitle)
-                        .font(.system(size: 15, weight: .medium))
+                        .appFont(15, weight: .medium, relativeTo: .subheadline)
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

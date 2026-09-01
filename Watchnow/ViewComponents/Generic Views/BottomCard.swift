@@ -70,7 +70,7 @@ struct BottomCard: View {
     private var metadata: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(content.getResultTitle())
-                .font(.system(size: 12, weight: .semibold))
+                .appFont(12, weight: .semibold, relativeTo: .caption)
                 .foregroundColor(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -93,21 +93,21 @@ struct BottomCard: View {
                 if let ratingText {
                     HStack(spacing: 2) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 9, weight: .semibold))
+                            .appFont(9, weight: .semibold, relativeTo: .caption2)
                             .foregroundColor(RatingStyle.tint(for: rating))
                         Text(ratingText)
-                            .font(.system(size: 10, weight: .semibold))
+                            .appFont(10, weight: .semibold, relativeTo: .caption2)
                             .foregroundColor(.secondary)
                     }
                 }
                 if ratingText != nil, year != nil {
                     Text("•")
-                        .font(.system(size: 10))
+                        .appFont(10, relativeTo: .caption2)
                         .foregroundColor(.secondary.opacity(0.6))
                 }
                 if let year {
                     Text(year)
-                        .font(.system(size: 10, weight: .medium))
+                        .appFont(10, weight: .medium, relativeTo: .caption2)
                         .foregroundColor(.secondary)
                 }
             }

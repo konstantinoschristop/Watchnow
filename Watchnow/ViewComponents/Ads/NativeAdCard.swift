@@ -112,7 +112,7 @@ struct NativeAdCard: View {
             } else {
                 // Neutral placeholder keeps the row height steady while loading.
                 sized {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                         .fill(Color(.secondarySystemBackground))
                         .frame(height: posterHeight)
                         .frame(maxHeight: .infinity, alignment: .top)
@@ -244,15 +244,15 @@ struct NativeAdRow: View {
 
     private var placeholder: some View {
         HStack(alignment: .top, spacing: 12) {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                 .fill(Color.secondary.opacity(0.15))
                 .frame(width: 120, height: 120)
             VStack(alignment: .leading, spacing: 8) {
-                RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.12))
+                RoundedRectangle(cornerRadius: AppRadius.micro).fill(Color.secondary.opacity(0.12))
                     .frame(width: 50, height: 12)
-                RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.12))
+                RoundedRectangle(cornerRadius: AppRadius.micro).fill(Color.secondary.opacity(0.12))
                     .frame(height: 15)
-                RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.12))
+                RoundedRectangle(cornerRadius: AppRadius.micro).fill(Color.secondary.opacity(0.12))
                     .frame(width: 110, height: 12)
             }
             Spacer(minLength: 0)

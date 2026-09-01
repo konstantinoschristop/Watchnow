@@ -29,12 +29,24 @@ struct TrendingPosterCard: View {
 
     static let posterWidth: CGFloat = 108
     static let posterHeight: CGFloat = 162
-    /// Poster + spacing + two text lines. Pinned so the enclosing
-    /// ScrollView has a fixed height and the sections below it don't shift
-    /// as posters stream in.
+    /// Poster + spacing + two text lines, at the default text size. Pinned so
+    /// the enclosing ScrollView has a fixed height and the sections below it
+    /// don't shift as posters stream in.
+    ///
+    /// Callers that need the *current* height (the shelf, its skeleton) must
+    /// use `scaledTotalHeight` — this constant is the baseline it scales from.
     static let totalHeight: CGFloat = 218
 
-    private let cornerRadius: CGFloat = 12
+    /// The text budget inside `totalHeight`: title (two lines) + year.
+    static let textHeight: CGFloat = 218 - 162 - 7
+
+    private let cornerRadius: CGFloat = AppRadius.card
+
+    /// Grows with the reader's text size so the title isn't clipped inside
+    /// the shelf's fixed row height.
+    @ScaledMetric(relativeTo: .caption) private var textBox: CGFloat = TrendingPosterCard.textHeight
+
+    private var cardHeight: CGFloat { Self.posterHeight + 7 + textBox }
 
     var body: some View {
         NavigationLink {
@@ -48,7 +60,7 @@ struct TrendingPosterCard: View {
                 title
                 Spacer(minLength: 0)
             }
-            .frame(width: Self.posterWidth, height: Self.totalHeight, alignment: .top)
+            .frame(width: Self.posterWidth, height: cardHeight, alignment: .top)
         }
         .buttonStyle(PressableCardStyle(reduceMotion: reduceMotion))
         .matchedTransitionSource(id: result.id ?? 0, in: namespace)
@@ -74,7 +86,7 @@ struct TrendingPosterCard: View {
     private var title: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(result.getResultTitle())
-                .font(.system(size: 12, weight: .semibold))
+                .appFont(12, weight: .semibold, relativeTo: .caption)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -82,7 +94,7 @@ struct TrendingPosterCard: View {
             let year = result.getReleaseDate(addSeparator: false)
             if !year.isEmpty {
                 Text(year)
-                    .font(.system(size: 11))
+                    .appFont(11, relativeTo: .caption2)
                     .foregroundStyle(.secondary)
             }
         }
@@ -114,6 +126,10 @@ private struct PressableCardStyle: ButtonStyle {
 /// fetch returns.
 struct TrendingSkeletonRow: View {
 
+    @ScaledMetric(relativeTo: .caption) private var textBox: CGFloat = TrendingPosterCard.textHeight
+
+    private var cardHeight: CGFloat { TrendingPosterCard.posterHeight + 7 + textBox }
+
     var body: some View {
         InlineShimmerContainer {
             // Same ScrollView wrapper as `trendingRow`, not a bare HStack.
@@ -124,24 +140,24 @@ struct TrendingSkeletonRow: View {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(0..<5, id: \.self) { _ in
                         VStack(alignment: .leading, spacing: 7) {
-                            ShimmerBox(cornerRadius: 12)
+                            ShimmerBox(cornerRadius: AppRadius.card)
                                 .frame(width: TrendingPosterCard.posterWidth,
                                        height: TrendingPosterCard.posterHeight)
-                            ShimmerBox(cornerRadius: 4)
+                            ShimmerBox(cornerRadius: AppRadius.micro)
                                 .frame(width: TrendingPosterCard.posterWidth * 0.85, height: 10)
-                            ShimmerBox(cornerRadius: 4)
+                            ShimmerBox(cornerRadius: AppRadius.micro)
                                 .frame(width: TrendingPosterCard.posterWidth * 0.45, height: 9)
                             Spacer(minLength: 0)
                         }
                         .frame(width: TrendingPosterCard.posterWidth,
-                               height: TrendingPosterCard.totalHeight, alignment: .top)
+                               height: cardHeight, alignment: .top)
                     }
                 }
                 .padding(.horizontal, 16)
             }
             .scrollDisabled(true)
         }
-        .frame(height: TrendingPosterCard.totalHeight, alignment: .top)
+        .frame(height: cardHeight, alignment: .top)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
@@ -166,14 +182,17 @@ struct GenreBrowseChip: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: genre.symbol)
-                    .font(.system(size: 12, weight: .semibold))
+                    .appFont(12, weight: .semibold, relativeTo: .caption)
                     .symbolRenderingMode(.hierarchical)
                 Text(genre.name)
-                    .font(.system(size: 14, weight: .medium))
+                    .appFont(14, weight: .medium, relativeTo: .subheadline)
             }
             .foregroundStyle(Color.accentColor)
             .padding(.horizontal, 13)
-            .padding(.vertical, 10)
+            // 44pt rather than the 34 its own padding produced. These sit in
+            // a wrapping grid where neighbours are only 8pt apart, which is
+            // exactly the situation a short target mis-fires in.
+            .frame(minHeight: 44)
             .background {
                 Capsule(style: .continuous)
                     .fill(Color.accentColor.opacity(0.12))
@@ -209,34 +228,42 @@ struct GenreChipPressStyle: ButtonStyle {
 
 /// Chip is split into two side-by-side tap zones so the X is reliably
 /// hittable. The previous nested-button layout fought SwiftUI's hit
-/// testing — the outer button's tap area swallowed touches near the X,
-/// and the X's 3-pt padding gave it a tap target well below Apple's
-/// 44-pt recommendation. Now both halves are sibling `Button`s sharing
-/// a single Capsule background, each with explicit `contentShape` so
-/// the entire half is tappable, not just the visible icon/text.
+/// testing — the outer button's tap area swallowed touches near the X.
+/// Now both halves are sibling `Button`s sharing a single Capsule
+/// background, each with explicit `contentShape` so the entire half is
+/// tappable, not just the visible icon/text.
+///
+/// Both halves are also 44pt tall and the X is 44pt wide, per Apple's
+/// minimum. Splitting the chip fixed *which* half a touch landed in, but
+/// left the targets at roughly 33×31 — the visual padding was doing the
+/// sizing, and a capsule sized to a 14pt label is not 44pt tall. The
+/// visible pill keeps its original proportions; the tappable area around
+/// it is what grew.
 struct RecentSearchChip: View {
     let query: String
     let onTap: () -> Void
     let onRemove: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isPressed = false
+
+    /// Apple's minimum comfortable target.
+    private static let minimumTarget: CGFloat = 44
 
     var body: some View {
         HStack(spacing: 0) {
             Button(action: onTap) {
                 HStack(spacing: 6) {
                     Image(systemName: "clock")
-                        .font(.system(size: 12, weight: .regular))
+                        .appFont(12, weight: .regular, relativeTo: .caption)
                         .foregroundStyle(.secondary)
                     Text(query)
-                        .font(.system(size: 14, weight: .medium))
+                        .appFont(14, weight: .medium, relativeTo: .subheadline)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
                 }
                 .padding(.leading, 14)
                 .padding(.trailing, 6)
-                .padding(.vertical, 10)
+                .frame(minHeight: Self.minimumTarget)
                 .contentShape(Rectangle())
             }
             .buttonStyle(ChipPressStyle(reduceMotion: reduceMotion))
@@ -247,15 +274,14 @@ struct RecentSearchChip: View {
             // the user's finger lands on the text half by default.
             Rectangle()
                 .fill(Color.primary.opacity(0.08))
-                .frame(width: 0.5, height: 18)
+                .frame(width: 0.5, height: 20)
 
             Button(action: onRemove) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .semibold))
+                    .appFont(11, weight: .semibold, relativeTo: .caption2)
                     .foregroundStyle(.secondary)
-                    .padding(.leading, 10)
-                    .padding(.trailing, 12)
-                    .padding(.vertical, 10)
+                    .frame(minWidth: Self.minimumTarget,
+                           minHeight: Self.minimumTarget)
                     .contentShape(Rectangle())
             }
             .buttonStyle(ChipPressStyle(reduceMotion: reduceMotion))
@@ -285,7 +311,7 @@ private struct ChipPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .opacity(configuration.isPressed ? 0.55 : 1)
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.15),
+            .animation(reduceMotion ? nil : .easeOut(duration: AppMotion.quick),
                        value: configuration.isPressed)
     }
 }

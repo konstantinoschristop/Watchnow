@@ -87,6 +87,8 @@ struct WhatsNewView: View {
             WebViewSheet(url: link.url)
         }
         .onAppear {
+            // Proof of presentation — see `WhatsNewViewModel.verifyPresentation`.
+            vm.briefingDidAppear()
             hasAppeared = true
             if !reduceMotion {
                 drifting = true
@@ -137,8 +139,17 @@ struct WhatsNewView: View {
         .padding(.bottom, 18)
         .background(alignment: .top) { headerWash }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(vm.headline). \(vm.subheadline)")
+        // Reads the same number the pill shows. `subheadline` counts the
+        // cards on screen, so on an overflowing briefing VoiceOver announced
+        // "5 things changed" beside a pill saying "12 UPDATES".
+        .accessibilityLabel(headerAccessibilityLabel)
         .accessibilityAddTraits(.isHeader)
+    }
+
+    private var headerAccessibilityLabel: String {
+        guard !vm.isSingleChange else { return "\(vm.headline). \(vm.subheadline)" }
+        let count = max(vm.totalUnseenCount, vm.briefing.count)
+        return "\(vm.headline). \(count) updates in your watchlist"
     }
 
     /// Up to four changed titles, overlapped and splayed like a hand of
@@ -177,7 +188,7 @@ struct WhatsNewView: View {
     private func fanPoster(_ change: WatchlistChange) -> some View {
         poster(change, width: 46, height: 69, radius: 8)
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)
                     .strokeBorder(Color(.systemBackground).opacity(0.9), lineWidth: 2)
             }
             .shadow(color: .black.opacity(0.28), radius: 6, y: 3)
@@ -257,7 +268,7 @@ struct WhatsNewView: View {
                 .padding(16)
             }
             .overlay { sheen }
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous))
         }
         .buttonStyle(WhatsNewPressStyle())
         .accessibilityElement(children: .ignore)
@@ -325,7 +336,7 @@ struct WhatsNewView: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
-                cardSurface(cornerRadius: 20)
+                cardSurface(cornerRadius: AppRadius.hero)
             }
         }
         .buttonStyle(WhatsNewPressStyle())
@@ -378,7 +389,7 @@ struct WhatsNewView: View {
                         .frame(maxWidth: .infinity, minHeight: 28)
                         .padding(.vertical, 14)
                         .background(LinearGradient.movieNightAccent,
-                                    in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    in: RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous))
                 }
                 .buttonStyle(WhatsNewPressStyle())
 
@@ -532,7 +543,7 @@ struct WhatsNewView: View {
                         .foregroundStyle(Color.accentColor)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            RoundedRectangle(cornerRadius: AppRadius.panel, style: .continuous)
                                 .strokeBorder(Color.accentColor.opacity(0.35), lineWidth: 1)
                         }
                 }
@@ -553,13 +564,17 @@ struct WhatsNewView: View {
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, minHeight: 28)
                 .padding(.vertical, 13)
-                .background { cardSurface(cornerRadius: 14) }
+                .background { cardSurface(cornerRadius: AppRadius.panel) }
         }
         .buttonStyle(WhatsNewPressStyle())
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 8)
-        .background(.bar)
+        // Extended into the bottom safe area. `safeAreaInset` places its
+        // content *above* the home indicator, so a plain `.background(.bar)`
+        // stopped short and left a strip of the sheet's own background
+        // showing beneath the material.
+        .background(.bar, ignoresSafeAreaEdges: .bottom)
     }
 
     /// One spoken sentence per card instead of four disconnected fragments.

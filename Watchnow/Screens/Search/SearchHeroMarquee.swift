@@ -21,6 +21,7 @@ import SwiftUI
 /// here depends on the typed text, so SwiftUI leaves the blink alone.
 struct BlinkingCaret: View {
     @State private var dim = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         RoundedRectangle(cornerRadius: 0.5, style: .continuous)
@@ -28,11 +29,182 @@ struct BlinkingCaret: View {
             .foregroundStyle(Color.accentColor)
             .opacity(dim ? 0 : 1)
             .onAppear {
-                withAnimation(.linear(duration: 0.55).repeatForever(autoreverses: true)) {
+                // `HintChip` already declines to draw a caret under Reduce
+                // Motion, but a view that owns a `repeatForever` should
+                // refuse to start it on its own account — the guard belongs
+                // where the loop is, not only where the loop is asked for.
+                guard !reduceMotion else { return }
+                withAnimation(.linear(duration: AppMotion.slow).repeatForever(autoreverses: true)) {
                     dim = true
                 }
             }
             .accessibilityHidden(true)
+    }
+}
+
+// MARK: - HintChip
+
+/// The rotating search suggestion, typed out as a real control.
+///
+/// Owns `typedHint`/`hintTarget` and runs the typewriter itself. They used
+/// to live on `SearchStartView`, which meant every character — one every
+/// 42ms typing, every 20ms deleting — invalidated that view's entire body:
+/// the poster band, the recents, sixteen genre chips and a twenty-card
+/// trending row, rebuilt 25-50 times a second. On the main thread, against
+/// a scroll gesture, that is what the screen's overscroll stutter was made
+/// of. Scoped here, a keystroke re-renders a pill.
+///
+/// The title types itself in, holds, then backspaces away before the next
+/// one starts. It stays tappable throughout and always searches
+/// `hintTarget`, the *whole* title, so a tap landing mid-animation never
+/// runs a half-typed query. Falls back to a plain description before
+/// trending arrives, so the line is never an empty pill.
+struct HintChip: View {
+
+    /// Titles to cycle. Changing this restarts the loop.
+    let titles: [String]
+    let reduceMotion: Bool
+    let onSelect: (String) -> Void
+
+    /// What the hint is currently showing — a growing or shrinking prefix
+    /// of `hintTarget` while the typewriter runs, or the whole title once
+    /// it has finished typing.
+    @State private var typedHint = ""
+    /// The full title behind `typedHint`. Kept separate so a tap during the
+    /// typing animation searches the whole title rather than whatever half
+    /// of it happens to be on screen.
+    @State private var hintTarget: String?
+
+    var body: some View {
+        content
+            .frame(height: 38)
+            .task(id: titles) { await runHints() }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if hintTarget != nil || !typedHint.isEmpty {
+            Button {
+                if let hintTarget { onSelect(hintTarget) }
+            } label: {
+                HStack(spacing: 7) {
+                    Image(systemName: "magnifyingglass")
+                        .appFont(12, weight: .semibold, relativeTo: .caption)
+
+                    HStack(spacing: 1) {
+                        Text(typedHint)
+                            .appFont(14, weight: .semibold, relativeTo: .subheadline)
+                            .lineLimit(1)
+                        if !reduceMotion {
+                            BlinkingCaret()
+                        }
+                    }
+                }
+                .foregroundStyle(Color.accentColor)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                // Floor on the width so the pill doesn't collapse to a
+                // stub between titles, and no implicit animation on the
+                // resize — a capsule easing out one character-width at a
+                // time lags behind the text and reads as a wobble.
+                .frame(minWidth: 150)
+                .animation(nil, value: typedHint)
+                .background {
+                    Capsule(style: .continuous)
+                        .fill(.ultraThinMaterial)
+                }
+                .overlay {
+                    Capsule(style: .continuous)
+                        .strokeBorder(Color.accentColor.opacity(0.30), lineWidth: 0.5)
+                }
+                .contentShape(Capsule(style: .continuous))
+            }
+            .buttonStyle(GenreChipPressStyle(reduceMotion: reduceMotion))
+            .accessibilityLabel(hintTarget.map { "Search for \($0)" } ?? "Suggestion")
+        } else {
+            Text("Movies, series and the people who make them.")
+                .appFont(14, relativeTo: .subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .transition(.opacity)
+        }
+    }
+
+    // MARK: Typewriter
+
+    /// Types each title out a character at a time, holds it, then
+    /// backspaces it away before starting the next one.
+    ///
+    /// A `Task` loop rather than a `Timer`: it's cancelled automatically
+    /// when the view goes away, so backing out of search doesn't leave a
+    /// timer ticking against a detached view.
+    ///
+    /// Under Reduce Motion the titles still rotate — the suggestion is
+    /// useful information, not decoration — but they swap whole rather
+    /// than animating in letter by letter. Text that rewrites itself
+    /// thirty times a second is exactly what that setting is asking us to
+    /// stop doing.
+    private func runHints() async {
+        while !Task.isCancelled {
+            guard !titles.isEmpty else {
+                // Trending hasn't landed — or the fetch failed outright, in
+                // which case this waits for the rest of the view's life.
+                // Slow enough that the standing case costs nothing, quick
+                // enough that the normal case starts typing right after the
+                // feed arrives.
+                try? await Task.sleep(for: .seconds(1))
+                continue
+            }
+
+            for title in titles {
+                guard !Task.isCancelled else { return }
+                hintTarget = title
+
+                if reduceMotion {
+                    typedHint = title
+                    try? await Task.sleep(for: .seconds(3.4))
+                    continue
+                }
+
+                await type(title)
+                try? await Task.sleep(for: .seconds(1.9))
+                await backspace(title)
+
+                // `hintTarget` deliberately outlives the text it typed. It
+                // gates the chip against the fallback description, so
+                // clearing it here dropped the whole pill for the length of
+                // the gap and flashed "Movies, series and the people who
+                // make them." in its place between every title. Holding it
+                // also means a tap landing in the gap searches the title
+                // the user just watched finish, rather than nothing.
+                //
+                // Beat on the empty caret before the next title starts, so
+                // the two runs read as separate words rather than one
+                // continuous scramble.
+                try? await Task.sleep(for: .milliseconds(280))
+            }
+        }
+    }
+
+    /// Reveals `title` one character at a time.
+    private func type(_ title: String) async {
+        for index in 1...max(title.count, 1) {
+            guard !Task.isCancelled else { return }
+            typedHint = String(title.prefix(index))
+            try? await Task.sleep(for: .milliseconds(42))
+        }
+    }
+
+    /// Removes `title` one character at a time. Faster than typing —
+    /// deleting is the part nobody's reading, and matching the two speeds
+    /// makes the whole cycle feel twice as long as it is.
+    private func backspace(_ title: String) async {
+        guard title.count > 0 else { return }
+        for index in stride(from: title.count - 1, through: 0, by: -1) {
+            guard !Task.isCancelled else { return }
+            typedHint = String(title.prefix(index))
+            try? await Task.sleep(for: .milliseconds(20))
+        }
     }
 }
 
@@ -78,12 +250,14 @@ struct HeroMarquee: View {
         // Both are render transforms, so the rows still lay out at the
         // band's own width — the tilt costs nothing in layout terms.
         .scaleEffect(overscale)
-        // A whisper of blur — enough to keep the art from competing with
-        // the headline for focus, not enough to read as out-of-focus. The
-        // legibility work is done by the scrim in `hero`, so the art
-        // itself stays at full strength; dropping its opacity instead
-        // washed it out to grey against the light background.
-        .blur(radius: 0.3)
+        // No blur. A 0.3pt radius was doing almost nothing visible — the
+        // scrim in `hero` is what keeps the art from competing with the
+        // headline — but it cost a full offscreen render pass over all
+        // three rows, and because the strips move every frame that pass
+        // could never be cached. Overscrolling the screen meant
+        // re-rasterizing 36 over-scaled, rotated posters at 60fps while
+        // UIScrollView was also driving the rubber band, which is what
+        // made the pull feel like it was catching.
         .frame(maxWidth: .infinity)
         .clipped()
         .accessibilityHidden(true)
@@ -186,21 +360,21 @@ private struct DriftRow: View {
                 PosterImage(url: tiled[index % tiled.count],
                             width: posterWidth * 2,
                             height: posterHeight * 2,
-                            cornerRadius: 9,
+                            cornerRadius: AppRadius.small,
                             shadowRadius: 0)
                     .frame(width: posterWidth, height: posterHeight)
                     // Fill behind each poster so a slot that hasn't
                     // decoded yet reads as a card still loading rather
                     // than a hole punched in the strip.
                     .background {
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)
                             .fill(Color(.tertiarySystemFill))
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous))
                     // Hairline edge so neighbouring posters stay distinct
                     // where two dark ones meet.
                     .overlay {
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)
                             .strokeBorder(.white.opacity(0.10), lineWidth: 0.5)
                     }
             }
@@ -225,7 +399,7 @@ private struct DriftRow: View {
         InlineShimmerContainer {
             HStack(spacing: spacing) {
                 ForEach(0..<7, id: \.self) { _ in
-                    ShimmerBox(cornerRadius: 9)
+                    ShimmerBox(cornerRadius: AppRadius.small)
                         .frame(width: posterWidth, height: posterHeight)
                 }
             }

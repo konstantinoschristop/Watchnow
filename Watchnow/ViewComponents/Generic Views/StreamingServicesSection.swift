@@ -21,6 +21,8 @@ import SwiftUI
 import Kingfisher
 
 struct StreamingServicesSection<VM: BaseContentViewModel>: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     @ObservedObject var viewModel: VM
     let viewSection: ViewSections
@@ -74,6 +76,11 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
             )
             .textCase(.none)
         }
+        // The result row is pinned to `slotHeight` with a 165pt poster inside
+        // it, which leaves the title and meta line a fixed ~55pt to live in.
+        // Capped so that budget holds; every tile opens a details screen that
+        // scales without a ceiling.
+        .artworkTypeClamp()
     }
 
     /// Section subtitle — surfaces the picked provider's name when we
@@ -107,7 +114,7 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
         }
         .sensoryFeedback(.selection, trigger: viewModel.selectedProvider?.id)
         .onChange(of: viewModel.selectedProvider?.id) { _, _ in
-            withAnimation(.easeInOut(duration: 0.25)) {
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard)) {
                 cardAnimationToken += 1
             }
         }
@@ -216,11 +223,11 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
                     Spacer().frame(width: 10)
                     ForEach(0..<6, id: \.self) { _ in
                         VStack(alignment: .leading, spacing: 6) {
-                            ShimmerBox(cornerRadius: 10)
+                            ShimmerBox(cornerRadius: AppRadius.card)
                                 .frame(width: cardWidth, height: 165)
-                            ShimmerBox(cornerRadius: 4)
+                            ShimmerBox(cornerRadius: AppRadius.micro)
                                 .frame(width: cardWidth * 0.85, height: 11)
-                            ShimmerBox(cornerRadius: 4)
+                            ShimmerBox(cornerRadius: AppRadius.micro)
                                 .frame(width: cardWidth * 0.55, height: 9)
                         }
                     }
@@ -236,10 +243,10 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
             Spacer()
             VStack(spacing: 6) {
                 Image(systemName: "tray")
-                    .font(.system(size: 24, weight: .light))
+                    .appFont(24, weight: .light, relativeTo: .title2)
                     .foregroundStyle(.secondary)
                 Text("Nothing matching this filter")
-                    .font(.system(size: 13))
+                    .appFont(13, relativeTo: .footnote)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -259,6 +266,8 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
 /// glass) when selected. The logo retains its own rounded white square
 /// background so it reads clearly against any content behind the glass.
 private struct ProviderChip: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     let provider: WatchProvider
     let isSelected: Bool
@@ -269,7 +278,7 @@ private struct ProviderChip: View {
     var body: some View {
         chipContent
             .scaleEffect(isSelected ? 1.03 : 1.0)
-            .animation(.spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
+            .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.68), value: isSelected)
     }
 
     // Same reasoning as GenreChip — glass inside a scroll view re-composites
@@ -278,7 +287,7 @@ private struct ProviderChip: View {
         HStack(spacing: 8) {
             logo
             Text(provider.provider_name)
-                .font(.system(size: 13, weight: .semibold))
+                .appFont(13, weight: .semibold, relativeTo: .footnote)
                 .foregroundStyle(isSelected ? .white : .primary)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -318,7 +327,7 @@ private struct ProviderChip: View {
                 .frame(width: logoSize, height: logoSize)
                 .overlay {
                     Text(String(provider.provider_name.prefix(1)).uppercased())
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .appFont(11, weight: .bold, relativeTo: .caption2, design: .rounded)
                         .foregroundStyle(.secondary)
                 }
         }
@@ -343,7 +352,7 @@ private struct ProviderResultThumb: View {
             poster
 
             Text(result.getResultTitle())
-                .font(.system(size: 12, weight: .semibold))
+                .appFont(12, weight: .semibold, relativeTo: .caption)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -364,20 +373,20 @@ private struct ProviderResultThumb: View {
             .cacheOriginalImage()
             .fade(duration: 0.2)
             .placeholder {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                     .fill(Color.secondary.opacity(0.15))
                     .overlay {
                         Image(systemName: "film")
-                            .font(.system(size: 22, weight: .light))
+                            .appFont(22, weight: .light, relativeTo: .title2)
                             .foregroundStyle(.secondary)
                     }
             }
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(width: posterWidth, height: posterHeight)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
                     .stroke(.white.opacity(0.08), lineWidth: 0.5)
             }
             .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
@@ -393,18 +402,18 @@ private struct ProviderResultThumb: View {
             HStack(spacing: 4) {
                 if let ratingText {
                     Image(systemName: "star.fill")
-                        .font(.system(size: 9))
+                        .appFont(9, relativeTo: .caption2)
                         .foregroundStyle(RatingStyle.tint(for: rating))
                     Text(ratingText)
-                        .font(.system(size: 10, weight: .semibold))
+                        .appFont(10, weight: .semibold, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
                 if ratingText != nil, !year.isEmpty {
-                    Text("•").font(.system(size: 10)).foregroundStyle(.secondary.opacity(0.6))
+                    Text("•").appFont(10, relativeTo: .caption2).foregroundStyle(.secondary.opacity(0.6))
                 }
                 if !year.isEmpty {
                     Text(year)
-                        .font(.system(size: 10, weight: .medium))
+                        .appFont(10, weight: .medium, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
             }

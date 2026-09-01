@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ScrollableTabBar<IdentifierType: Hashable>: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     let items: [IdentifierType]
     @Binding var selectedItem: IdentifierType
     let titleForItem: (IdentifierType) -> String
@@ -25,7 +27,7 @@ struct ScrollableTabBar<IdentifierType: Hashable>: View {
                     
                     ForEach(items, id: \.self) { item in
                         Button {
-                            withAnimation(.easeInOut(duration: animationDuration)) {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: animationDuration)) {
                                 selectedItem = item
                                 proxy.scrollTo(item, anchor: .center)
                             }

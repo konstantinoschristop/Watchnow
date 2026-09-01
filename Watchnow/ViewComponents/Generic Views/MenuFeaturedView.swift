@@ -15,6 +15,24 @@ import CoreImage
 /// cards, peek of the neighbors on each side, and a scale + opacity fade on
 /// the non-centered slides. Single-slide mode stays full-bleed (no inset, no
 /// rounded corners) so the details-screen hero keeps its cinematic look.
+/// Shared metrics for the featured hero, so the view and whatever supplies
+/// its overlay agree on the same numbers.
+///
+/// Its own namespace because `MenuFeaturedView` is generic over its overlay
+/// content, and Swift allows no static stored properties there.
+enum FeaturedHeroMetrics {
+
+    /// Vertical room the centred page indicator occupies at the bottom of a
+    /// slide, measured from the card's bottom edge: the pill's own content
+    /// (the dots, or the taller pause control) plus its bottom padding.
+    ///
+    /// A caller's overlay uses this to keep its copy clear of the indicator.
+    /// Without it the genre pills and the indicator shared one band and only
+    /// looked separate because the pills were short and leading-aligned — one
+    /// long genre name, or one step up in text size, and they collided.
+    static let indicatorReserve: CGFloat = 46
+}
+
 struct MenuFeaturedView<Content: View>: View {
     var results: [Result]
     var overlayContent: (Result) -> Content
@@ -31,7 +49,7 @@ struct MenuFeaturedView<Content: View>: View {
     private let dwellSeconds: Double = 6
 
     // Card treatment — only applied when there is more than one slide.
-    private let cardCornerRadius: CGFloat = 20
+    private let cardCornerRadius: CGFloat = AppRadius.hero
     private let cardInset: CGFloat = 10      // side padding; drives peek width
     private let cardSpacing: CGFloat = 8
 
@@ -43,6 +61,12 @@ struct MenuFeaturedView<Content: View>: View {
     /// body re-render afterwards.
     @State private var slideTints: [Int: Color] = [:]
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// User-controlled stop for the rotation. Auto-rotating content has to be
+    /// stoppable — a slide that moves on its own every six seconds while
+    /// someone is still reading it is the carousel's oldest failure, and it's
+    /// worse for anyone who reads slowly or uses a screen reader.
+    @State private var autoAdvancePaused = false
 
     private var isCarousel: Bool { results.count > 1 }
 
@@ -68,7 +92,7 @@ struct MenuFeaturedView<Content: View>: View {
             }
             guard !Task.isCancelled, shouldAutoAdvance,
                   let current = scrollIndex else { return }
-            withAnimation(.easeInOut(duration: 0.5)) {
+            withAnimation(.easeInOut(duration: AppMotion.slow)) {
                 scrollIndex = (current + 1) % results.count
             }
         }
@@ -85,6 +109,11 @@ struct MenuFeaturedView<Content: View>: View {
             let vm = ContentDetailsViewModel(model: model)
             ContentDetailsView(detailsViewModel: vm)
         }
+        // Title, meta and genre pills are set *on* the artwork inside a slide
+        // sized to 75% of the screen. Past the first accessibility size that
+        // copy starts covering the image it is captioning. The details screen
+        // one tap away carries the same text with no ceiling.
+        .artworkTypeClamp()
     }
 
     // Page indicator lives inside the card now — no reserved space needed.
@@ -156,7 +185,13 @@ struct MenuFeaturedView<Content: View>: View {
                 isDragging = (newPhase == .interacting || newPhase == .tracking)
             }
             .frame(width: size.width, height: size.height)
-            // Indicator sits inside the card, above the spotlight overlay
+            // Indicator sits inside the card, above the spotlight overlay,
+            // centred — the platform-standard placement for page position.
+            //
+            // It shares the bottom band with the slide's own bottom-leading
+            // copy, so the *copy* reserves room for it rather than the
+            // indicator dodging sideways: see `indicatorReserve` and the
+            // matching bottom padding in the caller's overlay.
             .overlay(alignment: .bottom) {
                 pageIndicator
             }
@@ -282,8 +317,8 @@ struct MenuFeaturedView<Content: View>: View {
             .frame(width: size.width, height: size.height)
             .clipped()
             .allowsHitTesting(false)
-            .animation(.easeInOut(duration: 0.45), value: tint)
-            .animation(.easeInOut(duration: 0.35), value: safeIndex)
+            .animation(.easeInOut(duration: AppMotion.slow), value: tint)
+            .animation(.easeInOut(duration: AppMotion.emphasis), value: safeIndex)
     }
 
     /// Computes a hero tint from the decoded poster once per slide and
@@ -309,7 +344,8 @@ struct MenuFeaturedView<Content: View>: View {
                 let isActive = index == (scrollIndex ?? 0)
                 Group {
                     if isActive {
-                        ProgressCapsule(duration: dwellSeconds)
+                        ProgressCapsule(duration: dwellSeconds,
+                                        isRunning: shouldAutoAdvance)
                     } else {
                         Capsule()
                             .fill(Color.white.opacity(0.35))
@@ -319,13 +355,45 @@ struct MenuFeaturedView<Content: View>: View {
                 // Force recreation when a dot transitions active ↔ inactive
                 // so ProgressCapsule's .onAppear always fires on a fresh view.
                 .id("\(index)-\(isActive)")
-                .animation(.easeInOut(duration: 0.25), value: scrollIndex)
+                .animation(.easeInOut(duration: AppMotion.standard), value: scrollIndex)
+            }
+            // Dots are decoration; the position is announced once, as a
+            // sentence, on the row itself.
+            .accessibilityHidden(true)
+
+            if isCarousel, !reduceMotion {
+                pauseControl
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .modifier(PageIndicatorBackground())
         .padding(.bottom, 18)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Slide \((scrollIndex ?? 0) + 1) of \(results.count)")
+    }
+
+    /// Stop/start for the rotation, tucked into the indicator's existing
+    /// glass pill so it costs no new chrome. The glyph is small; the tap
+    /// area is not.
+    private var pauseControl: some View {
+        Button {
+            autoAdvancePaused.toggle()
+        } label: {
+            Image(systemName: autoAdvancePaused ? "play.fill" : "pause.fill")
+                .appFont(9, weight: .bold, relativeTo: .caption2)
+                .foregroundStyle(.white.opacity(0.9))
+                .frame(width: 28, height: 28)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        // Extends past the pill rather than inflating it — the visible pill
+        // keeps its proportions while the target reaches 44pt.
+        .frame(width: 44, height: 44)
+        .contentShape(Rectangle())
+        .padding(.leading, -8)
+        .padding(.vertical, -8)
+        .accessibilityLabel(autoAdvancePaused ? "Play slideshow" : "Pause slideshow")
     }
 
     // MARK: - Progress capsule
@@ -348,6 +416,10 @@ struct MenuFeaturedView<Content: View>: View {
     /// observation retriggers the same reset-then-animate cycle on resume.
     private struct ProgressCapsule: View {
         let duration: Double
+        /// False when the rotation is paused or Reduce Motion is on. The
+        /// capsule then sits still instead of counting down to an advance
+        /// that isn't coming.
+        let isRunning: Bool
         @State private var progress: CGFloat = 0
         @Environment(\.scenePhase) private var scenePhase
 
@@ -371,6 +443,9 @@ struct MenuFeaturedView<Content: View>: View {
                     restartAnimation()
                 }
             }
+            .onChange(of: isRunning) { _, _ in
+                restartAnimation()
+            }
         }
 
         private func restartAnimation() {
@@ -385,6 +460,13 @@ struct MenuFeaturedView<Content: View>: View {
             // commits the reset first. Without this, both mutations coalesce
             // and the animation starts from whatever `progress` was before,
             // not from 0.
+            guard isRunning else {
+                // Paused: show the slide as "held" rather than mid-countdown.
+                var holdTx = Transaction()
+                holdTx.disablesAnimations = true
+                withTransaction(holdTx) { progress = 1.0 }
+                return
+            }
             DispatchQueue.main.async {
                 withAnimation(.linear(duration: duration)) {
                     progress = 1.0
@@ -395,17 +477,21 @@ struct MenuFeaturedView<Content: View>: View {
 
     // MARK: - Auto-advance plumbing
 
-    /// Composite key that drives the `.task` restart — every dimension that
-    /// should reset the dwell timer belongs here.
+    /// Reduce Motion stops the rotation outright rather than speeding it up:
+    /// the slides still exist and are still swipeable, they just don't move
+    /// on their own. With nothing moving there is nothing to pause, which is
+    /// why the control hides itself in that state.
+    private var shouldAutoAdvance: Bool {
+        scenePhase == .active && !isDragging && isCarousel
+            && !reduceMotion && !autoAdvancePaused
+    }
+
     private var autoAdvanceKey: AutoAdvanceKey {
         AutoAdvanceKey(tab: scrollIndex ?? 0,
                        isActive: scenePhase == .active,
                        isDragging: isDragging,
-                       slideCount: results.count)
-    }
-
-    private var shouldAutoAdvance: Bool {
-        scenePhase == .active && !isDragging && isCarousel
+                       slideCount: results.count,
+                       isPaused: autoAdvancePaused || reduceMotion)
     }
 
     private struct AutoAdvanceKey: Equatable {
@@ -413,6 +499,7 @@ struct MenuFeaturedView<Content: View>: View {
         let isActive: Bool
         let isDragging: Bool
         let slideCount: Int
+        let isPaused: Bool
     }
 
     // MARK: - Image
@@ -420,8 +507,15 @@ struct MenuFeaturedView<Content: View>: View {
     func getImage(for index: Int) -> some View {
         KFImage.url(results[index].getResultPosterURL())
             .placeholder {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                // A spinner in the middle of a full-bleed hero reads as an
+                // error more than as loading — it is a small grey mark on a
+                // large empty rectangle. A plain surface plus the slide's own
+                // copy underneath says "artwork coming" without the
+                // misdirection, and matches the skeleton language the rest of
+                // the app uses.
+                Rectangle()
+                    .fill(Color(.secondarySystemBackground))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .loadImmediately()
             .loadDiskFileSynchronously()

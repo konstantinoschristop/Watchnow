@@ -11,6 +11,8 @@ import SwiftUI
 /// "Read more" toggle when it overflows the collapsed line limit.
 /// Rating/year/runtime have been moved into the hero overlay.
 struct DetailsView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     var details: ResultDetailsResponse?
 
@@ -25,9 +27,9 @@ struct DetailsView: View {
         if let overview = details?.overview, !overview.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text(overview)
-                    .font(.system(size: 15))
+                    .appFont(15, relativeTo: .subheadline)
                     .lineLimit(isExpanded ? nil : collapsedLineLimit)
-                    .animation(.easeInOut(duration: 0.2), value: isExpanded)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: isExpanded)
 
                 if overview.count > expandThreshold {
                     Button {
@@ -38,7 +40,7 @@ struct DetailsView: View {
                         // CTAs) uses `.accentColor`, so matching keeps the
                         // theming coherent top-to-bottom.
                         Text(isExpanded ? "Read less" : "Read more")
-                            .font(.system(size: 14, weight: .semibold))
+                            .appFont(14, weight: .semibold, relativeTo: .subheadline)
                             .foregroundStyle(Color.accentColor)
                     }
                 }

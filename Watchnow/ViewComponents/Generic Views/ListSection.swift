@@ -13,6 +13,8 @@ import SwiftUI
 import Kingfisher
 
 struct ListSection<VM: BaseViewModelProtocol>: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     let results:     [Result]
     let screenType:  ScreenTypes
@@ -134,13 +136,13 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
                     .frame(width: i == currentPage ? 16 : 6, height: 6)
                     .contentShape(Capsule())
                     .onTapGesture {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.8)) {
                             pageID = i
                         }
                     }
             }
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentPage)
+        .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.8), value: currentPage)
         .frame(maxWidth: .infinity)
     }
 }
@@ -181,7 +183,7 @@ private struct ListSectionRow: View {
                     .fill(Color.secondary.opacity(0.15))
                     .overlay {
                         Image(systemName: "film")
-                            .font(.system(size: 20, weight: .light))
+                            .appFont(20, weight: .light, relativeTo: .title3)
                             .foregroundStyle(.secondary)
                     }
             }
@@ -201,7 +203,7 @@ private struct ListSectionRow: View {
     private var textColumn: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(result.getResultTitle())
-                .font(.system(size: 16, weight: .semibold))
+                .appFont(16, weight: .semibold, relativeTo: .body)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -211,7 +213,7 @@ private struct ListSectionRow: View {
                 HStack(spacing: 5) {
                     ForEach(genrePills, id: \.self) { name in
                         Text(name)
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .appFont(10, weight: .semibold, relativeTo: .caption2, design: .rounded)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 2)
@@ -225,7 +227,7 @@ private struct ListSectionRow: View {
 
             if let overview = overviewSnippet {
                 Text(overview)
-                    .font(.system(size: 13))
+                    .appFont(13, relativeTo: .footnote)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -247,9 +249,9 @@ private struct ListSectionRow: View {
             if let rating {
                 HStack(spacing: 3) {
                     Image(systemName: "star.fill")
-                        .font(.system(size: 11, weight: .bold))
+                        .appFont(11, weight: .bold, relativeTo: .caption2)
                     Text(String(format: "%.1f", rating))
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .appFont(13, weight: .bold, relativeTo: .footnote, design: .rounded)
                 }
                 .foregroundStyle(RatingStyle.tint(for: rating))
                 .padding(.horizontal, 8)
@@ -265,7 +267,7 @@ private struct ListSectionRow: View {
 
             if let year = yearString {
                 Text(year)
-                    .font(.system(size: 12, weight: .medium))
+                    .appFont(12, weight: .medium, relativeTo: .caption)
                     .foregroundStyle(.secondary)
             }
         }

@@ -252,7 +252,7 @@ private extension SearchView {
                     .transition(.opacity)
             }
         }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.26), value: phase)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: phase)
     }
 
     // MARK: Placeholder states
@@ -374,6 +374,10 @@ private extension SearchView {
                             namespace: namespace,
                             adSlot: 4)
 
+            if viewModel.activeGenre != nil, viewModel.genreHasMore {
+                loadMoreRow
+            }
+
             // A simple banner block at the foot of the list — same treatment
             // as the bottom of the home/details scroll pages.
             InlineBannerSection()
@@ -383,6 +387,41 @@ private extension SearchView {
         }
         .listStyle(.plain)
         .scrollDismissesKeyboard(.interactively)
+    }
+
+    /// Footer for a genre browse. A typed search doesn't get one — TMDB's
+    /// multi endpoint puts the matches worth showing on page one, whereas a
+    /// genre is a shelf the user is browsing and forty titles is the start
+    /// of it, not the end.
+    ///
+    /// An explicit button rather than infinite scroll: the row sits above an
+    /// ad block, and a list that grows on its own would keep pushing that
+    /// out of reach while the user is still reading.
+    var loadMoreRow: some View {
+        Button {
+            Task { await viewModel.loadMoreGenreResults() }
+        } label: {
+            HStack(spacing: 8) {
+                if viewModel.isLoadingMoreGenre {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: "arrow.down.circle")
+                        .font(.footnote.weight(.semibold))
+                }
+                Text(viewModel.isLoadingMoreGenre ? "Loading…" : "Show more")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .foregroundStyle(Color.accentColor)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(viewModel.isLoadingMoreGenre)
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        .accessibilityLabel("Show more results")
     }
 
     /// Shown when the server returned results but the active filter
@@ -432,7 +471,7 @@ private extension SearchView {
                 .font(.footnote.weight(.medium))
                 .foregroundStyle(.secondary)
                 .contentTransition(.numericText())
-                .animation(reduceMotion ? nil : .easeOut(duration: 0.2),
+                .animation(reduceMotion ? nil : .easeOut(duration: AppMotion.quick),
                            value: viewModel.filteredResults.count)
             Spacer(minLength: 0)
         }
@@ -464,7 +503,7 @@ private extension SearchView {
                         isSelected: viewModel.selectedChooser == option,
                         tint: tint(for: option)
                     ) {
-                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: AppMotion.quick)) {
                             viewModel.selectedChooser = option
                         }
                     }
@@ -514,7 +553,7 @@ private struct SearchResultsSkeleton: View {
                 // Filter chip bar placeholder.
                 HStack(spacing: 8) {
                     ForEach(0..<4, id: \.self) { index in
-                        ShimmerBox(cornerRadius: 20)
+                        ShimmerBox(cornerRadius: AppRadius.hero)
                             .frame(width: CGFloat(52 + (index % 3) * 22), height: 30)
                     }
                     Spacer(minLength: 0)
@@ -537,15 +576,15 @@ private struct SearchResultsSkeleton: View {
 
     private var row: some View {
         HStack(alignment: .top, spacing: 12) {
-            ShimmerBox(cornerRadius: 10)
+            ShimmerBox(cornerRadius: AppRadius.card)
                 .frame(width: posterWidth, height: posterHeight)
 
             VStack(alignment: .leading, spacing: 7) {
-                ShimmerBox(cornerRadius: 4).frame(width: 54, height: 14)
-                ShimmerBox(cornerRadius: 5).frame(width: 180, height: 15)
-                ShimmerBox(cornerRadius: 4).frame(width: 110, height: 11)
-                ShimmerBox(cornerRadius: 4).frame(maxWidth: .infinity).frame(height: 10)
-                ShimmerBox(cornerRadius: 4).frame(width: 200, height: 10)
+                ShimmerBox(cornerRadius: AppRadius.micro).frame(width: 54, height: 14)
+                ShimmerBox(cornerRadius: AppRadius.micro).frame(width: 180, height: 15)
+                ShimmerBox(cornerRadius: AppRadius.micro).frame(width: 110, height: 11)
+                ShimmerBox(cornerRadius: AppRadius.micro).frame(maxWidth: .infinity).frame(height: 10)
+                ShimmerBox(cornerRadius: AppRadius.micro).frame(width: 200, height: 10)
                 Spacer(minLength: 0)
             }
             .frame(height: posterHeight, alignment: .top)
@@ -577,10 +616,10 @@ private struct FilterChip: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Text(title)
-                    .font(.system(size: 13, weight: .semibold))
+                    .appFont(13, weight: .semibold, relativeTo: .footnote)
                 if count > 0 {
                     Text("\(count)")
-                        .font(.system(size: 12, weight: .semibold))
+                        .appFont(12, weight: .semibold, relativeTo: .caption)
                         .foregroundStyle(isSelected ? .white.opacity(0.85) : tint.opacity(0.8))
                         .contentTransition(.numericText())
                 }

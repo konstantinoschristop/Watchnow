@@ -10,6 +10,8 @@ import Kingfisher
 import AlertToast
 
 struct ContentDetailsView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     @StateObject var detailsViewModel: ContentDetailsViewModel
     @Environment(\.dismiss) var dismiss
@@ -184,7 +186,7 @@ extension ContentDetailsView {
         let genreIDs = detailsViewModel.likeGenreIDs
         let language = detailsViewModel.result.original_language
 
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
             if isLiked {
                 TasteProfile.unlike(id: id, genreIDs: genreIDs, language: language)
                 isLiked = false
@@ -363,7 +365,7 @@ extension ContentDetailsView {
                     isSeasonsSheetPresented.toggle()
                 } label: {
                     Text("See all")
-                        .font(.system(size: 15, weight: .semibold))
+                        .appFont(15, weight: .semibold, relativeTo: .subheadline)
                         .foregroundColor(.accentColor)
                 }
             }

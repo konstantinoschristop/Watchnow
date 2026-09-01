@@ -29,7 +29,7 @@ struct MovieNightView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .semibold))
+                            .appFont(15, weight: .semibold, relativeTo: .subheadline)
                     }
                     .accessibilityLabel("Close")
                 }

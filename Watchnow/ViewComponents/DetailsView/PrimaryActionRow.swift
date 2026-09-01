@@ -30,23 +30,36 @@ struct PrimaryActionRow: View {
     let onTrailerTap: () -> Void
     let onLikeTap: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// Two pills share a row until the labels stop fitting in half a screen.
+    /// At accessibility sizes "Watch Later" was rendering as "Watch…", which
+    /// is the label of the app's most important action reduced to a guess —
+    /// so past that point each action takes a full row instead.
+    private var stacksActions: Bool { typeSize.isAccessibilitySize }
+
     var body: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 10) {
-                ActionPill(
-                    icon:    isInWatchList ? "bookmark.fill" : "bookmark",
-                    label:   isInWatchList ? "Saved" : "Watch Later",
-                    style:   isInWatchList ? .activeAccent : .neutral,
-                    action:  onWatchlistTap
-                )
+            let watchlistPill = ActionPill(
+                icon:    isInWatchList ? "bookmark.fill" : "bookmark",
+                label:   isInWatchList ? "Saved" : "Watch Later",
+                style:   isInWatchList ? .activeAccent : .neutral,
+                action:  onWatchlistTap
+            )
+            let trailerPill = ActionPill(
+                icon:   "play.fill",
+                label:  "Trailer",
+                style:  .neutral,
+                action: onTrailerTap
+            )
 
-                if hasTrailer {
-                    ActionPill(
-                        icon:   "play.fill",
-                        label:  "Trailer",
-                        style:  .neutral,
-                        action: onTrailerTap
-                    )
+            if stacksActions {
+                watchlistPill
+                if hasTrailer { trailerPill }
+            } else {
+                HStack(spacing: 10) {
+                    watchlistPill
+                    if hasTrailer { trailerPill }
                 }
             }
 
@@ -90,10 +103,10 @@ private struct ActionPill: View {
         Button(action: action) {
             HStack(spacing: 7) {
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
+                    .appFont(16, weight: .semibold, relativeTo: .body)
                     .symbolEffect(.bounce, value: style != .neutral)
                 Text(label)
-                    .font(.system(size: 15, weight: .semibold))
+                    .appFont(15, weight: .semibold, relativeTo: .subheadline)
                     .lineLimit(1)
             }
             .foregroundStyle(foreground)

@@ -104,7 +104,7 @@ struct WatchProviderView: View {
                     .fill(tint)
                     .frame(width: 7, height: 7)
                 Text(label.uppercased())
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .appFont(11, weight: .bold, relativeTo: .caption2, design: .rounded)
                     .tracking(0.6)
                     .foregroundStyle(tint)
             }
@@ -146,7 +146,7 @@ struct WatchProviderView: View {
                     .shadow(color: .black.opacity(0.2), radius: 5, y: 2)
 
                 Text(name)
-                    .font(.system(size: 11, weight: .semibold))
+                    .appFont(11, weight: .semibold, relativeTo: .caption2)
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
@@ -185,12 +185,12 @@ struct WatchProviderView: View {
     private func attributionContent(chevron: Bool) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "info.circle")
-                .font(.system(size: 10, weight: .regular))
+                .appFont(10, weight: .regular, relativeTo: .caption2)
             Text("Availability provided by JustWatch")
-                .font(.system(size: 11, weight: .regular))
+                .appFont(11, weight: .regular, relativeTo: .caption2)
             if chevron {
                 Image(systemName: "arrow.up.right.square")
-                    .font(.system(size: 10, weight: .semibold))
+                    .appFont(10, weight: .semibold, relativeTo: .caption2)
             }
         }
         .foregroundStyle(.secondary)

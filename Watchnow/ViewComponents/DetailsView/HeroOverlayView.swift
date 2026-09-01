@@ -119,7 +119,7 @@ struct HeroOverlayView: View {
                     part.view
                 }
             }
-            .font(.system(size: 13, weight: .medium))
+            .appFont(13, weight: .medium, relativeTo: .footnote)
             .foregroundColor(.white.opacity(0.9))
             .shadow(color: .black.opacity(0.5), radius: 2)
         }
@@ -174,14 +174,14 @@ private struct GenrePill: View {
     var body: some View {
         if #available(iOS 26.0, *) {
             Text(name)
-                .font(.system(size: 11, weight: .semibold))
+                .appFont(11, weight: .semibold, relativeTo: .caption2)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .glassEffect(.regular, in: Capsule())
         } else {
             Text(name)
-                .font(.system(size: 11, weight: .semibold))
+                .appFont(11, weight: .semibold, relativeTo: .caption2)
                 .foregroundColor(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)

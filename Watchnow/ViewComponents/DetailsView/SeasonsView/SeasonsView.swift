@@ -80,19 +80,19 @@ struct SeasonsView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(season.name ?? "")
-                    .font(.system(size: 13, weight: .semibold))
+                    .appFont(13, weight: .semibold, relativeTo: .footnote)
                     .lineLimit(1)
                     .foregroundStyle(.primary)
 
                 if let episodes = season.episode_count {
                     Text("\(episodes) episode\(episodes == 1 ? "" : "s")")
-                        .font(.system(size: 11))
+                        .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
 
                 if let airDate = season.getAirDate() {
                     Text(airDate)
-                        .font(.system(size: 11))
+                        .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -101,7 +101,7 @@ struct SeasonsView: View {
         .padding(.horizontal, 10)
         .frame(width: Self.tileWidth, height: Self.rowHeight)
         .background(Color(.secondaryBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
     }
 
     @ViewBuilder
@@ -114,13 +114,13 @@ struct SeasonsView: View {
             GenericImageView(url: url,
                              width: posterWidth,
                              height: posterHeight,
-                             cornerRadius: 4,
+                             cornerRadius: AppRadius.micro,
                              showShadow: false)
                 .aspectRatio(contentMode: .fill)
                 .frame(width: posterWidth, height: posterHeight)
                 .clipped()
         } else {
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: AppRadius.micro)
                 .fill(Color.gray.opacity(0.25))
                 .frame(width: posterWidth, height: posterHeight)
         }

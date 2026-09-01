@@ -89,10 +89,10 @@ struct TopCard: View {
     private var rankBadge: some View {
         HStack(spacing: 1) {
             Text("#")
-                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .appFont(11, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .foregroundColor(.white.opacity(0.8))
             Text("\(rank)")
-                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .appFont(13, weight: .heavy, relativeTo: .footnote, design: .rounded)
                 .foregroundColor(.white)
         }
         .padding(.horizontal, 7)
@@ -123,7 +123,7 @@ struct TopCard: View {
     private var metadata: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(content.getResultTitle())
-                .font(.system(size: 12, weight: .semibold))
+                .appFont(12, weight: .semibold, relativeTo: .caption)
                 .foregroundColor(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -145,21 +145,21 @@ struct TopCard: View {
                 if let ratingText {
                     HStack(spacing: 2) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 9, weight: .semibold))
+                            .appFont(9, weight: .semibold, relativeTo: .caption2)
                             .foregroundColor(RatingStyle.tint(for: rating))
                         Text(ratingText)
-                            .font(.system(size: 10, weight: .semibold))
+                            .appFont(10, weight: .semibold, relativeTo: .caption2)
                             .foregroundColor(.secondary)
                     }
                 }
                 if ratingText != nil, year != nil {
                     Text("•")
-                        .font(.system(size: 10))
+                        .appFont(10, relativeTo: .caption2)
                         .foregroundColor(.secondary.opacity(0.6))
                 }
                 if let year {
                     Text(year)
-                        .font(.system(size: 10, weight: .medium))
+                        .appFont(10, weight: .medium, relativeTo: .caption2)
                         .foregroundColor(.secondary)
                 }
             }
@@ -238,7 +238,7 @@ struct StatusPill: View {
 
     var body: some View {
         Text(status.title)
-            .font(.system(size: 9, weight: .heavy, design: .rounded))
+            .appFont(9, weight: .heavy, relativeTo: .caption2, design: .rounded)
             .tracking(0.6)
             .foregroundStyle(.white)
             .padding(.horizontal, 7)

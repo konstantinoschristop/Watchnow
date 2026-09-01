@@ -14,6 +14,8 @@
 import SwiftUI
 
 struct EpisodeView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
 
     var episode: Episode
     /// Series name used in the reminder notification body. Optional so the
@@ -76,7 +78,7 @@ struct EpisodeView: View {
     private var reminderBell: some View {
         Button(action: toggleReminder) {
             Image(systemName: isReminderOn ? "bell.fill" : "bell")
-                .font(.system(size: 14, weight: .semibold))
+                .appFont(14, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(isReminderOn ? Color.accentColor : .secondary)
                 .frame(width: 32, height: 32)
                 .background {
@@ -85,6 +87,12 @@ struct EpisodeView: View {
                               ? Color.accentColor.opacity(0.15)
                               : Color(.secondarySystemBackground))
                 }
+                // Visible disc stays 32pt so the row's proportions hold; the
+                // target around it reaches 44. This sits at the trailing edge
+                // of a dense episode row, which is where a short target
+                // actually costs you the tap.
+                .frame(width: AppTouch.minTarget, height: AppTouch.minTarget)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isReminderOn ? "Cancel reminder" : "Remind me on air date")
@@ -149,7 +157,7 @@ struct EpisodeView: View {
                     .frame(width: thumbWidth, height: thumbHeight)
                     .overlay {
                         Image(systemName: "film")
-                            .font(.system(size: 22, weight: .light))
+                            .appFont(22, weight: .light, relativeTo: .title2)
                             .foregroundStyle(.tertiary)
                     }
             }
@@ -157,7 +165,7 @@ struct EpisodeView: View {
             // Episode number pill pinned to the bottom-left of the still
             if let num = episode.episode_number {
                 Text("E\(num)")
-                    .font(.system(size: 10, weight: .bold))
+                    .appFont(10, weight: .bold, relativeTo: .caption2)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 3)
@@ -179,7 +187,7 @@ struct EpisodeView: View {
 
             // Title
             Text(episode.name ?? "Untitled")
-                .font(.system(size: 14, weight: .semibold))
+                .appFont(14, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
 
@@ -187,17 +195,17 @@ struct EpisodeView: View {
             HStack(spacing: 8) {
                 if let airDate = episode.air_date {
                     Text(airDate)
-                        .font(.system(size: 11))
+                        .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
 
                 if let rating = episode.vote_average, rating > 0 {
                     HStack(spacing: 3) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 9))
+                            .appFont(9, relativeTo: .caption2)
                             .foregroundStyle(.orange)
                         Text(String(format: "%.1f", rating))
-                            .font(.system(size: 11))
+                            .appFont(11, relativeTo: .caption2)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -207,30 +215,75 @@ struct EpisodeView: View {
             if let overview = episode.overview, !overview.isEmpty {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(overview)
-                        .font(.system(size: 12))
+                        .appFont(12, relativeTo: .caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(isExpanded ? nil : 2)
-                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+                        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: isExpanded)
 
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick)) {
                             isExpanded.toggle()
                         }
                     } label: {
                         Text(isExpanded ? "Show less" : "Read more")
-                            .font(.system(size: 12, weight: .semibold))
+                            .appFont(12, weight: .semibold, relativeTo: .caption)
                             .foregroundStyle(Color.accentColor)
                     }
                     .buttonStyle(.plain)
                 }
             } else {
                 Text("No overview available.")
-                    .font(.system(size: 12))
+                    .appFont(12, relativeTo: .caption)
                     .foregroundStyle(.tertiary)
                     .italic()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - EpisodeListSkeleton
+
+/// Loading state for a season's episodes, shaped like the rows it replaces.
+///
+/// This slot used to be a centred `ProgressView`. A spinner on an otherwise
+/// empty panel says "the app is busy"; a skeleton in the shape of the answer
+/// says "the episodes are coming", and keeps the reader's eye where they will
+/// appear. The rest of the app had already moved to skeletons — the season
+/// tab and the person sheet were the two places still spinning.
+struct EpisodeListSkeleton: View {
+
+    /// Enough rows to fill the panel without implying a season length.
+    var rows: Int = 4
+
+    var body: some View {
+        InlineShimmerContainer {
+            VStack(spacing: 18) {
+                ForEach(0..<rows, id: \.self) { _ in
+                    HStack(alignment: .top, spacing: 12) {
+                        ShimmerBox(cornerRadius: AppRadius.small)
+                            .frame(width: 128, height: 72)
+
+                        VStack(alignment: .leading, spacing: 7) {
+                            ShimmerBox(cornerRadius: AppRadius.micro)
+                                .frame(width: 46, height: 11)
+                            ShimmerBox(cornerRadius: AppRadius.micro)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 14)
+                            ShimmerBox(cornerRadius: AppRadius.micro)
+                                .frame(width: 110, height: 10)
+                            Spacer(minLength: 0)
+                        }
+                        .frame(height: 72, alignment: .top)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement()
+        .accessibilityLabel("Loading episodes")
     }
 }
 
