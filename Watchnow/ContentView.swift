@@ -82,17 +82,31 @@ struct ContentView: View {
 
     private func applyDeepLink(_ deeplink: DeepLink?) {
         guard let deeplink else { return }
-        switch deeplink.mediaType {
-        case .movie:
-            selectedTab = .movies
-            moviesDeepLinkResult = Result.stub(id: deeplink.id, mediaType: "movie")
-        case .tv:
-            selectedTab = .series
-            seriesDeepLinkResult = Result.stub(id: deeplink.id, mediaType: "tv")
-        }
+
+        // Select the tab first and push on the next turn of the runloop.
+        //
+        // Doing both in one update asks SwiftUI to switch to a tab whose
+        // `NavigationStack` may not be on screen yet *and* push onto it
+        // simultaneously, which is where the push can be dropped or the
+        // destination's `.task` torn down as that tab's tree is rebuilt.
+        // Splitting them lets the stack exist before it is asked to carry
+        // anything. Reached from notification taps as well as What's New,
+        // so it is worth being boring about.
+        selectedTab = deeplink.mediaType == .movie ? .movies : .series
+
         // Consume — clear the router so the same deeplink doesn't re-fire
         // on a subsequent state change.
         router.pending = nil
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(120))
+            switch deeplink.mediaType {
+            case .movie:
+                moviesDeepLinkResult = Result.stub(id: deeplink.id, mediaType: "movie")
+            case .tv:
+                seriesDeepLinkResult = Result.stub(id: deeplink.id, mediaType: "tv")
+            }
+        }
     }
 }
 

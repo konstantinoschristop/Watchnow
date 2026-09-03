@@ -87,6 +87,73 @@ struct InlineShimmerContainer<Content: View>: View {
     }
 }
 
+// MARK: - DetailsSkeleton
+
+/// Loading state for a details screen that arrived with nothing to draw.
+///
+/// A tap from a list carries the whole `Result`, so `.redacted(.placeholder)`
+/// has real text and artwork to grey out and reads correctly as loading. A
+/// tap from a notification or the What's New briefing arrives as
+/// `Result.stub` — id and media type, nothing else — and redacting *that*
+/// produces a genuinely blank page. Indistinguishable from a broken screen,
+/// and for the length of a slow fetch that is what the user concludes.
+///
+/// Shaped like the screen it stands in for: hero band, action row, then a
+/// couple of section blocks.
+struct DetailsSkeleton: View {
+
+    var body: some View {
+        InlineShimmerContainer {
+            VStack(alignment: .leading, spacing: 18) {
+                // Hero — the tall band the poster fills.
+                ShimmerBox(cornerRadius: 0)
+                    .frame(height: 420)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    ShimmerBox(cornerRadius: AppRadius.micro)
+                        .frame(width: 220, height: 24)
+                    ShimmerBox(cornerRadius: AppRadius.micro)
+                        .frame(width: 140, height: 13)
+                }
+                .padding(.horizontal, 16)
+
+                // Action row.
+                HStack(spacing: 10) {
+                    ShimmerBox(cornerRadius: AppRadius.panel)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                    ShimmerBox(cornerRadius: AppRadius.panel)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                }
+                .padding(.horizontal, 16)
+
+                // Two content blocks.
+                ForEach(0..<2, id: \.self) { _ in
+                    VStack(alignment: .leading, spacing: 10) {
+                        ShimmerBox(cornerRadius: AppRadius.micro)
+                            .frame(width: 160, height: 18)
+                        ShimmerBox(cornerRadius: AppRadius.micro)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 12)
+                        ShimmerBox(cornerRadius: AppRadius.micro)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 12)
+                        ShimmerBox(cornerRadius: AppRadius.micro)
+                            .frame(width: 200, height: 12)
+                    }
+                    .padding(.horizontal, 16)
+                }
+
+                Spacer(minLength: 0)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement()
+        .accessibilityLabel("Loading")
+    }
+}
+
 // MARK: - Skeleton cards
 
 private struct SkeletonBottomCard: View {

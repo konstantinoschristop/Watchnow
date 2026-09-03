@@ -34,6 +34,9 @@ struct WhatsNewView: View {
     /// YouTube trailer opened in the same in-app web sheet the details
     /// screen uses.
     @State private var trailerLink: TrailerLink?
+    /// The card the user tapped through to, pushed inside this sheet's own
+    /// stack so the briefing is still here when they come back.
+    @State private var openedChange: WatchlistChange?
     @State private var hasAppeared = false
     /// Drives the hero backdrop's slow drift, and the one-shot light sweep
     /// that reveals the hero card.
@@ -46,6 +49,30 @@ struct WhatsNewView: View {
     private var featured: WatchlistChange? { vm.briefing.first }
 
     var body: some View {
+        // The briefing owns its navigation.
+        //
+        // Tapping a card used to dismiss the sheet and deep-link into a tab,
+        // which switched tabs under the user, threw the briefing away, and
+        // counted as a dismissal — so reading one card spent all of them and
+        // there was nothing to come back to. Pushing inside the sheet makes
+        // the briefing independent of the selected tab: back returns here,
+        // and only Done or a swipe retires the batch.
+        NavigationStack {
+            briefingRoot
+                .navigationDestination(item: $openedChange) { change in
+                    let screenType = change.screenType
+                    let model = ContentDetailsModel(screenType: screenType,
+                                                    result: change.detailsSeed)
+                    ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
+                }
+        }
+        .presentationDragIndicator(.visible)
+        .sheet(item: $trailerLink) { link in
+            WebViewSheet(url: link.url)
+        }
+    }
+
+    private var briefingRoot: some View {
         VStack(spacing: 0) {
             header
 
@@ -82,10 +109,9 @@ struct WhatsNewView: View {
         }
         .background(Color(.background))
         .safeAreaInset(edge: .bottom) { actionBar }
-        .presentationDragIndicator(.visible)
-        .sheet(item: $trailerLink) { link in
-            WebViewSheet(url: link.url)
-        }
+        // The briefing draws its own masthead; the stack's bar would sit on
+        // top of it. The pushed details screen brings its own back button.
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             // Proof of presentation — see `WhatsNewViewModel.verifyPresentation`.
             vm.briefingDidAppear()
@@ -233,7 +259,7 @@ struct WhatsNewView: View {
     /// card, headline copy set directly on the image.
     private func heroCard(_ change: WatchlistChange) -> some View {
         Button {
-            vm.open(change)
+            openedChange = change
         } label: {
             ZStack(alignment: .bottomLeading) {
                 artworkLayer(change, drift: drifting)
@@ -302,7 +328,7 @@ struct WhatsNewView: View {
 
     private func compactCard(_ change: WatchlistChange) -> some View {
         Button {
-            vm.open(change)
+            openedChange = change
         } label: {
             HStack(spacing: 14) {
                 poster(change, width: 56, height: 84, radius: 10)
@@ -381,7 +407,7 @@ struct WhatsNewView: View {
 
             VStack(spacing: 8) {
                 Button {
-                    vm.open(change)
+                    openedChange = change
                 } label: {
                     Text("View title")
                         .font(.headline)

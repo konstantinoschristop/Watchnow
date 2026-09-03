@@ -228,17 +228,18 @@ final class WhatsNewViewModel: ObservableObject {
         // while `isPresented` is false.
     }
 
-    /// Tap-through on a card: close the sheet, then route through the
-    /// existing deeplink machinery once the dismissal has settled — the
-    /// same path a notification tap takes into ContentDetailsView.
-    func open(_ change: WatchlistChange) {
-        isPresented = false
-        let link = change.deepLink
-        Task {
-            try? await Task.sleep(for: .milliseconds(450))
-            DeepLinkRouter.shared.handle(link)
-        }
-    }
+    // Tap-through is deliberately *not* handled here.
+    //
+    // It used to close the sheet and route through `DeepLinkRouter`, which
+    // meant a tap switched tabs, tore the briefing down, and — because
+    // closing the sheet is a dismissal — retired the whole batch as seen.
+    // Reading one card therefore spent every other card in the briefing, and
+    // coming back from the title left nothing to return to.
+    //
+    // The sheet now owns a `NavigationStack` and pushes the details screen
+    // inside itself, so the briefing is independent of the selected tab,
+    // back returns to it, and only an explicit dismissal spends the batch.
+    // See `WhatsNewView`.
 
     // MARK: - Taste hint
 

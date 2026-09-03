@@ -24,6 +24,21 @@ struct ContentDetailsView: View {
     @State private var isLiked = false
     @Namespace private var namespace
 
+    /// True while this screen has nothing of its own to draw yet.
+    ///
+    /// A tap from a list hands over the whole `Result`, so the redaction
+    /// below has real text and artwork to grey out. A tap from a notification
+    /// or the What's New briefing arrives as `Result.stub` — id and media
+    /// type only — and redacting nothing renders a blank page, which for the
+    /// length of the fetch is indistinguishable from a broken screen. That
+    /// was the "empty page" behind a briefing tap.
+    private var isAwaitingFirstContent: Bool {
+        detailsViewModel.details == nil
+            && detailsViewModel.result.poster_path == nil
+            && detailsViewModel.result.backdrop_path == nil
+            && (detailsViewModel.result.title ?? detailsViewModel.result.name) == nil
+    }
+
     var body: some View {
 
         Group {
@@ -31,6 +46,8 @@ struct ContentDetailsView: View {
                 ContentUnavailableView("Couldn't load content",
                                        systemImage: "exclamationmark.triangle",
                                        description: Text("Check your connection and try again."))
+            } else if isAwaitingFirstContent {
+                DetailsSkeleton()
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
                     self.constructContent()

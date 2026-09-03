@@ -78,7 +78,7 @@ enum WatchlistChangeKind: String, Codable, CaseIterable {
 /// Only what the UI needs to render the card — never a raw TMDB payload.
 /// Flat optionals rather than per-kind shapes, matching how the rest of
 /// the app models sparse TMDB data.
-struct ChangeMetadata: Codable, Equatable {
+struct ChangeMetadata: Codable, Equatable, Hashable {
     var videoKey: String?
     var videoName: String?
     var oldDate: String?
@@ -109,7 +109,10 @@ struct ChangeMetadata: Codable, Equatable {
 // MARK: - Change
 
 /// One meaningful event on a watchlist title.
-struct WatchlistChange: Codable, Equatable, Identifiable {
+///
+/// `Hashable` so the briefing can drive a `navigationDestination(item:)` with
+/// it directly — synthesized over every field, which agrees with `==`.
+struct WatchlistChange: Codable, Equatable, Hashable, Identifiable {
 
     /// Stable across syncs (built from the change's own facts, not a UUID),
     /// so "seen" tracking survives re-detection.
@@ -142,6 +145,14 @@ struct WatchlistChange: Codable, Equatable, Identifiable {
 
     var screenType: ScreenTypes { mediaType == "tv" ? .tv : .movie }
 
+    /// Route to this change's title from outside the app.
+    ///
+    /// Unused by the briefing, which pushes the details screen inside its own
+    /// sheet rather than routing through a tab. This is the other half of
+    /// `WatchlistChangeMonitor.shouldNotify` — when a release schedules a
+    /// local notification for a change, its tap needs exactly this. Kept for
+    /// the same reason that decision layer is: so the notification path is
+    /// already expressible when it lands.
     var deepLink: DeepLink {
         DeepLink(id: mediaID, mediaType: mediaType == "tv" ? .tv : .movie)
     }
@@ -192,6 +203,21 @@ struct WatchlistChange: Codable, Equatable, Identifiable {
             }
             return "The next episode's air date changed."
         }
+    }
+
+    /// A `Result` good enough to open a details screen with.
+    ///
+    /// Richer than `Result.stub`, deliberately: the briefing already knows
+    /// the title and its artwork, so handing those over means the details
+    /// screen renders its hero and a correct redaction immediately instead
+    /// of showing a placeholder while the fetch lands. Everything else is
+    /// re-fetched there, as it is for any other route in.
+    var detailsSeed: Result {
+        var seed = Result.stub(id: mediaID, mediaType: mediaType)
+        if mediaType == "tv" { seed.name = title } else { seed.title = title }
+        seed.poster_path = posterPath
+        seed.backdrop_path = backdropPath
+        return seed
     }
 
     /// Stable identity from the change's own facts. `detail` disambiguates
