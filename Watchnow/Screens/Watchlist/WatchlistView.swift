@@ -165,10 +165,15 @@ struct WatchlistView: View {
     }
 
     private func setFilter(_ filter: WatchlistModel.FolderFilter) {
-        // Quick and flat rather than springy: the album card's selection
-        // plate springs between cards, but a spring on a cross-fading wall
-        // of posters reads as a wobble.
-        withAnimation(reduceMotion ? nil : .easeOut(duration: AppMotion.standard)) {
+        // Springy now that the wall re-sorts rather than cross-fades.
+        //
+        // This was deliberately flat — a spring on a cross-fading wall of
+        // posters reads as a wobble, because every cover is moving opacity at
+        // once and none of them are going anywhere. Now that covers shared
+        // between two folders slide to new positions instead, the motion has
+        // real direction and a spring is what makes it feel like the shelf
+        // re-sorting rather than the screen reloading.
+        withAnimation(reduceMotion ? nil : AppMotion.springSoft) {
             watchlistViewModel.setFilter(filter)
         }
     }

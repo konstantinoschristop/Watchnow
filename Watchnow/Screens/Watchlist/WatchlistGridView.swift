@@ -63,18 +63,33 @@ struct WatchlistGridView<Header: View>: View {
         ScrollView {
             header()
 
+            // The wall is *not* keyed on the active folder.
+            //
+            // It used to be: `.id(contentID)` made a folder change one clean
+            // content swap instead of dozens of cells animating past each
+            // other. But a swap is a teardown — every cover is destroyed and
+            // rebuilt, which is exactly what it looked like, and covers the
+            // two folders share get re-fetched and re-faded for no reason.
+            //
+            // Letting the `ForEach` diff instead means shared covers simply
+            // move to their new positions while the rest fade in and out.
+            // That only became viable once `Result` hashed on `id` alone —
+            // before that a cell's identity changed with any field, so the
+            // diff had nothing stable to match on.
+            //
+            // The empty state is still a swap, because it genuinely is one.
             Group {
                 if items.isEmpty, let emptyState {
                     emptyState
                         .padding(.top, 40)
+                        .id(contentID)
+                        .transition(reduceMotion
+                                    ? .opacity
+                                    : .opacity.combined(with: .offset(y: 10)))
                 } else {
                     wall
                 }
             }
-            .id(contentID)
-            .transition(reduceMotion
-                        ? .opacity
-                        : .opacity.combined(with: .offset(y: 10)))
 
             if !items.isEmpty {
                 InlineBannerSection()
@@ -99,10 +114,21 @@ struct WatchlistGridView<Header: View>: View {
                                     reduceMotion: reduceMotion,
                                     onMoveToFolder: { onMoveToFolder(result) },
                                     onRemove: { onRemove(result) })
+                    // Covers that leave collapse into themselves rather than
+                    // blinking out, so a folder change reads as the wall
+                    // re-sorting rather than reloading.
+                    .transition(reduceMotion
+                                ? .opacity
+                                : .scale(scale: 0.86).combined(with: .opacity))
             }
         }
         .padding(.horizontal, 16)
         .padding(.top, 4)
+        // Drives the insert/remove/move diff. The caller also wraps the
+        // filter change in `withAnimation`; this makes the grid animate its
+        // own reflow even when the array changes some other way — a removal
+        // from the context menu, or an iCloud merge landing.
+        .animation(reduceMotion ? nil : AppMotion.springSoft, value: items)
     }
 
     private func folder(for result: Result) -> Folder? {
