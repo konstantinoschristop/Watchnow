@@ -38,9 +38,7 @@ struct WhatsNewView: View {
     /// stack so the briefing is still here when they come back.
     @State private var openedChange: WatchlistChange?
     @State private var hasAppeared = false
-    /// Drives the hero backdrop's slow drift, and the one-shot light sweep
-    /// that reveals the hero card.
-    @State private var drifting = false
+    /// Drives the one-shot light sweep that reveals the hero card.
     @State private var sheenSwept = false
     /// Resolved once on appear — `tasteHint` reads the whole watchlist, which
     /// is far too expensive to repeat on every body pass.
@@ -117,7 +115,6 @@ struct WhatsNewView: View {
             vm.briefingDidAppear()
             hasAppeared = true
             if !reduceMotion {
-                drifting = true
                 sheenSwept = true
             }
             if let featured, vm.isSingleChange {
@@ -224,9 +221,11 @@ struct WhatsNewView: View {
         HStack(spacing: 5) {
             Image(systemName: "sparkles")
                 .font(.caption2.weight(.bold))
-                // One bounce on arrival, not a permanent pulse — the hero
-                // already carries a continuous drift, and two forever-loops
-                // in one view reads as noise.
+                // One bounce on arrival, not a permanent pulse. Nothing on
+                // this sheet loops now, and a pill that pulses forever while
+                // the rest of it holds still would be the only thing moving
+                // — which makes it the thing you look at instead of the
+                // titles it is counting.
                 .symbolEffect(.bounce, value: dealt)
             Text(vm.totalUnseenCount == 1 ? "1 UPDATE" : "\(vm.totalUnseenCount) UPDATES")
                 .font(.caption2.weight(.heavy))
@@ -262,7 +261,7 @@ struct WhatsNewView: View {
             openedChange = change
         } label: {
             ZStack(alignment: .bottomLeading) {
-                artworkLayer(change, drift: drifting)
+                artworkLayer(change)
                     .aspectRatio(16 / 9, contentMode: .fit)
                     .overlay {
                         LinearGradient(stops: [
@@ -433,10 +432,14 @@ struct WhatsNewView: View {
     /// Decorative artwork that cannot affect layout: the image is an overlay
     /// on a `Color.clear` the caller has already sized, so `scaledToFill`'s
     /// overflow is clipped instead of widening the scroll content.
-    /// `drift` gives the image a very slow Ken Burns push so the hero never
-    /// sits completely still. It scales the *overlay content* only, inside
-    /// the clip, so layout is untouched.
-    private func artworkLayer(_ change: WatchlistChange?, drift: Bool = false) -> some View {
+    ///
+    /// Held still. This carried a very slow Ken Burns push — 1.0 → 1.10 over
+    /// sixteen seconds, ping-ponging forever — on the reasoning that the hero
+    /// should never sit completely still. In practice a backdrop that creeps
+    /// under fixed copy draws the eye away from the copy, and the briefing is
+    /// something you read in ten seconds and dismiss. The sheen already gives
+    /// the card its one moment of life on arrival.
+    private func artworkLayer(_ change: WatchlistChange?) -> some View {
         Color.clear
             .overlay {
                 Group {
@@ -455,9 +458,6 @@ struct WhatsNewView: View {
                         )
                     }
                 }
-                .scaleEffect(drift ? 1.10 : 1.0)
-                .animation(drift ? .easeInOut(duration: 16).repeatForever(autoreverses: true) : nil,
-                           value: drift)
             }
             .clipped()
             .accessibilityHidden(true)
