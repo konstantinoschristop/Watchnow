@@ -147,6 +147,13 @@
 		FE1D0A33000000000000FB33 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A33000000000000FA33 /* SettingsView.swift */; };
 		FE1D0A34000000000000FB34 /* NotificationExplainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A34000000000000FA34 /* NotificationExplainerView.swift */; };
 		FE1D0A35000000000000FB35 /* AlertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A35000000000000FA35 /* AlertsTests.swift */; };
+		FE1D0A36000000000000FB36 /* AlertPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A36000000000000FA36 /* AlertPlanner.swift */; };
+		FE1D0A37000000000000FB37 /* NotificationCenterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A37000000000000FA37 /* NotificationCenterClient.swift */; };
+		FE1D0A38000000000000FB38 /* AlertScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A38000000000000FA38 /* AlertScheduler.swift */; };
+		FE1D0A39000000000000FB39 /* AlertInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A39000000000000FA39 /* AlertInputs.swift */; };
+		FE1D0A3A000000000000FB3A /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3A000000000000FA3A /* BackgroundRefresh.swift */; };
+		FE1D0A3B000000000000FB3B /* SettingsDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3B000000000000FA3B /* SettingsDebugSection.swift */; };
+		FE1D0A3C000000000000FB3C /* AlertPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3C000000000000FA3C /* AlertPlannerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -300,6 +307,13 @@
 		FE1D0A33000000000000FA33 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		FE1D0A34000000000000FA34 /* NotificationExplainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExplainerView.swift; sourceTree = "<group>"; };
 		FE1D0A35000000000000FA35 /* AlertsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsTests.swift; sourceTree = "<group>"; };
+		FE1D0A36000000000000FA36 /* AlertPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPlanner.swift; sourceTree = "<group>"; };
+		FE1D0A37000000000000FA37 /* NotificationCenterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterClient.swift; sourceTree = "<group>"; };
+		FE1D0A38000000000000FA38 /* AlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertScheduler.swift; sourceTree = "<group>"; };
+		FE1D0A39000000000000FA39 /* AlertInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertInputs.swift; sourceTree = "<group>"; };
+		FE1D0A3A000000000000FA3A /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
+		FE1D0A3B000000000000FA3B /* SettingsDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDebugSection.swift; sourceTree = "<group>"; };
+		FE1D0A3C000000000000FA3C /* AlertPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPlannerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -556,6 +570,11 @@
 		8AC338FF2752931E00834B46 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A3A000000000000FA3A /* BackgroundRefresh.swift */,
+				FE1D0A39000000000000FA39 /* AlertInputs.swift */,
+				FE1D0A38000000000000FA38 /* AlertScheduler.swift */,
+				FE1D0A37000000000000FA37 /* NotificationCenterClient.swift */,
+				FE1D0A36000000000000FA36 /* AlertPlanner.swift */,
 				FE1D0A32000000000000FA32 /* NotificationPermission.swift */,
 				FE1D0A31000000000000FA31 /* AutoAlertPolicy.swift */,
 				FE1D0A30000000000000FA30 /* AlertPreferences.swift */,
@@ -611,6 +630,7 @@
 		AB10C011000000000000F011 /* WatchnowTests */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A3C000000000000FA3C /* AlertPlannerTests.swift */,
 				FE1D0A35000000000000FA35 /* AlertsTests.swift */,
 				AB10C012000000000000F012 /* WhatsNewTests.swift */,
 			);
@@ -664,6 +684,7 @@
 		FE1D0A3F000000000000FA3F /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A3B000000000000FA3B /* SettingsDebugSection.swift */,
 				FE1D0A34000000000000FA34 /* NotificationExplainerView.swift */,
 				FE1D0A33000000000000FA33 /* SettingsView.swift */,
 			);
@@ -775,6 +796,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A3B000000000000FB3B /* SettingsDebugSection.swift in Sources */,
+				FE1D0A3A000000000000FB3A /* BackgroundRefresh.swift in Sources */,
+				FE1D0A39000000000000FB39 /* AlertInputs.swift in Sources */,
+				FE1D0A38000000000000FB38 /* AlertScheduler.swift in Sources */,
+				FE1D0A37000000000000FB37 /* NotificationCenterClient.swift in Sources */,
+				FE1D0A36000000000000FB36 /* AlertPlanner.swift in Sources */,
 				FE1D0A34000000000000FB34 /* NotificationExplainerView.swift in Sources */,
 				FE1D0A33000000000000FB33 /* SettingsView.swift in Sources */,
 				FE1D0A32000000000000FB32 /* NotificationPermission.swift in Sources */,
@@ -913,6 +940,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A3C000000000000FB3C /* AlertPlannerTests.swift in Sources */,
 				FE1D0A35000000000000FB35 /* AlertsTests.swift in Sources */,
 				AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */,
 			);

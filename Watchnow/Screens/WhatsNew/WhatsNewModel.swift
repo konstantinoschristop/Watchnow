@@ -267,6 +267,15 @@ struct WatchlistSnapshot: Codable, Equatable {
     var lastEpisodeID: Int?
     var nextEpisodeID: Int?
     var nextEpisodeAirDate: String?
+    /// Season / episode numbers for `nextEpisodeID`, so an alert can say
+    /// "S3E7" rather than "a new episode".
+    ///
+    /// Optional and defaulted for the same reason `backdropPath` is:
+    /// `@UserDefault` decodes the whole snapshot table in one go, so a
+    /// non-optional addition would throw `keyNotFound` on the first record
+    /// written before this shipped and take every other snapshot with it.
+    var nextEpisodeSeason: Int? = nil
+    var nextEpisodeNumber: Int? = nil
     /// TMDB ids of the trailers/teasers known at last check.
     var videoIDs: [String]
     /// Flatrate (subscription) provider ids in the user's region.

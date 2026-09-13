@@ -36,6 +36,9 @@ struct SettingsView: View {
                 alertsSection
                 syncSection
                 aboutSection
+                #if DEBUG
+                SettingsDebugSection()
+                #endif
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)

@@ -259,6 +259,8 @@ enum ChangeClassifier {
             lastEpisodeID: fresh.details?.last_episode_to_air?.id,
             nextEpisodeID: fresh.details?.next_episode_to_air?.id,
             nextEpisodeAirDate: nonEmpty(fresh.details?.next_episode_to_air?.air_date),
+            nextEpisodeSeason: fresh.details?.next_episode_to_air?.season_number,
+            nextEpisodeNumber: fresh.details?.next_episode_to_air?.episode_number,
             videoIDs: trailers(in: fresh.videos ?? []).compactMap(\.id),
             providerIDs: fresh.providerIDs ?? [],
             lastCheckedAt: now.timeIntervalSince1970
@@ -285,6 +287,8 @@ enum ChangeClassifier {
             next.lastEpisodeID = details.last_episode_to_air?.id ?? snapshot.lastEpisodeID
             next.nextEpisodeID = details.next_episode_to_air?.id
             next.nextEpisodeAirDate = nonEmpty(details.next_episode_to_air?.air_date)
+            next.nextEpisodeSeason = details.next_episode_to_air?.season_number
+            next.nextEpisodeNumber = details.next_episode_to_air?.episode_number
         }
         if let videos = fresh.videos {
             next.videoIDs = trailers(in: videos).compactMap(\.id)

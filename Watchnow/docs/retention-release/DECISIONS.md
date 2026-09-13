@@ -240,3 +240,74 @@ id where it is *listed* inside a parent group's `children` (four tabs of indent)
 attempt filed three files under `Preview Content` and two under `Responses`. Anchor on
 `\n\t\t<id> /* ` — the definition, not the reference.
 **Status: accepted.**
+
+---
+
+# Phase 2 — Alert planning and background refresh
+
+## D-25 · 2026-09-13 · Episode data comes from `WatchlistSnapshot`, not a fresh TMDB call
+`WatchlistChangeMonitor` already refreshes every saved title twice a day and persists
+`nextEpisodeID` / `nextEpisodeAirDate` in the What's New snapshot. The planner reads that rather
+than fetching, which means a plan costs zero requests and works offline. Two optional fields were
+added to the snapshot — `nextEpisodeSeason` / `nextEpisodeNumber` — so an alert can say "S3E7"
+instead of "a new episode".
+They are `Int?` with a `nil` default for the reason `SavedProvider.kind` documents: `@UserDefault`
+decodes the whole snapshot table in one pass, so a non-optional addition would throw `keyNotFound`
+on the first pre-existing record and silently discard every other snapshot with it.
+**Status: accepted.**
+
+## D-26 · 2026-09-13 · The fire *day* is part of the alert identifier
+`auto.episode.<mediaID>.<yyyyMMdd>`. When TMDB moves an air date, the old identifier simply stops
+being planned and a new one appears, so `AlertScheduler` heals the schedule with a plain
+add/remove diff and no special case for rescheduling. It also makes the one-alert-per-title-per-day
+cap true by construction rather than by enforcement.
+**Status: accepted.**
+
+## D-27 · 2026-09-13 · The scheduler does not inherit `ReminderManager`'s 3-second DEBUG trigger
+`ReminderManager.schedule` fires every manual reminder ~3s after it is set in Debug builds, which is
+right for testing a deep link and wrong for anything that reconciles against pending fire dates.
+`LiveNotificationCenterClient.add` always builds a real calendar trigger. The debug menu's "Fire
+sample alert" covers the "does a delivery actually work" question instead, and the menu's footer
+says plainly that manual reminder dates shown there are not the real ones.
+**Status: accepted.**
+
+## D-28 · 2026-09-13 · An unauthorized reconcile leaves the schedule alone rather than tearing it down
+If notifications are off, nothing would be delivered, so nothing is worth scheduling — but the
+existing requests are not removed either. If the user turns notifications back on, the next
+reconcile finds the schedule already correct instead of rebuilding it from nothing. The outcome
+reports `skippedUnauthorized` so the debug menu can tell that apart from "nothing needed doing".
+**Status: accepted.**
+
+## D-29 · 2026-09-13 · The foreground pass plans but does not sync
+`WhatsNewViewModel.checkOnLaunch` already drives `WatchlistChangeMonitor` on launch and on every
+return to the foreground. A second sync beside it would double every saved title's request count
+for no new information. `runForegroundPass` takes whatever the monitor last learned and makes the
+schedule agree with it; only the background task and the debug button sync.
+**Status: accepted.**
+
+## D-30 · 2026-09-13 · `BGAppRefreshTask` crosses to the main actor in a box
+The task isn't `Sendable` and the pipeline it drives is `@MainActor`, which Swift 6 rejects outright.
+iOS hands the task over on one queue and only ever expects `expirationHandler` and
+`setTaskCompleted` on it, so a small `@unchecked Sendable` box is honest about how narrow that
+contract is — the same bargain `ServiceInvocation` and `NotificationCenterDelegate` already make in
+this codebase. `taskIdentifier` is `nonisolated` so `register()` can run from `WatchnowApp.init`,
+which is where it has to run: iOS traps on an identifier not declared in
+`BGTaskSchedulerPermittedIdentifiers`, and registration must happen before launch completes.
+**Status: accepted.**
+
+## D-31 · 2026-09-13 · An episode airing today after 18:00 gets no alert
+The planner drops any fire date already in the past, so saving a series at 20:00 on the day its
+episode airs produces nothing. Considered firing "soon" instead and rejected: it adds a branch for
+a narrow case, and in normal use the plan for today's episode was made yesterday or earlier, when
+18:00 today was still ahead. Worth revisiting only if it shows up in real use.
+**Status: accepted, with the trade-off named.**
+
+## D-32 · 2026-09-13 · Verified on device, including the removal path
+Saved series → snapshot → policy → plan → iOS. Proven on an iPhone 17 Pro simulator: the debug menu
+reported `1 dated → 1 planned`, iOS held `auto.episode.314939.20260920` at 20 Sep 18:00, a second
+foreground pass left it at exactly one pending (idempotent), and switching "Episode alerts" off
+reconciled to `+0 / −1`.
+One trap for anyone repeating this with a hand-edited fixture: `@UserDefault` stores `Data`, so a
+plist edit that writes the JSON back as a *string* makes the app decode nothing at all and report an
+empty store — which looks exactly like a broken pipeline.
+**Status: accepted.**

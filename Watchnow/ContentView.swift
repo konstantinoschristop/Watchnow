@@ -86,11 +86,17 @@ struct ContentView: View {
             SettingsView()
         }
         .task {
+            // Order matters: the briefing check drives the watchlist sync,
+            // and the alert plan is only as good as what that sync learned.
             await whatsNew.checkOnLaunch()
+            await BackgroundRefresh.runForegroundPass()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
-                Task { await whatsNew.checkOnLaunch() }
+                Task {
+                    await whatsNew.checkOnLaunch()
+                    await BackgroundRefresh.runForegroundPass()
+                }
             }
         }
     }

@@ -47,12 +47,12 @@ final class DeepLinkRouter: ObservableObject {
     }
 }
 
-struct DeepLink: Equatable {
+struct DeepLink: Equatable, Sendable {
 
     let id: Int
     let mediaType: MediaType
 
-    enum MediaType: String {
+    enum MediaType: String, Sendable {
         case movie
         case tv
     }

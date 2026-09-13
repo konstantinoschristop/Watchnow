@@ -41,6 +41,32 @@ enum ReminderManager {
         "reminder.episode.\(episodeID)"
     }
 
+    // MARK: - Reading an identifier back
+
+    /// The movie / series an identifier belongs to, or nil when it doesn't
+    /// name one. `reminder.episode.<episodeID>` carries an episode id rather
+    /// than a media id, so it returns nil here and is answered by
+    /// `episodeID(from:)` instead.
+    ///
+    /// This lives beside the builders above on purpose: the format has
+    /// exactly one owner, and `AlertPlanner`'s dedupe rule needs to read it
+    /// without inventing a second copy of the grammar.
+    nonisolated static func mediaID(from identifier: String) -> Int? {
+        let parts = identifier.split(separator: ".")
+        guard parts.count >= 3, parts[0] == "reminder" else { return nil }
+        switch parts[1] {
+        case "title", "season": return Int(parts[2])
+        default:                return nil
+        }
+    }
+
+    /// The episode an identifier belongs to, for episode-level reminders.
+    nonisolated static func episodeID(from identifier: String) -> Int? {
+        let parts = identifier.split(separator: ".")
+        guard parts.count >= 3, parts[0] == "reminder", parts[1] == "episode" else { return nil }
+        return Int(parts[2])
+    }
+
     // MARK: - Authorization
 
     /// Returns whether notification authorization is granted. Prompts the

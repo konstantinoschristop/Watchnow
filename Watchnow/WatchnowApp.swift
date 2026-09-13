@@ -29,6 +29,12 @@ struct WatchnowApp: App {
         // Begin mirroring the watchlist / folders / Movie Night prefs to
         // iCloud and reconcile with any data already in the user's account.
         CloudSync.start()
+
+        // Must happen before launch finishes, so it lives here rather than
+        // in a `.task`. iOS traps on an identifier that isn't declared in
+        // `BGTaskSchedulerPermittedIdentifiers`, so this and Info.plist have
+        // to agree.
+        BackgroundRefresh.register()
     }
 
     var body: some Scene {
