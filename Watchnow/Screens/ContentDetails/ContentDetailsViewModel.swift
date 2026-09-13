@@ -385,6 +385,55 @@ extension ContentDetailsViewModel {
         return ReminderManager.titleIdentifier(resultID: id)
     }
 
+    // MARK: - Alerts
+
+    /// What the bell in the nav bar controls on this screen.
+    ///
+    /// Two jobs, never at once. An unreleased title gets the manual
+    /// release reminder the bell has meant since v1.3 — untouched. Anything
+    /// already out is instead the per-title switch for the automatic alerts
+    /// this release adds, which is the only control a user has over an
+    /// episode or "now streaming" notification for that title.
+    enum BellMode: Equatable {
+        case releaseReminder(Date)
+        case automaticAlerts
+    }
+
+    var bellMode: BellMode? {
+        if let date = futureReleaseDate { return .releaseReminder(date) }
+        guard isInWatchList, result.id != nil, screenType != .person else { return nil }
+        return .automaticAlerts
+    }
+
+    /// Whether this title is currently muted. Saved titles are unmuted by
+    /// default — `AlertPreferences` stores exceptions, never follows.
+    var isAlertMuted: Bool {
+        guard let id = result.id else { return false }
+        return AlertPreferences.isOptedOut(id)
+    }
+
+    /// What will actually reach the user if this title stays unmuted, given
+    /// the global switches. Worded for the bell's accessibility hint, so a
+    /// VoiceOver user is told the truth rather than "alerts are on" when
+    /// both switches are off in Settings.
+    var alertHint: String {
+        guard let id = result.id else { return "" }
+        let kinds = AutoAlertPolicy.alertKinds(
+            for: AlertPreferences.policyInputs(forID: id, isSaved: isInWatchList))
+        if kinds.isEmpty {
+            return "Alerts are switched off for every title in Settings"
+        }
+        if kinds.contains(.episode), kinds.contains(.streaming) {
+            return screenType == .tv
+                ? "New episodes, and when it lands on a service you have"
+                : "When it lands on a service you have"
+        }
+        if kinds.contains(.episode) {
+            return screenType == .tv ? "New episodes" : "Alerts are limited to new episodes in Settings"
+        }
+        return "When it lands on a service you have"
+    }
+
     var reminderDeepLink: DeepLink? {
         guard let id = result.id else { return nil }
         let mediaType: DeepLink.MediaType = (screenType == .movie) ? .movie : .tv

@@ -150,6 +150,7 @@ struct GenericListView: View {
             viewModel.showAddedAlert = true
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             if added {
+                Task { await NotificationPermission.shared.offerAfterSave() }
                 ReviewRequestManager.recordWatchlistAdd()
                 ReviewRequestManager.requestReviewIfAppropriate()
             }

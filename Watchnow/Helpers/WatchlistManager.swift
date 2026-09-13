@@ -247,11 +247,14 @@ enum WatchlistManager {
         }
         // Drop the title's folder mapping and saved-date too. If the user
         // re-saves later it should reappear in Uncategorized, not in the
-        // old folder, and the "saved a while ago" clock should restart.
+        // old folder, and the "saved a while ago" clock should restart. The
+        // alert exception goes for the same reason: muting a title was a
+        // decision about a title they were following, and they no longer are.
         if let id = result.id {
             FolderManager.shared.forget(resultID: id)
             addedDates.removeValue(forKey: String(id))
             providers.removeValue(forKey: String(id))
+            AlertPreferences.forget(resultID: id)
         }
     }
     

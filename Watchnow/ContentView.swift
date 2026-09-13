@@ -17,9 +17,14 @@ struct ContentView: View {
     /// Shared (like the router) so the DEBUG test bench can drive the same
     /// instance this view presents from.
     @ObservedObject private var whatsNew = WhatsNewViewModel.shared
+    /// Shared for the same reason as the router: the save that triggers the
+    /// explainer happens on a details screen or a list row, and the sheet
+    /// that explains it belongs to the app's root.
+    @ObservedObject private var notificationPermission = NotificationPermission.shared
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab: AppTab = .movies
+    @State private var settingsPresented = false
     @State private var moviesDeepLinkResult: Result?
     @State private var seriesDeepLinkResult: Result?
     #if DEBUG
@@ -67,6 +72,18 @@ struct ContentView: View {
         // just hosts the sheet.
         .sheet(isPresented: $whatsNew.isPresented, onDismiss: { whatsNew.briefingDismissed() }) {
             WhatsNewView(vm: whatsNew)
+        }
+        // The pre-permission explainer, offered once, after the first save.
+        // Hosted here rather than on the details screen so it survives the
+        // user navigating away in the moment between saving and deciding.
+        .sheet(isPresented: $notificationPermission.explainerPresented) {
+            NotificationExplainerView(
+                onAllow: { Task { await notificationPermission.acceptExplainer() } },
+                onDecline: { notificationPermission.declineExplainer() }
+            )
+        }
+        .sheet(isPresented: $settingsPresented) {
+            SettingsView()
         }
         .task {
             await whatsNew.checkOnLaunch()
@@ -158,6 +175,16 @@ extension ContentView {
             WatchlistView(watchlistViewModel: watchlistViewModel)
                 .background(Color(.background))
                 .navigationTitle("Watchlist")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            settingsPresented = true
+                        } label: {
+                            Image(systemName: "gearshape")
+                        }
+                        .accessibilityLabel("Settings")
+                    }
+                }
             #if DEBUG
                 // Dev-only test bench for the What's New briefing; the
                 // whole affordance compiles away in Release.

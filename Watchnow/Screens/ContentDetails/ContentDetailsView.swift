@@ -19,7 +19,12 @@ struct ContentDetailsView: View {
     @State private var showAlert = false
     @State var isSeasonsSheetPresented = false
     @State private var isReminderOn = false
+    /// Working copy of this title's automatic-alert switch. Mirrors
+    /// `AlertPreferences`, which isn't observable — same shape as
+    /// `isReminderOn` above and `isLiked` below.
+    @State private var alertsOn = true
     @State private var showReminderAlert = false
+    @State private var showAlertsToast = false
     @State private var showNotificationSettingsAlert = false
     @State private var isLiked = false
     @Namespace private var namespace
@@ -83,6 +88,11 @@ struct ContentDetailsView: View {
             isReminderOn ?
             AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
             AlertToast(displayMode: .alert, type: .error(.red), title: "Reminder Removed")
+        })
+        .toast(isPresenting: $showAlertsToast, alert: {
+            alertsOn ?
+            AlertToast(displayMode: .alert, type: .complete(.green), title: "Alerts On") :
+            AlertToast(displayMode: .alert, type: .error(.red), title: "Alerts Muted")
         })
         .sheet(isPresented: $videoPresented) {
             WebViewSheet(url: detailsViewModel.videos?.getVideoURL())
@@ -221,11 +231,42 @@ extension ContentDetailsView {
     }
 
     private func syncReminderState() {
+        alertsOn = !detailsViewModel.isAlertMuted
+
         guard let identifier = detailsViewModel.reminderIdentifier else {
             isReminderOn = false
             return
         }
         isReminderOn = ReminderManager.isScheduled(identifier: identifier)
+    }
+
+    /// Mute or unmute this title's automatic alerts.
+    ///
+    /// Turning them *on* is the one moment where asking iOS outright is
+    /// right: the user has just pointed at a bell and asked to be told
+    /// about this title, so the system prompt needs no preamble. A denial
+    /// routes to the same "Notifications are off" alert the manual
+    /// reminders have always used.
+    private func toggleAlerts() {
+        guard let id = detailsViewModel.result.id else { return }
+
+        let turningOn = !alertsOn
+        AlertPreferences.setOptedOut(!turningOn, for: id)
+        alertsOn = turningOn
+        showAlertsToast = true
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+
+        guard turningOn else { return }
+        Task {
+            let permission = NotificationPermission.shared
+            await permission.refreshStatus()
+            guard !permission.isAuthorized else { return }
+            if permission.canStillAsk {
+                await permission.requestFromSettings()
+            } else {
+                showNotificationSettingsAlert = true
+            }
+        }
     }
 
     private func toggleReminder() {
@@ -285,6 +326,11 @@ extension ContentDetailsView {
             // from a list row carrying months-old artwork.
             detailsViewModel.syncWatchlistEntry()
             if added {
+                // Saving is what subscribes the user to alerts, so it is
+                // also the first moment asking iOS for permission means
+                // anything. A no-op after the first time — see
+                // `NotificationPermission.offerAfterSave`.
+                Task { await NotificationPermission.shared.offerAfterSave() }
                 ReviewRequestManager.recordWatchlistAdd()
                 ReviewRequestManager.requestReviewIfAppropriate()
             }
@@ -307,13 +353,7 @@ extension ContentDetailsView {
     var navBarTrailingView: some View {
 
         HStack(alignment: .center, spacing: 20) {
-            if detailsViewModel.futureReleaseDate != nil {
-                Button(action: toggleReminder) {
-                    getnavBarLabel(imageName: isReminderOn ? "bell.fill" : "bell")
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isReminderOn ? "Cancel reminder" : "Remind me on release")
-            }
+            bellButton
 
             if let url = URL(string: detailsViewModel.createShareLink()) {
                 ShareLink(item: url) {
@@ -329,6 +369,35 @@ extension ContentDetailsView {
         }
         .onChange(of: detailsViewModel.reminderIdentifier) { _, _ in
             syncReminderState()
+        }
+        // Saving or unsaving flips the bell between "remind me on release"
+        // and "mute this title" — or removes it entirely.
+        .onChange(of: detailsViewModel.isInWatchList) { _, _ in
+            syncReminderState()
+        }
+    }
+
+    /// One glyph, two jobs — see `ContentDetailsViewModel.BellMode`.
+    @ViewBuilder
+    private var bellButton: some View {
+        switch detailsViewModel.bellMode {
+        case .releaseReminder:
+            Button(action: toggleReminder) {
+                getnavBarLabel(imageName: isReminderOn ? "bell.fill" : "bell")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isReminderOn ? "Cancel reminder" : "Remind me on release")
+
+        case .automaticAlerts:
+            Button(action: toggleAlerts) {
+                getnavBarLabel(imageName: alertsOn ? "bell.fill" : "bell.slash")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(alertsOn ? "Mute alerts for this title" : "Turn alerts on for this title")
+            .accessibilityHint(detailsViewModel.alertHint)
+
+        case nil:
+            EmptyView()
         }
     }
 

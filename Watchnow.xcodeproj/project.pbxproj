@@ -141,6 +141,12 @@
 		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
 		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
 		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
+		FE1D0A30000000000000FB30 /* AlertPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A30000000000000FA30 /* AlertPreferences.swift */; };
+		FE1D0A31000000000000FB31 /* AutoAlertPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A31000000000000FA31 /* AutoAlertPolicy.swift */; };
+		FE1D0A32000000000000FB32 /* NotificationPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A32000000000000FA32 /* NotificationPermission.swift */; };
+		FE1D0A33000000000000FB33 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A33000000000000FA33 /* SettingsView.swift */; };
+		FE1D0A34000000000000FB34 /* NotificationExplainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A34000000000000FA34 /* NotificationExplainerView.swift */; };
+		FE1D0A35000000000000FB35 /* AlertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A35000000000000FA35 /* AlertsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -288,6 +294,12 @@
 		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
 		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
 		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
+		FE1D0A30000000000000FA30 /* AlertPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPreferences.swift; sourceTree = "<group>"; };
+		FE1D0A31000000000000FA31 /* AutoAlertPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoAlertPolicy.swift; sourceTree = "<group>"; };
+		FE1D0A32000000000000FA32 /* NotificationPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermission.swift; sourceTree = "<group>"; };
+		FE1D0A33000000000000FA33 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FE1D0A34000000000000FA34 /* NotificationExplainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExplainerView.swift; sourceTree = "<group>"; };
+		FE1D0A35000000000000FA35 /* AlertsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -445,6 +457,7 @@
 		8AA98D7E2ADB1544007963E3 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A3F000000000000FA3F /* Settings */,
 				8AA98D832ADB157D007963E3 /* ContentDetails */,
 				8AA98D822ADB156B007963E3 /* Watchlist */,
 				8AA98D812ADB1564007963E3 /* Search */,
@@ -543,6 +556,9 @@
 		8AC338FF2752931E00834B46 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A32000000000000FA32 /* NotificationPermission.swift */,
+				FE1D0A31000000000000FA31 /* AutoAlertPolicy.swift */,
+				FE1D0A30000000000000FA30 /* AlertPreferences.swift */,
 				AB10C006000000000000F006 /* ChangeClassifier.swift */,
 				AB10C007000000000000F007 /* WatchlistChangeStore.swift */,
 				AB10C008000000000000F008 /* WatchlistChangeMonitor.swift */,
@@ -595,6 +611,7 @@
 		AB10C011000000000000F011 /* WatchnowTests */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A35000000000000FA35 /* AlertsTests.swift */,
 				AB10C012000000000000F012 /* WhatsNewTests.swift */,
 			);
 			path = WatchnowTests;
@@ -642,6 +659,15 @@
 				EEDC84A728AAC40300F3C171 /* EpisodesViewModel.swift */,
 			);
 			path = SeasonsView;
+			sourceTree = "<group>";
+		};
+		FE1D0A3F000000000000FA3F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				FE1D0A34000000000000FA34 /* NotificationExplainerView.swift */,
+				FE1D0A33000000000000FA33 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -749,6 +775,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A34000000000000FB34 /* NotificationExplainerView.swift in Sources */,
+				FE1D0A33000000000000FB33 /* SettingsView.swift in Sources */,
+				FE1D0A32000000000000FB32 /* NotificationPermission.swift in Sources */,
+				FE1D0A31000000000000FB31 /* AutoAlertPolicy.swift in Sources */,
+				FE1D0A30000000000000FB30 /* AlertPreferences.swift in Sources */,
 				AB10C001000000000000F101 /* ChangesResponse.swift in Sources */,
 				AB10C002000000000000F102 /* WhatsNewModel.swift in Sources */,
 				AB10C003000000000000F103 /* WhatsNewViewModel.swift in Sources */,
@@ -882,6 +913,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A35000000000000FB35 /* AlertsTests.swift in Sources */,
 				AB10C013000000000000F013 /* WhatsNewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

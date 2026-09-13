@@ -44,7 +44,16 @@ enum CloudSync {
         "tasteLikedIDs",                // titles they said "I like this" to
         "tasteLikedGenres",             // genre weights from those likes
         "tasteLikedLanguages",          // languages they gravitate to
-        "tastePassedGenres"             // Movie Night passes (implicit dislikes)
+        "tastePassedGenres",            // Movie Night passes (implicit dislikes)
+
+        // AlertPreferences — what the user has said about automatic alerts.
+        // A title muted on the phone must stay muted on the iPad: these are
+        // decisions about content, not about a device. The device's own
+        // notification-permission bookkeeping is deliberately absent, since
+        // iOS grants that per device.
+        "alertsEpisodesEnabled",
+        "alertsStreamingEnabled",
+        "alertsOptedOutIDs"
 
         // Deliberately absent: "watchlistProviders". Which service a title
         // streams on is answered per region, so an iPhone set to Greece and
