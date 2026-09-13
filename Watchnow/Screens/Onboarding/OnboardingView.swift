@@ -24,7 +24,6 @@ struct OnboardingView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
             content
             footer
         }
@@ -94,16 +93,22 @@ struct OnboardingView: View {
     @ViewBuilder
     private var content: some View {
         ScrollView {
-            Group {
-                switch vm.step {
-                case .services: servicesStep
-                case .loved:    posterStep(vm.lovedCandidates, isPicked: vm.isLovedPicked, toggle: vm.toggleLoved)
-                case .save:     posterStep(vm.saveCandidates, isPicked: vm.isSavePicked, toggle: vm.toggleSave)
-                case .finish:   finishStep
+            // The header scrolls with the content rather than sitting above
+            // it. Pinned, a five-line title at an accessibility size left
+            // barely one row of choices visible between it and the footer.
+            VStack(spacing: 0) {
+                header
+                Group {
+                    switch vm.step {
+                    case .services: servicesStep
+                    case .loved:    posterStep(vm.lovedCandidates, isPicked: vm.isLovedPicked, toggle: vm.toggleLoved)
+                    case .save:     posterStep(vm.saveCandidates, isPicked: vm.isSavePicked, toggle: vm.toggleSave)
+                    case .finish:   finishStep
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 24)
         }
         .scrollBounceBehavior(.basedOnSize)
         .overlay {

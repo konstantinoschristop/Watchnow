@@ -85,6 +85,13 @@ struct MovieNightMatchView: View {
         VStack(spacing: 12) {
             primaryButton("View details", icon: "info.circle.fill") {
                 vm.detailTarget = result
+                // Asked here rather than when this screen appears: the
+                // results phase fires the app's one interstitial, and a
+                // review sheet raised behind a fullscreen ad is simply
+                // discarded — spending the four-month throttle on nothing.
+                // By the time someone taps through, the ad is long gone and
+                // they have a decision they liked.
+                ReviewRequestManager.requestReview(for: .movieNightMatch)
             }
             HStack(spacing: 12) {
                 secondaryButton("Deal again", icon: "arrow.triangle.2.circlepath") { vm.dealAgain() }

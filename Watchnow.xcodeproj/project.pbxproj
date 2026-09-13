@@ -164,6 +164,9 @@
 		FE1D0A46000000000000FB46 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A46000000000000FA46 /* OnboardingView.swift */; };
 		FE1D0A47000000000000FB47 /* ProviderPickerGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A47000000000000FA47 /* ProviderPickerGrid.swift */; };
 		FE1D0A48000000000000FB48 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A48000000000000FA48 /* OnboardingTests.swift */; };
+		FE1D0A49000000000000FB49 /* ReviewPromptPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */; };
+		FE1D0A4A000000000000FB4A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FE1D0A4A000000000000FA4A /* Localizable.xcstrings */; };
+		FE1D0A4B000000000000FB4B /* ReviewPromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -334,6 +337,9 @@
 		FE1D0A46000000000000FA46 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		FE1D0A47000000000000FA47 /* ProviderPickerGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPickerGrid.swift; sourceTree = "<group>"; };
 		FE1D0A48000000000000FA48 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
+		FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptPolicy.swift; sourceTree = "<group>"; };
+		FE1D0A4A000000000000FA4A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -411,6 +417,7 @@
 		8A981D5126B5AF1000993232 /* Watchnow */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A4A000000000000FA4A /* Localizable.xcstrings */,
 				8AA98D7E2ADB1544007963E3 /* Screens */,
 				8AC338FF2752931E00834B46 /* Helpers */,
 				8A981D6A26B68D8800993232 /* Services */,
@@ -592,6 +599,7 @@
 		8AC338FF2752931E00834B46 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */,
 				FE1D0A44000000000000FA44 /* OnboardingCoordinator.swift */,
 				FE1D0A43000000000000FA43 /* TasteSeeder.swift */,
 				FE1D0A42000000000000FA42 /* OnboardingState.swift */,
@@ -658,6 +666,7 @@
 		AB10C011000000000000F011 /* WatchnowTests */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */,
 				FE1D0A48000000000000FA48 /* OnboardingTests.swift */,
 				FE1D0A3C000000000000FA3C /* AlertPlannerTests.swift */,
 				FE1D0A35000000000000FA35 /* AlertsTests.swift */,
@@ -821,6 +830,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A4A000000000000FB4A /* Localizable.xcstrings in Resources */,
 				8A981D5F26B5AF1100993232 /* LaunchScreen.storyboard in Resources */,
 				8A981D5C26B5AF1100993232 /* Preview Assets.xcassets in Resources */,
 				8A981D5926B5AF1100993232 /* Assets.xcassets in Resources */,
@@ -834,6 +844,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A49000000000000FB49 /* ReviewPromptPolicy.swift in Sources */,
 				FE1D0A47000000000000FB47 /* ProviderPickerGrid.swift in Sources */,
 				FE1D0A46000000000000FB46 /* OnboardingView.swift in Sources */,
 				FE1D0A45000000000000FB45 /* OnboardingViewModel.swift in Sources */,
@@ -987,6 +998,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A4B000000000000FB4B /* ReviewPromptTests.swift in Sources */,
 				FE1D0A48000000000000FB48 /* OnboardingTests.swift in Sources */,
 				FE1D0A3C000000000000FB3C /* AlertPlannerTests.swift in Sources */,
 				FE1D0A35000000000000FB35 /* AlertsTests.swift in Sources */,
@@ -1164,6 +1176,7 @@
 				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -1196,6 +1209,7 @@
 				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;

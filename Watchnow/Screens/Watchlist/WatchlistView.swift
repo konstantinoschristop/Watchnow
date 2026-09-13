@@ -303,14 +303,13 @@ struct WatchlistView: View {
     /// different features.
     private func toggleWatched(_ result: Result) {
         guard let id = result.id else { return }
+        var nowWatched = false
         withAnimation(reduceMotion ? nil : AppMotion.crossfade) {
-            if WatchedStore.toggle(id) {
-                watchedIDs.insert(id)
-            } else {
-                watchedIDs.remove(id)
-            }
+            nowWatched = WatchedStore.toggle(id)
+            if nowWatched { watchedIDs.insert(id) } else { watchedIDs.remove(id) }
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        if nowWatched { ReviewRequestManager.requestReview(for: .markedWatched) }
     }
 
     private func removeFromGrid(_ result: Result) {

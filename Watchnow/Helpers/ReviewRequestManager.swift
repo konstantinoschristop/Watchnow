@@ -2,14 +2,12 @@
 //  ReviewRequestManager.swift
 //  Watchnow
 //
-//  Decides when to ask the user for an App Store review.
+//  Spends the App Store review prompt, at most once every four months.
 //
-//  Strategy: prompt at most once per app version, after the user has shown
-//  engagement (N watchlist adds) and the app has been installed for at
-//  least a couple of days. Apple's own throttle (3 prompts / 365 days)
-//  sits on top of this as a backstop — these gates exist to make sure we
-//  ask in a "this app is useful" moment rather than burning the quota
-//  early.
+//  `ReviewPromptPolicy` decides whether to ask; this owns the bookkeeping
+//  and the one call to StoreKit. It replaces a once-per-version rule that
+//  fired on the third save alone — the store had no ratings under it, and
+//  a save is the moment someone starts work rather than finishes it.
 //
 
 import Foundation
@@ -20,59 +18,98 @@ import UIKit
 enum ReviewRequestManager {
 
     private enum Key {
-        static let qualifyingActionCount = "review.qualifyingActionCount"
-        static let lastPromptedVersion = "review.lastPromptedVersion"
-        static let firstSeenDate = "review.firstSeenDate"
+        static let savedCount = "review.qualifyingActionCount"
+        static let firstSeen = "review.firstSeenDate"
+        static let lastPromptedAt = "review.lastPromptedAt"
+        /// The old once-per-version marker. Read once during migration,
+        /// never written again.
+        static let legacyPromptedVersion = "review.lastPromptedVersion"
     }
 
-    private static let actionThreshold = 3
-    private static let minDaysSinceFirstSeen = 2
+    /// Lets the success toast and haptic finish before the system sheet
+    /// slides up. Landing on top of a toast reads as an ambush.
+    private static let presentationDelay: TimeInterval = 1.5
+
+    /// True for the session that created the install record. Transient by
+    /// design — a relaunch is a second session.
+    private static var isFirstSession = false
+
+    // MARK: - Launch bookkeeping
+
+    /// Call once per launch, before anything can trigger a prompt.
+    static func recordLaunch(now: Date = Date()) {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: Key.firstSeen) == nil {
+            defaults.set(now, forKey: Key.firstSeen)
+            isFirstSession = true
+        }
+        migrateLegacyPromptMarkerIfNeeded(now: now)
+    }
+
+    /// v2.0 recorded only *which version* last prompted, so an upgrading
+    /// user carries no date. Treat a marker matching the running version as
+    /// "prompted just now" and start the four-month clock from here: asking
+    /// again immediately is the one outcome worth ruling out, and being
+    /// four months late costs nothing.
+    private static func migrateLegacyPromptMarkerIfNeeded(now: Date) {
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: Key.lastPromptedAt) == nil,
+              let legacy = defaults.string(forKey: Key.legacyPromptedVersion)
+        else { return }
+
+        if legacy == currentAppVersion() {
+            defaults.set(now, forKey: Key.lastPromptedAt)
+        }
+        defaults.removeObject(forKey: Key.legacyPromptedVersion)
+    }
+
+    // MARK: - Counting
 
     static func recordWatchlistAdd() {
         let defaults = UserDefaults.standard
-        if defaults.object(forKey: Key.firstSeenDate) == nil {
-            defaults.set(Date(), forKey: Key.firstSeenDate)
-        }
-        let next = defaults.integer(forKey: Key.qualifyingActionCount) + 1
-        defaults.set(next, forKey: Key.qualifyingActionCount)
+        defaults.set(defaults.integer(forKey: Key.savedCount) + 1, forKey: Key.savedCount)
     }
 
-    static func requestReviewIfAppropriate() {
-        guard shouldRequestReview() else { return }
+    // MARK: - Asking
 
-        // Defer so the success haptic + toast finish first; the system
-        // sheet appearing on top of the toast feels jarring otherwise.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+    /// Ask, if this moment has earned it. Safe to call from any trigger
+    /// site — the policy does the deciding.
+    static func requestReview(for trigger: ReviewTrigger, now: Date = Date()) {
+        let defaults = UserDefaults.standard
+        let inputs = ReviewPromptPolicy.Inputs(
+            trigger: trigger,
+            firstLaunchedAt: defaults.object(forKey: Key.firstSeen) as? Date,
+            lastPromptedAt: defaults.object(forKey: Key.lastPromptedAt) as? Date,
+            isFirstSession: isFirstSession,
+            savedCount: defaults.integer(forKey: Key.savedCount),
+            watchedCount: WatchedStore.count,
+            now: now)
+
+        guard ReviewPromptPolicy.shouldAsk(inputs) else { return }
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(presentationDelay))
             guard let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
             else { return }
 
-            Task { await AppStore.requestReview(in: scene) }
-            UserDefaults.standard.set(currentAppVersion(), forKey: Key.lastPromptedVersion)
+            AppStore.requestReview(in: scene)
+            UserDefaults.standard.set(now, forKey: Key.lastPromptedAt)
         }
-    }
-
-    private static func shouldRequestReview() -> Bool {
-        let defaults = UserDefaults.standard
-
-        guard defaults.integer(forKey: Key.qualifyingActionCount) >= actionThreshold else {
-            return false
-        }
-
-        if let lastVersion = defaults.string(forKey: Key.lastPromptedVersion),
-           lastVersion == currentAppVersion() {
-            return false
-        }
-
-        if let firstSeen = defaults.object(forKey: Key.firstSeenDate) as? Date {
-            let elapsed = Date().timeIntervalSince(firstSeen)
-            guard elapsed >= TimeInterval(minDaysSinceFirstSeen * 86_400) else { return false }
-        }
-
-        return true
     }
 
     private static func currentAppVersion() -> String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+    }
+
+    // MARK: - Reset
+
+    /// Debug tooling and tests only.
+    static func reset() {
+        let defaults = UserDefaults.standard
+        for key in [Key.savedCount, Key.firstSeen, Key.lastPromptedAt, Key.legacyPromptedVersion] {
+            defaults.removeObject(forKey: key)
+        }
+        isFirstSession = false
     }
 }

@@ -225,6 +225,7 @@ extension ContentDetailsView {
             isWatched = WatchedStore.toggle(id)
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        if isWatched { ReviewRequestManager.requestReview(for: .markedWatched) }
     }
 
     /// Records an explicit taste signal for this title. Kept separate from
@@ -349,7 +350,7 @@ extension ContentDetailsView {
                 // `NotificationPermission.offerAfterSave`.
                 Task { await NotificationPermission.shared.offerAfterSave() }
                 ReviewRequestManager.recordWatchlistAdd()
-                ReviewRequestManager.requestReviewIfAppropriate()
+                ReviewRequestManager.requestReview(for: .savedTitle)
             }
         }
         showAlert = true

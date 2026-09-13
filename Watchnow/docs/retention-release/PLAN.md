@@ -338,20 +338,15 @@ exclusion from Movie Night decks. Tests for the store and the filter. **Stop.**
 - Tests: gate (including the restore-wait branches), seeder mapping. Manual VoiceOver pass.
 - **Stop.**
 
-### Phase 5 — Widget
-- **Manual step for you:** add the widget extension target + App Group in Xcode. The pbxproj is
-  `objectVersion 54` with explicit file references; hand-editing it to bolt on an extension target
-  is a reliable way to produce a project that opens but does not build. You create the target and
-  enable `group.k.christopoulos.Watchnow` on both targets in Signing & Capabilities; I write every
-  line of code inside it. (Same shape as the iCloud KVS capability step from v1.x.)
-- `WidgetSnapshot` (shared source membership), `WidgetSnapshotWriter` (JSON + ≤10 posters ≤300 KB,
-  pulled from Kingfisher's existing cache — no new network), pick selection (pure, date-seeded),
-  small + medium views, `widgetURL` deep links.
-- URL scheme `watchnow://` in `Info.plist` + `.onOpenURL` feeding the existing `DeepLinkRouter`;
-  `DeepLink` gains a `.movieNight` destination.
-- Reload hooks: save path, unsave path, background refresh.
-- Tests: pick determinism per calendar day, both fallbacks, never-watched invariant.
-- **Stop.**
+### Phase 5 — Widget · **CUT**
+
+Dropped on 2026-09-13 by the dev, after weighing it against the other four
+mechanisms (see D-51). A widget only reaches users who perform a five-step
+gesture they don't know exists, it was the only phase needing a new target and
+new entitlements, and its effect could never be separated from the rest in App
+Store Connect. Revisit for v2.2 once the four shipped mechanisms have been
+measured — and if it returns, it returns with an in-app nudge, because a widget
+nobody adds is worse than no widget.
 
 ### Phase 6 — Review prompt, polish, release
 - Modify `ReviewRequestManager` (do **not** add a coordinator beside it): 120-day throttle,

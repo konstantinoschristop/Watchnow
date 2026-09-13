@@ -22,11 +22,26 @@ struct ProviderPickerGrid: View {
     let onToggle: (Int) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// A chip is a compact-size affordance: it sizes to its own text, and
+    /// "Amazon Prime Video" at an accessibility size is wider than the
+    /// phone. Past that point the same controls become full-width rows,
+    /// which have somewhere to grow into.
+    private var usesRows: Bool { typeSize.isAccessibilitySize }
 
     var body: some View {
-        FlowLayout(spacing: 10) {
-            ForEach(providers) { provider in
-                chip(for: provider)
+        if usesRows {
+            VStack(spacing: 8) {
+                ForEach(providers) { provider in
+                    chip(for: provider)
+                }
+            }
+        } else {
+            FlowLayout(spacing: 10) {
+                ForEach(providers) { provider in
+                    chip(for: provider)
+                }
             }
         }
     }
@@ -43,11 +58,20 @@ struct ProviderPickerGrid: View {
                 logo(for: provider)
                 Text(provider.provider_name)
                     .appFont(15, weight: .semibold, relativeTo: .subheadline)
-                    .lineLimit(1)
+                    .lineLimit(usesRows ? 2 : 1)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: usesRows)
+                if usesRows {
+                    Spacer(minLength: 8)
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .appFont(18, weight: .semibold, relativeTo: .body)
+                        .accessibilityHidden(true)
+                }
             }
             .foregroundStyle(isSelected ? Color.white : Color.primary)
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
+            .frame(maxWidth: usesRows ? .infinity : nil, alignment: .leading)
             .frame(minHeight: AppTouch.minTarget)
             .background {
                 AppRadius.shape(AppRadius.panel)

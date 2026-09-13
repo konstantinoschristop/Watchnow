@@ -152,7 +152,7 @@ struct GenericListView: View {
             if added {
                 Task { await NotificationPermission.shared.offerAfterSave() }
                 ReviewRequestManager.recordWatchlistAdd()
-                ReviewRequestManager.requestReviewIfAppropriate()
+                ReviewRequestManager.requestReview(for: .savedTitle)
             }
         } label: {
             Label("Add to Watchlist", systemImage: "bookmark.fill")

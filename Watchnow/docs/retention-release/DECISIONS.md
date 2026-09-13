@@ -493,3 +493,86 @@ empty-state item. Two things from earlier phases remain open and are called out 
 discover them: the `Localizable.xcstrings` catalog agreed in D-13 has not been added, and the watched
 filter deferred in D-35 is still deferred.
 **Status: accepted, tracked for Phase 6.**
+
+---
+
+# Phase 5 — cut
+
+## D-51 · 2026-09-13 · The "Tonight's Pick" widget is cut from this release
+Dropped by the dev after weighing it against the four mechanisms already built.
+Three reasons, in order of weight. There is no API to add a widget for someone: it takes a
+long-press, a +, a search, a size choice and a placement — five deliberate steps most people never
+perform, so its reach is a self-selected minority. It was the only phase requiring a new target and
+new entitlements, i.e. the only signing risk in the release. And its effect could never be isolated
+in App Store Connect, which is the only measurement this release has.
+If it returns in v2.2 it returns with an in-app nudge — a widget nobody adds is worse than no
+widget, because it cost a phase. Everything it would have needed already exists:
+`WatchlistManager.providers` is refreshed twice daily, `WatchedStore` says what is finished, and
+`StreamingPreferences` says which services count.
+**Status: accepted 2026-09-13 by the dev.**
+
+---
+
+# Phase 6 — Review prompt, polish, release
+
+## D-52 · 2026-09-13 · The Movie Night review prompt fires on acting, not on arriving
+The results phase already fires the app's one interstitial. A review sheet raised behind a
+fullscreen ad is simply discarded by StoreKit — which would spend the four-month throttle on a
+prompt nobody saw. Asking when the user taps "View details" on the match puts it after the ad has
+been dismissed, and at a better moment anyway: they have a decision and they are taking it.
+Deliberately done without touching `InterstitialAdManager` to add a "did it present" accessor —
+that file has uncommitted work in the tree from a parallel screenshot-mode change, and committing
+someone else's half-finished work to read one boolean is a bad trade.
+**Status: accepted.**
+
+## D-53 · 2026-09-13 · Upgrading users carry their old prompt marker forward
+v2.0 recorded only *which version* last prompted, so an upgrading user has no date to throttle
+against. On first launch of 2.1, a marker matching the running version is converted to
+"prompted just now", starting the 120-day clock from the upgrade. Asking someone twice in a week is
+the one outcome worth ruling out; being four months late costs nothing. A marker from an older
+version is discarded without throttling.
+**Status: accepted.**
+
+## D-54 · 2026-09-13 · The String Catalog is wired, but it needs opening in Xcode once
+`Localizable.xcstrings` is in the project as a resource and `SWIFT_EMIT_LOC_STRINGS = YES` is set on
+both app configurations. A build now emits 302 `.stringsdata` tables — every user-facing literal in
+the app, including every screen from this release, without a line of Swift changing.
+The catalog file itself stays empty until someone opens it in Xcode, which is what syncs the
+extracted strings into it; `xcodebuild` alone will not populate it. So the app is *localisation-
+ready* but not yet *localised*, and that last step is a manual one. Recorded in the release notes'
+pre-submission list rather than left as a surprise.
+**Status: accepted, with the manual step named.**
+
+## D-55 · 2026-09-13 · Two real accessibility bugs found at AX3, both fixed
+Neither was visible at default text size.
+A provider chip sizes to its own text, so "Amazon Prime Video" at an accessibility size was wider
+than the phone and ran off the right edge. `ProviderPickerGrid` now switches from a wrapping chip
+flow to full-width rows once `dynamicTypeSize.isAccessibilitySize`, with the label wrapping to two
+lines and a selection circle on the trailing edge. Chips are a compact-size affordance; past that
+point they have nowhere to grow.
+Onboarding's header was pinned above the scroll view, and a five-line title left barely one row of
+choices visible between it and the footer. The header now scrolls with the content; only the footer
+stays pinned. Verified at AX3: all eight services reachable, poster grid holds three across with
+clean truncation.
+**Status: accepted.**
+
+## D-56 · 2026-09-13 · The unused push and CloudKit entitlements stay, for now
+D-18 proposed removing `aps-environment` and the CloudKit container as a Phase 6 tidy-up, on the
+reasoning that the App Group work would already have touched signing. With Phase 5 cut there is no
+signing work in this release at all — so entitlement churn would be the *only* provisioning change,
+introduced immediately before submission. That is exactly the kind of thing you do not want to
+discover at upload. They are misleading but harmless; remove them in a quiet moment on a non-release
+branch.
+**Status: superseded by D-51; deferred deliberately.**
+
+## D-57 · 2026-09-13 · Release audit
+- Network destinations: four, all pre-existing — `api.themoviedb.org`, `image.tmdb.org`,
+  `themoviedb.org`, `youtube.com`. This release adds none.
+- `PrivacyInfo.xcprivacy`: unchanged and still correct. No new data types;
+  `NSPrivacyAccessedAPICategoryUserDefaults` was already declared.
+- No new third-party dependencies.
+- `Info.plist` gained `BGTaskSchedulerPermittedIdentifiers` and `UIBackgroundModes: fetch`.
+- Warnings: the Phase 0 baseline had three first-party warnings. Phase 6 fixed one
+  (`ReviewRequestManager`'s no-op `await`, in a file it rewrote), leaving two — both in files this
+  release never touched.
+**Status: accepted.**

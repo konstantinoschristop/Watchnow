@@ -117,6 +117,10 @@ struct ContentView: View {
             SettingsView()
         }
         .task {
+            // Before anything can trigger a review prompt: this is what
+            // makes "never in the first session" knowable.
+            ReviewRequestManager.recordLaunch()
+
             // Order matters: the briefing check drives the watchlist sync,
             // and the alert plan is only as good as what that sync learned.
             await whatsNew.checkOnLaunch()
