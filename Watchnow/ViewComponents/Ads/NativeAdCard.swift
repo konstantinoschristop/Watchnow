@@ -45,6 +45,10 @@ final class NativeAdLoader: NSObject, ObservableObject {
     private var adLoader: AdLoader?
 
     func loadIfNeeded() {
+        // A capture run takes the same route as a no-fill, so both the card
+        // and the row variants collapse through their existing `failed`
+        // branch rather than needing a second kind of empty state.
+        guard !ScreenshotMode.isOn else { failed = true; return }
         guard nativeAd == nil, !failed, adLoader == nil else { return }
         let root = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }

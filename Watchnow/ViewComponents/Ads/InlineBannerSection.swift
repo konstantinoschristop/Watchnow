@@ -45,8 +45,8 @@ struct InlineBannerSection: View {
     }
 
     var body: some View {
-        if state == .failed {
-            // No fill — take up no space whatsoever.
+        if ScreenshotMode.isOn || state == .failed {
+            // No fill (or a screenshot run) — take up no space whatsoever.
             EmptyView()
         } else {
             VStack(spacing: 0) {

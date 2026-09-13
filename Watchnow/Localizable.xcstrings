@@ -1,7 +1,640 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
 
+    },
+    " " : {
+
+    },
+    "·" : {
+
+    },
+    "“%@”" : {
+
+    },
+    "#" : {
+
+    },
+    "%@ chosen" : {
+
+    },
+    "%@, %lld titles" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld titles"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld episode%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld episode%2$@"
+          }
+        }
+      }
+    },
+    "%lld Episodes" : {
+
+    },
+    "%lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "%lld titles" : {
+
+    },
+    "%lld UPDATES" : {
+
+    },
+    "%lld/10" : {
+
+    },
+    "•" : {
+
+    },
+    "+%lld" : {
+
+    },
+    "🎬" : {
+
+    },
+    "1 title" : {
+
+    },
+    "1 UPDATE" : {
+
+    },
+    "About" : {
+
+    },
+    "ACTOR" : {
+
+    },
+    "Add to Watchlist" : {
+
+    },
+    "Adds this title to your picks" : {
+
+    },
+    "Alerts" : {
+
+    },
+    "Ask Coach" : {
+
+    },
+    "Ask Coach again" : {
+
+    },
+    "Ask something else" : {
+
+    },
+    "Asks iOS for permission to send you alerts" : {
+
+    },
+    "Availability provided by JustWatch" : {
+
+    },
+    "Back to setup" : {
+
+    },
+    "Biography" : {
+
+    },
+    "Browse %@" : {
+
+    },
+    "Browse Trending" : {
+
+    },
+    "Browsing %@" : {
+
+    },
+    "Can't decide? Swipe to find tonight's pick." : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Cancel reminder" : {
+
+    },
+    "Cast" : {
+
+    },
+    "Check your connection and try again." : {
+
+    },
+    "Checking whether this is a good match for you right now and how it fits your evening." : {
+
+    },
+    "Clear All" : {
+
+    },
+    "Close" : {
+
+    },
+    "Coach" : {
+
+    },
+    "COACH" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Couldn't answer that one." : {
+
+    },
+    "Couldn't get a read on this one." : {
+
+    },
+    "Couldn't load" : {
+
+    },
+    "Couldn't load content" : {
+
+    },
+    "Couldn't load episodes" : {
+
+    },
+    "Couldn't load picks" : {
+
+    },
+    "Couldn't load trending titles." : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete folder" : {
+
+    },
+    "Done" : {
+
+    },
+    "E%lld" : {
+
+    },
+    "Enable notifications for Watchnow in Settings to set episode reminders." : {
+
+    },
+    "Enable notifications for Watchnow in Settings to set release reminders." : {
+
+    },
+    "Enable notifications for Watchnow in Settings to set season reminders." : {
+
+    },
+    "Episode alerts" : {
+
+    },
+    "Everyone wants to watch this one." : {
+
+    },
+    "Find my pick" : {
+
+    },
+    "Find our match" : {
+
+    },
+    "Find what to watch" : {
+
+    },
+    "Full cast" : {
+
+    },
+    "Getting to know your taste" : {
+
+    },
+    "Go to my watchlist" : {
+
+    },
+    "Great pick" : {
+
+    },
+    "I like this %@" : {
+
+    },
+    "I'm ready" : {
+
+    },
+    "iCloud" : {
+
+    },
+    "It's a match!" : {
+
+    },
+    "Keep what you'd watch" : {
+
+    },
+    "Known For" : {
+
+    },
+    "Layout" : {
+
+    },
+    "Liked. Tap to remove from your taste profile." : {
+
+    },
+    "Loading" : {
+
+    },
+    "Loading biography" : {
+
+    },
+    "Loading episodes" : {
+
+    },
+    "Loading your services…" : {
+
+    },
+    "Loading…" : {
+
+    },
+    "Mark as unwatched" : {
+
+    },
+    "Mark as watched" : {
+
+    },
+    "More info" : {
+
+    },
+    "Move" : {
+
+    },
+    "Move to folder" : {
+
+    },
+    "Move to Folder" : {
+
+    },
+    "Movie Night" : {
+
+    },
+    "Movies" : {
+
+    },
+    "Movies, series and the people who make them." : {
+
+    },
+    "Movies, TV series, actors" : {
+
+    },
+    "Mute alerts for this title" : {
+
+    },
+    "Name" : {
+
+    },
+    "Never miss the moment" : {
+
+    },
+    "New" : {
+
+    },
+    "NEW" : {
+
+    },
+    "New folder" : {
+
+    },
+    "New folder…" : {
+
+    },
+    "No matches for this filter. Try another category." : {
+
+    },
+    "No overview available." : {
+
+    },
+    "No peeking at each other's picks!" : {
+
+    },
+    "No rated reviews" : {
+
+    },
+    "No unanimous pick" : {
+
+    },
+    "Nobody landed on the same title — here's what came closest, or deal a fresh round." : {
+
+    },
+    "Not aired yet" : {
+
+    },
+    "Not now" : {
+
+    },
+    "Nothing came back for this genre. Try another one." : {
+
+    },
+    "Nothing fit that combo" : {
+
+    },
+    "Nothing matching this filter" : {
+
+    },
+    "Notifications are off" : {
+
+    },
+    "Now streaming alerts" : {
+
+    },
+    "Number %lld, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Number %1$lld, %2$@"
+          }
+        }
+      }
+    },
+    "On your list" : {
+
+    },
+    "Only these two, only for titles you saved, and you can switch either off in Settings at any time." : {
+
+    },
+    "Open iOS Settings" : {
+
+    },
+    "Open Settings" : {
+
+    },
+    "Opens details" : {
+
+    },
+    "Pass to Player %lld" : {
+
+    },
+    "Pause slideshow" : {
+
+    },
+    "Pick the services you subscribe to and Watchnow will tell you when a saved title lands on one." : {
+
+    },
+    "Play slideshow" : {
+
+    },
+    "Player %lld's turn" : {
+
+    },
+    "Premieres %@." : {
+
+    },
+    "Rated reviews only" : {
+
+    },
+    "Read less" : {
+
+    },
+    "Read more" : {
+
+    },
+    "Remind Me" : {
+
+    },
+    "Remind me on air date" : {
+
+    },
+    "Remind me on release" : {
+
+    },
+    "Reminding" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove %@ from recent searches" : {
+
+    },
+    "Remove %@ from your Watchlist?" : {
+
+    },
+    "Remove from folder" : {
+
+    },
+    "Remove from Watchlist" : {
+
+    },
+    "Rename" : {
+
+    },
+    "Restoring your watchlist…" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Reviews" : {
+
+    },
+    "Rounding up tonight's contenders…" : {
+
+    },
+    "Save or like %lld more %@ and Movie Coach will start telling you whether something's a good fit for you." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save or like %1$lld more %2$@ and Movie Coach will start telling you whether something's a good fit for you."
+          }
+        }
+      }
+    },
+    "Save something from Trending and Watchnow will tell you when it airs or lands on a service you have." : {
+
+    },
+    "Search" : {
+
+    },
+    "Search %@" : {
+
+    },
+    "Search for %@" : {
+
+    },
+    "Searching" : {
+
+    },
+    "See all" : {
+
+    },
+    "See all %lld reviews" : {
+
+    },
+    "Series" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Show all" : {
+
+    },
+    "Show All" : {
+
+    },
+    "Show less" : {
+
+    },
+    "Show more" : {
+
+    },
+    "Show more results" : {
+
+    },
+    "Shows popular %@ titles" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Skips this title" : {
+
+    },
+    "Slide %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Slide %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "Sort" : {
+
+    },
+    "Step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Step %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "Suggestion" : {
+
+    },
+    "Sync" : {
+
+    },
+    "Tap what fits — skip the rest. One tap is enough." : {
+
+    },
+    "Tells you the day the next episode of a saved series airs" : {
+
+    },
+    "Tells you when a saved title lands on a service you have" : {
+
+    },
+    "Thinking that through for you right now." : {
+
+    },
+    "This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability provided by JustWatch." : {
+
+    },
+    "This season hasn't started yet." : {
+
+    },
+    "Top of the titles you kept." : {
+
+    },
+    "Trending %@" : {
+
+    },
+    "Try Again" : {
+
+    },
+    "Try fewer filters or a different mood." : {
+
+    },
+    "Turn alerts on for this title" : {
+
+    },
+    "Turn off \"Rated reviews only\" to see all reviews." : {
+
+    },
+    "Turn on alerts" : {
+
+    },
+    "Turn on notifications" : {
+
+    },
+    "Used for now-streaming alerts and for Movie Night." : {
+
+    },
+    "Version" : {
+
+    },
+    "View options" : {
+
+    },
+    "View title" : {
+
+    },
+    "Watch trailer" : {
+
+    },
+    "Watch Trailer" : {
+
+    },
+    "Watch trailer for %@" : {
+
+    },
+    "Watched. Tap to unmark." : {
+
+    },
+    "Watchlist" : {
+
+    },
+    "Watchnow can tell you the day something you saved is finally watchable." : {
+
+    },
+    "We couldn't load the services for your region. You can set them later in Settings." : {
+
+    },
+    "What do you want to know?" : {
+
+    },
+    "What's everyone in the mood for?" : {
+
+    },
+    "Which do you have? We'll remember it next time." : {
+
+    },
+    "You asked us to remind you" : {
+
+    },
+    "Your pick tonight" : {
+
+    },
+    "Your services" : {
+
+    },
+    "Your watchlist, folders, taste and alert settings follow you to your other devices." : {
+
+    }
   },
   "version" : "1.0"
 }

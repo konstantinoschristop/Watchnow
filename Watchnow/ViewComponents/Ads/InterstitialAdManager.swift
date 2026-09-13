@@ -79,6 +79,7 @@ final class InterstitialAdManager: NSObject {
 
     /// Whether the caps currently allow a fullscreen ad.
     private var isAllowed: Bool {
+        guard !ScreenshotMode.isOn else { return false }
         guard shownThisSession < maxPerSession else { return false }
         guard let lastShownAt else { return true }
         return Date().timeIntervalSince(lastShownAt) >= minimumInterval
