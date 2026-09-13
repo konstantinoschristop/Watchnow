@@ -31,8 +31,15 @@ struct SettingsDebugSection: View {
             Button("Show pending notifications") { run(showPending) }
             Button("Fire sample alert") { run(fireSample) }
             Button("Reset alert preferences", role: .destructive) {
+                // Also clears the alerted-change ledger, so a "now
+                // streaming" change can be offered again for testing.
                 AlertPreferences.reset()
-                status = "Alert preferences reset"
+                status = "Alert preferences and alerted-change ledger reset"
+                lines = []
+            }
+            Button("Mark all as unwatched", role: .destructive) {
+                WatchedStore.reset()
+                status = "Watched state cleared"
                 lines = []
             }
 
@@ -80,16 +87,21 @@ struct SettingsDebugSection: View {
         // job — and without the left-hand side of the arrow there is no way
         // to tell which of those it was.
         let events = AlertInputs.episodeEvents()
+        let landed = AlertInputs.streamingChanges()
         let plan = await BackgroundRefresh.currentPlan()
-        status = "\(events.count) dated → \(plan.count) planned (cap \(AlertPlanner.maxPending))"
+        status = "\(events.count) dated · \(landed.count) streaming → "
+            + "\(plan.count) planned (cap \(AlertPlanner.maxPending))"
 
         if !plan.isEmpty {
             lines = plan.map { "\(Self.stamp($0.fireDate))  \($0.body)" }
-        } else if events.isEmpty {
-            lines = ["No saved series has a dated next episode yet."]
+        } else if events.isEmpty && landed.isEmpty {
+            lines = ["Nothing to plan: no dated next episode, and nothing new",
+                     "on a service you have. Services live in Movie Night setup."]
         } else {
             lines = events.map { event in
                 "skipped  \(event.seriesTitle) — airs \(Self.stamp(event.airDate))"
+            } + landed.map { change in
+                "skipped  \(change.title) — capped or muted"
             }
         }
     }

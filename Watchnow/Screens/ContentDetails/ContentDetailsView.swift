@@ -27,6 +27,7 @@ struct ContentDetailsView: View {
     @State private var showAlertsToast = false
     @State private var showNotificationSettingsAlert = false
     @State private var isLiked = false
+    @State private var isWatched = false
     @Namespace private var namespace
 
     /// True while this screen has nothing of its own to draw yet.
@@ -193,21 +194,37 @@ extension ContentDetailsView {
             hasTrailer: detailsViewModel.videos?.getVideoURL() != nil,
             mediaKind: detailsViewModel.mediaKindLabel,
             isLiked: isLiked,
+            isWatched: isWatched,
             onWatchlistTap: toggleWatchlist,
             onTrailerTap: { videoPresented = true },
-            onLikeTap: toggleLike
+            onLikeTap: toggleLike,
+            onWatchedTap: toggleWatched
         )
         .onAppear { syncLikeState() }
         .onChange(of: detailsViewModel.result.id) { _, _ in syncLikeState() }
         // A like made on another device can land while this screen is open.
         .onReceive(NotificationCenter.default.publisher(for: CloudSync.didMergeRemoteChanges)) { note in
             let keys = note.userInfo?[CloudSync.changedKeysKey] as? [String] ?? []
-            if keys.contains("tasteLikedIDs") { syncLikeState() }
+            if keys.contains("tasteLikedIDs") || keys.contains("watchedAtDates") { syncLikeState() }
         }
     }
 
     private func syncLikeState() {
         isLiked = TasteProfile.isLiked(detailsViewModel.result.id)
+        isWatched = WatchedStore.isWatched(detailsViewModel.result.id)
+    }
+
+    /// Record that this has been seen.
+    ///
+    /// Deliberately independent of the watchlist: marking something watched
+    /// does not unsave it, because the entry is finally worth something at
+    /// exactly the moment it would otherwise be thrown away.
+    private func toggleWatched() {
+        guard let id = detailsViewModel.result.id else { return }
+        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
+            isWatched = WatchedStore.toggle(id)
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     /// Records an explicit taste signal for this title. Kept separate from

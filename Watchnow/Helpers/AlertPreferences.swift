@@ -74,6 +74,38 @@ enum AlertPreferences {
         setOptedOut(false, for: id)
     }
 
+    // MARK: - Alerted-change ledger
+
+    /// `WatchlistChange` ids already sent as a notification.
+    ///
+    /// Without this, a "now streaming" alert would be re-sent on every run
+    /// until the user happened to open the app and spend the change: the
+    /// reconcile is idempotent only while the notification is still pending,
+    /// and once it has *fired* it is no longer pending, so the next plan
+    /// would cheerfully schedule it again.
+    ///
+    /// Device-local, deliberately. Notifications are delivered per device,
+    /// so being told once on the phone should not silence the iPad the user
+    /// actually picks up. Same reasoning that keeps What's New's seen-state
+    /// off iCloud.
+    @UserDefault("alertsNotifiedChangeIDs", defaultValue: [])
+    private static var notifiedChangeIDs: [String]
+
+    /// Ceiling on the ledger. Changes age out of `WatchlistChangeStore`
+    /// after 30 days, so an id older than the last few hundred can never be
+    /// offered again anyway.
+    private static let maxNotifiedIDs = 300
+
+    static var alertedChangeIDs: Set<String> { Set(notifiedChangeIDs) }
+
+    static func recordAlerted(changeIDs: [String]) {
+        guard !changeIDs.isEmpty else { return }
+        let known = Set(notifiedChangeIDs)
+        let fresh = changeIDs.filter { !known.contains($0) }
+        guard !fresh.isEmpty else { return }
+        notifiedChangeIDs = Array((notifiedChangeIDs + fresh).suffix(maxNotifiedIDs))
+    }
+
     // MARK: - Device-local bookkeeping
 
     /// Whether the pre-permission explainer has already been shown here.
@@ -91,6 +123,7 @@ enum AlertPreferences {
         episodeAlertsEnabled = true
         streamingAlertsEnabled = true
         optedOutIDs = []
+        notifiedChangeIDs = []
         didShowPermissionExplainer = false
     }
 }

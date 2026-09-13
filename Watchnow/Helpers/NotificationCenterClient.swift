@@ -51,7 +51,12 @@ struct LiveNotificationCenterClient: NotificationCenterClient {
         content.title = alert.title
         content.body = alert.body
         content.sound = .default
-        content.userInfo = alert.deepLink.userInfo
+        // The digest deliberately has no deep link — it speaks for several
+        // titles, and the in-app briefing is its destination — so a tap on
+        // it carries no routing payload.
+        if let deepLink = alert.deepLink {
+            content.userInfo = deepLink.userInfo
+        }
 
         // Deliberately a calendar trigger on the real date, with none of the
         // DEBUG "fire in 3 seconds" shortcut `ReminderManager.schedule` uses.

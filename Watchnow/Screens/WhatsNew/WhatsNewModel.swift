@@ -84,6 +84,12 @@ struct ChangeMetadata: Codable, Equatable, Hashable {
     var oldDate: String?
     var newDate: String?
     var providerName: String?
+    /// TMDB provider id behind `providerName`. Carried so an alert can ask
+    /// "is this one of *their* services?" without parsing it back out of
+    /// the change's id. Optional, so records written before this shipped
+    /// keep decoding — and a nil is read as "unknown service", which never
+    /// notifies.
+    var providerID: Int?
     var seasonNumber: Int?
     var episodeNumber: Int?
     var episodeName: String?
@@ -91,7 +97,7 @@ struct ChangeMetadata: Codable, Equatable, Hashable {
 
     init(videoKey: String? = nil, videoName: String? = nil,
          oldDate: String? = nil, newDate: String? = nil,
-         providerName: String? = nil,
+         providerName: String? = nil, providerID: Int? = nil,
          seasonNumber: Int? = nil, episodeNumber: Int? = nil,
          episodeName: String? = nil, airDate: String? = nil) {
         self.videoKey = videoKey
@@ -99,6 +105,7 @@ struct ChangeMetadata: Codable, Equatable, Hashable {
         self.oldDate = oldDate
         self.newDate = newDate
         self.providerName = providerName
+        self.providerID = providerID
         self.seasonNumber = seasonNumber
         self.episodeNumber = episodeNumber
         self.episodeName = episodeName
@@ -148,11 +155,9 @@ struct WatchlistChange: Codable, Equatable, Hashable, Identifiable {
     /// Route to this change's title from outside the app.
     ///
     /// Unused by the briefing, which pushes the details screen inside its own
-    /// sheet rather than routing through a tab. This is the other half of
-    /// `WatchlistChangeMonitor.shouldNotify` — when a release schedules a
-    /// local notification for a change, its tap needs exactly this. Kept for
-    /// the same reason that decision layer is: so the notification path is
-    /// already expressible when it lands.
+    /// sheet rather than routing through a tab. It is what a "now streaming"
+    /// notification carries, so tapping the banner lands on the title rather
+    /// than on whichever tab happened to be open.
     var deepLink: DeepLink {
         DeepLink(id: mediaID, mediaType: mediaType == "tv" ? .tv : .movie)
     }

@@ -154,6 +154,7 @@
 		FE1D0A3A000000000000FB3A /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3A000000000000FA3A /* BackgroundRefresh.swift */; };
 		FE1D0A3B000000000000FB3B /* SettingsDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3B000000000000FA3B /* SettingsDebugSection.swift */; };
 		FE1D0A3C000000000000FB3C /* AlertPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3C000000000000FA3C /* AlertPlannerTests.swift */; };
+		FE1D0A3D000000000000FB3D /* WatchedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A3D000000000000FA3D /* WatchedStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -314,6 +315,7 @@
 		FE1D0A3A000000000000FA3A /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
 		FE1D0A3B000000000000FA3B /* SettingsDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDebugSection.swift; sourceTree = "<group>"; };
 		FE1D0A3C000000000000FA3C /* AlertPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPlannerTests.swift; sourceTree = "<group>"; };
+		FE1D0A3D000000000000FA3D /* WatchedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchedStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -570,6 +572,7 @@
 		8AC338FF2752931E00834B46 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A3D000000000000FA3D /* WatchedStore.swift */,
 				FE1D0A3A000000000000FA3A /* BackgroundRefresh.swift */,
 				FE1D0A39000000000000FA39 /* AlertInputs.swift */,
 				FE1D0A38000000000000FA38 /* AlertScheduler.swift */,
@@ -796,6 +799,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A3D000000000000FB3D /* WatchedStore.swift in Sources */,
 				FE1D0A3B000000000000FB3B /* SettingsDebugSection.swift in Sources */,
 				FE1D0A3A000000000000FB3A /* BackgroundRefresh.swift in Sources */,
 				FE1D0A39000000000000FB39 /* AlertInputs.swift in Sources */,

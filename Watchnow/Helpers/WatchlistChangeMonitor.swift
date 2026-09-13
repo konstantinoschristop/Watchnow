@@ -15,8 +15,18 @@
 //  definition produces zero changes — first install shows nothing.
 //
 //  Runs at most every `minSyncInterval`, in small batches, a couple of
-//  seconds after launch. Failures are silent: a title that errors keeps its
-//  old snapshot untouched and is simply retried next sync.
+//  seconds after launch — and from `BackgroundRefresh` when iOS grants the
+//  app time. Failures are silent: a title that errors keeps its old snapshot
+//  untouched and is simply retried next sync.
+//
+//  One run touches at most `maxTitlesPerRun` titles, oldest-checked first,
+//  so a long watchlist is walked across several runs rather than in one
+//  burst TMDB would be right to throttle.
+//
+//  Its output is the single source of truth for both surfaces that report
+//  change: the "While You Were Away" briefing reads it from
+//  `WatchlistChangeStore`, and `AlertPlanner` reads the same store to decide
+//  what is worth a notification. There is deliberately no second detector.
 //
 
 import Foundation
@@ -31,15 +41,25 @@ enum WatchlistChangeMonitor {
     /// (`nonisolated`: read from the off-main fetch path.)
     private nonisolated static let changesWindow: TimeInterval = 13 * 24 * 3600
 
+    /// Ceiling on how many titles one run will touch.
+    ///
+    /// Each title costs at least two requests (`/changes` plus
+    /// `/watch/providers`) and sometimes four, so an unbounded walk of a
+    /// three-hundred-title watchlist is a burst TMDB has every right to
+    /// refuse — and a background task has no time for anyway. Titles are
+    /// taken oldest-checked first, so what is skipped this run leads the
+    /// next one and nothing is starved.
+    static let maxTitlesPerRun = 40
+
     private static let batchSize = 3
     private static let batchPause: Duration = .milliseconds(250)
     private static let launchDelay: Duration = .seconds(2)
 
-    /// Used when the user has actually been away. There is no background
-    /// refresh in this app, so on that launch this sync *is* the feature —
-    /// nothing was pre-computed and the briefing cannot exist until it
-    /// finishes. It skips the courtesy delay and runs wider batches,
-    /// deliberately competing with the home tabs' own requests.
+    /// Used when the user has actually been away. Background refresh is
+    /// opportunistic — iOS may not have granted a run in days — so on that
+    /// launch this sync may well be what *creates* the briefing. It skips
+    /// the courtesy delay and runs wider batches, deliberately competing
+    /// with the home tabs' own requests.
     /// Concurrency still equals the batch size (each title's requests run
     /// in sequence inside `fetchState`), so this stays well inside TMDB's
     /// tolerance.
@@ -84,6 +104,21 @@ enum WatchlistChangeMonitor {
             return false
         }
 
+        // Oldest-checked first, so the cap below skips what was looked at
+        // most recently rather than whatever happens to sit at the end of
+        // the array. A title with no snapshot yet sorts first: it has never
+        // been checked, and until it has a baseline it can produce nothing.
+        let due = Array(
+            watchlist
+                .sorted { lhs, rhs in
+                    let lhsChecked = lastCheckedAt(lhs)
+                    let rhsChecked = lastCheckedAt(rhs)
+                    if lhsChecked != rhsChecked { return lhsChecked < rhsChecked }
+                    return (lhs.id ?? 0) < (rhs.id ?? 0)   // deterministic
+                }
+                .prefix(maxTitlesPerRun)
+        )
+
         let region = Locale.current.region?.identifier ?? "US"
         let subscribed = Set(StreamingPreferences.providerIDs)
         var newChangeCount = 0
@@ -92,8 +127,8 @@ enum WatchlistChangeMonitor {
         let pause = urgent ? urgentBatchPause : batchPause
 
         var index = 0
-        while index < watchlist.count, !Task.isCancelled {
-            let batch = watchlist[index ..< min(index + stride, watchlist.count)]
+        while index < due.count, !Task.isCancelled {
+            let batch = due[index ..< min(index + stride, due.count)]
 
             // Snapshots are read on the main actor, the network runs in
             // child tasks, and the classify/persist step comes back to the
@@ -155,6 +190,14 @@ enum WatchlistChangeMonitor {
 
         WatchlistChangeStore.recordSync(now: now)
         return newChangeCount > 0
+    }
+
+    /// When this title was last checked, or 0 if it never has been.
+    private static func lastCheckedAt(_ item: Result) -> Double {
+        guard let id = item.id else { return 0 }
+        return WatchlistChangeStore
+            .snapshot(mediaType: item.inferredScreenType.rawValue, mediaID: id)?
+            .lastCheckedAt ?? 0
     }
 
     // MARK: - Per-title fetch
@@ -258,29 +301,5 @@ enum WatchlistChangeMonitor {
         fmt.timeZone = TimeZone(secondsFromGMT: 0)
         fmt.dateFormat = "yyyy-MM-dd"
         return fmt.string(from: date)
-    }
-
-    // MARK: - Notifications (future)
-
-    /// Decision layer for local notifications. Nothing calls a scheduler
-    /// yet — this exists so a future release can notify without redesigning
-    /// anything, and so the policy ("only high-value, never spam") is
-    /// already written down and tested.
-    static var notificationCooldown: TimeInterval = 24 * 3600
-
-    static func shouldNotify(_ change: WatchlistChange,
-                             lastNotifiedAt: Date?,
-                             now: Date = Date()) -> Bool {
-        if let lastNotifiedAt, now.timeIntervalSince(lastNotifiedAt) < notificationCooldown {
-            return false
-        }
-        // A title the user explicitly asked to hear about always qualifies.
-        if change.hasReminder { return true }
-        switch change.kind {
-        case .streamingAvailability, .newTrailer, .newEpisode, .released:
-            return true
-        case .releaseDateChanged, .newSeason, .episodeDateChanged:
-            return false
-        }
     }
 }

@@ -56,6 +56,46 @@ struct EpisodeEvent: Equatable, Sendable {
     }
 }
 
+/// A saved title that has just become streamable on a service the user
+/// actually has.
+///
+/// Unlike an episode, this cannot be known in advance — availability moves
+/// without warning, so it is detected by diffing and reported after the
+/// fact. Filtering to the user's own services, and to titles they have not
+/// already watched, happens in `AlertInputs` before the planner sees it:
+/// by the time a change arrives here it is, by construction, worth sending.
+struct StreamingChange: Equatable, Sendable {
+
+    /// The `WatchlistChange` this came from. Carried so the app can record
+    /// that it has been alerted about and never alert twice.
+    let changeID: String
+    let mediaID: Int
+    let mediaType: String
+    let title: String
+    /// The service it landed on. Nil only for records written before the
+    /// provider id was stored, which are filtered out upstream.
+    let serviceName: String?
+    let savedAt: Date?
+
+    init(changeID: String,
+         mediaID: Int,
+         mediaType: String,
+         title: String,
+         serviceName: String? = nil,
+         savedAt: Date? = nil) {
+        self.changeID = changeID
+        self.mediaID = mediaID
+        self.mediaType = mediaType
+        self.title = title
+        self.serviceName = serviceName
+        self.savedAt = savedAt
+    }
+
+    var deepLink: DeepLink {
+        DeepLink(id: mediaID, mediaType: mediaType == "tv" ? .tv : .movie)
+    }
+}
+
 /// A reminder the user set by hand with the bell, already scheduled with
 /// iOS. Immovable: the planner counts these against its caps but never
 /// plans one, never replaces one, and never evicts one.
@@ -87,8 +127,37 @@ struct PlannedAlert: Equatable, Sendable {
     let title: String
     let body: String
     let fireDate: Date
-    let deepLink: DeepLink
+    /// Where tapping it lands. Nil for the digest, which is about several
+    /// titles at once — the app's own "While You Were Away" briefing is the
+    /// right destination for that, and it presents itself on launch without
+    /// being routed to.
+    let deepLink: DeepLink?
     let kind: AlertKind
+    /// The `WatchlistChange` ids this alert speaks for, so they can be
+    /// marked as alerted once iOS accepts it. Empty for episode alerts,
+    /// which are planned from dates rather than from detected changes.
+    let sourceChangeIDs: [String]
+
+    init(identifier: String,
+         title: String,
+         body: String,
+         fireDate: Date,
+         deepLink: DeepLink?,
+         kind: AlertKind,
+         sourceChangeIDs: [String] = []) {
+        self.identifier = identifier
+        self.title = title
+        self.body = body
+        self.fireDate = fireDate
+        self.deepLink = deepLink
+        self.kind = kind
+        self.sourceChangeIDs = sourceChangeIDs
+    }
+
+    /// The title this alert is about, when it is about exactly one. The
+    /// per-title-per-day cap keys on it; the digest has no single answer,
+    /// so it is exempt from that cap by construction.
+    var subjectID: Int? { deepLink?.id }
 }
 
 // MARK: - Planner
@@ -114,6 +183,12 @@ enum AlertPlanner {
     /// already decided.
     static let episodeHour = 18
 
+    /// "Now streaming" is news the moment it is found, so it fires almost
+    /// immediately — a minute's lead, purely so iOS is scheduling something
+    /// in the future rather than in the past. Quiet hours still apply, which
+    /// is what turns an overnight discovery into a 09:00 arrival.
+    static let streamingLead: TimeInterval = 60
+
     /// Nothing is delivered from 22:00 up to this hour. Anything that would
     /// land inside the window is moved to `quietEndHour` instead of being
     /// dropped — the news keeps, the 3am buzz does not.
@@ -134,16 +209,23 @@ enum AlertPlanner {
     ///
     /// - Parameters:
     ///   - episodes: dated episodes of saved, unmuted series.
+    ///   - streamingChanges: titles that just landed on a service the user
+    ///     has. Already filtered to the ones worth sending.
     ///   - manualReminders: what the user already set with the bell.
     ///   - now: anything in the past is not planned.
     ///   - calendar: supplies the local day and time zone. Injected so the
     ///     quiet-hour and per-day rules can be tested in a fixed zone.
     static func plan(episodes: [EpisodeEvent],
+                     streamingChanges: [StreamingChange] = [],
                      manualReminders: [ManualReminder] = [],
                      now: Date = Date(),
                      calendar: Calendar = .current) -> [PlannedAlert] {
 
         var candidates: [(alert: PlannedAlert, savedAt: Date?)] = []
+
+        candidates.append(contentsOf: streamingCandidates(streamingChanges,
+                                                          now: now,
+                                                          calendar: calendar))
 
         for event in episodes {
             guard let fireDate = fireDate(forAirDate: event.airDate, calendar: calendar),
@@ -167,6 +249,60 @@ enum AlertPlanner {
         }
 
         return trim(candidates, manualReminders: manualReminders, calendar: calendar)
+    }
+
+    // MARK: - Now streaming
+
+    /// One alert per change — unless several land together, in which case
+    /// one digest stands for all of them.
+    ///
+    /// The digest is not a nicety. Three separate banners inside a minute is
+    /// the exact behaviour that teaches people to switch notifications off,
+    /// and the daily cap would have silently dropped the third one anyway.
+    /// One line that says how many there are respects both.
+    private static func streamingCandidates(_ changes: [StreamingChange],
+                                            now: Date,
+                                            calendar: Calendar) -> [(alert: PlannedAlert, savedAt: Date?)] {
+        guard !changes.isEmpty else { return [] }
+
+        let fireDate = movedOutOfQuietHours(now.addingTimeInterval(streamingLead),
+                                            calendar: calendar)
+        let day = dayKey(fireDate, calendar: calendar)
+
+        if changes.count == 1 {
+            let change = changes[0]
+            return [(
+                PlannedAlert(identifier: "\(autoPrefix)streaming.\(change.mediaID).\(day)",
+                             title: "Now streaming",
+                             body: streamingBody(for: change),
+                             fireDate: fireDate,
+                             deepLink: change.deepLink,
+                             kind: .streaming,
+                             sourceChangeIDs: [change.changeID]),
+                change.savedAt
+            )]
+        }
+
+        // Most recently saved first, so the digest speaks for the set but
+        // inherits the priority of the title the user cares most about.
+        let mostRecentSave = changes.compactMap(\.savedAt).max()
+        return [(
+            PlannedAlert(identifier: "\(autoPrefix)streaming.digest.\(day)",
+                         title: "Now streaming",
+                         body: "\(changes.count) titles from your watchlist are new on your services",
+                         fireDate: fireDate,
+                         deepLink: nil,
+                         kind: .streaming,
+                         sourceChangeIDs: changes.map(\.changeID)),
+            mostRecentSave
+        )]
+    }
+
+    private static func streamingBody(for change: StreamingChange) -> String {
+        if let service = change.serviceName {
+            return "\(change.title) is now on \(service)"
+        }
+        return "\(change.title) is now streaming"
     }
 
     // MARK: - Timing
@@ -290,13 +426,17 @@ enum AlertPlanner {
             guard remainingPending > 0 else { break }
 
             let day = dayKey(candidate.alert.fireDate, calendar: calendar)
-            let titleDay = "\(candidate.alert.deepLink.id).\(day)"
 
-            guard perTitlePerDay[titleDay, default: 0] < maxPerTitlePerDay else { continue }
+            // The digest has no single subject, so it is exempt from the
+            // per-title cap — it is already the answer to "too many at once".
+            if let subject = candidate.alert.subjectID {
+                let titleDay = "\(subject).\(day)"
+                guard perTitlePerDay[titleDay, default: 0] < maxPerTitlePerDay else { continue }
+                perTitlePerDay[titleDay, default: 0] += 1
+            }
             guard perDay[day, default: 0] < maxPerDay else { continue }
 
             kept.append(candidate.alert)
-            perTitlePerDay[titleDay, default: 0] += 1
             perDay[day, default: 0] += 1
             remainingPending -= 1
         }

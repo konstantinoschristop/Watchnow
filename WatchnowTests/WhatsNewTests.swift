@@ -264,6 +264,11 @@ final class ChangeClassifierTests: XCTestCase {
                                             .newSeason, .released])
     }
 
+    // The "is this worth a notification" policy that used to live on
+    // `WatchlistChangeMonitor` now sits in `AlertPlanner` and `AlertInputs`,
+    // where it can cooperate with the caps and quiet hours. Its coverage
+    // moved with it, to `AlertPlannerTests`.
+
     func testReminderTitleRanksFirst() {
         let ranked = ChangeClassifier.ranked([
             makeChange(kind: .streamingAvailability, id: 1),
@@ -271,19 +276,6 @@ final class ChangeClassifierTests: XCTestCase {
         ])
         XCTAssertEqual(ranked.first?.mediaID, 2)
         XCTAssertTrue(ranked.first?.hasReminder ?? false)
-    }
-
-    func testShouldNotifyPolicy() {
-        let trailer = makeChange(kind: .newTrailer)
-        let dateShift = makeChange(kind: .releaseDateChanged)
-        let remindedShift = makeChange(kind: .releaseDateChanged, reminder: true)
-
-        XCTAssertTrue(WatchlistChangeMonitor.shouldNotify(trailer, lastNotifiedAt: nil, now: fixedNow))
-        XCTAssertFalse(WatchlistChangeMonitor.shouldNotify(dateShift, lastNotifiedAt: nil, now: fixedNow))
-        XCTAssertTrue(WatchlistChangeMonitor.shouldNotify(remindedShift, lastNotifiedAt: nil, now: fixedNow))
-        // Cooldown throttles even high-value changes.
-        XCTAssertFalse(WatchlistChangeMonitor.shouldNotify(
-            trailer, lastNotifiedAt: fixedNow.addingTimeInterval(-3600), now: fixedNow))
     }
 }
 

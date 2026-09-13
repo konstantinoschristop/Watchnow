@@ -35,6 +35,12 @@ struct WatchlistGridView<Header: View>: View {
     let streamingProvider: ((Int) -> SavedProvider?)?
     let onMoveToFolder: (Result) -> Void
     let onRemove: (Result) -> Void
+    /// Ids already watched. Passed in as a set for the same reason
+    /// `streamingProvider` is injected: `WatchedStore` is a `@UserDefault`,
+    /// so asking it per cell would decode the whole table once per cover
+    /// per render.
+    var watchedIDs: Set<Int> = []
+    var onToggleWatched: ((Result) -> Void)?
 
     var namespace: Namespace.ID
     /// Identity for the poster wall alone. Changing it swaps the covers as
@@ -110,10 +116,12 @@ struct WatchlistGridView<Header: View>: View {
                 WatchlistPosterCell(result: result,
                                     folder: folder(for: result),
                                     provider: provider(for: result),
+                                    isWatched: watchedIDs.contains(result.id ?? -1),
                                     namespace: namespace,
                                     reduceMotion: reduceMotion,
                                     onMoveToFolder: { onMoveToFolder(result) },
-                                    onRemove: { onRemove(result) })
+                                    onRemove: { onRemove(result) },
+                                    onToggleWatched: { onToggleWatched?(result) })
                     // Covers that leave collapse into themselves rather than
                     // blinking out, so a folder change reads as the wall
                     // re-sorting rather than reloading.
@@ -150,10 +158,12 @@ private struct WatchlistPosterCell: View {
     let result: Result
     let folder: Folder?
     let provider: SavedProvider?
+    let isWatched: Bool
     var namespace: Namespace.ID
     let reduceMotion: Bool
     let onMoveToFolder: () -> Void
     let onRemove: () -> Void
+    let onToggleWatched: () -> Void
 
     @State private var confirmingRemove = false
     /// Two lines of the 12pt title, tracking the reader's text size.
@@ -181,6 +191,12 @@ private struct WatchlistPosterCell: View {
         // actions move into a long-press menu here. Both routes end up in
         // the same handlers the list uses.
         .contextMenu {
+            Button {
+                onToggleWatched()
+            } label: {
+                Label(isWatched ? "Mark as unwatched" : "Mark as watched",
+                      systemImage: isWatched ? "arrow.uturn.backward" : "checkmark.circle")
+            }
             Button {
                 onMoveToFolder()
             } label: {
@@ -244,7 +260,26 @@ private struct WatchlistPosterCell: View {
             .overlay(alignment: .topLeading) { typeBadge }
             .overlay(alignment: .topTrailing) { folderBadge }
             .overlay(alignment: .bottomLeading) { providerBadge }
+            .overlay(alignment: .bottomTrailing) { watchedBadge }
+            // Dimmed rather than desaturated. A wall of grey covers is hard
+            // to read past, and "done" is a state worth showing without
+            // making the artwork look broken.
+            .opacity(isWatched ? 0.6 : 1)
             .shadow(color: .black.opacity(0.28), radius: 5, y: 3)
+    }
+
+    /// Marks a cover as already seen. Paired with the dim above rather than
+    /// standing alone, so it reads at a glance in a three-across wall where
+    /// the glyph itself is barely 16pt.
+    @ViewBuilder
+    private var watchedBadge: some View {
+        if isWatched {
+            Image(systemName: "checkmark.circle.fill")
+                .appFont(15, weight: .semibold, relativeTo: .footnote)
+                .foregroundStyle(.white, Color.accentColor)
+                .padding(5)
+                .accessibilityHidden(true)
+        }
     }
 
     /// Stand-in for a cover that hasn't arrived — or never will, for the
@@ -486,6 +521,10 @@ private struct WatchlistPosterCell: View {
                          : "streaming on \(provider.name)")
         }
         if let folder { parts.append("in \(folder.name)") }
+        // The badge and the dim are both purely visual, so without this a
+        // VoiceOver user has no way to tell a watched cover from an unwatched
+        // one.
+        if isWatched { parts.append("watched") }
         return parts.joined(separator: ", ")
     }
 }

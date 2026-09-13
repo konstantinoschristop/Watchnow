@@ -23,11 +23,17 @@ enum AlertScheduler {
     /// What a reconcile actually did. Returned rather than logged so the
     /// debug menu can show it and tests can assert on it.
     struct Outcome: Equatable {
-        var added: Int = 0
-        var removed: Int = 0
+        /// The alerts iOS accepted this pass. Carried rather than counted so
+        /// the caller can mark their source changes as alerted — and only
+        /// the ones that genuinely landed.
+        var addedAlerts: [PlannedAlert] = []
+        var removedIdentifiers: [String] = []
         /// True when nothing was attempted because iOS wouldn't deliver
         /// anyway. Distinct from "nothing needed doing".
         var skippedUnauthorized: Bool = false
+
+        var added: Int { addedAlerts.count }
+        var removed: Int { removedIdentifiers.count }
 
         static let unauthorized = Outcome(skippedUnauthorized: true)
     }
@@ -67,11 +73,11 @@ enum AlertScheduler {
 
         await client.removePending(identifiers: work.remove)
 
-        var added = 0
+        var accepted: [PlannedAlert] = []
         for alert in work.add {
             do {
                 try await client.add(alert)
-                added += 1
+                accepted.append(alert)
             } catch {
                 // A rejected request is not worth failing the whole pass
                 // for — the next reconcile will try it again.
@@ -79,6 +85,6 @@ enum AlertScheduler {
             }
         }
 
-        return Outcome(added: added, removed: work.remove.count)
+        return Outcome(addedAlerts: accepted, removedIdentifiers: work.remove)
     }
 }

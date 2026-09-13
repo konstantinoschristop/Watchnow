@@ -292,7 +292,11 @@ final class MovieNightViewModel: ObservableObject {
     /// (or all of them when no mood is picked).
     private func watchlistCandidates() -> [Result] {
         let wanted = Set(criteria.genreIDs)
+        let watched = WatchedStore.watchedIDs
         return WatchlistManager.watchlist.filter { result in
+            // "What should we watch tonight" can't answer with something
+            // they already have.
+            guard !watched.contains(result.id ?? -1) else { return false }
             // TV titles carry `name`; movies carry `title`. Prefer the
             // explicit media_type when present, fall back to that heuristic.
             let isMovie = result.media_type == ScreenTypes.movie.rawValue

@@ -255,6 +255,7 @@ enum WatchlistManager {
             addedDates.removeValue(forKey: String(id))
             providers.removeValue(forKey: String(id))
             AlertPreferences.forget(resultID: id)
+            WatchedStore.forget(resultID: id)
         }
     }
     

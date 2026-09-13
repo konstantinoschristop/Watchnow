@@ -133,8 +133,16 @@ enum BackgroundRefresh {
 
         let manualReminders = AlertInputs.manualReminders(from: await client.pending())
         let plan = AlertPlanner.plan(episodes: AlertInputs.episodeEvents(),
+                                     streamingChanges: AlertInputs.streamingChanges(),
                                      manualReminders: manualReminders)
-        return await AlertScheduler.reconcile(plan, using: client)
+
+        let outcome = await AlertScheduler.reconcile(plan, using: client)
+
+        // Only what iOS actually accepted is marked as told. An alert that
+        // was capped, rejected or never reached is still owed.
+        AlertPreferences.recordAlerted(
+            changeIDs: outcome.addedAlerts.flatMap(\.sourceChangeIDs))
+        return outcome
     }
 
     #if DEBUG
@@ -155,6 +163,7 @@ enum BackgroundRefresh {
     static func currentPlan(using client: any NotificationCenterClient = LiveNotificationCenterClient()
     ) async -> [PlannedAlert] {
         AlertPlanner.plan(episodes: AlertInputs.episodeEvents(),
+                          streamingChanges: AlertInputs.streamingChanges(),
                           manualReminders: AlertInputs.manualReminders(from: await client.pending()))
     }
 }

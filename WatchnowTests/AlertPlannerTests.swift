@@ -66,11 +66,27 @@ private func episode(_ mediaID: Int,
                  savedAt: savedAt)
 }
 
+private func streaming(_ mediaID: Int,
+                      title: String = "Fixture Film",
+                      service: String? = "Netflix",
+                      mediaType: String = "movie",
+                      savedAt: Date? = nil) -> StreamingChange {
+    StreamingChange(changeID: "movie.\(mediaID).streamingAvailability.8",
+                    mediaID: mediaID,
+                    mediaType: mediaType,
+                    title: title,
+                    serviceName: service,
+                    savedAt: savedAt)
+}
+
 private func plan(_ episodes: [EpisodeEvent],
-                  manual: [ManualReminder] = []) -> [PlannedAlert] {
+                  streamingChanges: [StreamingChange] = [],
+                  manual: [ManualReminder] = [],
+                  at instant: Date = now) -> [PlannedAlert] {
     AlertPlanner.plan(episodes: episodes,
+                      streamingChanges: streamingChanges,
                       manualReminders: manual,
-                      now: now,
+                      now: instant,
                       calendar: testCalendar)
 }
 
@@ -404,5 +420,128 @@ final class ReminderIdentifierTests: XCTestCase {
         XCTAssertEqual(manual.map(\.identifier), ["reminder.title.550", "reminder.episode.99"])
         XCTAssertEqual(manual[0].mediaID, 550)
         XCTAssertEqual(manual[1].episodeID, 99)
+    }
+}
+
+// MARK: - Now streaming
+
+final class AlertPlannerStreamingTests: XCTestCase {
+
+    func testASingleChangeNamesTheTitleAndTheService() {
+        let result = plan([], streamingChanges: [streaming(550, title: "Fight Club")])
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].body, "Fight Club is now on Netflix")
+        XCTAssertEqual(result[0].kind, .streaming)
+        XCTAssertEqual(result[0].deepLink, DeepLink(id: 550, mediaType: .movie))
+    }
+
+    func testBodyStaysHonestWhenTheServiceIsUnknown() {
+        let result = plan([], streamingChanges: [streaming(550, title: "Fight Club", service: nil)])
+        XCTAssertEqual(result[0].body, "Fight Club is now streaming")
+    }
+
+    func testItFiresAlmostImmediately() {
+        // "Now streaming" is news now, not at six o'clock.
+        let result = plan([], streamingChanges: [streaming(550)])
+        XCTAssertEqual(result[0].fireDate,
+                       now.addingTimeInterval(AlertPlanner.streamingLead))
+    }
+
+    func testSeveralChangesCollapseIntoOneDigest() {
+        // Three banners inside a minute is what teaches people to switch
+        // notifications off.
+        let result = plan([], streamingChanges: [streaming(1), streaming(2), streaming(3)])
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].body, "3 titles from your watchlist are new on your services")
+    }
+
+    func testTheDigestCarriesEveryChangeItSpeaksFor() {
+        // All three must be marked as told, or the two it didn't name would
+        // be offered again on the next run.
+        let changes = [streaming(1), streaming(2), streaming(3)]
+        let result = plan([], streamingChanges: changes)
+        XCTAssertEqual(Set(result[0].sourceChangeIDs), Set(changes.map(\.changeID)))
+    }
+
+    func testTheDigestHasNoDeepLink() {
+        // Several titles, so there is no single right destination. Opening
+        // the app is the answer — the briefing lists them.
+        let result = plan([], streamingChanges: [streaming(1), streaming(2)])
+        XCTAssertNil(result[0].deepLink)
+        XCTAssertNil(result[0].subjectID)
+    }
+
+    func testASingleChangeCarriesItsOwnID() {
+        let change = streaming(550)
+        let result = plan([], streamingChanges: [change])
+        XCTAssertEqual(result[0].sourceChangeIDs, [change.changeID])
+    }
+
+    func testEpisodeAlertsCarryNoChangeIDs() {
+        // They are planned from a date, not from a detected change, so there
+        // is nothing to mark as told.
+        let result = plan([episode(1, on: "2026-10-01")])
+        XCTAssertTrue(result[0].sourceChangeIDs.isEmpty)
+    }
+
+    func testAnOvernightDiscoveryWaitsForMorning() {
+        let lateNight = localTime("2026-10-01 23:40")
+        let result = plan([], streamingChanges: [streaming(550)], at: lateNight)
+        XCTAssertEqual(result[0].fireDate, localTime("2026-10-02 09:00"))
+    }
+
+    func testASmallHoursDiscoveryWaitsForTheSameMorning() {
+        let small = localTime("2026-10-01 04:10")
+        let result = plan([], streamingChanges: [streaming(550)], at: small)
+        XCTAssertEqual(result[0].fireDate, localTime("2026-10-01 09:00"))
+    }
+
+    func testStreamingComesBeforeTonightsEpisode() {
+        let result = plan([episode(1, on: "2026-09-30")], streamingChanges: [streaming(550)])
+        XCTAssertEqual(result.count, 2)
+        XCTAssertEqual(result[0].kind, .streaming)
+        XCTAssertEqual(result[1].kind, .episode)
+    }
+
+    func testTheSameTitleGetsOneAlertADayAcrossBothKinds() {
+        // A series whose episode airs tonight and which also just landed on
+        // a service is still one interruption.
+        let result = plan([episode(42, on: "2026-09-30")],
+                          streamingChanges: [streaming(42, mediaType: "tv")])
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].kind, .streaming, "the sooner one wins")
+    }
+
+    func testTheDigestIsExemptFromThePerTitleCap() {
+        // It has no single subject, so it cannot collide with a title that
+        // also has an episode tonight.
+        let result = plan([episode(1, on: "2026-09-30")],
+                          streamingChanges: [streaming(1, mediaType: "tv"), streaming(2)])
+        XCTAssertEqual(result.count, 2)
+        XCTAssertTrue(result.contains { $0.body.contains("2 titles") })
+    }
+
+    func testTheDailyCapStillApplies() {
+        let manual = (900...902).map {
+            ManualReminder(identifier: "reminder.title.\($0)",
+                           fireDate: now.addingTimeInterval(3600), mediaID: $0)
+        }
+        XCTAssertTrue(plan([], streamingChanges: [streaming(1)], manual: manual).isEmpty)
+    }
+
+    func testNoChangesMeansNoDigest() {
+        XCTAssertTrue(plan([], streamingChanges: []).isEmpty)
+    }
+
+    func testIdentifiersAreNamespacedAndStableWithinADay() {
+        let single = plan([], streamingChanges: [streaming(550)])
+        XCTAssertEqual(single[0].identifier, "auto.streaming.550.20260930")
+
+        let digest = plan([], streamingChanges: [streaming(1), streaming(2)])
+        XCTAssertEqual(digest[0].identifier, "auto.streaming.digest.20260930")
+
+        // Planning twice inside the same day must not churn the schedule.
+        XCTAssertEqual(plan([], streamingChanges: [streaming(550)])[0].identifier,
+                       single[0].identifier)
     }
 }

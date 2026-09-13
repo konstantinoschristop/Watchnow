@@ -25,10 +25,12 @@ struct PrimaryActionRow: View {
     /// "movie" or "series" — only used to word the taste button.
     let mediaKind: String
     let isLiked: Bool
+    let isWatched: Bool
 
     let onWatchlistTap: () -> Void
     let onTrailerTap: () -> Void
     let onLikeTap: () -> Void
+    let onWatchedTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -77,6 +79,21 @@ struct PrimaryActionRow: View {
             .accessibilityLabel(isLiked
                                 ? "Liked. Tap to remove from your taste profile."
                                 : "I like this \(mediaKind)")
+
+            // Closing the loop. Its own row rather than a third pill up top
+            // for the same reason the taste button is: "Mark as watched"
+            // does not survive a third of the width, and squeezing it would
+            // take "Watch Later" down with it.
+            ActionPill(
+                icon:   isWatched ? "checkmark.circle.fill" : "checkmark.circle",
+                label:  isWatched ? "Watched" : "Mark as watched",
+                style:  isWatched ? .activeAccent : .neutral,
+                height: 44,
+                action: onWatchedTap
+            )
+            .accessibilityLabel(isWatched
+                                ? "Watched. Tap to unmark."
+                                : "Mark as watched")
         }
         .padding(.horizontal, 16)
     }

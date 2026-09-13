@@ -45,6 +45,50 @@ enum AlertInputs {
         }
     }
 
+    /// The availability changes worth a notification.
+    ///
+    /// Every filter that decides "is this worth interrupting someone for"
+    /// lives here rather than in the planner, because each one is a question
+    /// about a store: do they have this service, have they already watched
+    /// it, have they muted it, were they already told. The planner's job
+    /// starts once the answer is yes.
+    ///
+    /// The changes themselves come from `WatchlistChangeStore` — the same
+    /// ones the "While You Were Away" briefing reads. There is one detector
+    /// in this app and this is not it.
+    static func streamingChanges(now: Date = Date()) -> [StreamingChange] {
+        // With no services chosen there is no such thing as "a service you
+        // have", so there is nothing honest to say. Movie Night's setup is
+        // where that list gets filled in.
+        let services = Set(StreamingPreferences.providerIDs)
+        guard !services.isEmpty else { return [] }
+
+        let watched = WatchedStore.watchedIDs
+        let alreadyAlerted = AlertPreferences.alertedChangeIDs
+
+        return WatchlistChangeStore.unseenChanges(now: now).compactMap { change in
+            guard change.kind == .streamingAvailability,
+                  !alreadyAlerted.contains(change.id),
+                  !watched.contains(change.mediaID),
+                  // A nil provider id is a record written before v2.1 —
+                  // unknown, so not provably one of theirs, so silent.
+                  let providerID = change.metadata.providerID,
+                  services.contains(providerID)
+            else { return nil }
+
+            let kinds = AutoAlertPolicy.alertKinds(
+                for: AlertPreferences.policyInputs(forID: change.mediaID, isSaved: true))
+            guard kinds.contains(.streaming) else { return nil }
+
+            return StreamingChange(changeID: change.id,
+                                   mediaID: change.mediaID,
+                                   mediaType: change.mediaType,
+                                   title: change.title,
+                                   serviceName: change.metadata.providerName,
+                                   savedAt: WatchlistManager.addedDate(forID: change.mediaID))
+        }
+    }
+
     /// The user's own bell reminders, read back out of what iOS is holding.
     ///
     /// iOS is the source of truth rather than `ReminderManager`'s identifier

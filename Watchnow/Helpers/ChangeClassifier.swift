@@ -94,7 +94,8 @@ enum ChangeClassifier {
             }).first {
                 add(.streamingAvailability,
                     detail: String(featured),
-                    metadata: ChangeMetadata(providerName: fresh.providerNames[featured]))
+                    metadata: ChangeMetadata(providerName: fresh.providerNames[featured],
+                                             providerID: featured))
             }
         }
 

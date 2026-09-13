@@ -162,3 +162,115 @@ final class AlertPreferencesTests: XCTestCase {
         XCTAssertFalse(AlertPreferences.didShowPermissionExplainer)
     }
 }
+
+// MARK: - Alerted-change ledger
+
+@MainActor
+final class AlertedChangeLedgerTests: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        AlertPreferences.reset()
+    }
+
+    func testNothingIsAlertedToBeginWith() {
+        XCTAssertTrue(AlertPreferences.alertedChangeIDs.isEmpty)
+    }
+
+    func testRecordingMakesAChangeKnown() {
+        // The ledger is what stops a "now streaming" alert being re-sent on
+        // every run: once it has fired it is no longer pending, so without
+        // this the next plan would schedule it again.
+        AlertPreferences.recordAlerted(changeIDs: ["movie.550.streamingAvailability.8"])
+        XCTAssertTrue(AlertPreferences.alertedChangeIDs.contains("movie.550.streamingAvailability.8"))
+    }
+
+    func testRecordingTheSameIDTwiceStoresItOnce() {
+        AlertPreferences.recordAlerted(changeIDs: ["a"])
+        AlertPreferences.recordAlerted(changeIDs: ["a", "b"])
+        XCTAssertEqual(AlertPreferences.alertedChangeIDs, ["a", "b"])
+    }
+
+    func testAnEmptyRecordIsANoOp() {
+        AlertPreferences.recordAlerted(changeIDs: [])
+        XCTAssertTrue(AlertPreferences.alertedChangeIDs.isEmpty)
+    }
+
+    func testTheLedgerIsBounded() {
+        // Changes age out of the store after 30 days, so an id older than
+        // the last few hundred can never be offered again anyway.
+        AlertPreferences.recordAlerted(changeIDs: (0..<400).map { "id.\($0)" })
+        XCTAssertEqual(AlertPreferences.alertedChangeIDs.count, 300)
+        XCTAssertTrue(AlertPreferences.alertedChangeIDs.contains("id.399"))
+        XCTAssertFalse(AlertPreferences.alertedChangeIDs.contains("id.0"))
+    }
+
+    func testTheLedgerIsDeviceLocal() {
+        // Notifications are delivered per device. Being told on the phone
+        // must not silence the iPad the user actually picks up.
+        XCTAssertFalse(CloudSync.syncedKeys.contains("alertsNotifiedChangeIDs"))
+    }
+
+    func testResetClearsTheLedger() {
+        AlertPreferences.recordAlerted(changeIDs: ["a"])
+        AlertPreferences.reset()
+        XCTAssertTrue(AlertPreferences.alertedChangeIDs.isEmpty)
+    }
+}
+
+// MARK: - WatchedStore
+
+@MainActor
+final class WatchedStoreTests: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        WatchedStore.reset()
+    }
+
+    func testNothingIsWatchedToBeginWith() {
+        XCTAssertFalse(WatchedStore.isWatched(550))
+        XCTAssertFalse(WatchedStore.isWatched(nil))
+        XCTAssertEqual(WatchedStore.count, 0)
+    }
+
+    func testMarkingRecordsTheDate() {
+        let when = Date(timeIntervalSince1970: 1_760_000_000)
+        XCTAssertTrue(WatchedStore.markWatched(550, now: when))
+        XCTAssertTrue(WatchedStore.isWatched(550))
+        XCTAssertEqual(WatchedStore.watchedDate(forID: 550), when)
+    }
+
+    func testMarkingTwiceKeepsTheFirstDate() {
+        // "You watched this in March" must not become "you watched this
+        // today" because a re-tap passed through.
+        let first = Date(timeIntervalSince1970: 1_760_000_000)
+        WatchedStore.markWatched(550, now: first)
+        XCTAssertFalse(WatchedStore.markWatched(550, now: first.addingTimeInterval(86_400)))
+        XCTAssertEqual(WatchedStore.watchedDate(forID: 550), first)
+    }
+
+    func testToggleReportsTheNewState() {
+        XCTAssertTrue(WatchedStore.toggle(550))
+        XCTAssertFalse(WatchedStore.toggle(550))
+        XCTAssertFalse(WatchedStore.isWatched(550))
+    }
+
+    func testWatchedIDsCoversEverythingMarked() {
+        WatchedStore.markWatched(1)
+        WatchedStore.markWatched(2)
+        XCTAssertEqual(WatchedStore.watchedIDs, [1, 2])
+        XCTAssertEqual(WatchedStore.count, 2)
+    }
+
+    func testUnsavingForgetsThatItWasWatched() {
+        WatchedStore.markWatched(550)
+        WatchedStore.forget(resultID: 550)
+        XCTAssertFalse(WatchedStore.isWatched(550))
+    }
+
+    func testWatchedStateSyncs() {
+        // Having seen something is a fact about the person, not the phone.
+        XCTAssertTrue(CloudSync.syncedKeys.contains("watchedAtDates"))
+    }
+}

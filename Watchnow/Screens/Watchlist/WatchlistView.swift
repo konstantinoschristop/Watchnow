@@ -35,6 +35,9 @@ struct WatchlistView: View {
     /// return; the folder itself already exists either way.
     @State private var draftName = ""
     @State private var moveTarget: Result?
+    /// Read once and held, not asked per cover — see the note on
+    /// `WatchlistGridView.watchedIDs`.
+    @State private var watchedIDs: Set<Int> = []
     @ObservedObject private var syncStatus = SyncStatus.shared
     @Namespace private var navigationNamespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -61,7 +64,16 @@ struct WatchlistView: View {
                 }
             }
         }
-        .onAppear { watchlistViewModel.refreshDataIfNeeded() }
+        .onAppear {
+            watchlistViewModel.refreshDataIfNeeded()
+            watchedIDs = WatchedStore.watchedIDs
+        }
+        // A title marked watched on another device, or on its own details
+        // screen, should be marked here too by the time you look.
+        .onReceive(NotificationCenter.default.publisher(for: CloudSync.didMergeRemoteChanges)) { note in
+            let keys = note.userInfo?[CloudSync.changedKeysKey] as? [String] ?? []
+            if keys.contains("watchedAtDates") { watchedIDs = WatchedStore.watchedIDs }
+        }
         .toast(isPresenting: $watchlistViewModel.showRemovedAlert) {
             AlertToast(displayMode: .alert,
                        type: .error(.red),
@@ -223,6 +235,8 @@ struct WatchlistView: View {
                               streamingProvider: streamingBadgeProvider,
                               onMoveToFolder: { moveTarget = $0 },
                               onRemove: { removeFromGrid($0) },
+                              watchedIDs: watchedIDs,
+                              onToggleWatched: { toggleWatched($0) },
                               namespace: navigationNamespace,
                               contentID: watchlistViewModel.selectedFilter,
                               emptyState: AnyView(folderEmptyState)) {
@@ -283,6 +297,18 @@ struct WatchlistView: View {
     /// poster wall collapses out of the grid and buzzes exactly like one
     /// deleted from the row list — the two routes shouldn't feel like
     /// different features.
+    private func toggleWatched(_ result: Result) {
+        guard let id = result.id else { return }
+        withAnimation(reduceMotion ? nil : AppMotion.crossfade) {
+            if WatchedStore.toggle(id) {
+                watchedIDs.insert(id)
+            } else {
+                watchedIDs.remove(id)
+            }
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     private func removeFromGrid(_ result: Result) {
         withAnimation(reduceMotion ? nil
                                    : .spring(response: 0.35, dampingFraction: 0.85)) {

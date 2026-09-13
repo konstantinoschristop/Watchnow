@@ -311,3 +311,99 @@ One trap for anyone repeating this with a hand-edited fixture: `@UserDefault` st
 plist edit that writes the JSON back as a *string* makes the app decode nothing at all and report an
 empty store — which looks exactly like a broken pipeline.
 **Status: accepted.**
+
+---
+
+# Phase 1.5 — Mark as watched
+
+## D-33 · 2026-09-13 · Marking watched does not unsave
+The watchlist becomes a record of what you meant to watch and what you did. Throwing the entry away
+at the exact moment it finally means something would be backwards, and it would destroy the only
+signal the widget, the alerts and the review prompt need. Stored as id → date rather than a set, the
+same shape as `WatchlistManager.addedDates`, because the date is what lets anything later say "you
+watched this in March" or count the last three. Synced: having seen something is a fact about the
+person, not the phone.
+**Status: accepted.**
+
+## D-34 · 2026-09-13 · Watched surfaces: a third pill on details, a context action and a dim in the grid
+The pill is its own full-width row for the same reason the taste button is — "Mark as watched" does
+not survive a third of the width, and squeezing it would take "Watch Later" down with it. In the
+grid the cover is dimmed to 0.6 and gains a checkmark badge; desaturating instead was tried in
+thought and rejected, because a wall of grey covers is hard to read past and "done" should not make
+the artwork look broken. Both the dim and the badge are purely visual, so `accessibilityDescription`
+appends "watched" for VoiceOver.
+`watchedIDs` is passed into the grid as a `Set<Int>` rather than asked per cell, for the reason the
+existing `streamingProvider` comment already documents: `@UserDefault` decodes the whole table on
+every access, so a per-cell read would be one full `JSONDecoder` pass per cover per render.
+**Status: accepted.**
+
+## D-35 · 2026-09-13 · Not built: a watched filter in the watchlist
+Watched titles stay in place, dimmed. A "Hide watched" filter would sit next to the folder chips,
+which is a busier surface than it looks, and the dim already answers "have I seen this" at a glance.
+Worth adding if the list gets long enough that it stops being enough — noted rather than done.
+**Status: accepted, scope deliberately left out.**
+
+---
+
+# Phase 3 — Now streaming alerts
+
+## D-36 · 2026-09-13 · No new availability modules; the existing monitor got a cap
+As agreed in D-3. `WatchlistChangeMonitor` gained `maxTitlesPerRun = 40` and oldest-`lastCheckedAt`-
+first ordering, so a long watchlist is walked across several runs instead of in one burst. Titles
+with no snapshot sort first — they have never been checked, and until they have a baseline they can
+produce nothing. Ties break on id so the order is deterministic.
+Nothing else was built: the snapshot store, the batched refresher and the diff engine the brief
+asked for all already existed and are now feeding two consumers instead of one.
+**Status: accepted.**
+
+## D-37 · 2026-09-13 · `shouldNotify` moved from the monitor into the planner
+The monitor's unused `shouldNotify` / `notificationCooldown` stub is gone. Its job is now split
+where each half belongs: `AlertInputs.streamingChanges` answers the store-shaped questions (do they
+have this service, have they watched it, have they muted it, were they told already) and
+`AlertPlanner` answers the scheduling-shaped ones (caps, quiet hours, digest). A cooldown constant
+floating beside a detector could never have cooperated with the daily caps; now there is one place
+that decides how much noise a day may contain. Its test moved to `AlertPlannerTests` with it.
+**Status: accepted.**
+
+## D-38 · 2026-09-13 · `ChangeMetadata` carries the provider id
+Answering "is this one of *their* services?" by parsing the provider id back out of the change's
+composite id would have made the id format load-bearing for a second reason. An optional
+`providerID` on the metadata is additive, decodes as nil for anything written before v2.1, and a nil
+is read as "unknown service", which never notifies. Conservative in exactly the direction this
+feature should be.
+**Status: accepted.**
+
+## D-39 · 2026-09-13 · The digest has no deep link
+"3 titles from your watchlist are new on your services" has no single right destination, and opening
+one of the three would be a small lie. Tapping it opens the app, where "While You Were Away"
+presents itself on launch and lists exactly those changes. That also makes the digest exempt from
+the per-title-per-day cap by construction — it has no subject to collide with.
+**Status: accepted.**
+
+## D-40 · 2026-09-13 · An alerted-change ledger, device-local
+`AlertScheduler`'s reconcile is idempotent only while a notification is still *pending*. Once it has
+fired it leaves the pending list, so the next plan would cheerfully schedule it again — every run,
+until the user happened to open the app and spend the change. `AlertPreferences` now keeps the last
+300 `WatchlistChange` ids it has alerted on, and only ids that iOS actually accepted are recorded:
+an alert that was capped or rejected is still owed.
+Device-local rather than synced. Notifications are delivered per device, so being told once on the
+phone should not silence the iPad the user actually picks up — the same reasoning that keeps What's
+New's seen-state off iCloud.
+**Status: accepted.**
+
+## D-41 · 2026-09-13 · A notification does not suppress the briefing card
+A change that produced an alert still appears in the next "While You Were Away" briefing. They are
+different surfaces with different lifetimes: a banner is missed, swiped away, or read on a locked
+screen, and the briefing is the place you go to catch up deliberately. Suppressing the card would
+punish the user for having notifications on. The store stays the single source of truth for both;
+only the ledger differs, and it governs notifications alone.
+**Status: accepted.**
+
+## D-42 · 2026-09-13 · Verified end to end on device, with real TMDB data
+The fixture was honest: Mayday's snapshot had its `providerIDs` emptied and the user's services set
+to Apple TV+ (350), so the *real* classifier diffed real availability and produced a genuine
+`streamingAvailability` change. It flowed through every filter and arrived as a delivered banner
+reading "Now streaming — Mayday is now on Apple TV". Afterwards the plan correctly reported
+`0 streaming`, because the ledger had recorded it: the alert had been sent, and the whole point is
+that it is not sent twice.
+**Status: accepted.**

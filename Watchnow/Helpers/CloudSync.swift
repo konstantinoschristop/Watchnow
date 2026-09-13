@@ -53,7 +53,11 @@ enum CloudSync {
         // iOS grants that per device.
         "alertsEpisodesEnabled",
         "alertsStreamingEnabled",
-        "alertsOptedOutIDs"
+        "alertsOptedOutIDs",
+
+        // WatchedStore — having seen something is a fact about the person,
+        // not about the phone they saw it on.
+        "watchedAtDates"
 
         // Deliberately absent: "watchlistProviders". Which service a title
         // streams on is answered per region, so an iPhone set to Greece and
