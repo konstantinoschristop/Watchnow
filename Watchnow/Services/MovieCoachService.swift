@@ -148,7 +148,22 @@ enum MovieCoachService {
 
     static var savedTitleCount: Int { WatchlistManager.watchlist.count }
 
-    static var hasEnoughHistory: Bool { savedTitleCount >= minimumWatchlistSize }
+    /// Titles Coach can reason about: everything saved, plus everything the
+    /// user has explicitly said they love.
+    ///
+    /// Counting saves alone would have kept Coach silent for exactly the
+    /// user who has just told it the most. Onboarding asks for five loves
+    /// and three saves, and a love is the stronger signal of the two — a
+    /// deliberate "this is my kind of thing" against a save's "maybe
+    /// later". Ignoring five of them because they weren't bookmarks would
+    /// make the bar arithmetic rather than meaningful.
+    static var knownTitleCount: Int {
+        Set(WatchlistManager.watchlist.compactMap(\.id))
+            .union(TasteProfile.likedIDs)
+            .count
+    }
+
+    static var hasEnoughHistory: Bool { knownTitleCount >= minimumWatchlistSize }
 
     /// Why Coach can or can't run. The UI hides itself for anything but
     /// `.ready`, so an unsupported device simply never sees the feature.

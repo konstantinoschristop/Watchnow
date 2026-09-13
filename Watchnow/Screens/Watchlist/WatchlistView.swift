@@ -25,6 +25,10 @@ import AlertToast
 struct WatchlistView: View {
 
     @ObservedObject var watchlistViewModel: WatchlistViewModel
+    /// Takes the user somewhere they can actually save something. Supplied
+    /// by `ContentView`, which owns the tab selection — an empty state whose
+    /// only advice is "go and find something" is where a first session ends.
+    var onBrowse: (() -> Void)?
     /// Observed here so the album row + filtered content refresh when
     /// folders are created/renamed/deleted or items move between them.
     @ObservedObject private var folderStore = FolderManager.shared
@@ -525,11 +529,18 @@ struct WatchlistView: View {
 
     private var globalEmptyState: some View {
         ContentUnavailableView {
-            themedLabel(title: "Your Watchlist is empty",
+            themedLabel(title: "Nothing saved yet",
                         systemImage: "bookmark",
                         tint: .accentColor)
         } description: {
-            Text("Tap the bookmark on any movie or TV series to save it here.")
+            Text("Save something from Trending and Watchnow will tell you when it airs or lands on a service you have.")
+        } actions: {
+            if let onBrowse {
+                Button("Browse Trending", action: onBrowse)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.regular)
+                    .tint(.accentColor)
+            }
         }
     }
 

@@ -37,6 +37,11 @@ struct SettingsDebugSection: View {
                 status = "Alert preferences and alerted-change ledger reset"
                 lines = []
             }
+            Button("Reset onboarding", role: .destructive) {
+                OnboardingState.reset()
+                status = "Onboarding will run again on next launch"
+                lines = []
+            }
             Button("Mark all as unwatched", role: .destructive) {
                 WatchedStore.reset()
                 status = "Watched state cleared"

@@ -44,6 +44,13 @@ struct WatchnowApp: App {
                     // Run consent flow once the UI is on screen so we have
                     // a guaranteed root view controller for the form.
                     await Self.requestConsent()
+
+                    // Strictly afterwards. Two modals racing for the first
+                    // second of a fresh install is a bad first impression,
+                    // and consent is the one with a legal claim on going
+                    // first — it governs whether the ads already shipping
+                    // may be personalised.
+                    await OnboardingCoordinator.shared.evaluate()
                 }
                 .task {
                     // Top up the keyword cache for saved titles so Movie

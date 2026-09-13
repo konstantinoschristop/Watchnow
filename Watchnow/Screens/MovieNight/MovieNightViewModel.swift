@@ -74,56 +74,9 @@ final class MovieNightViewModel: ObservableObject {
     /// keep the row to the platforms people actually recognise.
     func loadProvidersIfNeeded() async {
         guard availableProviders.isEmpty else { return }
-        if let response = try? await service.fetchProviders(screenType: .movie, region: region) {
-            let rank = Self.subscriptionRank
-            availableProviders = (response.results ?? [])
-                .filter { rank[$0.provider_id] != nil }
-                .sorted { (rank[$0.provider_id] ?? .max) < (rank[$1.provider_id] ?? .max) }
-                .prefix(5)
-                .map { $0 }
-        }
+        availableProviders = Array(
+            await StreamingProviderCatalog.load(region: region, using: service).prefix(5))
     }
-
-    /// Major subscription services in rough global-recognition order. Movie
-    /// Night shows the first few of these the user's region actually carries
-    /// — subscriptions only, never rent/buy storefronts (Apple TV Store,
-    /// Google Play), free/ad tiers, or transactional platforms.
-    ///
-    /// We curate both the set *and* the order by stable provider ID because
-    /// TMDB's provider list doesn't tag monetization and its `display_
-    /// priority` is erratic across regions (it ranks Sun Nxt above Hulu in
-    /// the US). Ordering here instead of by `display_priority` keeps the row
-    /// to household names. id 350 ("Apple TV") is the Apple TV+ subscription;
-    /// the rent/buy "Apple TV Store" (id 2) is intentionally absent. Regional
-    /// services sit at the end so they only surface where the majors don't.
-    private static let subscriptionProviders: [Int] = [
-        8,         // Netflix
-        9, 119,    // Amazon Prime Video (+ regional id)
-        337,       // Disney+
-        350,       // Apple TV (Apple TV+)
-        1899, 384, // Max / HBO Max
-        15,        // Hulu
-        531,       // Paramount+
-        386, 387,  // Peacock
-        283,       // Crunchyroll
-        37,        // Showtime
-        43,        // Starz
-        520,       // Discovery+
-        526,       // AMC+
-        11,        // MUBI
-        151,       // BritBox
-        39,        // NOW
-        29,        // Sky Go
-        122,       // Disney+ Hotstar (regional)
-        309,       // Sun Nxt (regional)
-        232,       // ZEE5 (regional)
-        220        // JioCinema (regional)
-    ]
-
-    /// provider_id → its index in `subscriptionProviders` (lower = shown first).
-    private static let subscriptionRank: [Int: Int] =
-        Dictionary(subscriptionProviders.enumerated().map { ($1, $0) },
-                   uniquingKeysWith: { first, _ in first })
 
     // MARK: - Session lifecycle
 

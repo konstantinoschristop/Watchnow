@@ -57,7 +57,11 @@ enum CloudSync {
 
         // WatchedStore — having seen something is a fact about the person,
         // not about the phone they saw it on.
-        "watchedAtDates"
+        "watchedAtDates",
+
+        // OnboardingState — someone who set up on their phone should not be
+        // asked again on their iPad, even before the watchlist arrives.
+        "hasCompletedOnboarding"
 
         // Deliberately absent: "watchlistProviders". Which service a title
         // streams on is answered per region, so an iPhone set to Greece and

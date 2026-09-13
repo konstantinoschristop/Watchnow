@@ -78,6 +78,17 @@ final class NotificationPermission: ObservableObject {
     /// explainer has been shown, and a no-op when iOS has already been
     /// answered (typically by a bell reminder set before this release).
     func offerAfterSave() async {
+        await offer()
+    }
+
+    /// The other moment worth asking: onboarding has just filled the
+    /// watchlist, so "we'll tell you the moment it airs" is a promise about
+    /// three titles the user chose thirty seconds ago.
+    func offerAfterOnboarding() async {
+        await offer()
+    }
+
+    private func offer() async {
         await refreshStatus()
         guard canStillAsk, !AlertPreferences.didShowPermissionExplainer else { return }
 

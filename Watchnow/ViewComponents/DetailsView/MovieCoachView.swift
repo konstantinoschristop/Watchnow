@@ -67,12 +67,12 @@ struct MovieCoachView: View {
 
     // MARK: - Warm-up hint
 
-    /// Shown until the watchlist reaches `minimumWatchlistSize`. Frames the
+    /// Shown until Coach knows `minimumWatchlistSize` titles. Frames the
     /// threshold as progress rather than a lockout.
     private var warmUpHint: some View {
-        let saved = MovieCoachService.savedTitleCount
+        let known = MovieCoachService.knownTitleCount
         let target = MovieCoachService.minimumWatchlistSize
-        let remaining = max(0, target - saved)
+        let remaining = max(0, target - known)
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top) {
@@ -85,15 +85,15 @@ struct MovieCoachView: View {
                 .appFont(20, weight: .heavy, relativeTo: .title3)
                 .foregroundStyle(.primary)
 
-            Text("Save \(remaining) more \(remaining == 1 ? "title" : "titles") to your watchlist and Movie Coach will start telling you whether something's a good fit for you.")
+            Text("Save or like \(remaining) more \(remaining == 1 ? "title" : "titles") and Movie Coach will start telling you whether something's a good fit for you.")
                 .appFont(14, relativeTo: .subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 8) {
-                ProgressView(value: Double(saved), total: Double(target))
+                ProgressView(value: Double(known), total: Double(target))
                     .tint(Color.accentColor)
-                Text("\(saved) of \(target)")
+                Text("\(known) of \(target)")
                     .appFont(12, weight: .semibold, relativeTo: .caption)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()

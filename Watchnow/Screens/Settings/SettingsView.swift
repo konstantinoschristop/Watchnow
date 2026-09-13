@@ -30,10 +30,14 @@ struct SettingsView: View {
     @State private var episodeAlerts = true
     @State private var streamingAlerts = true
 
+    @State private var providers: [WatchProvider] = []
+    @State private var selectedProviderIDs: Set<Int> = []
+
     var body: some View {
         NavigationStack {
             Form {
                 alertsSection
+                servicesSection
                 syncSection
                 aboutSection
                 #if DEBUG
@@ -51,7 +55,10 @@ struct SettingsView: View {
         .task {
             episodeAlerts = AlertPreferences.episodeAlertsEnabled
             streamingAlerts = AlertPreferences.streamingAlertsEnabled
+            selectedProviderIDs = Set(StreamingPreferences.providerIDs)
             await permission.refreshStatus()
+            providers = await StreamingProviderCatalog.load(
+                region: Locale.current.region?.identifier ?? "US")
         }
         .onChange(of: episodeAlerts) { _, value in
             AlertPreferences.episodeAlertsEnabled = value
@@ -110,6 +117,37 @@ struct SettingsView: View {
             return "Notifications are off for Watchnow, so nothing will be delivered yet."
         }
         return "Notifications are turned off for Watchnow in iOS Settings, so nothing will be delivered."
+    }
+
+    // MARK: - Services
+
+    /// Until now this question could only be answered inside Movie Night's
+    /// setup screen, which made it invisible to anyone who had not played a
+    /// round. It decides what "a service you have" means for every
+    /// now-streaming alert, so it belongs somewhere a user would think to
+    /// look.
+    @ViewBuilder
+    private var servicesSection: some View {
+        if !providers.isEmpty {
+            Section {
+                ProviderPickerGrid(providers: providers,
+                                   selectedIDs: selectedProviderIDs,
+                                   onToggle: toggleProvider)
+                    .padding(.vertical, 4)
+            } header: {
+                Text("Your services")
+            } footer: {
+                Text(selectedProviderIDs.isEmpty
+                     ? "Pick the services you subscribe to and Watchnow will tell you when a saved title lands on one."
+                     : "Used for now-streaming alerts and for Movie Night.")
+            }
+        }
+    }
+
+    private func toggleProvider(_ id: Int) {
+        if selectedProviderIDs.contains(id) { selectedProviderIDs.remove(id) }
+        else { selectedProviderIDs.insert(id) }
+        StreamingPreferences.save(selectedProviderIDs)
     }
 
     // MARK: - Sync

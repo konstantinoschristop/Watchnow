@@ -407,3 +407,89 @@ reading "Now streaming — Mayday is now on Apple TV". Afterwards the plan corre
 `0 streaming`, because the ledger had recorded it: the alert had been sent, and the whole point is
 that it is not sent twice.
 **Status: accepted.**
+
+---
+
+# Phase 4 — Onboarding and Coach gating
+
+## D-43 · 2026-09-13 · Coach gating needed no migration; only its arithmetic changed
+As predicted in Phase 0: there is exactly one Coach entry point, `MovieCoachView`, and it already
+renders nothing at all unless `MovieCoachService.isReady`. No `CoachAvailability` wrapper was added
+— a new type whose whole body forwards to an existing one earns nothing.
+What did change is D-9: `hasEnoughHistory` now counts `knownTitleCount` — saved ids unioned with
+`TasteProfile.likedIDs` — rather than saves alone. Onboarding asks for five loves and three saves,
+and a love is the stronger signal of the two; keeping the bar at "saves only" would have kept Coach
+silent for precisely the user who had just told it the most. Verified on device: the finish screen
+showed the Coach card rather than the warm-up hint.
+**Status: accepted.**
+
+## D-44 · 2026-09-13 · The finish screen is part of onboarding, not three modals over the watchlist
+The brief asks for: land on the Watchlist, then a Coach verdict, then the permission explainer.
+Chaining two sheets on top of a freshly-revealed watchlist is fiddly to sequence and reads as being
+handed three things at once. Instead onboarding has a fourth internal step — "You're all set" —
+carrying the three saved covers and the Coach verdict, and the permission explainer is presented
+*after* dismissal, over the watchlist. The user still meets both, in the stated order, in one
+continuous flow.
+Completion is marked on *arrival* at that screen, not on leaving it, so neither Coach nor the
+notification prompt is ever a condition of having been onboarded.
+**Status: accepted, with the deviation named.**
+
+## D-45 · 2026-09-13 · Onboarding runs after the consent form, and this is a real dependency
+`WatchnowApp` presents the UMP consent form and now awaits it before `OnboardingCoordinator
+.evaluate()`. Consent has the legal claim on going first — it governs whether the ads already
+shipping may be personalised — and two modals racing for the first second of a fresh install is a
+bad first impression.
+Worth flagging: the file's own header notes that a stalled consent flow used to block ads forever,
+which is why `MobileAds.start()` was uncoupled from it. Onboarding is now coupled to it instead. On
+the simulator the callback returns promptly, but if it ever hangs, the first run hangs with it. A
+timeout around the consent wait is the obvious hardening and is **not** done — noted rather than
+guessed at, because the right ceiling depends on real UMP behaviour in the field.
+**Status: accepted, with a known risk recorded.**
+
+## D-46 · 2026-09-13 · Step 2 uses trending, not a hand-curated list of classics
+"~30 well-known titles across genres and both media types" could be a static list, which would be
+more controllable and would start ageing the day it shipped. Trending is what people are actually
+watching, comes region-flavoured for free, and is never empty. Films and shows are interleaved so
+the grid reads as "both" rather than as a block of one followed by a block of the other.
+Step 3 is personalised from step 2 through TMDB's own recommendations for the loved picks — three
+requests — and falls back to trending when the user skipped step 2 or TMDB had little to say.
+Verified on device: loving Moana produced a step-3 grid of family adventure titles, not generic
+trending.
+**Status: accepted.**
+
+## D-47 · 2026-09-13 · One provider picker, two screens, and Movie Night keeps its own chips
+`StreamingProviderCatalog` now owns the curated subscription list and its ordering, which used to
+live inside `MovieNightViewModel`. `ProviderPickerGrid` is the shared chip layout, used by
+onboarding step 1 and the new Settings "Your services" section — closing D-20.
+Movie Night's own chips were left alone. They carry that screen's motion and layout, and migrating a
+shipped screen for visual uniformity is risk without benefit; it reads the same catalogue, so the
+list and its order can no longer drift. Two chip *views*, one source of truth.
+**Status: accepted.**
+
+## D-48 · 2026-09-13 · The gate's hardest case was verified by accident, and it passed
+The first attempt at a clean-install walkthrough showed no onboarding at all. The cause was the
+right one: `simctl uninstall` leaves the KVS store behind, `CloudSync.reconcileAtLaunch` pulled a
+three-title watchlist back, and the gate correctly answered `.skip` — which is precisely the
+second-device scenario it exists for. Seeing the real flow required clearing
+`data/Containers/Data/InternalDaemon/*/com.apple.kvs` as well.
+Worth writing down for whoever tests this next: on a simulator the KVS daemon logs
+`Error synchronizing with cloud … "No account"`, so `CloudSync.isAvailable` is false and the gate
+takes the no-iCloud path immediately. The three-second restore wait cannot be exercised there at all
+— it needs a signed-in device.
+**Status: accepted.**
+
+## D-49 · 2026-09-13 · The finish screen fetches a full Coach context, not a thin one
+Four parallel requests (details, providers, credits, keywords) rather than the two it started with.
+`MovieCoachContext` reasons from cast and themes, so handing it empties would have made the first
+Coach verdict the user ever sees the most generic one the app can produce. On the simulator the
+generation itself fails — the on-device model is not really available there — and the card falls
+back to its existing "Couldn't get a read on this one · Retry" state rather than breaking the
+screen.
+**Status: accepted.**
+
+## D-50 · 2026-09-13 · Not built: a watchlist filter, and localization is still outstanding
+The empty state was rewritten with a "Browse Trending" action that switches tabs, closing the brief's
+empty-state item. Two things from earlier phases remain open and are called out so Phase 6 does not
+discover them: the `Localizable.xcstrings` catalog agreed in D-13 has not been added, and the watched
+filter deferred in D-35 is still deferred.
+**Status: accepted, tracked for Phase 6.**

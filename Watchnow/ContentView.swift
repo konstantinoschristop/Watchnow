@@ -7,6 +7,28 @@
 
 import SwiftUI
 
+/// Turns the app into the build an App Store capture should show.
+///
+/// Debug builds carry two things the shipping app does not: ad slots filled
+/// with Google's "Test mode" placeholders, and the What's New test bench in
+/// the Watchlist toolbar. Both would be visible in a screenshot. Requesting
+/// live ad inventory from a simulator to dodge the first would count as
+/// invalid traffic, so the slots are suppressed instead.
+///
+/// Read from `UserDefaults`, so the argument domain satisfies it — launching
+/// with `-screenshotMode YES` turns it on for that run only and leaves
+/// nothing persisted. Compiles away to `false` in Release, where neither
+/// affordance exists in the first place.
+enum ScreenshotMode {
+    static var isOn: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "screenshotMode")
+        #else
+        false
+        #endif
+    }
+}
+
 struct ContentView: View {
 
     @StateObject private var moviesViewModel = MoviesViewModel(model: MoviesModel())
@@ -21,6 +43,7 @@ struct ContentView: View {
     /// explainer happens on a details screen or a list row, and the sheet
     /// that explains it belongs to the app's root.
     @ObservedObject private var notificationPermission = NotificationPermission.shared
+    @ObservedObject private var onboarding = OnboardingCoordinator.shared
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab: AppTab = .movies
@@ -67,6 +90,14 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $movieNightDemo) {
             MovieNightView()
         }
+        .fullScreenCover(isPresented: $onboarding.isPresented) {
+            OnboardingView(onFinish: finishOnboarding)
+        }
+        // Shown only while the gate is waiting on iCloud, so a second device
+        // restoring its watchlist reads as care rather than as a hang.
+        .overlay(alignment: .bottom) {
+            if onboarding.isRestoring { restoringCaption }
+        }
         // "While You Were Away": evaluated on launch and on each return to
         // the foreground. The view model owns every decision — this view
         // just hosts the sheet.
@@ -99,6 +130,30 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    private var restoringCaption: some View {
+        HStack(spacing: 7) {
+            ProgressView().controlSize(.small)
+            Text("Restoring your watchlist…")
+                .appFont(13, relativeTo: .footnote)
+        }
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .background(.regularMaterial, in: Capsule())
+        .padding(.bottom, 90)
+        .transition(.opacity)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// Onboarding is over. Land on the watchlist it just filled — the three
+    /// covers are the whole payoff — and only then ask iOS for permission to
+    /// send anything.
+    private func finishOnboarding() {
+        onboarding.finish()
+        selectedTab = .watchlist
+        Task { await NotificationPermission.shared.offerAfterOnboarding() }
     }
 
     // MARK: - Deeplink handling
@@ -178,7 +233,8 @@ extension ContentView {
 
     private var watchlistTabContent: some View {
         NavigationStack {
-            WatchlistView(watchlistViewModel: watchlistViewModel)
+            WatchlistView(watchlistViewModel: watchlistViewModel,
+                          onBrowse: { selectedTab = .movies })
                 .background(Color(.background))
                 .navigationTitle("Watchlist")
                 .toolbar {
@@ -195,13 +251,15 @@ extension ContentView {
                 // Dev-only test bench for the What's New briefing; the
                 // whole affordance compiles away in Release.
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            whatsNewDebugPresented = true
-                        } label: {
-                            Image(systemName: "hammer.circle")
+                    if !ScreenshotMode.isOn {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                whatsNewDebugPresented = true
+                            } label: {
+                                Image(systemName: "hammer.circle")
+                            }
+                            .accessibilityLabel("What's New Testing")
                         }
-                        .accessibilityLabel("What's New Testing")
                     }
                 }
                 .sheet(isPresented: $whatsNewDebugPresented) {
