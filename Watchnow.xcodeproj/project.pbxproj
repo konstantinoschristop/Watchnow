@@ -134,13 +134,6 @@
 		FE1D0A21000000000000FB21 /* KeywordsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A21000000000000FA21 /* KeywordsResponse.swift */; };
 		FE1D0A22000000000000FB22 /* KeywordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A22000000000000FA22 /* KeywordStore.swift */; };
 		FE1D0A23000000000000FB23 /* KeywordEnricher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A23000000000000FA23 /* KeywordEnricher.swift */; };
-		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
-		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
-		FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C01000000000000FA01 /* WatchlistGridView.swift */; };
-		FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */; };
-		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
-		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
-		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
 		FE1D0A30000000000000FB30 /* AlertPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A30000000000000FA30 /* AlertPreferences.swift */; };
 		FE1D0A31000000000000FB31 /* AutoAlertPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A31000000000000FA31 /* AutoAlertPolicy.swift */; };
 		FE1D0A32000000000000FB32 /* NotificationPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A32000000000000FA32 /* NotificationPermission.swift */; };
@@ -167,6 +160,14 @@
 		FE1D0A49000000000000FB49 /* ReviewPromptPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */; };
 		FE1D0A4A000000000000FB4A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FE1D0A4A000000000000FA4A /* Localizable.xcstrings */; };
 		FE1D0A4B000000000000FB4B /* ReviewPromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */; };
+		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
+		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
+		FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C01000000000000FA01 /* WatchlistGridView.swift */; };
+		FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */; };
+		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
+		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
+		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
+		FE1D0A4C000000000000FB4C /* BrandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4C000000000000FA4C /* BrandColors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -307,13 +308,6 @@
 		FE1D0A21000000000000FA21 /* KeywordsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordsResponse.swift; sourceTree = "<group>"; };
 		FE1D0A22000000000000FA22 /* KeywordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordStore.swift; sourceTree = "<group>"; };
 		FE1D0A23000000000000FA23 /* KeywordEnricher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordEnricher.swift; sourceTree = "<group>"; };
-		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
-		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
-		FE3B0C01000000000000FA01 /* WatchlistGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistGridView.swift; sourceTree = "<group>"; };
-		FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderAlbumRow.swift; sourceTree = "<group>"; };
-		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
-		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
-		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		FE1D0A30000000000000FA30 /* AlertPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPreferences.swift; sourceTree = "<group>"; };
 		FE1D0A31000000000000FA31 /* AutoAlertPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoAlertPolicy.swift; sourceTree = "<group>"; };
 		FE1D0A32000000000000FA32 /* NotificationPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermission.swift; sourceTree = "<group>"; };
@@ -340,6 +334,14 @@
 		FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptPolicy.swift; sourceTree = "<group>"; };
 		FE1D0A4A000000000000FA4A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTests.swift; sourceTree = "<group>"; };
+		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
+		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
+		FE3B0C01000000000000FA01 /* WatchlistGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistGridView.swift; sourceTree = "<group>"; };
+		FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderAlbumRow.swift; sourceTree = "<group>"; };
+		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
+		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
+		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
+		FE1D0A4C000000000000FA4C /* BrandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandColors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -380,6 +382,7 @@
 		8A19B1B92E7F003A0083A094 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
+				FE1D0A4C000000000000FA4C /* BrandColors.swift */,
 				8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */,
 				AB20D001000000000000F001 /* DesignTokens.swift */,
 			);
@@ -844,6 +847,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1D0A4C000000000000FB4C /* BrandColors.swift in Sources */,
 				FE1D0A49000000000000FB49 /* ReviewPromptPolicy.swift in Sources */,
 				FE1D0A47000000000000FB47 /* ProviderPickerGrid.swift in Sources */,
 				FE1D0A46000000000000FB46 /* OnboardingView.swift in Sources */,
@@ -1173,15 +1177,15 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1206,15 +1210,15 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

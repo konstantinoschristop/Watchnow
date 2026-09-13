@@ -157,7 +157,14 @@ struct GenericResultResponse: Codable, Equatable {
 }
 
 // MARK: - Result
-struct Result: Codable, Hashable, Equatable {
+/// `Sendable` is stated rather than inferred. Every stored property below is
+/// already a value type, so the conformance is free — but *implicit* Sendable
+/// inference is resolved per compilation batch, and the batches shift with
+/// the number of files in the target. Adding one unrelated file was enough to
+/// leave `SearchViewModel`'s task group unable to see it, which is a build
+/// failure with no connection to anything either file does. Saying it out
+/// loud costs a word and removes the whole class of problem.
+struct Result: Codable, Hashable, Equatable, Sendable {
 
     // A saved watchlist entry is a long-lived copy of a TMDB record, and TMDB
     // keeps editing the record: posters get replaced, ratings drift, dates
