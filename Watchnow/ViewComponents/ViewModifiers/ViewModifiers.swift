@@ -39,6 +39,24 @@ struct SoftScrollEdgeEffectStyleModifier: ViewModifier {
     }
 }
 
+/// Soft edges top *and* bottom.
+///
+/// Onboarding's grids scroll between a bare status bar and a bare footer, so
+/// without this a poster slides under both with a hard edge and nothing to
+/// explain it. The single-edge variant above is right for the tabs, which
+/// have a navigation bar doing the same job at the bottom.
+struct SoftScrollEdgesModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .scrollEdgeEffectStyle(.soft, for: .top)
+                .scrollEdgeEffectStyle(.soft, for: .bottom)
+        } else {
+            content
+        }
+    }
+}
+
 // MARK: - ViewDidLoadModifier
 struct ViewDidLoadModifier: ViewModifier {
     

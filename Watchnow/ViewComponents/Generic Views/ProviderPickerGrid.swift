@@ -20,8 +20,15 @@ struct ProviderPickerGrid: View {
     let providers: [WatchProvider]
     let selectedIDs: Set<Int>
     let onToggle: (Int) -> Void
+    /// Drives the cascade when this appears inside onboarding. Settings
+    /// leaves it at its default, so the section simply exists — a list that
+    /// animates itself in every time you open Settings is a tic, not a
+    /// flourish.
+    var revealed: Bool = true
+    var reduceMotionOverride: Bool? = nil
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var reduceMotionEnvironment
+    private var reduceMotion: Bool { reduceMotionOverride ?? reduceMotionEnvironment }
     @Environment(\.dynamicTypeSize) private var typeSize
 
     /// A chip is a compact-size affordance: it sizes to its own text, and
@@ -33,14 +40,16 @@ struct ProviderPickerGrid: View {
     var body: some View {
         if usesRows {
             VStack(spacing: 8) {
-                ForEach(providers) { provider in
+                ForEach(Array(providers.enumerated()), id: \.element.id) { index, provider in
                     chip(for: provider)
+                        .staggeredReveal(index: index, isRevealed: revealed, reduceMotion: reduceMotion)
                 }
             }
         } else {
             FlowLayout(spacing: 10) {
-                ForEach(providers) { provider in
+                ForEach(Array(providers.enumerated()), id: \.element.id) { index, provider in
                     chip(for: provider)
+                        .staggeredReveal(index: index, isRevealed: revealed, reduceMotion: reduceMotion)
                 }
             }
         }
@@ -100,6 +109,14 @@ struct ProviderPickerGrid: View {
     private func logo(for provider: WatchProvider) -> some View {
         if let url = provider.logoURL {
             KFImage(url)
+                // Without a placeholder the chip shows a 22pt hole for as
+                // long as the logo takes to arrive, and on a first run with
+                // a cold cache that is every chip at once — which reads as
+                // broken rather than as loading.
+                .placeholder {
+                    AppRadius.shape(AppRadius.small)
+                        .fill(Color.primary.opacity(0.06))
+                }
                 .resizable()
                 .scaledToFit()
                 .frame(width: 22, height: 22)

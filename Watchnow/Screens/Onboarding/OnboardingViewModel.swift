@@ -21,11 +21,23 @@ import Foundation
 final class OnboardingViewModel: ObservableObject {
 
     enum Step: Int, CaseIterable {
-        case services, loved, save, finish
+        case welcome, services, loved, save, finish
 
-        /// Only the three questions count towards the progress dots — the
-        /// finish screen is the reward, not a fourth thing to get through.
+        /// Only the three questions count towards the progress dots. The
+        /// welcome screen is the door and the finish screen is the reward;
+        /// neither is a thing to get through.
         static var questionCount: Int { 3 }
+
+        /// Position among the questions, or nil for the screens that book-end
+        /// them.
+        var questionIndex: Int? {
+            switch self {
+            case .services: return 0
+            case .loved:    return 1
+            case .save:     return 2
+            default:        return nil
+            }
+        }
     }
 
     // MARK: - Tunables
@@ -37,7 +49,7 @@ final class OnboardingViewModel: ObservableObject {
 
     // MARK: - State
 
-    @Published private(set) var step: Step = .services
+    @Published private(set) var step: Step = .welcome
     @Published private(set) var isLoading = false
 
     @Published private(set) var providers: [WatchProvider] = []
@@ -66,6 +78,7 @@ final class OnboardingViewModel: ObservableObject {
 
     var canContinue: Bool {
         switch step {
+        case .welcome:  return true
         case .services: return !selectedProviderIDs.isEmpty
         case .loved:    return lovedPickIDs.count >= Self.requiredLoved
         case .save:     return savePickIDs.count >= Self.requiredSaves
@@ -123,6 +136,9 @@ final class OnboardingViewModel: ObservableObject {
         if skipping { clearPicks(for: step) }
 
         switch step {
+        case .welcome:
+            step = .services
+
         case .services:
             commitServices()
             step = .loved
@@ -253,7 +269,7 @@ final class OnboardingViewModel: ObservableObject {
         case .services: selectedProviderIDs = []
         case .loved:    lovedPickIDs = []
         case .save:     savePickIDs = []
-        case .finish:   break
+        case .welcome, .finish: break
         }
     }
 
