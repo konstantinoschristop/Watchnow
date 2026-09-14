@@ -67,6 +67,9 @@
     "•" : {
 
     },
+    "^[%lld service](inflect: true) selected. We'll tell you the moment a saved title lands on one." : {
+
+    },
     "+%lld" : {
 
     },
@@ -202,6 +205,9 @@
     "Episode alerts" : {
 
     },
+    "Every one of these is on a service you have. Start tonight." : {
+
+    },
     "Everyone wants to watch this one." : {
 
     },
@@ -217,6 +223,9 @@
     "Full cast" : {
 
     },
+    "Get started" : {
+
+    },
     "Getting to know your taste" : {
 
     },
@@ -224,6 +233,9 @@
 
     },
     "Great pick" : {
+
+    },
+    "However long ago. This is how Watchnow learns your taste." : {
 
     },
     "I like this %@" : {
@@ -235,7 +247,13 @@
     "iCloud" : {
 
     },
+    "In cinemas, airing this week, and trending right now." : {
+
+    },
     "It's a match!" : {
+
+    },
+    "Keep track of what you want to watch, find where it's streaming, and get told the moment it lands." : {
 
     },
     "Keep what you'd watch" : {
@@ -365,6 +383,9 @@
         }
       }
     },
+    "On now, and matched to the five you just picked." : {
+
+    },
     "On your list" : {
 
     },
@@ -405,6 +426,9 @@
 
     },
     "Read more" : {
+
+    },
+    "Ready to watch" : {
 
     },
     "Remind Me" : {
@@ -449,6 +473,9 @@
     "Rounding up tonight's contenders…" : {
 
     },
+    "Save anything you come across and we'll tell you when it airs or lands on a service you have." : {
+
+    },
     "Save or like %lld more %@ and Movie Coach will start telling you whether something's a good fit for you." : {
       "localizations" : {
         "en" : {
@@ -460,6 +487,18 @@
       }
     },
     "Save something from Trending and Watchnow will tell you when it airs or lands on a service you have." : {
+
+    },
+    "Save three to start" : {
+
+    },
+    "Saved. We'll tell you the day the next episode airs." : {
+
+    },
+    "Saved. We'll tell you the moment the new releases reach a service you have." : {
+
+    },
+    "Saved. We'll tell you when a new episode airs, or when one reaches a service you have." : {
 
     },
     "Search" : {
@@ -484,6 +523,9 @@
 
     },
     "Settings" : {
+
+    },
+    "Setup complete" : {
 
     },
     "Show all" : {
@@ -539,6 +581,9 @@
     "Sync" : {
 
     },
+    "Tap five you've loved" : {
+
+    },
     "Tap what fits — skip the rest. One tap is enough." : {
 
     },
@@ -555,6 +600,9 @@
 
     },
     "This season hasn't started yet." : {
+
+    },
+    "Three steps to set up" : {
 
     },
     "Top of the titles you kept." : {
@@ -614,6 +662,15 @@
     "We couldn't load the services for your region. You can set them later in Settings." : {
 
     },
+    "We'll only suggest what you can actually watch." : {
+
+    },
+    "We'll use this to tell you when something you saved lands somewhere you can actually watch it." : {
+
+    },
+    "Welcome to Watchnow" : {
+
+    },
     "What do you want to know?" : {
 
     },
@@ -623,7 +680,16 @@
     "Which do you have? We'll remember it next time." : {
 
     },
+    "Which services do you have?" : {
+
+    },
     "You asked us to remind you" : {
+
+    },
+    "You're all set" : {
+
+    },
+    "You're set up" : {
 
     },
     "Your pick tonight" : {

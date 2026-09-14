@@ -14,6 +14,27 @@ enum API {
     static let youtubeBaseURL = "https://www.youtube.com/watch?v="
     static let language = "en-US"
 
+    /// The width TMDB should render a still at.
+    ///
+    /// Everything in the app has historically asked for `original`, which is
+    /// the studio master — routinely 2000px wide and a couple of megabytes.
+    /// Drawing one of those in a 120pt grid cell means downloading roughly
+    /// fifty times the pixels that will ever be shown, and thirty of them at
+    /// once is why onboarding's grids used to fill in one poster at a time.
+    ///
+    /// `Kingfisher.downsampling` does not help here: it shrinks the image
+    /// *after* the full master has come down the wire, so it saves decode
+    /// time and memory but not a single byte of network.
+    enum ImageWidth: String {
+        /// Three-across poster grids and the onboarding wall. 342px covers a
+        /// ~120pt cell at 3x with a few pixels to spare.
+        case poster = "w342"
+        /// Full-width backdrops and hero art.
+        case backdrop = "w780"
+        /// The master. Only for something being viewed at full size.
+        case original
+    }
+
     enum Common {
         static func credits(type: String, for id: String) -> String {
             return "\(API.baseURL)/\(type)/\(id)/credits?api_key=\(API.key)&language=\(API.language)"
@@ -89,7 +110,31 @@ enum API {
                                    sortBy: String = "popularity.desc",
                                    voteCountGTE: Int = 200,
                                    page: Int = 1) -> String {
-            var url = "\(API.baseURL)/discover/movie?api_key=\(API.key)&language=\(API.language)&include_adult=false&sort_by=\(sortBy)&vote_count.gte=\(voteCountGTE)&page=\(page)"
+            discover(type: ScreenTypes.movie.rawValue,
+                     genreIDs: genreIDs,
+                     runtimeLTE: runtimeLTE,
+                     providerIDs: providerIDs,
+                     region: region,
+                     sortBy: sortBy,
+                     voteCountGTE: voteCountGTE,
+                     page: page)
+        }
+
+        /// The same query for either media type.
+        ///
+        /// Split out of `discoverMovies` when onboarding needed the series
+        /// half of "popular in the genres you like, on the services you
+        /// have". Movie Night still calls the movies-only wrapper above and
+        /// builds a byte-identical URL.
+        static func discover(type: String,
+                             genreIDs: [Int],
+                             runtimeLTE: Int?,
+                             providerIDs: [Int],
+                             region: String,
+                             sortBy: String = "popularity.desc",
+                             voteCountGTE: Int = 200,
+                             page: Int = 1) -> String {
+            var url = "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&include_adult=false&sort_by=\(sortBy)&vote_count.gte=\(voteCountGTE)&page=\(page)"
             if !genreIDs.isEmpty {
                 url += "&with_genres=\(genreIDs.map(String.init).joined(separator: "|"))"
             }
@@ -118,6 +163,12 @@ enum API {
         }
         static func imageUrl(imageId: String) -> String {
             return API.imageBaseURL + imageId
+        }
+
+        /// The same still at a specific width. `imageId` arrives from TMDB
+        /// with its own leading slash, which is why there isn't one here.
+        static func imageUrl(imageId: String, width: API.ImageWidth) -> String {
+            return "https://image.tmdb.org/t/p/\(width.rawValue)\(imageId)"
         }
         static func youtubeUrl(videoId: String) -> String {
             return API.youtubeBaseURL + videoId

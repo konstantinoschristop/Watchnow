@@ -280,7 +280,13 @@ struct HeroMarquee: View {
 /// `body`, so the strip's child views are built once and each frame merely
 /// re-applies an offset to them. The `KFImage`s never see a changed input
 /// and so never re-fetch.
-private struct DriftRow: View {
+///
+/// Shared with onboarding's `PosterWall`, which is why the geometry is
+/// parameterised rather than hard-coded. Every parameter defaults to the
+/// value this screen was tuned at, so the search band is byte-for-byte the
+/// layout it always was — the wall simply asks for bigger posters and more
+/// of them per copy.
+struct DriftRow: View {
     let posters: [URL]
     /// `true` sends this row right instead of left.
     let reversed: Bool
@@ -289,13 +295,16 @@ private struct DriftRow: View {
     let speed: CGFloat
     let reduceMotion: Bool
 
+    var posterWidth: CGFloat = 80
+    var posterHeight: CGFloat = 120
+    var spacing: CGFloat = 8
+    var cornerRadius: CGFloat = AppRadius.small
+    /// How many slots one copy of the strip must fill. See `tiled`.
+    var minimumSlots: Int = 6
+
     /// Shared, fixed origin for every row's phase. Static so it outlives
     /// any individual row and survives the tab being torn down and rebuilt.
     private static let epoch = Date()
-
-    private let posterWidth: CGFloat = 80
-    private let posterHeight: CGFloat = 120
-    private let spacing: CGFloat = 8
 
     /// The source list repeated until one copy is wider than any phone.
     ///
@@ -307,10 +316,9 @@ private struct DriftRow: View {
     /// partway through every cycle.
     private var tiled: [URL] {
         guard !posters.isEmpty else { return [] }
-        // Six slots is ~528pt per copy, comfortably past the 402pt the
-        // enclosing ScrollView is offered. Kept as low as coverage allows
-        // because this count is now paid three times over.
-        let minimumSlots = 6
+        // The default of six slots is ~528pt per copy, comfortably past the
+        // 402pt the enclosing ScrollView is offered. Kept as low as coverage
+        // allows because this count is paid once per row.
         guard posters.count < minimumSlots else { return posters }
         return (0..<minimumSlots).map { posters[$0 % posters.count] }
     }
@@ -360,21 +368,21 @@ private struct DriftRow: View {
                 PosterImage(url: tiled[index % tiled.count],
                             width: posterWidth * 2,
                             height: posterHeight * 2,
-                            cornerRadius: AppRadius.small,
+                            cornerRadius: cornerRadius,
                             shadowRadius: 0)
                     .frame(width: posterWidth, height: posterHeight)
                     // Fill behind each poster so a slot that hasn't
                     // decoded yet reads as a card still loading rather
                     // than a hole punched in the strip.
                     .background {
-                        RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .fill(Color(.tertiarySystemFill))
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     // Hairline edge so neighbouring posters stay distinct
                     // where two dark ones meet.
                     .overlay {
-                        RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .strokeBorder(.white.opacity(0.10), lineWidth: 0.5)
                     }
             }
@@ -399,7 +407,7 @@ private struct DriftRow: View {
         InlineShimmerContainer {
             HStack(spacing: spacing) {
                 ForEach(0..<7, id: \.self) { _ in
-                    ShimmerBox(cornerRadius: AppRadius.small)
+                    ShimmerBox(cornerRadius: cornerRadius)
                         .frame(width: posterWidth, height: posterHeight)
                 }
             }

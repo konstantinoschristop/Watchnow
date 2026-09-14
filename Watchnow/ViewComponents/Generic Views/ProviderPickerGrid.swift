@@ -17,6 +17,20 @@ import Kingfisher
 
 struct ProviderPickerGrid: View {
 
+    /// How the chips are painted. The layout, the behaviour and the
+    /// accessibility are shared either way — only the surface differs,
+    /// which is the whole point of keeping this one component: Settings
+    /// and onboarding ask the same question and must not drift apart in
+    /// how they *answer* it.
+    enum Style {
+        /// Settings: a grouped control on a system background.
+        case standard
+        /// Onboarding: glass over the drifting poster wall. Deliberately
+        /// not a material — the wall behind redraws continuously, and a
+        /// material over it would re-blur on every one of those frames.
+        case cinema
+    }
+
     let providers: [WatchProvider]
     let selectedIDs: Set<Int>
     let onToggle: (Int) -> Void
@@ -26,6 +40,7 @@ struct ProviderPickerGrid: View {
     /// flourish.
     var revealed: Bool = true
     var reduceMotionOverride: Bool? = nil
+    var style: Style = .standard
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotionEnvironment
     private var reduceMotion: Bool { reduceMotionOverride ?? reduceMotionEnvironment }
@@ -77,29 +92,70 @@ struct ProviderPickerGrid: View {
                         .accessibilityHidden(true)
                 }
             }
-            .foregroundStyle(isSelected ? Color.white : Color.primary)
+            .foregroundStyle(foreground(isSelected: isSelected))
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
             .frame(maxWidth: usesRows ? .infinity : nil, alignment: .leading)
             .frame(minHeight: AppTouch.minTarget)
             .background {
                 AppRadius.shape(AppRadius.panel)
-                    .fill(isSelected ? AnyShapeStyle(Color.accentColor)
-                                     : AnyShapeStyle(Color(.secondarySystemBackground)))
+                    .fill(fill(isSelected: isSelected))
             }
             .overlay {
                 AppRadius.shape(AppRadius.panel)
-                    .strokeBorder(isSelected ? Color.clear : Color.primary.opacity(0.08),
-                                  lineWidth: 1)
+                    .strokeBorder(stroke(isSelected: isSelected), lineWidth: 1)
             }
+            // Selected chips lift out of the sheet and glow, so a row of
+            // them reads as chosen at a glance rather than only by colour.
+            //
+            // Cinema only, along with the haptic below. Settings shares this
+            // component but was not part of the onboarding redesign, and its
+            // chips are deliberately left exactly as they were — a shared
+            // control is allowed to have two surfaces, not two behaviours
+            // nobody asked for.
+            .scaleEffect(isCinema && isSelected && !reduceMotion ? 1.03 : 1)
+            .shadow(color: Color.accentColor.opacity(isCinema && isSelected ? 0.45 : 0),
+                    radius: isCinema ? 12 : 0, y: 4)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .sensoryFeedback(trigger: isSelected) { _, _ in isCinema ? .selection : nil }
         // One control, one state. Without this VoiceOver reads the logo and
         // the name as separate elements and never says whether it is on.
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(provider.provider_name)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+
+    // MARK: - Surface
+
+    private var isCinema: Bool { style == .cinema }
+
+    private func foreground(isSelected: Bool) -> Color {
+        switch style {
+        case .standard: return isSelected ? .white : .primary
+        case .cinema:   return isSelected ? .white : .white.opacity(0.86)
+        }
+    }
+
+    private func fill(isSelected: Bool) -> AnyShapeStyle {
+        switch style {
+        case .standard:
+            return isSelected ? AnyShapeStyle(Color.accentColor)
+                              : AnyShapeStyle(Color(.secondarySystemBackground))
+        case .cinema:
+            return isSelected
+                ? AnyShapeStyle(LinearGradient(colors: [Color.accentColor, WatchnowBrand.blue],
+                                               startPoint: .topLeading, endPoint: .bottomTrailing))
+                : AnyShapeStyle(OnboardingSurface.glass)
+        }
+    }
+
+    private func stroke(isSelected: Bool) -> Color {
+        switch style {
+        case .standard: return isSelected ? .clear : .primary.opacity(0.08)
+        case .cinema:   return isSelected ? .white.opacity(0.35) : OnboardingSurface.edge
+        }
     }
 
     /// The service's own mark, which is how people recognise a subscription
@@ -115,7 +171,8 @@ struct ProviderPickerGrid: View {
                 // broken rather than as loading.
                 .placeholder {
                     AppRadius.shape(AppRadius.small)
-                        .fill(Color.primary.opacity(0.06))
+                        .fill(isCinema ? Color.white.opacity(0.14)
+                                   : Color.primary.opacity(0.06))
                 }
                 .resizable()
                 .scaledToFit()

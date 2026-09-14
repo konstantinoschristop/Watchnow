@@ -55,8 +55,8 @@ enum ReminderManager {
         let parts = identifier.split(separator: ".")
         guard parts.count >= 3, parts[0] == "reminder" else { return nil }
         switch parts[1] {
-        case "title", "season": return Int(parts[2])
-        default:                return nil
+        case "title", "season", "watch": return Int(parts[2])
+        default:                         return nil
         }
     }
 
@@ -98,16 +98,28 @@ enum ReminderManager {
         case failed
     }
 
-    /// Schedule a one-shot local notification at 09:00 local on `date`.
+    /// Schedule a one-shot local notification on `date`, at `atHour` local.
     /// Returns `.authorizationDenied` if the OS-level permission is off,
     /// `.failed` for past dates or rejected requests, `.scheduled` on
     /// success.
+    ///
+    /// `atHour` defaults to 09:00, which is right for the case this was
+    /// written for — a title the user asked to be reminded about on its
+    /// release day. Callers whose copy implies a time of day should say so;
+    /// see the watch nudge below.
+    ///
+    /// `debugFiresImmediately` controls whether a debug build is allowed to
+    /// collapse the wait to a few seconds. On by default because that is the
+    /// only way to test a release-day deep link without waiting for a
+    /// release day, and off for anything whose *delay is the feature*.
     @discardableResult
     static func schedule(identifier: String,
                          title: String,
                          body: String,
                          on date: Date,
-                         deepLink: DeepLink? = nil) async -> ScheduleResult {
+                         atHour: Int = 9,
+                         deepLink: DeepLink? = nil,
+                         debugFiresImmediately: Bool = true) async -> ScheduleResult {
 
         guard await requestAuthorization() else { return .authorizationDenied }
 
@@ -119,23 +131,28 @@ enum ReminderManager {
             content.userInfo = deepLink.userInfo
         }
 
-        // Debug builds fire ~3s from scheduling regardless of `date`, so
-        // deeplink wiring can be tested end-to-end without waiting for
-        // real release/air dates. Release builds use the real date pinned
-        // to 09:00 local.
+        // Debug builds may fire ~3s from scheduling regardless of `date`, so
+        // deeplink wiring can be tested end-to-end without waiting for a
+        // real release or air date. Everything else — and every release
+        // build — uses the real date pinned to `atHour` local.
         let trigger: UNNotificationTrigger
         #if DEBUG
-        _ = date
-        trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let collapseForDebug = debugFiresImmediately
         #else
-        let fireDate = fireDateAt9AM(for: date)
-        guard fireDate > Date() else { return .failed }
-        let comps = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: fireDate
-        )
-        trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        let collapseForDebug = false
         #endif
+
+        if collapseForDebug {
+            trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        } else {
+            let fireDate = fireDate(for: date, atHour: atHour)
+            guard fireDate > Date() else { return .failed }
+            let comps = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute],
+                from: fireDate
+            )
+            trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        }
 
         let request = UNNotificationRequest(identifier: identifier,
                                             content: content,
@@ -185,14 +202,113 @@ enum ReminderManager {
         scheduledIDs.removeAll { !pendingIDs.contains($0) }
     }
 
+    // MARK: - Onboarding watch nudge
+
+    /// The one notification this app sends about something that has
+    /// *already* happened.
+    ///
+    /// Both automatic alerts fire on a change — a next episode airing, a
+    /// title newly reaching a service you have — so neither can ever fire
+    /// for a title that was already streaming the moment it was saved. Since
+    /// onboarding's third step now leads with exactly those titles, a first
+    /// session could otherwise end with three saves and nothing that will
+    /// ever bring the user back to them.
+    ///
+    /// Deliberately one, once. The `reminder.` prefix is load-bearing:
+    /// `AlertPlanner` counts anything carrying it against the same daily
+    /// caps as a bell the user set by hand, so this cannot stack on top of
+    /// an episode alert the same morning. `watch` rather than `title` keeps
+    /// it from being mistaken for a real bell in the details screen's state.
+    struct WatchNudge: Codable, Equatable {
+        let mediaID: Int
+        let mediaType: String
+        let title: String
+        let due: Date
+    }
+
+    @UserDefault("pendingWatchNudge", defaultValue: nil)
+    private static var pendingNudge: WatchNudge?
+
+    static func nudgeIdentifier(mediaID: Int) -> String { "reminder.watch.\(mediaID)" }
+
+    /// Long enough not to be a second notification about the thing they did
+    /// thirty seconds ago; short enough that the title is still a decision
+    /// they remember making.
+    private static let nudgeDelay: TimeInterval = 2 * 24 * 60 * 60
+
+    /// Early evening, which is when a person actually decides what to watch.
+    /// The body asks "fancy it tonight?", so arriving at 09:00 — the default
+    /// for a release-day reminder — would make the copy false. Sits just
+    /// after `AlertPlanner.episodeHour` (18:00) and well clear of that
+    /// planner's 22:00 quiet-hour boundary.
+    private static let nudgeHour = 19
+
+    /// Record the intent.
+    ///
+    /// Scheduling usually cannot happen here. On a fresh install
+    /// notification permission is asked for *after* onboarding closes, and
+    /// calling `schedule` while the status is still undetermined would put
+    /// the bare system dialog on screen ahead of the app's own explainer —
+    /// which is the whole thing `NotificationPermission` exists to avoid.
+    /// So the intent is persisted and flushed when the answer arrives.
+    static func armWatchNudge(mediaID: Int, mediaType: String, title: String) async {
+        pendingNudge = WatchNudge(mediaID: mediaID,
+                                  mediaType: mediaType,
+                                  title: title,
+                                  due: Date().addingTimeInterval(nudgeDelay))
+        await flushWatchNudge()
+    }
+
+    /// Schedule the pending nudge, if there is one and it is still worth
+    /// sending. Safe to call as often as you like.
+    static func flushWatchNudge() async {
+        guard let nudge = pendingNudge else { return }
+
+        switch await UNUserNotificationCenter.current().notificationSettings().authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            break
+        case .notDetermined:
+            // Still unanswered. Leave the intent alone — this gets called
+            // again the moment the user says yes.
+            return
+        default:
+            // Denied. There is nothing to wait for, so stop holding it.
+            pendingNudge = nil
+            return
+        }
+
+        // They have had three days to watch it or drop it, and either
+        // answer makes the nudge noise.
+        guard WatchlistManager.watchlist.contains(where: { $0.id == nudge.mediaID }),
+              !WatchedStore.isWatched(nudge.mediaID)
+        else {
+            pendingNudge = nil
+            return
+        }
+
+        await schedule(identifier: nudgeIdentifier(mediaID: nudge.mediaID),
+                       title: "Ready when you are",
+                       body: "\(nudge.title) is on a service you have. Fancy it tonight?",
+                       on: nudge.due,
+                       atHour: nudgeHour,
+                       deepLink: DeepLink(id: nudge.mediaID,
+                                          mediaType: nudge.mediaType == "tv" ? .tv : .movie),
+                       // The delay *is* this notification. A debug build
+                       // collapsing it to three seconds turns it into the
+                       // instant "you just saved these" alert it exists to
+                       // avoid being.
+                       debugFiresImmediately: false)
+        pendingNudge = nil
+    }
+
     // MARK: - Helpers
 
-    /// TMDB release/air dates are date-only — pin the fire time to 09:00
-    /// local so the notification arrives at a reasonable hour instead of
-    /// midnight.
-    private static func fireDateAt9AM(for date: Date) -> Date {
+    /// TMDB release/air dates are date-only — pin the fire time to a
+    /// sensible hour so the notification arrives at a reasonable time of day
+    /// instead of at midnight.
+    private static func fireDate(for date: Date, atHour hour: Int) -> Date {
         var comps = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        comps.hour = 9
+        comps.hour = hour
         comps.minute = 0
         return Calendar.current.date(from: comps) ?? date
     }

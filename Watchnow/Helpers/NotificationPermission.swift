@@ -68,6 +68,17 @@ final class NotificationPermission: ObservableObject {
     func refreshStatus() async -> UNAuthorizationStatus {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         status = settings.authorizationStatus
+
+        // Authorization can be granted without this app ever asking — the
+        // user declines the explainer, then turns notifications on in iOS
+        // Settings. Hooking the flush to the places we *ask* missed that
+        // entirely and left onboarding's watch nudge persisted but never
+        // scheduled. This is the one place guaranteed to observe the new
+        // status, and `flushWatchNudge` is a no-op unless something is
+        // actually pending.
+        if status == .authorized {
+            await ReminderManager.flushWatchNudge()
+        }
         return status
     }
 
@@ -107,6 +118,8 @@ final class NotificationPermission: ObservableObject {
         AlertPreferences.didShowPermissionExplainer = true
         explainerPresented = false
         _ = await ReminderManager.requestAuthorization()
+        // Refreshing is what flushes any watch nudge onboarding left
+        // waiting on this answer — see `refreshStatus`.
         await refreshStatus()
     }
 

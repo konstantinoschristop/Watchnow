@@ -61,50 +61,30 @@ struct ContentView: View {
 
     enum AppTab: Hashable {
         case movies, series, search, watchlist
-
-        /// Left-to-right order, so a switch can tell which way it travelled.
-        var position: Int {
-            switch self {
-            case .movies:    return 0
-            case .series:    return 1
-            case .search:    return 2
-            case .watchlist: return 3
-            }
-        }
     }
 
-    /// Which way the last switch went: +1 rightwards, -1 leftwards. Drives
-    /// the side each tab's content arrives from.
-    @State private var tabDirection = 1
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private func motion(for tab: AppTab) -> some ViewModifier {
-        TabSwitchMotion(isActive: selectedTab == tab,
-                        direction: tabDirection,
-                        reduceMotion: reduceMotion)
-    }
-
+    // Switching tabs is the system's own crossfade, deliberately. Each tab's
+    // content used to slide in from the side it was reached from — see the
+    // deleted `TabSwitchMotion` — which read as motion for its own sake on a
+    // screen the user visits dozens of times a session. Onboarding is where
+    // this app spends its motion budget; the tabs are somewhere to work.
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Movies", systemImage: "film", value: AppTab.movies) {
                 moviesTabContent
-                    .modifier(motion(for: .movies))
             }
             Tab("Series", systemImage: "tv.inset.filled", value: AppTab.series) {
                 seriesTabContent
-                    .modifier(motion(for: .series))
             }
             Tab("Search", systemImage: "magnifyingglass.circle", value: AppTab.search, role: .search) {
                 searchTabContent
-                    .modifier(motion(for: .search))
             }
             Tab("Watchlist", systemImage: "list.bullet.circle.fill", value: AppTab.watchlist) {
                 watchlistTabContent
-                    .modifier(motion(for: .watchlist))
             }
         }
-        .onChange(of: selectedTab) { previous, current in
-            tabDirection = current.position > previous.position ? 1 : -1
+        .onChange(of: selectedTab) { previous, _ in
+            // The tap still answers. Feedback is not a transition.
             UIImpactFeedbackGenerator(style: .soft).impactOccurred()
 
             // Leaving Search returns it to its start screen. See

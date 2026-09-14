@@ -127,6 +127,33 @@ final class ServiceInvocation: BaseNetworkService,
         return try await request(urlString: urlString)
     }
 
+    /// Films in cinemas right now, in TMDB's default region.
+    func fetchNowPlayingMovies(page: Int = 1) async throws -> GenericResultResponse {
+        try await request(urlString: API.Movie.nowPlaying(page: page))
+    }
+
+    /// Series with an episode airing in the next week.
+    func fetchOnTheAirSeries(page: Int = 1) async throws -> GenericResultResponse {
+        try await request(urlString: API.TV.airingToday(page: page))
+    }
+
+    /// Discover for either media type: popular titles carrying any of
+    /// `genreIDs`, optionally scoped to what `providerIDs` stream in
+    /// `region`. Onboarding's third step is built out of this.
+    func discover(screenType: ScreenTypes,
+                  genreIDs: [Int],
+                  providerIDs: [Int],
+                  region: String,
+                  page: Int = 1) async throws -> GenericResultResponse {
+        let urlString = API.Common.discover(type: screenType.rawValue,
+                                            genreIDs: genreIDs,
+                                            runtimeLTE: nil,
+                                            providerIDs: providerIDs,
+                                            region: region,
+                                            page: page)
+        return try await request(urlString: urlString)
+    }
+
     /// Movie Night candidate fetch — TMDB Discover for movies filtered by
     /// the chosen moods (genre IDs), runtime cap and streaming services.
     func discover(genreIDs: [Int],

@@ -169,7 +169,6 @@
 		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
 		FE1D0A4C000000000000FB4C /* BrandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4C000000000000FA4C /* BrandColors.swift */; };
 		FE1D0A4D000000000000FB4D /* OnboardingMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4D000000000000FA4D /* OnboardingMotion.swift */; };
-		FE1D0A4E000000000000FB4E /* TabSwitchMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4E000000000000FA4E /* TabSwitchMotion.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -345,7 +344,6 @@
 		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		FE1D0A4C000000000000FA4C /* BrandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandColors.swift; sourceTree = "<group>"; };
 		FE1D0A4D000000000000FA4D /* OnboardingMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMotion.swift; sourceTree = "<group>"; };
-		FE1D0A4E000000000000FA4E /* TabSwitchMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSwitchMotion.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -386,7 +384,6 @@
 		8A19B1B92E7F003A0083A094 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
-				FE1D0A4E000000000000FA4E /* TabSwitchMotion.swift */,
 				FE1D0A4C000000000000FA4C /* BrandColors.swift */,
 				8A19B1BA2E7F00490083A094 /* ViewModifiers.swift */,
 				AB20D001000000000000F001 /* DesignTokens.swift */,
@@ -853,7 +850,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FE1D0A4E000000000000FB4E /* TabSwitchMotion.swift in Sources */,
 				FE1D0A4D000000000000FB4D /* OnboardingMotion.swift in Sources */,
 				FE1D0A4C000000000000FB4C /* BrandColors.swift in Sources */,
 				FE1D0A49000000000000FB49 /* ReviewPromptPolicy.swift in Sources */,

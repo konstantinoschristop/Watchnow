@@ -237,6 +237,19 @@ struct Result: Codable, Hashable, Equatable, Sendable {
             ?? URL(string: API.baseURL)!
     }
 
+    /// The poster at a specific TMDB width.
+    ///
+    /// Prefer this to `getPosterURL()` anywhere the art is drawn smaller
+    /// than full screen — see `API.ImageWidth` for why the difference is
+    /// measured in megabytes rather than pixels. The width is part of the
+    /// URL, so two call sites asking for different widths do not share a
+    /// cache entry: ask for the same one across a screen.
+    func getPosterURL(width: API.ImageWidth) -> URL {
+        let posterURL = poster_path ?? ""
+        return URL(string: API.Common.imageUrl(imageId: posterURL, width: width))
+            ?? URL(string: API.baseURL)!
+    }
+
     func getBackdropURL() -> URL {
         let posterURL = backdrop_path ?? ""
         return URL(string: API.Common.imageUrl(imageId: posterURL))
