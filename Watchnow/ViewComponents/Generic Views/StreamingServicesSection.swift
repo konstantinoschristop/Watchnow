@@ -56,7 +56,20 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     private let slotHeight:  CGFloat = 275
 
     var body: some View {
-        Section {
+        // A plain stack, not a `Section`. In the `List` the feed scrolls on,
+        // a section header is pinned to the top while its rows pass under it
+        // and is restyled to the list's secondary grey — neither of which the
+        // feed wants. Stacked like this the header scrolls with its row and
+        // keeps its own typography.
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeaderView(
+                title: viewSection.cleanTitle,
+                subtitle: subtitle,
+                icon: viewSection.themeIcon,
+                tint: viewSection.themeColor,
+                showsPulse: viewSection.isTrending
+            )
+
             VStack(alignment: .leading, spacing: 4) {
                 chipBar
                 resultsRow
@@ -66,15 +79,6 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
                     // the user taps a different chip.
                     .frame(height: slotHeight)
             }
-        } header: {
-            SectionHeaderView(
-                title: viewSection.cleanTitle,
-                subtitle: subtitle,
-                icon: viewSection.themeIcon,
-                tint: viewSection.themeColor,
-                showsPulse: viewSection.isTrending
-            )
-            .textCase(.none)
         }
         // The result row is pinned to `slotHeight` with a 165pt poster inside
         // it, which leaves the title and meta line a fixed ~55pt to live in.

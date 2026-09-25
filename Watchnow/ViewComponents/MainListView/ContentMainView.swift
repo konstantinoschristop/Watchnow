@@ -141,6 +141,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                         .navigationTransition(.zoom(sourceID: selection.id, in: cardNamespace))
                 }
                 .listStyle(.plain)
+                .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
                 // Rows are content, not table cells: no implicit minimum
                 // height, so a section that collapses to nothing takes no room.

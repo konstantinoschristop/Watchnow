@@ -44,7 +44,19 @@ struct TopTenSection<VM: BaseViewModelProtocol>: View {
     }
 
     var body: some View {
-        Section {
+        // A plain stack, not a `Section`. In the `List` the feed scrolls on,
+        // a section header is pinned to the top while its rows pass under it
+        // and is restyled to the list's secondary grey — neither of which the
+        // feed wants. Stacked like this the header scrolls with its row and
+        // keeps its own typography.
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeaderView(
+                title: viewSection.cleanTitle,
+                icon: viewSection.themeIcon,
+                tint: viewSection.themeColor,
+                showsPulse: viewSection.isTrending
+            )
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .bottom, spacing: 8) {
                     ForEach(Array(visibleResults.enumerated()), id: \.element) { idx, result in
@@ -63,14 +75,6 @@ struct TopTenSection<VM: BaseViewModelProtocol>: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6)
             }
-        } header: {
-            SectionHeaderView(
-                title: viewSection.cleanTitle,
-                icon: viewSection.themeIcon,
-                tint: viewSection.themeColor,
-                showsPulse: viewSection.isTrending
-            )
-            .textCase(.none)
         }
     }
 }
