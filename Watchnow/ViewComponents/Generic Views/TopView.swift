@@ -15,14 +15,18 @@ struct TopView: View {
     var screenType: ScreenTypes
     var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
-    
+    var namespace: Namespace.ID
+    var onSelect: (Result) -> Void
+
     var body: some View {
         Section {
             ScrollableContentView(results: results,
                                   screenType: screenType,
                                   viewModel: viewModel,
                                   viewSection: viewSection,
-                                  cardType: .top)
+                                  cardType: .top,
+                                  namespace: namespace,
+                                  onSelect: onSelect)
             .background(LinearGradient(colors: [.clear, Color(.secondaryBackground).opacity(0.6)], startPoint: .center, endPoint: .bottom))
         } header: {
             SectionHeaderView(

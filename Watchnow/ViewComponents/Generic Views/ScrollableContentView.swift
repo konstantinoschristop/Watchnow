@@ -19,6 +19,10 @@ struct ScrollableContentView: View {
     var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
     var cardType: CardType
+    /// Shared zoom-transition namespace, threaded down to the cards.
+    var namespace: Namespace.ID
+    /// Opens a result's details screen.
+    var onSelect: (Result) -> Void
     /// Index at which to slot a native ad card into the row (nil = none).
     /// Only honoured for `.bottom` rows so it matches the poster-card style.
     var adSlot: Int? = nil
@@ -159,9 +163,16 @@ struct ScrollableContentView: View {
     @ViewBuilder
     private func cardContent(for movie: Result, index: Int) -> some View {
         if cardType == .bottom {
-            BottomCard(content: movie, screenType: screenType)
+            BottomCard(content: movie,
+                       screenType: screenType,
+                       namespace: namespace,
+                       onSelect: onSelect)
         } else {
-            TopCard(content: movie, screenType: screenType, rank: index + 1)
+            TopCard(content: movie,
+                    screenType: screenType,
+                    rank: index + 1,
+                    namespace: namespace,
+                    onSelect: onSelect)
         }
     }
 }

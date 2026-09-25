@@ -60,3 +60,16 @@ extension View {
         }
     }
 }
+
+extension View {
+
+    /// Strips a `List` row back to plain content: no separator, no inset, no
+    /// cell background. The home feed uses `List` for its cell recycling, not
+    /// for its table styling — see `ContentMainView`.
+    func feedRow() -> some View {
+        self
+            .listRowInsets(EdgeInsets())
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+    }
+}

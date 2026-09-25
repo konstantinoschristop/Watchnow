@@ -29,6 +29,20 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
 
     let sections: [ViewSections]
 
+    /// The card the user tapped, driving `navigationDestination` below.
+    @State private var cardSelection: CardSelection?
+    /// One namespace for every card in the feed and the details screen they
+    /// open, so the zoom transition can match source to destination.
+    @Namespace private var cardNamespace
+
+    /// A tapped card. Carries the screen type with it because the feed mixes
+    /// movie and TV sections, and the details screen needs to know which.
+    struct CardSelection: Identifiable, Hashable {
+        let result: Result
+        let screenType: ScreenTypes
+        var id: Int { result.id ?? 0 }
+    }
+
     /// Currently active genre filter. nil = "All" (no filter).
     @State private var selectedGenreID: Int? = nil
 
@@ -71,64 +85,67 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                 }
                 .transition(.opacity)
             } else {
-                ScrollView(showsIndicators: false) {
+                // `List`, not `ScrollView` + `LazyVStack`.
+                //
+                // `LazyVStack` builds rows lazily but never tears them down:
+                // every section scrolled past stays live in the view graph and
+                // is re-evaluated on every frame forever after. A Time Profiler
+                // trace of this feed put ~42% of main-thread scroll time in
+                // AttributeGraph updates with no single hot spot — the shape of
+                // a graph that is simply too big. `List` is backed by
+                // UICollectionView and actually recycles, so off-screen sections
+                // leave the graph.
+                GeometryReader { container in
+                List {
                     if let results = viewModel.featuredResult {
                         MenuFeaturedView(results: results,
                                          overlayContent: { result in overlayContent(for: result) },
-                                         screenType: isMovieTab ? .movie : .tv)
+                                         screenType: isMovieTab ? .movie : .tv,
+                                         containerHeight: container.size.height)
+                            .feedRow()
                     }
 
                     genreFilterBar
+                        // Same reason: a horizontal ScrollView has no intrinsic
+                        // height to give the row.
+                        .fixedSize(horizontal: false, vertical: true)
+                        .feedRow()
 
                     // Movie Night entry point — Movies tab only (the feature
                     // is movies-only for now). Sits high in the feed, under
                     // the genre chips, so it's the first thing after the hero.
                     if isMovieTab {
                         MovieNightBanner { movieNightPresented = true }
+                            .feedRow()
                     }
 
-                    LazyVStack(spacing: 6) {
-                        ForEach(sections, id: \.self) { section in
-                            // Streaming-services has a different data shape
-                            // (providers + selected results, not the standard
-                            // section list) so it goes through its own branch
-                            // and consumes the view model directly.
-                            if section.isStreamingServicesSection,
-                               let providers = viewModel.providers, !providers.isEmpty {
-                                StreamingServicesSection(viewModel: viewModel,
-                                                         viewSection: section)
-                            } else if let results = filteredResults(for: section) {
-                                if section.isTopView {
-                                    TopView(results: results,
-                                            viewTitle: section.title,
-                                            screenType: section.screenType,
-                                            viewModel: viewModel,
-                                            viewSection: section)
-                                } else if section.isListSection {
-                                    ListSection(results: results,
-                                                screenType: section.screenType,
-                                                viewSection: section,
-                                                viewModel: viewModel)
-                                } else if section.isTopTenSection {
-                                    // Hidden — results need review before re-enabling.
-                                    EmptyView()
-                                } else {
-                                    BottomView(results: results,
-                                               viewTitle: section.title,
-                                               screenType: section.screenType,
-                                               viewModel: viewModel,
-                                               viewSection: section,
-                                               adSlot: adSlot(for: section))
-                                }
-                            }
-                        }
-
-                        // Subtle inline banner — sits below all content sections,
-                        // takes up no space until a creative loads.
-                        InlineBannerSection()
-                            .padding(.top, 4)
+                    ForEach(sections, id: \.self) { section in
+                        sectionView(for: section)
+                            .feedRow()
+                            .padding(.top, 6)
                     }
-                    .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: selectedGenreID)
+
+                    // Subtle inline banner — sits below all content sections,
+                    // takes up no space until a creative loads.
+                    InlineBannerSection()
+                        .padding(.top, 4)
+                        .feedRow()
+                }
+                // Cards are `Button`s, not `NavigationLink`s: a link inside a
+                // `List` row draws a system disclosure chevron beside every
+                // card. The push happens here instead.
+                .navigationDestination(item: $cardSelection) { selection in
+                    let model = ContentDetailsModel(screenType: selection.screenType,
+                                                    result: selection.result)
+                    ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
+                        .navigationTransition(.zoom(sourceID: selection.id, in: cardNamespace))
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                // Rows are content, not table cells: no implicit minimum
+                // height, so a section that collapses to nothing takes no room.
+                .environment(\.defaultMinListRowHeight, 0)
+                .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: selectedGenreID)
                 }
                 .transition(.opacity)
             }
@@ -140,6 +157,52 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         .fullScreenCover(isPresented: $movieNightPresented) {
             MovieNightView()
         }
+    }
+
+    /// One feed section. Lifted out of the feed body so the container can be
+    /// a `List` without burying the branch inside a row builder.
+    @ViewBuilder
+    private func sectionView(for section: ViewSections) -> some View {
+        // Streaming-services has a different data shape (providers + selected
+        // results, not the standard section list) so it goes through its own
+        // branch and consumes the view model directly.
+        if section.isStreamingServicesSection,
+           let providers = viewModel.providers, !providers.isEmpty {
+            StreamingServicesSection(viewModel: viewModel,
+                                     viewSection: section)
+        } else if let results = filteredResults(for: section) {
+            if section.isTopView {
+                TopView(results: results,
+                        viewTitle: section.title,
+                        screenType: section.screenType,
+                        viewModel: viewModel,
+                        viewSection: section,
+                        namespace: cardNamespace,
+                        onSelect: { select($0, in: section) })
+            } else if section.isListSection {
+                ListSection(results: results,
+                            screenType: section.screenType,
+                            viewSection: section,
+                            viewModel: viewModel)
+            } else if section.isTopTenSection {
+                // Hidden — results need review before re-enabling.
+                EmptyView()
+            } else {
+                BottomView(results: results,
+                           viewTitle: section.title,
+                           screenType: section.screenType,
+                           viewModel: viewModel,
+                           viewSection: section,
+                           adSlot: adSlot(for: section),
+                           namespace: cardNamespace,
+                           onSelect: { select($0, in: section) })
+            }
+        }
+    }
+
+    /// Records the tapped card so `navigationDestination` can push details.
+    private func select(_ result: Result, in section: ViewSections) {
+        cardSelection = CardSelection(result: result, screenType: section.screenType)
     }
 
     // MARK: - Genre filter bar

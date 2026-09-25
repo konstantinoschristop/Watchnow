@@ -22,10 +22,21 @@ struct SimilarsView: View {
 
     let content: [Result]
     let screenType: ScreenTypes
-    /// Kept for API parity with the previous call site; unused because
-    /// `BottomCard` drives its own zoom-navigation namespace internally.
-    /// Prefixed with `_` to document the intent without breaking callers.
+    /// Shared with the cards below and with the details screen they push, so
+    /// the zoom transition matches. `BottomCard` used to own a private
+    /// namespace and its own `NavigationLink`; it now takes both from its
+    /// caller, because a link inside a `List` row draws a disclosure chevron
+    /// on the home feed — see `ContentMainView`.
     var namespace: Namespace.ID
+
+    /// The card the user tapped. Local to this row: the details screen it
+    /// pushes is just another `ContentDetailsView`.
+    @State private var selection: Selection?
+
+    private struct Selection: Identifiable, Hashable {
+        let result: Result
+        var id: Int { result.id ?? 0 }
+    }
 
     // Matches the home-screen `BottomCard` footprint so "Similar" cards
     // and "Popular Movies" cards sit at the exact same visual weight.
@@ -43,11 +54,19 @@ struct SimilarsView: View {
                                      cardWidth: cardWidth,
                                      cardHeight: cardHeight)
                     }
-                    BottomCard(content: item, screenType: screenType)
+                    BottomCard(content: item,
+                               screenType: screenType,
+                               namespace: namespace,
+                               onSelect: { selection = Selection(result: $0) })
                         .frame(width: cardWidth, height: cardHeight, alignment: .top)
                 }
             }
             .padding(.horizontal, 16)
+        }
+        .navigationDestination(item: $selection) { selected in
+            let model = ContentDetailsModel(screenType: screenType, result: selected.result)
+            ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
+                .navigationTransition(.zoom(sourceID: selected.id, in: namespace))
         }
     }
 }

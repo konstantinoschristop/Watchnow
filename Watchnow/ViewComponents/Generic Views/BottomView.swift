@@ -16,6 +16,8 @@ struct BottomView: View {
     var viewModel: BaseViewModelProtocol
     var viewSection: ViewSections
     var adSlot: Int? = nil
+    var namespace: Namespace.ID
+    var onSelect: (Result) -> Void
 
     var body: some View {
         Section {
@@ -24,6 +26,8 @@ struct BottomView: View {
                                   viewModel: viewModel,
                                   viewSection: viewSection,
                                   cardType: .bottom,
+                                  namespace: namespace,
+                                  onSelect: onSelect,
                                   adSlot: adSlot)
             .background(LinearGradient(colors: [.clear, Color(.secondaryBackground).opacity(0.6)], startPoint: .center, endPoint: .bottom))
         } header: {

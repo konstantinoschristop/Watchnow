@@ -42,6 +42,14 @@ struct MenuFeaturedView<Content: View>: View {
     /// that case the tap would push a duplicate details view onto itself.
     var isTappable: Bool = true
 
+    /// Height of the scroll container this hero sits in, when the caller can
+    /// measure it. `containerRelativeFrame(.vertical)` resolves against a
+    /// `ScrollView` but has nothing to resolve against inside a `List` row,
+    /// where it collapses the hero to nothing — so the feed measures the
+    /// container itself and hands the number down. Callers still inside a
+    /// plain `ScrollView` (the details hero) leave this nil.
+    var containerHeight: CGFloat? = nil
+
     /// Seconds each slide dwells before auto-advancing. A user swipe (or a
     /// scene-phase change) restarts this countdown from zero, so viewers
     /// always get a full window to read the slide they just landed on.
@@ -70,10 +78,24 @@ struct MenuFeaturedView<Content: View>: View {
 
     private var isCarousel: Bool { results.count > 1 }
 
+    /// The hero at three-quarters of its container, sized the only way each
+    /// context allows. Exactly one of these runs — applying both stacks two
+    /// heights on the same view and leaves a gap under the artwork.
+    @ViewBuilder
+    private var sizedHero: some View {
+        if let containerHeight {
+            heroContent
+                .stretchy()
+                .frame(height: containerHeight * 0.75, alignment: .top)
+        } else {
+            heroContent
+                .stretchy()
+                .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 0.75 }
+        }
+    }
+
     var body: some View {
-        heroContent
-        .stretchy()
-        .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 0.75 }
+        sizedHero
         // Note: dragging detection is wired up inside `carouselView` via
         // `onScrollPhaseChange` on the horizontal ScrollView itself, so the
         // hero no longer installs an outer DragGesture. That gesture used

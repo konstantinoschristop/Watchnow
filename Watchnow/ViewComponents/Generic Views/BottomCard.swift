@@ -19,22 +19,20 @@ import Kingfisher
 struct BottomCard: View {
     var content: Result
     var screenType: ScreenTypes
-    @Namespace private var namespace
-
-    init(content: Result, screenType: ScreenTypes) {
-        self.screenType = screenType
-        self.content = content
-    }
+    /// Shared by every card in the feed and by the details screen it opens,
+    /// so the zoom transition has a namespace both ends can match on.
+    var namespace: Namespace.ID
+    /// Opens the details screen. A plain closure rather than a
+    /// `NavigationLink`, because a link inside a `List` row draws a system
+    /// disclosure chevron beside every card — see `ContentMainView`.
+    var onSelect: (Result) -> Void
 
     private let posterHeight: CGFloat = 175
     private let posterCornerRadius: CGFloat = 12
 
     var body: some View {
-        NavigationLink {
-            let model = ContentDetailsModel(screenType: screenType, result: content)
-            let vm = ContentDetailsViewModel(model: model)
-            ContentDetailsView(detailsViewModel: vm)
-                .navigationTransition(.zoom(sourceID: content.id ?? 0, in: namespace))
+        Button {
+            onSelect(content)
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 poster
@@ -43,6 +41,7 @@ struct BottomCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .buttonStyle(.plain)
         .matchedTransitionSource(id: content.id ?? 0, in: namespace)
     }
 

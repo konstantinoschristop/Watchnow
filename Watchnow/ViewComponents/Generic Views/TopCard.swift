@@ -25,17 +25,17 @@ struct TopCard: View {
     /// 1-based rank within the section. Passed down from
     /// `ScrollableContentView` via the enumerated `ForEach`.
     var rank: Int
-    @Namespace private var namespace
+    /// See `BottomCard` — shared namespace for the zoom transition.
+    var namespace: Namespace.ID
+    /// See `BottomCard` — opens details without a `NavigationLink`.
+    var onSelect: (Result) -> Void
 
     private let backdropHeight: CGFloat = 112
     private let cornerRadius: CGFloat = 12
 
     var body: some View {
-        NavigationLink {
-            let model = ContentDetailsModel(screenType: screenType, result: content)
-            let vm = ContentDetailsViewModel(model: model)
-            ContentDetailsView(detailsViewModel: vm)
-                .navigationTransition(.zoom(sourceID: content.id ?? 0, in: namespace))
+        Button {
+            onSelect(content)
         } label: {
             VStack(alignment: .leading, spacing: 7) {
                 backdrop
@@ -44,6 +44,7 @@ struct TopCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .buttonStyle(.plain)
         .matchedTransitionSource(id: content.id ?? 0, in: namespace)
     }
 
