@@ -36,6 +36,7 @@ struct GenericImageView: View {
             .loadDiskFileSynchronously()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.25)
             .resizable()
             .frame(width: width, height: height)

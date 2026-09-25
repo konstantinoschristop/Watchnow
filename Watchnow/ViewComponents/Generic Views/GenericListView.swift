@@ -250,6 +250,7 @@ struct ResultRow: View {
             .loadImmediately()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.2)
             .placeholder {
                 RoundedRectangle(cornerRadius: posterCornerRadius, style: .continuous)

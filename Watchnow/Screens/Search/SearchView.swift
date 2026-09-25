@@ -36,6 +36,10 @@ struct SearchView: View {
     /// recent chip fire immediately *and* keeps the resulting
     /// `viewModel.query` change from scheduling a duplicate debounced fetch.
     @State private var dispatchedQuery = ""
+    /// Whether the user has asked for search. Set by the hero's chip, cleared
+    /// by Cancel. Distinct from "has a query" so tapping the chip brings the
+    /// field and keyboard up over an empty start screen.
+    @State private var searchActive = false
 
     /// Debounce window for typed input. Short enough to feel live, long
     /// enough that a normal typing cadence doesn't spend a request per
@@ -43,48 +47,50 @@ struct SearchView: View {
     private let debounce: Duration = .seconds(0.45)
 
     var body: some View {
-        contentView
-            .toolbar {
-                // Explicit Cancel/back affordance — iOS's native Cancel
-                // button only shows while the search field has focus, so as
-                // soon as the user dismisses the keyboard there's no obvious
-                // way back to the initial state. This toolbar item stays
-                // visible whenever there's *any* search activity (typed
-                // input or returned results) and bails out of search
-                // entirely on tap, including dismissing the search field
-                // focus via the SwiftUI `dismissSearch` environment action.
-                if !viewModel.query.isEmpty || viewModel.results != nil {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        SearchCancelButton {
-                            cancelSearch()
-                        }
-                    }
-                }
+        VStack(spacing: 0) {
+            if searchBarVisible {
+                SearchFieldBar(text: $viewModel.query,
+                               isFocused: $searchFieldFocused,
+                               onCancel: cancelSearch)
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
-            .toast(isPresenting: $viewModel.showAddedAlert) {
-                AlertToast(displayMode: .alert,
-                           type: .complete(.green),
-                           title: "Added to Watchlist")
-            }
-            .toast(isPresenting: $viewModel.showRemovedAlert) {
-                AlertToast(displayMode: .alert,
-                           type: .error(.red),
-                           title: "Removed from Watchlist")
-            }
-            .searchable(text: $viewModel.query,
-                        placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: "Movies, TV series, actors")
-            .searchFocused($searchFieldFocused)
-            // Hands the top of the screen to the hero before anything has
-            // been typed. See `SearchChromeModifier` for why this only
-            // happens on iOS 26.
-            .modifier(SearchChromeModifier(hidesNavigationBar: phase == .initial))
-            .onChange(of: viewModel.query) { _, newValue in
-                queryChanged(to: newValue)
-            }
-            .onDisappear {
-                searchTask?.cancel()
-            }
+
+            contentView
+        }
+        .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.88),
+                   value: searchBarVisible)
+        // No navigation bar on this tab at all. The title said "Search" on
+        // the search tab, and the bar's only other job was carrying the
+        // system search field, which `SearchFieldBar` has replaced.
+        .toolbar(.hidden, for: .navigationBar)
+        .toast(isPresenting: $viewModel.showAddedAlert) {
+            AlertToast(displayMode: .alert,
+                       type: .complete(.green),
+                       title: "Added to Watchlist")
+        }
+        .toast(isPresenting: $viewModel.showRemovedAlert) {
+            AlertToast(displayMode: .alert,
+                       type: .error(.red),
+                       title: "Removed from Watchlist")
+        }
+        // The bar has to exist before it can take focus, so arming search
+        // renders it first and this hands it the keyboard on the next pass.
+        .task(id: searchActive) {
+            if searchActive { searchFieldFocused = true }
+        }
+        .onChange(of: viewModel.query) { _, newValue in
+            queryChanged(to: newValue)
+        }
+        .onDisappear {
+            searchTask?.cancel()
+        }
+    }
+
+    /// The bar is up from the moment search is armed until it is cancelled.
+    /// Results keep it up on their own so dismissing the keyboard never
+    /// strands the user with results and no field to edit.
+    private var searchBarVisible: Bool {
+        searchActive || !viewModel.query.isEmpty || viewModel.results != nil
     }
 }
 
@@ -156,57 +162,12 @@ private extension SearchView {
         dispatchedQuery = ""
         viewModel.query = ""
         viewModel.clearResults()
+        searchFieldFocused = false
+        searchActive = false
     }
 }
 
 // MARK: - SearchChromeModifier
-
-/// Drops the navigation bar on the start screen so the poster band starts
-/// at the top of the display instead of below a bar and a large title.
-///
-/// Gated to iOS 26 and later, and not out of caution about the API: on
-/// iOS 18 `.searchable(placement: .navigationBarDrawer)` renders the search
-/// field *inside* the navigation bar, so hiding the bar there would take
-/// the search field with it and leave the screen with no way to search. On
-/// 26 the system relocates the field to the bottom glass bar for a tab
-/// with `role: .search`, which leaves the navigation bar holding nothing
-/// but the title — and the hero already says "Find what to watch" more
-/// usefully than the word "Search" does.
-///
-/// Bound to the initial phase only. As soon as there are results the bar
-/// comes back, because that's where Cancel lives.
-private struct SearchChromeModifier: ViewModifier {
-    let hidesNavigationBar: Bool
-
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.toolbarVisibility(hidesNavigationBar ? .hidden : .visible,
-                                      for: .navigationBar)
-        } else {
-            content
-        }
-    }
-}
-
-// MARK: - SearchCancelButton
-
-/// Small helper that reads `dismissSearch` from the environment so a
-/// caller-provided cleanup closure can run alongside the standard
-/// "remove search field focus" behaviour. Lives in this file because it
-/// is a thin shim that only makes sense inside `SearchView`'s searchable
-/// scope.
-private struct SearchCancelButton: View {
-    let onCancel: () -> Void
-    @Environment(\.dismissSearch) private var dismissSearch
-
-    var body: some View {
-        Button("Cancel") {
-            onCancel()
-            dismissSearch()
-        }
-        .tint(.accentColor)
-    }
-}
 
 // MARK: - State dispatch
 
@@ -303,6 +264,7 @@ private extension SearchView {
         SearchStartView(viewModel: viewModel,
                         bleedsUnderStatusBar: heroOwnsTopEdge,
                         isSearchFieldFocused: searchFieldFocused,
+                        onActivateSearch: { searchActive = true },
                         onSelectQuery: { query in
                             viewModel.query = query
                             runSearch(query, immediate: true)
@@ -317,10 +279,7 @@ private extension SearchView {
     /// Tracks exactly when `SearchChromeModifier` hides the navigation bar,
     /// so the hero's extra height and its status-bar scrim only appear on
     /// the platform where there's actually a bar missing.
-    var heroOwnsTopEdge: Bool {
-        if #available(iOS 26.0, *) { return true }
-        return false
-    }
+    var heroOwnsTopEdge: Bool { true }
 
     /// Shared empty-state label builder. `ContentUnavailableView`'s
     /// single-string `Label` initializer can't tint just the icon —

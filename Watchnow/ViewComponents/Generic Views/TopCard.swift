@@ -60,6 +60,7 @@ struct TopCard: View {
             .loadImmediately()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.25)
             .resizable()
             .aspectRatio(contentMode: .fill)
@@ -71,7 +72,12 @@ struct TopCard: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(.white.opacity(0.08), lineWidth: 0.5)
             )
-            .shadow(color: .black.opacity(0.3), radius: 5, y: 3)
+            // Behind, not after — see `PosterImage.shadowLayer`.
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Color.black)
+                    .shadow(color: .black.opacity(0.3), radius: 5, y: 3)
+            )
             .overlay(alignment: .topLeading) { rankBadge.padding(7) }
             .overlay(alignment: .topTrailing) {
                 if let status = statusBadge {

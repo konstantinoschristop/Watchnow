@@ -147,12 +147,7 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     /// state that could re-trigger on scroll.
     private var populatedRow: some View {
         StretchingActionScrollView(
-            onTriggered: {
-                Task { @MainActor in
-                    performFeedback.toggle()
-                    await viewModel.loadMoreProviderResults()
-                }
-            },
+            onTriggered: triggerLoadMore,
             onThresholdReached: { reached in self.thresholdReached = reached },
             onProgress: { progress in self.loadMoreProgress.value = progress },
             content: { populatedRowContent }
@@ -160,6 +155,15 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
         .sensoryFeedback(.success, trigger: performFeedback)
         .id(cardAnimationToken)
         .transition(.opacity)
+    }
+
+    /// One entry point for the next page, shared by the overscroll pull and
+    /// a tap on the trailing button.
+    private func triggerLoadMore() {
+        Task { @MainActor in
+            performFeedback.toggle()
+            await viewModel.loadMoreProviderResults()
+        }
     }
 
     private var populatedRowContent: some View {
@@ -172,7 +176,7 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
 
                 if result == viewModel.providerResults.last,
                    viewModel.canLoadMoreProviderResults {
-                    LoadMoreButtonView(tracker: loadMoreProgress)
+                    LoadMoreButtonView(tracker: loadMoreProgress, onTap: triggerLoadMore)
                 }
             }
         }
@@ -315,6 +319,7 @@ private struct ProviderChip: View {
                 .loadImmediately()
                 .fromMemoryCacheOrRefresh()
                 .cacheOriginalImage()
+            .backgroundDecode()
                 .fade(duration: 0.2)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -371,6 +376,7 @@ private struct ProviderResultThumb: View {
             .loadImmediately()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.2)
             .placeholder {
                 RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)

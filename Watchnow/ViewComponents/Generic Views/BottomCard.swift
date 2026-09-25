@@ -62,7 +62,14 @@ struct BottomCard: View {
             RoundedRectangle(cornerRadius: posterCornerRadius, style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 0.5)
         )
-        .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
+        // Behind, not after: see `PosterImage.shadowLayer` for why a shadow
+        // applied on top of the clipped poster costs an offscreen pass per
+        // card per frame.
+        .background(
+            RoundedRectangle(cornerRadius: posterCornerRadius, style: .continuous)
+                .fill(Color.black)
+                .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
+        )
     }
 
     // MARK: - Metadata

@@ -43,18 +43,23 @@ struct ScrollableContentView: View {
     private var slotHeight: CGFloat { cardType == .bottom ? 295 : 215 }
 
     var body: some View {
-        StretchingActionScrollView(onTriggered: {
-            Task { @MainActor in
-                performFeedback.toggle()
-                viewModel.loadMoreContent(section: viewSection)
-            }
-        }, onThresholdReached: { thresholdReached in
+        StretchingActionScrollView(onTriggered: triggerLoadMore,
+                                   onThresholdReached: { thresholdReached in
             self.thresholdReached = thresholdReached
         }, onProgress: { progress in
             self.loadMoreProgress.value = progress
         }, content: getContent)
         .frame(height: slotHeight)
         .sensoryFeedback(.success, trigger: performFeedback)
+    }
+
+    /// One entry point for the next page, so the overscroll pull and a tap
+    /// on the trailing button cannot drift apart.
+    private func triggerLoadMore() {
+        Task { @MainActor in
+            performFeedback.toggle()
+            viewModel.loadMoreContent(section: viewSection)
+        }
     }
 
     func getContent() -> some View {
@@ -103,7 +108,7 @@ struct ScrollableContentView: View {
 
             if results.last == movie,
                viewModel.canLoadMoreContent(section: viewSection) {
-                LoadMoreButtonView(tracker: loadMoreProgress)
+                LoadMoreButtonView(tracker: loadMoreProgress, onTap: triggerLoadMore)
             }
         }
     }

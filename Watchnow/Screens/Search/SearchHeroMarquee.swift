@@ -64,7 +64,11 @@ struct HintChip: View {
     /// Titles to cycle. Changing this restarts the loop.
     let titles: [String]
     let reduceMotion: Bool
-    let onSelect: (String) -> Void
+    /// Focuses the real search field. The chip has always *looked* like a
+    /// search field — magnifying glass, caret, capsule — so tapping it now
+    /// does what that appearance promises and opens the keyboard, rather
+    /// than silently running a search for whichever title is on screen.
+    let onActivate: () -> Void
 
     /// What the hint is currently showing — a growing or shrinking prefix
     /// of `hintTarget` while the typewriter runs, or the whole title once
@@ -85,7 +89,7 @@ struct HintChip: View {
     private var content: some View {
         if hintTarget != nil || !typedHint.isEmpty {
             Button {
-                if let hintTarget { onSelect(hintTarget) }
+                onActivate()
             } label: {
                 HStack(spacing: 7) {
                     Image(systemName: "magnifyingglass")
@@ -120,7 +124,8 @@ struct HintChip: View {
                 .contentShape(Capsule(style: .continuous))
             }
             .buttonStyle(GenreChipPressStyle(reduceMotion: reduceMotion))
-            .accessibilityLabel(hintTarget.map { "Search for \($0)" } ?? "Suggestion")
+            .accessibilityLabel("Search")
+            .accessibilityHint(hintTarget.map { "Suggestions like \($0)" } ?? "")
         } else {
             Text("Movies, series and the people who make them.")
                 .appFont(14, relativeTo: .subheadline)

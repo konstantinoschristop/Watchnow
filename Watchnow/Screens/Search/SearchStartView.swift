@@ -30,6 +30,10 @@ struct SearchStartView: View {
     /// Drives the hero collapse. Owned by `SearchView` because the focus
     /// state belongs to the `.searchable` field, not to this subtree.
     let isSearchFieldFocused: Bool
+    /// Puts the keyboard in the real search field. The hero's chip is the
+    /// only way into search while the navigation bar is hidden, so this is
+    /// what makes hiding the bar safe — see `SearchChromeModifier`.
+    let onActivateSearch: () -> Void
     /// Runs a search straight away, bypassing the keystroke debounce — a
     /// tap on a recent chip is an explicit, complete query, so making the
     /// user wait 0.6s for it would read as lag.
@@ -161,7 +165,7 @@ private extension SearchStartView {
 
                 HintChip(titles: hintTitles,
                          reduceMotion: reduceMotion,
-                         onSelect: onSelectQuery)
+                         onActivate: onActivateSearch)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 4)

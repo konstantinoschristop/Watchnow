@@ -230,6 +230,7 @@ private struct TopTenCard: View {
             .loadImmediately()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.2)
             .placeholder {
                 RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)

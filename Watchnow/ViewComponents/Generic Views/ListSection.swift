@@ -177,6 +177,7 @@ private struct ListSectionRow: View {
             .loadImmediately()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.2)
             .placeholder {
                 RoundedRectangle(cornerRadius: posterRadius, style: .continuous)

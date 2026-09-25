@@ -148,6 +148,9 @@
     "Clear All" : {
 
     },
+    "Clear search" : {
+
+    },
     "Close" : {
 
     },
@@ -265,7 +268,13 @@
     "Layout" : {
 
     },
+    "Leaves search and returns to the start screen" : {
+
+    },
     "Liked. Tap to remove from your taste profile." : {
+
+    },
+    "Load more" : {
 
     },
     "Loading" : {
@@ -507,9 +516,6 @@
     "Search %@" : {
 
     },
-    "Search for %@" : {
-
-    },
     "Searching" : {
 
     },
@@ -575,7 +581,7 @@
         }
       }
     },
-    "Suggestion" : {
+    "Suggestions like %@" : {
 
     },
     "Sync" : {

@@ -42,6 +42,13 @@ struct LoadMoreButtonView: View {
     /// `ObservableObject` rather than a plain prop.
     @ObservedObject var tracker: LoadMoreProgress
 
+    /// Runs the same load the overscroll pull does. Stretching to paginate
+    /// is a nice gesture but an invisible one, and it asks for a deliberate
+    /// drag past the end of the row — awkward one-handed, and impossible to
+    /// discover if you have never done it. The button already looked like a
+    /// control, so it is one now; the pull still works untouched.
+    let onTap: () -> Void
+
     private let baseSize:   CGFloat = 40
     private let maxGrowth:  CGFloat = 40   // 40 → 80 — bigger payoff at threshold
 
@@ -67,6 +74,17 @@ struct LoadMoreButtonView: View {
     private var isArmed: Bool { p > 0.65 }
 
     var body: some View {
+        Button(action: onTap) {
+            content
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Load more")
+        .frame(maxHeight: .infinity)
+        .padding(.leading, 24)
+        .padding(.trailing, 16)
+    }
+
+    private var content: some View {
         ZStack {
             // Translucent base so the row's content / background reads
             // through. Stays the same across all progress values.
@@ -103,8 +121,8 @@ struct LoadMoreButtonView: View {
         // the overscroll back to the edge — visually "stuck", couldn't
         // pull far enough to fire onTriggered.
         .frame(width: maxSize, height: maxSize)
-        .frame(maxHeight: .infinity)
-        .padding(.leading, 24)
-        .padding(.trailing, 16)
+        // The tap target is the whole reserved slot rather than the circle,
+        // which is only 40pt until a pull grows it.
+        .contentShape(Rectangle())
     }
 }

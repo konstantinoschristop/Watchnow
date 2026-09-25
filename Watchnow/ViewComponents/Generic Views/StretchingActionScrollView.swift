@@ -36,6 +36,12 @@ struct StretchingActionScrollView<Content: View>: UIViewRepresentable {
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.backgroundColor = .clear
         scrollView.clipsToBounds = false
+        // UIScrollView holds content touches for ~150ms before delivering
+        // them, to see whether the finger is starting a scroll. On the
+        // trailing load-more button that reads as a dead tap, so deliver
+        // immediately — the scroll gesture still cancels the touch if the
+        // finger moves.
+        scrollView.delaysContentTouches = false
         scrollView.delegate = context.coordinator
         context.coordinator.scrollView = scrollView
 

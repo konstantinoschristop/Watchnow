@@ -239,7 +239,6 @@ extension ContentView {
                 .background(Color(.background))
                 .navigationTitle("Search")
         }
-        .searchPresentationToolbarBehavior(.avoidHidingContent)
         .modifier(SoftScrollEdgeEffectStyleModifier())
     }
 

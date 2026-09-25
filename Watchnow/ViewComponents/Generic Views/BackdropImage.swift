@@ -19,6 +19,7 @@ struct BackdropImage: View {
             .loadDiskFileSynchronously()
             .fromMemoryCacheOrRefresh()
             .cacheOriginalImage()
+            .backgroundDecode()
             .fade(duration: 0.25)
             .resizable()
             .aspectRatio(contentMode: .fit)

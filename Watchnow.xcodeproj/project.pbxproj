@@ -160,15 +160,16 @@
 		FE1D0A49000000000000FB49 /* ReviewPromptPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */; };
 		FE1D0A4A000000000000FB4A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FE1D0A4A000000000000FA4A /* Localizable.xcstrings */; };
 		FE1D0A4B000000000000FB4B /* ReviewPromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */; };
+		FE1D0A4C000000000000FB4C /* BrandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4C000000000000FA4C /* BrandColors.swift */; };
+		FE1D0A4D000000000000FB4D /* OnboardingMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4D000000000000FA4D /* OnboardingMotion.swift */; };
 		FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B01000000000000FA01 /* SearchStartView.swift */; };
+		FE7F1A01000000000000FB01 /* SearchFieldBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE7F1A01000000000000FA01 /* SearchFieldBar.swift */; };
 		FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */; };
 		FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C01000000000000FA01 /* WatchlistGridView.swift */; };
 		FE3B0C02000000000000FB02 /* FolderAlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */; };
 		FE4C0D01000000000000FB01 /* SearchHeroMarquee.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */; };
 		FE4C0D02000000000000FB02 /* SearchStartComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D02000000000000FA02 /* SearchStartComponents.swift */; };
 		FE4C0D03000000000000FB03 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4C0D03000000000000FA03 /* FlowLayout.swift */; };
-		FE1D0A4C000000000000FB4C /* BrandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4C000000000000FA4C /* BrandColors.swift */; };
-		FE1D0A4D000000000000FB4D /* OnboardingMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1D0A4D000000000000FA4D /* OnboardingMotion.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -335,15 +336,16 @@
 		FE1D0A49000000000000FA49 /* ReviewPromptPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptPolicy.swift; sourceTree = "<group>"; };
 		FE1D0A4A000000000000FA4A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		FE1D0A4B000000000000FA4B /* ReviewPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTests.swift; sourceTree = "<group>"; };
+		FE1D0A4C000000000000FA4C /* BrandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandColors.swift; sourceTree = "<group>"; };
+		FE1D0A4D000000000000FA4D /* OnboardingMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMotion.swift; sourceTree = "<group>"; };
 		FE2A0B01000000000000FA01 /* SearchStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartView.swift; sourceTree = "<group>"; };
+		FE7F1A01000000000000FA01 /* SearchFieldBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFieldBar.swift; sourceTree = "<group>"; };
 		FE2A0B02000000000000FA02 /* SearchDiscoveryServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryServiceProtocol.swift; sourceTree = "<group>"; };
 		FE3B0C01000000000000FA01 /* WatchlistGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistGridView.swift; sourceTree = "<group>"; };
 		FE3B0C02000000000000FA02 /* FolderAlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderAlbumRow.swift; sourceTree = "<group>"; };
 		FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeroMarquee.swift; sourceTree = "<group>"; };
 		FE4C0D02000000000000FA02 /* SearchStartComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStartComponents.swift; sourceTree = "<group>"; };
 		FE4C0D03000000000000FA03 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
-		FE1D0A4C000000000000FA4C /* BrandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandColors.swift; sourceTree = "<group>"; };
-		FE1D0A4D000000000000FA4D /* OnboardingMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMotion.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -543,6 +545,7 @@
 				EE2732EE287AF44E00B066C7 /* SearchViewModel.swift */,
 				8AA98D882ADB1650007963E3 /* SearchModel.swift */,
 				FE2A0B01000000000000FA01 /* SearchStartView.swift */,
+				FE7F1A01000000000000FA01 /* SearchFieldBar.swift */,
 				FE4C0D02000000000000FA02 /* SearchStartComponents.swift */,
 				FE4C0D01000000000000FA01 /* SearchHeroMarquee.swift */,
 			);
@@ -937,6 +940,7 @@
 				FE3B0C01000000000000FB01 /* WatchlistGridView.swift in Sources */,
 				FE2A0B02000000000000FB02 /* SearchDiscoveryServiceProtocol.swift in Sources */,
 				FE2A0B01000000000000FB01 /* SearchStartView.swift in Sources */,
+				FE7F1A01000000000000FB01 /* SearchFieldBar.swift in Sources */,
 				EE2732EF287AF44E00B066C7 /* SearchViewModel.swift in Sources */,
 				EE95E4432895CA1000B8C688 /* MoviesViewModel.swift in Sources */,
 				8AE787E52E8966E000A6FF50 /* ContentMainView.swift in Sources */,
@@ -1171,7 +1175,7 @@
 				CODE_SIGN_ENTITLEMENTS = Watchnow/Watchnow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
 				ENABLE_PREVIEWS = YES;
@@ -1204,7 +1208,7 @@
 				CODE_SIGN_ENTITLEMENTS = Watchnow/Watchnow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Watchnow/Preview Content\"";
 				DEVELOPMENT_TEAM = YC87BA998K;
 				ENABLE_PREVIEWS = YES;
