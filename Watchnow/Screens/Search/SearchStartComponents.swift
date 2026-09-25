@@ -72,8 +72,7 @@ struct TrendingPosterCard: View {
         PosterImage(url: result.getPosterURL(),
                     width: Self.posterWidth * 2,
                     height: Self.posterHeight * 2,
-                    cornerRadius: cornerRadius,
-                    shadowRadius: 0)
+                    cornerRadius: cornerRadius)
             .frame(width: Self.posterWidth, height: Self.posterHeight)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay {

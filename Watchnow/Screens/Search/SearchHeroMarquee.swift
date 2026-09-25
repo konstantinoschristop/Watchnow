@@ -373,8 +373,7 @@ struct DriftRow: View {
                 PosterImage(url: tiled[index % tiled.count],
                             width: posterWidth * 2,
                             height: posterHeight * 2,
-                            cornerRadius: cornerRadius,
-                            shadowRadius: 0)
+                            cornerRadius: cornerRadius)
                     .frame(width: posterWidth, height: posterHeight)
                     // Fill behind each poster so a slot that hasn't
                     // decoded yet reads as a card still loading rather

@@ -76,7 +76,7 @@ struct TopCard: View {
             // Behind, not after — see `PosterImage.shadowLayer`.
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Color.black)
+                    .fill(Color(.tertiarySystemFill))
                     .shadow(color: .black.opacity(0.3), radius: 5, y: 3)
             )
             .overlay(alignment: .topLeading) { rankBadge.padding(7) }

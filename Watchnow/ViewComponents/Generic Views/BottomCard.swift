@@ -52,8 +52,7 @@ struct BottomCard: View {
             url: content.getPosterURL(),
             width: 260,
             height: 390,
-            cornerRadius: posterCornerRadius,
-            shadowRadius: 0 // applied below at the card level
+            cornerRadius: posterCornerRadius
         )
         .frame(height: posterHeight)
         .clipShape(RoundedRectangle(cornerRadius: posterCornerRadius, style: .continuous))
@@ -66,7 +65,7 @@ struct BottomCard: View {
         // card per frame.
         .background(
             RoundedRectangle(cornerRadius: posterCornerRadius, style: .continuous)
-                .fill(Color.black)
+                .fill(Color(.tertiarySystemFill))
                 .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
         )
     }

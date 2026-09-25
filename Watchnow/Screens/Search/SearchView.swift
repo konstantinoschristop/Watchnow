@@ -36,10 +36,6 @@ struct SearchView: View {
     /// recent chip fire immediately *and* keeps the resulting
     /// `viewModel.query` change from scheduling a duplicate debounced fetch.
     @State private var dispatchedQuery = ""
-    /// Whether the user has asked for search. Set by the hero's chip, cleared
-    /// by Cancel. Distinct from "has a query" so tapping the chip brings the
-    /// field and keyboard up over an empty start screen.
-    @State private var searchActive = false
 
     /// Debounce window for typed input. Short enough to feel live, long
     /// enough that a normal typing cadence doesn't spend a request per
@@ -75,8 +71,8 @@ struct SearchView: View {
         }
         // The bar has to exist before it can take focus, so arming search
         // renders it first and this hands it the keyboard on the next pass.
-        .task(id: searchActive) {
-            if searchActive { searchFieldFocused = true }
+        .task(id: viewModel.isSearchActive) {
+            if viewModel.isSearchActive { searchFieldFocused = true }
         }
         .onChange(of: viewModel.query) { _, newValue in
             queryChanged(to: newValue)
@@ -90,7 +86,7 @@ struct SearchView: View {
     /// Results keep it up on their own so dismissing the keyboard never
     /// strands the user with results and no field to edit.
     private var searchBarVisible: Bool {
-        searchActive || !viewModel.query.isEmpty || viewModel.results != nil
+        viewModel.isSearchActive || !viewModel.query.isEmpty || viewModel.results != nil
     }
 }
 
@@ -163,7 +159,7 @@ private extension SearchView {
         viewModel.query = ""
         viewModel.clearResults()
         searchFieldFocused = false
-        searchActive = false
+        viewModel.isSearchActive = false
     }
 }
 
@@ -264,7 +260,7 @@ private extension SearchView {
         SearchStartView(viewModel: viewModel,
                         bleedsUnderStatusBar: heroOwnsTopEdge,
                         isSearchFieldFocused: searchFieldFocused,
-                        onActivateSearch: { searchActive = true },
+                        onActivateSearch: { viewModel.isSearchActive = true },
                         onSelectQuery: { query in
                             viewModel.query = query
                             runSearch(query, immediate: true)

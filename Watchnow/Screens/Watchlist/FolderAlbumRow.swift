@@ -467,8 +467,7 @@ struct FolderAlbumFace: View {
         PosterImage(url: result.getResultPosterURL(),
                     width: posterWidth * 2,
                     height: (Self.coverHeight - 14) * 2,
-                    cornerRadius: AppRadius.small,
-                    shadowRadius: 0)
+                    cornerRadius: AppRadius.small)
             .frame(width: posterWidth, height: Self.coverHeight - 14)
             .background {
                 RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous)

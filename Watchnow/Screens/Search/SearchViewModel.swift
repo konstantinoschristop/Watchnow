@@ -27,6 +27,14 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     
     @Published var apiError: Bool = false
     @Published var isSearching: Bool = false
+    /// True from the moment the user asks for search — the hero's chip —
+    /// until Cancel or a tab switch ends the session.
+    ///
+    /// Lives here rather than in `SearchView` so `endSearchSession()` can
+    /// clear it. As view state it survived the tab switch, and coming back to
+    /// Search landed on an empty search bar with the start screen collapsed
+    /// behind it instead of the hero.
+    @Published var isSearchActive: Bool = false
     /// Composed rather than a single fat protocol: search needs the multi
     /// endpoint from `DetailServiceProtocol` and the two feeds from
     /// `SearchDiscoveryServiceProtocol`, and neither has to grow to serve the
@@ -82,6 +90,9 @@ class SearchViewModel: ObservableObject, BaseSwipeActionsProtocol {
     /// also fires when pushing a details screen — that would wipe the
     /// results the user was about to come back to.
     func endSearchSession() {
+        // Before the guard: the user can arm search and leave without typing,
+        // and that still has to put the start screen back.
+        isSearchActive = false
         guard !query.isEmpty || results != nil else { return }
         query = ""
         clearResults()
