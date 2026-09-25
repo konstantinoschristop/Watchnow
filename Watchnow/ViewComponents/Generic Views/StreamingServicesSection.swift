@@ -27,7 +27,15 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     @ObservedObject var viewModel: VM
     let viewSection: ViewSections
 
-    @Namespace private var namespace
+    /// Shared with the rest of the feed and with the details screen a tile
+    /// opens, so the zoom transition matches. Was a private `@Namespace`,
+    /// which meant this row's transition ran in a namespace of its own while
+    /// every other card in the feed shared `ContentMainView`'s.
+    var namespace: Namespace.ID
+    /// Opens a tile's details screen. See `BottomCard`: a `NavigationLink`
+    /// inside a `List` row draws a system disclosure chevron, so the feed's
+    /// cards report the tap upward instead.
+    var onSelect: (Result) -> Void
 
     // Overscroll-to-load-more state, mirrored from the BottomView /
     // TopView pattern. The progress tracker is an ObservableObject
@@ -188,15 +196,15 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
 
     @ViewBuilder
     private func providerCard(for result: Result, screenHalfWidth: CGFloat) -> some View {
-        let link = NavigationLink {
-            let model = ContentDetailsModel(screenType: viewModel.screenType, result: result)
-            let detailVM = ContentDetailsViewModel(model: model)
-            ContentDetailsView(detailsViewModel: detailVM)
-                .navigationTransition(.zoom(sourceID: result.id, in: namespace))
+        let link = Button {
+            onSelect(result)
         } label: {
             ProviderResultThumb(result: result)
         }
-        .matchedTransitionSource(id: result.id, in: namespace)
+        // `?? 0` to match the destination's id exactly — the feed keys the
+        // zoom on a non-optional `Int`, and an `Int?` source would never pair
+        // with it.
+        .matchedTransitionSource(id: result.id ?? 0, in: namespace)
         .buttonStyle(.plain)
 
         if #available(iOS 17, *) {

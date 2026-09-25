@@ -170,7 +170,9 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         if section.isStreamingServicesSection,
            let providers = viewModel.providers, !providers.isEmpty {
             StreamingServicesSection(viewModel: viewModel,
-                                     viewSection: section)
+                                     viewSection: section,
+                                     namespace: cardNamespace,
+                                     onSelect: { select($0, in: section) })
         } else if let results = filteredResults(for: section) {
             if section.isTopView {
                 TopView(results: results,
