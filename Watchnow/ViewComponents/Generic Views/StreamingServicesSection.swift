@@ -201,10 +201,9 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
         } label: {
             ProviderResultThumb(result: result)
         }
-        // `?? 0` to match the destination's id exactly — the feed keys the
-        // zoom on a non-optional `Int`, and an `Int?` source would never pair
-        // with it.
-        .matchedTransitionSource(id: result.id ?? 0, in: namespace)
+        // Keyed by section as well as title, like every other feed card —
+        // a provider's catalogue overlaps the rows above it.
+        .matchedTransitionSource(id: CardTransitionID(result, in: viewSection), in: namespace)
         .buttonStyle(.plain)
 
         if #available(iOS 17, *) {

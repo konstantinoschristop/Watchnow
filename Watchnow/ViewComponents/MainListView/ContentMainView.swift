@@ -21,6 +21,22 @@ let tmdbGenreNames: [Int: String] = [
  10762: "Kids",   10763: "News",      10764: "Reality",  10766: "Soap"
 ]
 
+/// Zoom-transition source ID for a card. The title's ID alone is not
+/// enough: every row in the feed shares one namespace, and the same title
+/// often sits in two rows at once (Hot Right Now and Most Watched, say).
+/// Given two sources with one ID, the zoom picks either — often the card in
+/// the other row — so the ID also carries the row the card was tapped in.
+/// Outside the feed `section` is nil.
+struct CardTransitionID: Hashable {
+    let resultID: Int
+    let section: ViewSections?
+
+    init(_ result: Result, in section: ViewSections? = nil) {
+        resultID = result.id ?? 0
+        self.section = section
+    }
+}
+
 struct ContentMainView<VM: BaseContentViewModel>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -35,12 +51,15 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
     /// open, so the zoom transition can match source to destination.
     @Namespace private var cardNamespace
 
-    /// A tapped card. Carries the screen type with it because the feed mixes
-    /// movie and TV sections, and the details screen needs to know which.
+    /// A tapped card. Carries its section with it: the feed mixes movie and
+    /// TV sections, so the details screen needs the screen type, and the
+    /// zoom needs the section to find the card that was actually tapped.
     struct CardSelection: Identifiable, Hashable {
         let result: Result
-        let screenType: ScreenTypes
+        let section: ViewSections
         var id: Int { result.id ?? 0 }
+        var screenType: ScreenTypes { section.screenType }
+        var transitionID: CardTransitionID { CardTransitionID(result, in: section) }
     }
 
     /// Currently active genre filter. nil = "All" (no filter).
@@ -138,7 +157,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                     let model = ContentDetailsModel(screenType: selection.screenType,
                                                     result: selection.result)
                     ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
-                        .navigationTransition(.zoom(sourceID: selection.id, in: cardNamespace))
+                        .navigationTransition(.zoom(sourceID: selection.transitionID, in: cardNamespace))
                 }
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
@@ -205,7 +224,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
 
     /// Records the tapped card so `navigationDestination` can push details.
     private func select(_ result: Result, in section: ViewSections) {
-        cardSelection = CardSelection(result: result, screenType: section.screenType)
+        cardSelection = CardSelection(result: result, section: section)
     }
 
     // MARK: - Genre filter bar

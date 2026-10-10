@@ -22,6 +22,10 @@ struct BottomCard: View {
     /// Shared by every card in the feed and by the details screen it opens,
     /// so the zoom transition has a namespace both ends can match on.
     var namespace: Namespace.ID
+    /// The feed row this card sits in. Part of the zoom's source ID, because
+    /// the same title can appear in more than one row — see
+    /// `CardTransitionID`. Nil outside the home feed.
+    var section: ViewSections? = nil
     /// Opens the details screen. A plain closure rather than a
     /// `NavigationLink`, because a link inside a `List` row draws a system
     /// disclosure chevron beside every card — see `ContentMainView`.
@@ -42,7 +46,7 @@ struct BottomCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(.plain)
-        .matchedTransitionSource(id: content.id ?? 0, in: namespace)
+        .matchedTransitionSource(id: CardTransitionID(content, in: section), in: namespace)
     }
 
     // MARK: - Poster

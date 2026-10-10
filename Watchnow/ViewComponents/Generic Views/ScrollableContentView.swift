@@ -166,12 +166,14 @@ struct ScrollableContentView: View {
             BottomCard(content: movie,
                        screenType: screenType,
                        namespace: namespace,
+                       section: viewSection,
                        onSelect: onSelect)
         } else {
             TopCard(content: movie,
                     screenType: screenType,
                     rank: index + 1,
                     namespace: namespace,
+                    section: viewSection,
                     onSelect: onSelect)
         }
     }

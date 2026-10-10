@@ -66,7 +66,7 @@ struct SimilarsView: View {
         .navigationDestination(item: $selection) { selected in
             let model = ContentDetailsModel(screenType: screenType, result: selected.result)
             ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
-                .navigationTransition(.zoom(sourceID: selected.id, in: namespace))
+                .navigationTransition(.zoom(sourceID: CardTransitionID(selected.result), in: namespace))
         }
     }
 }

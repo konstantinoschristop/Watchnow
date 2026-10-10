@@ -27,6 +27,8 @@ struct TopCard: View {
     var rank: Int
     /// See `BottomCard` — shared namespace for the zoom transition.
     var namespace: Namespace.ID
+    /// See `BottomCard` — the row this card sits in, for the zoom's source ID.
+    var section: ViewSections? = nil
     /// See `BottomCard` — opens details without a `NavigationLink`.
     var onSelect: (Result) -> Void
 
@@ -45,7 +47,7 @@ struct TopCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(.plain)
-        .matchedTransitionSource(id: content.id ?? 0, in: namespace)
+        .matchedTransitionSource(id: CardTransitionID(content, in: section), in: namespace)
     }
 
     // MARK: - Backdrop
