@@ -393,7 +393,7 @@ struct MenuFeaturedView<Content: View>: View {
         .modifier(PageIndicatorBackground())
         .padding(.bottom, 18)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Slide \((scrollIndex ?? 0) + 1) of \(results.count)")
+        .accessibilityLabel(Text("Slide \((scrollIndex ?? 0) + 1) of \(results.count)", comment: "Accessibility: featured carousel position"))
     }
 
     /// Stop/start for the rotation, tucked into the indicator's existing

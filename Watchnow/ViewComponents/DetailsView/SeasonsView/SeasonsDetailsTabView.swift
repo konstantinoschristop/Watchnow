@@ -62,8 +62,8 @@ struct SeasonsDetailsTabView: View {
         }
         .toast(isPresenting: $showReminderToast, alert: {
             seasonReminderOn ?
-            AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
-            AlertToast(displayMode: .alert, type: .error(.red), title: "Reminder Removed")
+            AlertToast(displayMode: .alert, type: .complete(.green), title: String(localized: "Reminder Set")) :
+            AlertToast(displayMode: .alert, type: .error(.red), title: String(localized: "Reminder Removed"))
         })
         .alert("Notifications are off",
                isPresented: $showNotificationSettingsAlert) {
@@ -78,7 +78,7 @@ struct SeasonsDetailsTabView: View {
 
     private var sheetHeader: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(selectedSeason.name ?? "Season")
+            Text(selectedSeason.name ?? String(localized: "Season", comment: "A season with no name"))
                 .appFont(20, weight: .bold, relativeTo: .title3)
                 .foregroundStyle(.primary)
                 .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.quick), value: selectedSeason)
@@ -88,7 +88,7 @@ struct SeasonsDetailsTabView: View {
             let count = episodesViewModel.episodes?.episodes?.count
                         ?? selectedSeason.episode_count
                         ?? 0
-            Text("\(count) Episodes")
+            Text("\(count) Episodes", comment: "Number of episodes")
                 .appFont(13, relativeTo: .footnote)
                 .foregroundStyle(.secondary)
         }
@@ -202,7 +202,8 @@ struct SeasonsDetailsTabView: View {
                     .foregroundStyle(Color.accentColor)
             } description: {
                 if let airDate = selectedSeason.airDateValue() {
-                    Text("Premieres \(airDate.formatted(date: .abbreviated, time: .omitted)).")
+                    Text("Premieres \(airDate.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, timeZone: .gmt))).",
+                         comment: "Season not aired yet; its premiere date")
                 } else {
                     Text("This season hasn't started yet.")
                 }
@@ -254,13 +255,13 @@ struct SeasonsDetailsTabView: View {
             return
         }
 
-        let seasonLabel = selectedSeason.name ?? "New season"
+        let seasonLabel = selectedSeason.name ?? String(localized: "New season", comment: "A season with no name, in a reminder")
         let deepLink = DeepLink(id: seriesID, mediaType: .tv)
         Task {
             let result = await ReminderManager.schedule(
                 identifier: identifier,
-                title: "Premiering today",
-                body: "\(seasonLabel) of \(seriesName) starts today.",
+                title: String(localized: "Premiering today", comment: "Season reminder notification title"),
+                body: String(localized: "\(seasonLabel) of \(seriesName) starts today.", comment: "Season reminder notification body: season name, then series name"),
                 on: airDate,
                 deepLink: deepLink
             )

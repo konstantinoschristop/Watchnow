@@ -7,11 +7,15 @@
 
 import SwiftUI
 
-/// Stable TMDB genre ID → display name map (movies + TV combined).
+/// Stable TMDB genre ID → English name map (movies + TV combined).
 /// Lives outside `ContentMainView` because Swift doesn't allow static
 /// stored properties in generic types. Module-internal so `ListSection`
 /// (and any future consumer) can resolve genre IDs without duplicating
 /// the table.
+///
+/// A key space, not a label: `TasteProfile` persists tallies keyed by these
+/// names, and Movie Coach and What's New match genres on them, so they must
+/// not change with the app's language. Show `tmdbGenreDisplayNames` instead.
 let tmdbGenreNames: [Int: String] = [
     28: "Action",     12: "Adventure",   16: "Animation",   35: "Comedy",
     80: "Crime",      99: "Documentary", 18: "Drama",     10751: "Family",
@@ -19,6 +23,34 @@ let tmdbGenreNames: [Int: String] = [
  10749: "Romance",   878: "Sci-Fi",      53: "Thriller",  10752: "War",
     37: "Western",10759: "Action",    10765: "Sci-Fi",   10768: "War",
  10762: "Kids",   10763: "News",      10764: "Reality",  10766: "Soap"
+]
+
+/// `tmdbGenreNames` in the app's language, for display.
+let tmdbGenreDisplayNames: [Int: String] = [
+    28:    String(localized: "Action", comment: "Genre"),
+    12:    String(localized: "Adventure", comment: "Genre"),
+    16:    String(localized: "Animation", comment: "Genre"),
+    35:    String(localized: "Comedy", comment: "Genre"),
+    80:    String(localized: "Crime", comment: "Genre"),
+    99:    String(localized: "Documentary", comment: "Genre"),
+    18:    String(localized: "Drama", comment: "Genre"),
+    10751: String(localized: "Family", comment: "Genre"),
+    14:    String(localized: "Fantasy", comment: "Genre"),
+    36:    String(localized: "History", comment: "Genre"),
+    27:    String(localized: "Horror", comment: "Genre"),
+    9648:  String(localized: "Mystery", comment: "Genre"),
+    10749: String(localized: "Romance", comment: "Genre"),
+    878:   String(localized: "Sci-Fi", comment: "Genre"),
+    53:    String(localized: "Thriller", comment: "Genre"),
+    10752: String(localized: "War", comment: "Genre"),
+    37:    String(localized: "Western", comment: "Genre"),
+    10759: String(localized: "Action", comment: "Genre"),
+    10765: String(localized: "Sci-Fi", comment: "Genre"),
+    10768: String(localized: "War", comment: "Genre"),
+    10762: String(localized: "Kids", comment: "Genre"),
+    10763: String(localized: "News", comment: "Genre"),
+    10764: String(localized: "Reality", comment: "Genre"),
+    10766: String(localized: "Soap", comment: "Genre: soap opera"),
 ]
 
 /// Zoom-transition source ID for a card. The title's ID alone is not
@@ -233,7 +265,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 // "All" chip — clears the filter
-                GenreChip(name: "All",
+                GenreChip(name: String(localized: "All", comment: "Genre filter chip that clears the filter"),
                           isSelected: selectedGenreID == nil,
                           tint: tint) {
                     withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.75)) {
@@ -436,10 +468,12 @@ private struct MovieNightBanner: View {
             }
             .foregroundStyle(.white)
 
+            // Room for a third line: English takes two, but every
+            // translation runs longer, and so does larger text.
             Text("Can't decide? Swipe to find tonight's pick.")
                 .appFont(13, weight: .medium, relativeTo: .footnote)
                 .foregroundStyle(.white.opacity(0.92))
-                .lineLimit(2)
+                .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)
         }
@@ -531,23 +565,11 @@ private struct PressableCardStyle: ButtonStyle {
 /// lists and give the most useful filter signal with just a single tap.
 struct PopularGenre: Identifiable {
     let id: Int
-    let name: String
+    var name: String { tmdbGenreDisplayNames[id] ?? "" }
 
-    static let movies: [PopularGenre] = [
-        .init(id: 28,  name: "Action"),
-        .init(id: 35,  name: "Comedy"),
-        .init(id: 18,  name: "Drama"),
-        .init(id: 27,  name: "Horror"),
-        .init(id: 878, name: "Sci-Fi"),
-    ]
+    static let movies: [PopularGenre] = [28, 35, 18, 27, 878].map(PopularGenre.init)
 
-    static let series: [PopularGenre] = [
-        .init(id: 10759, name: "Action"),
-        .init(id: 18,    name: "Drama"),
-        .init(id: 35,    name: "Comedy"),
-        .init(id: 80,    name: "Crime"),
-        .init(id: 10765, name: "Sci-Fi"),
-    ]
+    static let series: [PopularGenre] = [10759, 18, 35, 80, 10765].map(PopularGenre.init)
 }
 
 // MARK: - Overlay content (home-screen carousel hero)
@@ -585,7 +607,7 @@ extension ContentMainView {
                             Image(systemName: "star.fill")
                                 .appFont(10, relativeTo: .caption2)
                                 .foregroundStyle(RatingStyle.tint(for: rating))
-                            Text(String(format: "%.1f", rating))
+                            Text(rating.ratingText)
                         }
                         Text("·").opacity(0.6)
                     }
@@ -621,7 +643,7 @@ extension ContentMainView {
     /// Maps up to 2 genre IDs on a `Result` to their display names.
     private func resolvedGenres(for content: Result) -> [String] {
         guard let ids = content.genre_ids else { return [] }
-        return ids.prefix(2).compactMap { tmdbGenreNames[$0] }
+        return ids.prefix(2).compactMap { tmdbGenreDisplayNames[$0] }
     }
 
     /// Display-only genre tag on the home-feed hero image. On iOS 26

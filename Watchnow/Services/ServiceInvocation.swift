@@ -127,9 +127,9 @@ final class ServiceInvocation: BaseNetworkService,
         return try await request(urlString: urlString)
     }
 
-    /// Films in cinemas right now, in TMDB's default region.
+    /// Films in cinemas right now in the device's region.
     func fetchNowPlayingMovies(page: Int = 1) async throws -> GenericResultResponse {
-        try await request(urlString: API.Movie.nowPlaying(page: page))
+        try await requestRegional { API.Movie.nowPlaying(page: page, region: $0) }
     }
 
     /// Series with an episode airing in the next week.

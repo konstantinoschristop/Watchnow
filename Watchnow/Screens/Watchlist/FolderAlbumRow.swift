@@ -185,18 +185,18 @@ struct FolderAlbumRow: View {
     /// "moon stars fill", which is the API talking rather than the picture.
     private static func symbolName(_ symbol: String) -> String {
         switch symbol {
-        case "folder":            return "Folder"
-        case "film.fill":         return "Film"
-        case "tv.fill":           return "Television"
-        case "popcorn.fill":      return "Popcorn"
-        case "heart.fill":        return "Heart"
-        case "star.fill":         return "Star"
-        case "sparkles":          return "Sparkles"
-        case "moon.stars.fill":   return "Night"
-        case "flame.fill":        return "Flame"
-        case "theatermasks.fill": return "Theatre masks"
-        case "crown.fill":        return "Crown"
-        case "bolt.fill":         return "Bolt"
+        case "folder":            return String(localized: "Folder", comment: "Accessibility: name of a folder icon")
+        case "film.fill":         return String(localized: "Film", comment: "Accessibility: name of a folder icon")
+        case "tv.fill":           return String(localized: "Television", comment: "Accessibility: name of a folder icon")
+        case "popcorn.fill":      return String(localized: "Popcorn", comment: "Accessibility: name of a folder icon")
+        case "heart.fill":        return String(localized: "Heart", comment: "Accessibility: name of a folder icon")
+        case "star.fill":         return String(localized: "Star", comment: "Accessibility: name of a folder icon")
+        case "sparkles":          return String(localized: "Sparkles", comment: "Accessibility: name of a folder icon")
+        case "moon.stars.fill":   return String(localized: "Night", comment: "Accessibility: name of a folder icon")
+        case "flame.fill":        return String(localized: "Flame", comment: "Accessibility: name of a folder icon")
+        case "theatermasks.fill": return String(localized: "Theatre masks", comment: "Accessibility: name of a folder icon")
+        case "crown.fill":        return String(localized: "Crown", comment: "Accessibility: name of a folder icon")
+        case "bolt.fill":         return String(localized: "Bolt", comment: "Accessibility: name of a folder icon")
         default:
             return symbol.replacingOccurrences(of: ".", with: " ")
         }
@@ -210,7 +210,7 @@ struct FolderAlbumRow: View {
     // MARK: - Cards
 
     private var allCard: some View {
-        FolderAlbumCard(title: "All",
+        FolderAlbumCard(title: String(localized: "All", comment: "Watchlist folder holding every saved title"),
                         count: allItems.count,
                         fallbackSymbol: "tray.full",
                         covers: Array(allItems.prefix(3)),
@@ -266,7 +266,7 @@ struct FolderAlbumRow: View {
                             .foregroundStyle(Color.accentColor)
                     }
 
-                Text("New")
+                Text("New", comment: "Card that creates a new watchlist folder, under a plus sign")
                     .appFont(13, weight: .semibold, relativeTo: .footnote)
                     .foregroundStyle(Color.accentColor)
 
@@ -336,7 +336,7 @@ struct FolderAlbumCard: View {
             }
             .buttonStyle(AlbumPressStyle(reduceMotion: reduceMotion))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(title), \(count) titles")
+            .accessibilityLabel(Text("\(title), \(count) titles", comment: "Accessibility: a watchlist folder and how many titles it holds"))
             .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
         }
     }
@@ -386,7 +386,7 @@ struct FolderAlbumFace: View {
                     .lineLimit(1)
             }
 
-            Text(count == 1 ? "1 title" : "\(count) titles")
+            Text("\(count) titles", comment: "How many titles a watchlist folder holds")
                 .appFont(11, relativeTo: .caption2)
                 .foregroundStyle(.secondary)
                 // Tabular figures so the caption doesn't shuffle sideways

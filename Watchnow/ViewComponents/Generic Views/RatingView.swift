@@ -7,13 +7,21 @@
 
 import SwiftUI
 
+extension Double {
+    /// A 0–10 rating to one decimal place, with the app language's decimal
+    /// separator: "8.4" in English, "8,4" in German or Greek.
+    var ratingText: String {
+        formatted(.number.precision(.fractionLength(1)))
+    }
+}
+
 // MARK: - RatingView Component
 struct RatingView: View {
 
     var rating: Double?
 
     var body: some View {
-        (Text(Image(systemName: "star.fill")) + Text(" ") + Text(rating.map { String(format: "%.1f", $0) } ?? "-"))
+        (Text(Image(systemName: "star.fill")) + Text(" ") + Text(rating.map(\.ratingText) ?? "-"))
             .appFont(11, weight: .bold, relativeTo: .caption2)
             .foregroundColor(.orange)
             .padding(.vertical, 5)

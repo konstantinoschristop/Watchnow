@@ -421,17 +421,19 @@ extension ContentDetailsViewModel {
         let kinds = AutoAlertPolicy.alertKinds(
             for: AlertPreferences.policyInputs(forID: id, isSaved: isInWatchList))
         if kinds.isEmpty {
-            return "Alerts are switched off for every title in Settings"
+            return String(localized: "Alerts are switched off for every title in Settings")
         }
         if kinds.contains(.episode), kinds.contains(.streaming) {
             return screenType == .tv
-                ? "New episodes, and when it lands on a service you have"
-                : "When it lands on a service you have"
+                ? String(localized: "New episodes, and when it lands on a service you have", comment: "What this title's alerts cover")
+                : String(localized: "When it lands on a service you have", comment: "What this title's alerts cover")
         }
         if kinds.contains(.episode) {
-            return screenType == .tv ? "New episodes" : "Alerts are limited to new episodes in Settings"
+            return screenType == .tv
+                ? String(localized: "New episodes", comment: "What this title's alerts cover")
+                : String(localized: "Alerts are limited to new episodes in Settings")
         }
-        return "When it lands on a service you have"
+        return String(localized: "When it lands on a service you have", comment: "What this title's alerts cover")
     }
 
     var reminderDeepLink: DeepLink? {
@@ -450,8 +452,6 @@ extension ContentDetailsViewModel {
         return fromDetails.isEmpty ? (result.genre_ids ?? []) : fromDetails
     }
 
-    /// "movie" or "series" — words the taste button.
-    var mediaKindLabel: String { screenType == .tv ? "series" : "movie" }
 
     // MARK: - Movie Coach
 

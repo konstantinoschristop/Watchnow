@@ -12,7 +12,66 @@ enum API {
     static let baseURL = "https://api.themoviedb.org/3"
     static let imageBaseURL = "https://image.tmdb.org/t/p/original/"
     static let youtubeBaseURL = "https://www.youtube.com/watch?v="
-    static let language = "en-US"
+
+    /// The device's language, in the form TMDB's `language` parameter takes:
+    /// `el-GR`, `pt-BR`, `zh-TW`.
+    ///
+    /// Read from `Locale.preferredLanguages` rather than `Locale.current`.
+    /// `Locale.current` reports the language the app runs in, which falls
+    /// back to English wherever the app has no translation of its own — but
+    /// TMDB may well have the user's language even then.
+    ///
+    /// TMDB matches on the language and only prefers the region, so a pair it
+    /// has no translation for still lands: `el-CY` gets Greek, `en-GR` English.
+    /// Gaps in a translation are filled from English by `TranslationBackfill`.
+    static var language: String {
+        tmdbLanguage(for: Locale.preferredLanguages.first)
+    }
+
+    /// `language` for a given BCP 47 identifier, such as an entry of
+    /// `Locale.preferredLanguages`.
+    static func tmdbLanguage(for identifier: String?) -> String {
+        guard let identifier else { return "en-US" }
+        let language = Locale.Language(identifier: identifier)
+        guard let code = language.languageCode?.identifier(.alpha2) else { return "en-US" }
+        let region = language.region?.identifier
+
+        switch (code, region) {
+        case ("zh", _):
+            // TMDB keys Chinese by region, not script, and serves `zh-Hant`
+            // the simplified translation.
+            guard language.script == .hanTraditional else { return "zh-CN" }
+            return region == "HK" || region == "MO" ? "zh-HK" : "zh-TW"
+        case ("es", "419"):
+            // iOS's Latin-American Spanish. TMDB reads `es-419` as Spain's.
+            return "es-MX"
+        case (_, let region?) where region.count == 2:
+            return "\(code)-\(region)"
+        default:
+            return code
+        }
+    }
+
+    /// `language` without its region: `el`, `pt`. What TMDB tags each video
+    /// and each title's `original_language` with.
+    static var languageCode: String {
+        String(language.prefix(2))
+    }
+
+    /// The device's region. Where the user is, not the region implied by
+    /// their language: a Greek speaker in Germany gets German cinemas.
+    static var region: String {
+        Locale.current.region?.identifier ?? "US"
+    }
+
+    /// The same request in English, to fill in what the device language's
+    /// translation leaves out. Nil when the request is already in English or
+    /// asks for no language at all.
+    static func englishFallback(for urlString: String) -> String? {
+        let localized = "&language=\(language)"
+        guard !language.hasPrefix("en"), urlString.contains(localized) else { return nil }
+        return urlString.replacingOccurrences(of: localized, with: "&language=en-US")
+    }
 
     /// The width TMDB should render a still at.
     ///
@@ -48,11 +107,20 @@ enum API {
         static func similar(type: String, for id: String, page: Int = 1) -> String {
             return "\(API.baseURL)/\(type)/\(id)/similar?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }
+        /// Always English. Reviews are written by people, not translated, and
+        /// TMDB returns only those written in the requested language — Fight
+        /// Club has twelve in English and none in Greek.
         static func reviews(type: String, for id: String, page: Int = 1) -> String {
-            return "\(API.baseURL)/\(type)/\(id)/reviews?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+            return "\(API.baseURL)/\(type)/\(id)/reviews?api_key=\(API.key)&language=en-US&page=\(page)"
         }
+        /// Videos in the device language, then English, then ones with no
+        /// language at all. `language` alone returns only the first: most
+        /// titles have no Greek trailer, and would have no trailer.
         static func videos(type: String, for id: String) -> String {
-            return "\(API.baseURL)/\(type)/\(id)/videos?api_key=\(API.key)&language=\(API.language)"
+            let languages = [API.languageCode, "en", "null"].reduce(into: [String]()) { list, code in
+                if !list.contains(code) { list.append(code) }
+            }
+            return "\(API.baseURL)/\(type)/\(id)/videos?api_key=\(API.key)&language=\(API.language)&include_video_language=\(languages.joined(separator: ","))"
         }
         static func season(tvId: Int, seasonNumber: Int) -> String {
             return "\(API.baseURL)/tv/\(tvId)/season/\(seasonNumber)?api_key=\(API.key)&language=\(API.language)"
@@ -159,7 +227,7 @@ enum API {
         }
 
         static func details(screenType: String, id: String) -> String {
-            return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)"
+            return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)&language=\(API.language)"
         }
         static func imageUrl(imageId: String) -> String {
             return API.imageBaseURL + imageId
@@ -179,14 +247,20 @@ enum API {
         static func popular(page: Int) -> String {
             return "\(API.baseURL)/movie/popular?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }
-        static func upcoming(page: Int) -> String {
-            return "\(API.baseURL)/movie/upcoming?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+        /// `region` scopes the list to release dates in that country; nil
+        /// means anywhere in the world. See `BaseNetworkService.requestRegional`.
+        static func upcoming(page: Int, region: String?) -> String {
+            return "\(API.baseURL)/movie/upcoming?api_key=\(API.key)&language=\(API.language)&page=\(page)" + regionQuery(region)
         }
         static func trending(page: Int) -> String {
             return "\(API.baseURL)/trending/movie/day?api_key=\(API.key)&language=\(API.language)&page=\(page)"
         }
-        static func nowPlaying(page: Int) -> String {
-            return "\(API.baseURL)/movie/now_playing?api_key=\(API.key)&language=\(API.language)&page=\(page)"
+        /// See `upcoming` for `region`.
+        static func nowPlaying(page: Int, region: String?) -> String {
+            return "\(API.baseURL)/movie/now_playing?api_key=\(API.key)&language=\(API.language)&page=\(page)" + regionQuery(region)
+        }
+        private static func regionQuery(_ region: String?) -> String {
+            region.map { "&region=\($0)" } ?? ""
         }
         /// `/discover/movie` sorted by weighted average with a 5 000-vote
         /// floor. TMDB's `/movie/top_rated` endpoint applies its own

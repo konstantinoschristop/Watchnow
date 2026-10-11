@@ -158,7 +158,9 @@ struct MovieNightSetupView: View {
             sectionHeader("How many of you?", icon: "person.2.fill")
             FlowLayout(spacing: 8) {
                 ForEach(1...4, id: \.self) { count in
-                    MNChip(label: count == 1 ? "Just me" : "\(count)",
+                    MNChip(label: count == 1
+                               ? String(localized: "Just me", comment: "Movie Night: one player")
+                               : count.formatted(),
                            symbol: count == 1 ? "person.fill" : "person.2.fill",
                            isSelected: playerCount == count) {
                         withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
@@ -210,7 +212,7 @@ struct MovieNightSetupView: View {
 
     // MARK: - Helpers
 
-    private func sectionHeader(_ text: String, icon: String) -> some View {
+    private func sectionHeader(_ text: LocalizedStringKey, icon: String) -> some View {
         HStack(spacing: 7) {
             Image(systemName: icon)
                 .appFont(13, weight: .bold, relativeTo: .footnote)

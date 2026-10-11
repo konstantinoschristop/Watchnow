@@ -85,7 +85,7 @@ struct MovieCoachView: View {
                 .appFont(20, weight: .heavy, relativeTo: .title3)
                 .foregroundStyle(.primary)
 
-            Text("Save or like \(remaining) more \(remaining == 1 ? "title" : "titles") and Movie Coach will start telling you whether something's a good fit for you.")
+            Text("Save or like \(remaining) more titles and Movie Coach will start telling you whether something's a good fit for you.", comment: "Movie Coach progress card. The number is how many more titles the user needs.")
                 .appFont(14, relativeTo: .subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

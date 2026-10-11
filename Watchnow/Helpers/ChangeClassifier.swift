@@ -304,11 +304,19 @@ enum ChangeClassifier {
     // MARK: - Helpers
 
     /// The videos worth tracking: trailers and teasers, YouTube-hosted (the
-    /// only site the app can play).
+    /// only site the app can play), in English.
+    ///
+    /// English only because that's all the videos request used to return.
+    /// It now also asks for the device language and for videos with no
+    /// language, so tracking everything would greet existing snapshots —
+    /// and every change of device language — with trailers that had been
+    /// there for months, each one reported as new. A nil language is a
+    /// video decoded without the field.
     private static func trailers(in videos: [VideoModelResult]) -> [VideoModelResult] {
         videos.filter { video in
             (video.type == "Trailer" || video.type == "Teaser")
                 && (video.site == nil || video.site == "YouTube")
+                && (video.iso_639_1 == nil || video.iso_639_1 == "en")
         }
     }
 

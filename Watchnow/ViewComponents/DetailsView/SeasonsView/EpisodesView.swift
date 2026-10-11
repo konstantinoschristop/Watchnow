@@ -116,14 +116,17 @@ struct EpisodeView: View {
             return
         }
 
-        let episodeLabel = episode.name ?? "Episode \(episode.episode_number ?? 0)"
-        let context = seriesName.map { " of \($0)" } ?? ""
+        let episodeLabel = episode.name
+            ?? String(localized: "Episode \(episode.episode_number ?? 0)", comment: "An episode with no name, by its number")
+        let body = seriesName.map {
+            String(localized: "\(episodeLabel) of \($0) airs today.", comment: "Episode reminder notification body: episode name, then series name")
+        } ?? String(localized: "\(episodeLabel) airs today.", comment: "Episode reminder notification body: episode name")
         let deepLink = seriesID.map { DeepLink(id: $0, mediaType: .tv) }
         Task {
             let result = await ReminderManager.schedule(
                 identifier: identifier,
-                title: "Airing today",
-                body: "\(episodeLabel)\(context) airs today.",
+                title: String(localized: "Airing today", comment: "Episode reminder notification title"),
+                body: body,
                 on: airDate,
                 deepLink: deepLink
             )
@@ -164,7 +167,7 @@ struct EpisodeView: View {
 
             // Episode number pill pinned to the bottom-left of the still
             if let num = episode.episode_number {
-                Text("E\(num)")
+                Text("E\(num)", comment: "Episode number badge on a still, e.g. E3. Keep it very short.")
                     .appFont(10, weight: .bold, relativeTo: .caption2)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
@@ -186,15 +189,17 @@ struct EpisodeView: View {
         VStack(alignment: .leading, spacing: 4) {
 
             // Title
-            Text(episode.name ?? "Untitled")
+            Text(episode.name ?? String(localized: "Untitled", comment: "An episode with no name"))
                 .appFont(14, weight: .semibold, relativeTo: .subheadline)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
 
             // Meta: air date · star rating
             HStack(spacing: 8) {
-                if let airDate = episode.air_date {
-                    Text(airDate)
+                // In UTC, like `airDateValue()` parses it: a time zone west of
+                // Greenwich would otherwise show the day before.
+                if let airDate = episode.airDateValue() {
+                    Text(airDate.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, timeZone: .gmt)))
                         .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -204,7 +209,7 @@ struct EpisodeView: View {
                         Image(systemName: "star.fill")
                             .appFont(9, relativeTo: .caption2)
                             .foregroundStyle(.orange)
-                        Text(String(format: "%.1f", rating))
+                        Text(rating.ratingText)
                             .appFont(11, relativeTo: .caption2)
                             .foregroundStyle(.secondary)
                     }

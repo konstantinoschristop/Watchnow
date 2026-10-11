@@ -323,7 +323,7 @@ struct ResultRow: View {
             EmptyView()
         } else {
             let year = yearString
-            let ratingText = rating.map { String(format: "%.1f", $0) }
+            let ratingText = rating.map(\.ratingText)
             let hasYear = year != nil
             let hasRating = ratingText != nil
             let hasBadge = folderBadge != nil
@@ -447,18 +447,31 @@ struct MediaTypeBadge: View {
                 .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(kind)
+        .accessibilityLabel(spokenKind)
+    }
+
+    /// `kind` is a key ("TV Series", "Actor", "Movie"), never shown as is.
+    private var spokenKind: String {
+        switch kind {
+        // Singular keys of their own: "TV Series" and "Series" also label
+        // the plural tab and filter chips.
+        case "TV Series": return String(localized: "mediaType.tvSeries", defaultValue: "TV Series", comment: "Media type of one title (singular), read by VoiceOver")
+        case "Actor":     return String(localized: "Actor", comment: "Media type: a person in search results")
+        default:          return String(localized: "Movie", comment: "Media type label")
+        }
     }
 
     /// Shorter than `getMediaType()`'s wording — "TV SERIES" pushes the
     /// pill past the width a narrow row or a grid cell can spare, and
     /// "SERIES" loses nothing sitting next to a television glyph.
     private var label: String {
+        let word: String
         switch kind {
-        case "TV Series": return "SERIES"
-        case "Actor":     return "ACTOR"
-        default:          return "MOVIE"
+        case "TV Series": word = String(localized: "mediaType.series", defaultValue: "Series", comment: "Media type label on one title (singular): a TV series. Shown in capitals on badges.")
+        case "Actor":     word = String(localized: "Actor", comment: "Media type: a person in search results")
+        default:          word = String(localized: "Movie", comment: "Media type label")
         }
+        return word.uppercased(with: .current)
     }
 
     private static func symbol(for kind: String) -> String {

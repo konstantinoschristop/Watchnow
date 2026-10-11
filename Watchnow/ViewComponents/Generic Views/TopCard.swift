@@ -147,7 +147,7 @@ struct TopCard: View {
     @ViewBuilder
     private var metaRow: some View {
         let year = yearString
-        let ratingText = rating.map { String(format: "%.1f", $0) }
+        let ratingText = rating.map(\.ratingText)
 
         if ratingText != nil || year != nil {
             HStack(spacing: 5) {
@@ -230,8 +230,10 @@ struct StatusPill: View {
 
         var title: String {
             switch self {
-            case .new: return "NEW"
-            case .soon: return "SOON"
+            // Its own key: "New" is also the new-folder button, which some
+            // languages inflect differently.
+            case .new: return String(localized: "badge.newRelease", defaultValue: "New", comment: "Badge on a just-released title, shown in capitals").uppercased(with: .current)
+            case .soon: return String(localized: "Soon", comment: "Badge on a title releasing soon, shown in capitals").uppercased(with: .current)
             }
         }
 

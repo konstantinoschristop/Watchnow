@@ -239,7 +239,7 @@ enum AlertPlanner {
                 PlannedAlert(identifier: episodeIdentifier(mediaID: event.mediaID,
                                                            fireDate: fireDate,
                                                            calendar: calendar),
-                             title: "New episode",
+                             title: String(localized: "New episode", comment: "Notification title"),
                              body: episodeBody(for: event),
                              fireDate: fireDate,
                              deepLink: DeepLink(id: event.mediaID, mediaType: .tv),
@@ -273,7 +273,7 @@ enum AlertPlanner {
             let change = changes[0]
             return [(
                 PlannedAlert(identifier: "\(autoPrefix)streaming.\(change.mediaID).\(day)",
-                             title: "Now streaming",
+                             title: String(localized: "Now streaming", comment: "Notification title"),
                              body: streamingBody(for: change),
                              fireDate: fireDate,
                              deepLink: change.deepLink,
@@ -288,8 +288,8 @@ enum AlertPlanner {
         let mostRecentSave = changes.compactMap(\.savedAt).max()
         return [(
             PlannedAlert(identifier: "\(autoPrefix)streaming.digest.\(day)",
-                         title: "Now streaming",
-                         body: "\(changes.count) titles from your watchlist are new on your services",
+                         title: String(localized: "Now streaming", comment: "Notification title"),
+                         body: String(localized: "\(changes.count) titles from your watchlist are new on your services", comment: "Notification body"),
                          fireDate: fireDate,
                          deepLink: nil,
                          kind: .streaming,
@@ -300,9 +300,9 @@ enum AlertPlanner {
 
     private static func streamingBody(for change: StreamingChange) -> String {
         if let service = change.serviceName {
-            return "\(change.title) is now on \(service)"
+            return String(localized: "\(change.title) is now on \(service)", comment: "Notification body: a title and the streaming service it arrived on")
         }
-        return "\(change.title) is now streaming"
+        return String(localized: "\(change.title) is now streaming", comment: "Notification body")
     }
 
     // MARK: - Timing
@@ -369,9 +369,9 @@ enum AlertPlanner {
 
     private static func episodeBody(for event: EpisodeEvent) -> String {
         if let season = event.seasonNumber, let episode = event.episodeNumber {
-            return "\(event.seriesTitle) S\(season)E\(episode) airs today"
+            return String(localized: "\(event.seriesTitle) S\(season)E\(episode) airs today", comment: "Notification body: series title, then season and episode numbers")
         }
-        return "A new episode of \(event.seriesTitle) airs today"
+        return String(localized: "A new episode of \(event.seriesTitle) airs today", comment: "Notification body")
     }
 
     // MARK: - Deduplication

@@ -15,17 +15,29 @@ struct SearchModel {
         case series = "TV Series"
         case actors = "Actor"
         
+        /// The chip's label. `rawValue` is a key matched against
+        /// `Result.getMediaType()`, never shown.
         func getTitle() -> String {
             
             switch self {
             case .all:
-                return "All"
+                return String(localized: "All", comment: "Search filter chip: every kind of result")
             case .movies:
-                return "Movies"
+                return String(localized: "Movies", comment: "Search filter chip")
             case .series:
-                return "TV Series"
+                return String(localized: "TV Series", comment: "Search filter chip")
             case .actors:
-                return "Actors"
+                return String(localized: "Actors", comment: "Search filter chip: people")
+            }
+        }
+
+        /// Empty-state title when this filter leaves nothing.
+        var emptyTitle: String {
+            switch self {
+            case .all:    return String(localized: "No results", comment: "Search empty state")
+            case .movies: return String(localized: "No movies", comment: "Search empty state for the Movies filter")
+            case .series: return String(localized: "No TV series", comment: "Search empty state for the TV Series filter")
+            case .actors: return String(localized: "No actors", comment: "Search empty state for the Actors filter")
             }
         }
     }
@@ -42,8 +54,8 @@ struct SearchModel {
 
         var title: String {
             switch self {
-            case .movies: return "Movies"
-            case .series: return "TV Series"
+            case .movies: return String(localized: "Movies", comment: "Search start screen: trending scope")
+            case .series: return String(localized: "TV Series", comment: "Search start screen: trending scope")
             }
         }
 
@@ -69,7 +81,8 @@ struct SearchModel {
         let movieID: Int?
         let seriesID: Int?
 
-        var id: String { name }
+        /// The TMDB ids, not `name`: that's in the app's language.
+        var id: String { "\(movieID ?? 0)/\(seriesID ?? 0)" }
 
         /// The `(screenType, genreID)` pairs this chip should query.
         var queries: [(ScreenTypes, Int)] {
@@ -85,22 +98,22 @@ struct SearchModel {
         /// shortcut into a wall of chips. These are the tags people
         /// actually reach for, ordered roughly by how often.
         static let browsable: [Genre] = [
-            .init(name: "Action",      symbol: "bolt.fill",              movieID: 28,    seriesID: 10759),
-            .init(name: "Comedy",      symbol: "face.smiling.inverse",   movieID: 35,    seriesID: 35),
-            .init(name: "Drama",       symbol: "theatermasks.fill",      movieID: 18,    seriesID: 18),
-            .init(name: "Sci-Fi",      symbol: "sparkles",               movieID: 878,   seriesID: 10765),
-            .init(name: "Horror",      symbol: "moon.stars.fill",        movieID: 27,    seriesID: nil),
-            .init(name: "Thriller",    symbol: "eye.fill",               movieID: 53,    seriesID: nil),
-            .init(name: "Romance",     symbol: "heart.fill",             movieID: 10749, seriesID: nil),
-            .init(name: "Crime",       symbol: "key.fill",            movieID: 80,    seriesID: 80),
-            .init(name: "Fantasy",     symbol: "wand.and.sparkles",         movieID: 14,    seriesID: nil),
-            .init(name: "Animation",   symbol: "paintpalette.fill",      movieID: 16,    seriesID: 16),
-            .init(name: "Mystery",     symbol: "questionmark.circle.fill", movieID: 9648, seriesID: 9648),
-            .init(name: "Documentary", symbol: "book.closed.fill",       movieID: 99,    seriesID: 99),
-            .init(name: "Family",      symbol: "figure.2.and.child.holdinghands", movieID: 10751, seriesID: 10751),
-            .init(name: "Adventure",   symbol: "map.fill",               movieID: 12,    seriesID: nil),
-            .init(name: "War",         symbol: "shield.fill",            movieID: 10752, seriesID: 10768),
-            .init(name: "Western",     symbol: "hat.widebrim.fill",          movieID: 37,    seriesID: 37),
+            .init(name: String(localized: "Action", comment: "Genre"),      symbol: "bolt.fill",              movieID: 28,    seriesID: 10759),
+            .init(name: String(localized: "Comedy", comment: "Genre"),      symbol: "face.smiling.inverse",   movieID: 35,    seriesID: 35),
+            .init(name: String(localized: "Drama", comment: "Genre"),       symbol: "theatermasks.fill",      movieID: 18,    seriesID: 18),
+            .init(name: String(localized: "Sci-Fi", comment: "Genre"),      symbol: "sparkles",               movieID: 878,   seriesID: 10765),
+            .init(name: String(localized: "Horror", comment: "Genre"),      symbol: "moon.stars.fill",        movieID: 27,    seriesID: nil),
+            .init(name: String(localized: "Thriller", comment: "Genre"),    symbol: "eye.fill",               movieID: 53,    seriesID: nil),
+            .init(name: String(localized: "Romance", comment: "Genre"),     symbol: "heart.fill",             movieID: 10749, seriesID: nil),
+            .init(name: String(localized: "Crime", comment: "Genre"),       symbol: "key.fill",            movieID: 80,    seriesID: 80),
+            .init(name: String(localized: "Fantasy", comment: "Genre"),     symbol: "wand.and.sparkles",         movieID: 14,    seriesID: nil),
+            .init(name: String(localized: "Animation", comment: "Genre"),   symbol: "paintpalette.fill",      movieID: 16,    seriesID: 16),
+            .init(name: String(localized: "Mystery", comment: "Genre"),     symbol: "questionmark.circle.fill", movieID: 9648, seriesID: 9648),
+            .init(name: String(localized: "Documentary", comment: "Genre"), symbol: "book.closed.fill",       movieID: 99,    seriesID: 99),
+            .init(name: String(localized: "Family", comment: "Genre"),      symbol: "figure.2.and.child.holdinghands", movieID: 10751, seriesID: 10751),
+            .init(name: String(localized: "Adventure", comment: "Genre"),   symbol: "map.fill",               movieID: 12,    seriesID: nil),
+            .init(name: String(localized: "War", comment: "Genre"),         symbol: "shield.fill",            movieID: 10752, seriesID: 10768),
+            .init(name: String(localized: "Western", comment: "Genre"),     symbol: "hat.widebrim.fill",          movieID: 37,    seriesID: 37),
         ]
     }
 

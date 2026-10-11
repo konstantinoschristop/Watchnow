@@ -50,13 +50,15 @@ enum WatchlistChangeKind: String, Codable, CaseIterable {
     /// The short label on the card ("NEW TRAILER").
     var label: String {
         switch self {
-        case .streamingAvailability: return "Now streaming"
-        case .newTrailer:            return "New trailer"
-        case .releaseDateChanged:    return "Release date updated"
-        case .newEpisode:            return "New episode"
-        case .newSeason:             return "New season"
-        case .released:              return "Released"
-        case .episodeDateChanged:    return "New air date"
+        case .streamingAvailability: return String(localized: "Now streaming", comment: "What's New card label")
+        case .newTrailer:            return String(localized: "New trailer", comment: "What's New card label")
+        case .releaseDateChanged:    return String(localized: "Release date updated", comment: "What's New card label")
+        case .newEpisode:            return String(localized: "New episode", comment: "What's New card label")
+        case .newSeason:             return String(localized: "New season", comment: "What's New card label")
+        // Its own key: "Released" is also the details screen's release-date
+        // label, which several languages word differently.
+        case .released:              return String(localized: "whatsNew.label.released", defaultValue: "Released", comment: "What's New card label: the title has just come out")
+        case .episodeDateChanged:    return String(localized: "New air date", comment: "What's New card label")
         }
     }
 
@@ -174,39 +176,39 @@ struct WatchlistChange: Codable, Equatable, Hashable, Identifiable {
         switch kind {
         case .streamingAvailability:
             if let provider = metadata.providerName {
-                return "Now available on \(provider)."
+                return String(localized: "Now available on \(provider).", comment: "What's New: a title is streaming on the named service")
             }
-            return "Now available to stream."
+            return String(localized: "Now available to stream.")
         case .newTrailer:
-            return "A new trailer was added."
+            return String(localized: "A new trailer was added.")
         case .releaseDateChanged:
             if let pretty = Self.prettyDate(metadata.newDate) {
                 return metadata.oldDate == nil
-                    ? "Coming \(pretty)."
-                    : "Now coming \(pretty)."
+                    ? String(localized: "Coming \(pretty).", comment: "What's New: the release date, e.g. Coming October 10, 2026.")
+                    : String(localized: "Now coming \(pretty).", comment: "What's New: the release date moved, e.g. Now coming October 10, 2026.")
             }
-            return "The release date was updated."
+            return String(localized: "The release date was updated.")
         case .newEpisode:
             if let season = metadata.seasonNumber, let episode = metadata.episodeNumber {
-                return "Season \(season), Episode \(episode) is now available."
+                return String(localized: "Season \(season), Episode \(episode) is now available.")
             }
-            return "A new episode is available."
+            return String(localized: "A new episode is available.")
         case .newSeason:
             if let season = metadata.seasonNumber {
-                return "Season \(season) is on the way."
+                return String(localized: "Season \(season) is on the way.")
             }
-            return "A new season is on the way."
+            return String(localized: "A new season is on the way.")
         case .released:
-            return "It's officially out now."
+            return String(localized: "It's officially out now.")
         case .episodeDateChanged:
             if let season = metadata.seasonNumber, let episode = metadata.episodeNumber,
                let pretty = Self.prettyDate(metadata.airDate) {
-                return "Season \(season), Episode \(episode) now airs \(pretty)."
+                return String(localized: "Season \(season), Episode \(episode) now airs \(pretty).", comment: "What's New: an episode's new air date, e.g. now airs October 10, 2026.")
             }
             if let pretty = Self.prettyDate(metadata.airDate) {
-                return "The next episode now airs \(pretty)."
+                return String(localized: "The next episode now airs \(pretty).", comment: "What's New: e.g. now airs October 10, 2026.")
             }
-            return "The next episode's air date changed."
+            return String(localized: "The next episode's air date changed.")
         }
     }
 
@@ -244,6 +246,9 @@ struct WatchlistChange: Codable, Equatable, Hashable, Identifiable {
         let printer = DateFormatter()
         printer.dateStyle = .long
         printer.timeStyle = .none
+        // The parser's UTC, or a time zone west of Greenwich prints the day
+        // before.
+        printer.timeZone = parser.timeZone
         return printer.string(from: date)
     }
 }

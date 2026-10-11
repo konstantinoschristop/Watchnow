@@ -124,7 +124,7 @@ private struct TopTenCard: View {
         // than #1 because the numeral genuinely needs more room. Same
         // tradeoff Netflix makes.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Number \(rank), \(result.getResultTitle())")
+        .accessibilityLabel(Text("Number \(rank), \(result.getResultTitle())", comment: "Accessibility: a title's position in a top 10"))
     }
 
     // MARK: - Text column
@@ -149,7 +149,7 @@ private struct TopTenCard: View {
     @ViewBuilder
     private var metaRow: some View {
         let year = yearString
-        let ratingText = rating.map { String(format: "%.1f", $0) }
+        let ratingText = rating.map(\.ratingText)
 
         if ratingText != nil || year != nil {
             HStack(spacing: 5) {

@@ -349,7 +349,7 @@ struct PersonSheetView: View {
         if let birthday = person.birthday, !birthday.isEmpty {
             var label = formattedDate(birthday) ?? birthday
             if person.deathday == nil, let age = age(from: birthday) {
-                label += "  ·  age \(age)"
+                label += "  ·  " + String(localized: "age \(age)", comment: "A living person's age, after their birth date")
             }
             items.append(.init(icon: "birthday.cake", label: label))
         }
@@ -434,19 +434,24 @@ struct PersonSheetView: View {
     }
 
     private func formattedDate(_ raw: String) -> String? {
-        let input = DateFormatter()
-        input.dateFormat = "yyyy-MM-dd"
-        guard let date = input.date(from: raw) else { return nil }
-        let output = DateFormatter()
-        output.dateFormat = "MMM d, yyyy"
-        return output.string(from: date)
+        guard let date = Self.parseDate(raw) else { return nil }
+        return date.formatted(date: .abbreviated, time: .omitted)
     }
 
     private func age(from birthday: String) -> Int? {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
-        guard let date = fmt.date(from: birthday) else { return nil }
+        guard let date = Self.parseDate(birthday) else { return nil }
         return Calendar.current.dateComponents([.year], from: date, to: Date()).year
+    }
+
+    /// TMDB's yyyy-MM-dd, read as Gregorian whatever calendar the device
+    /// uses: under the Buddhist calendar "1963" would otherwise be a year
+    /// five centuries back.
+    private static func parseDate(_ raw: String) -> Date? {
+        let parser = DateFormatter()
+        parser.calendar = Calendar(identifier: .gregorian)
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.dateFormat = "yyyy-MM-dd"
+        return parser.date(from: raw)
     }
 }
 

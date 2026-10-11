@@ -158,7 +158,7 @@ private struct NativeAdCardView: UIViewRepresentable {
 
         let badge = PaddingLabel()
         badge.translatesAutoresizingMaskIntoConstraints = false
-        badge.text = "Ad"
+        badge.text = String(localized: "Ad", comment: "Label marking an advertisement")
         badge.font = .systemFont(ofSize: 9, weight: .bold)
         badge.textColor = .black
         badge.backgroundColor = .systemYellow
@@ -283,7 +283,7 @@ private struct NativeAdRowView: UIViewRepresentable {
 
         let badge = PaddingLabel()
         badge.translatesAutoresizingMaskIntoConstraints = false
-        badge.text = "AD"
+        badge.text = String(localized: "Ad", comment: "Label marking an advertisement").uppercased(with: .current)
         badge.font = .systemFont(ofSize: 10, weight: .bold)
         badge.textColor = .secondaryLabel
         badge.layer.borderWidth = 0.5

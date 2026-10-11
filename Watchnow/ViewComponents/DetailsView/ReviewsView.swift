@@ -86,7 +86,7 @@ private struct ReviewCard: View {
                     authorAvatar
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(review.author_details?.username ?? review.author ?? "Anonymous")
+                        Text(review.author_details?.username ?? review.author ?? String(localized: "Anonymous", comment: "Review author with no name"))
                             .appFont(13, weight: .bold, relativeTo: .footnote)
                             .foregroundStyle(.primary)
                             .lineLimit(1)
@@ -198,9 +198,7 @@ private struct ReviewCard: View {
         let date = parser.date(from: iso)
             ?? ISO8601DateFormatter().date(from: iso)
         guard let date else { return nil }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMM d, yyyy"
-        return fmt.string(from: date)
+        return date.formatted(date: .abbreviated, time: .omitted)
     }
 }
 
@@ -227,6 +225,16 @@ private struct AllReviewsSheet: View {
         case mostDetailed = "Most Detailed"
 
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .mostRecent:   return String(localized: "Most Recent", comment: "Review sort order")
+            case .oldestFirst:  return String(localized: "Oldest First", comment: "Review sort order")
+            case .highestRated: return String(localized: "Highest Rated", comment: "Review sort order")
+            case .lowestRated:  return String(localized: "Lowest Rated", comment: "Review sort order")
+            case .mostDetailed: return String(localized: "Most Detailed", comment: "Review sort order: longest reviews first")
+            }
+        }
 
         var icon: String {
             switch self {
@@ -323,7 +331,7 @@ private struct AllReviewsSheet: View {
         Menu {
             Picker("Sort", selection: $sortOrder) {
                 ForEach(SortOrder.allCases) { order in
-                    Label(order.rawValue, systemImage: order.icon).tag(order)
+                    Label(order.title, systemImage: order.icon).tag(order)
                 }
             }
 
@@ -357,7 +365,7 @@ struct ReviewSheet: View {
                 HStack(alignment: .top, spacing: 12) {
                     avatarView
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(review?.author_details?.username ?? review?.author ?? "Anonymous")
+                        Text(review?.author_details?.username ?? review?.author ?? String(localized: "Anonymous", comment: "Review author with no name"))
                             .appFont(16, weight: .bold, relativeTo: .body)
                             .foregroundStyle(.primary)
 
@@ -434,8 +442,6 @@ struct ReviewSheet: View {
         let date = parser.date(from: iso)
             ?? ISO8601DateFormatter().date(from: iso)
         guard let date else { return nil }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMM d, yyyy"
-        return fmt.string(from: date)
+        return date.formatted(date: .abbreviated, time: .omitted)
     }
 }

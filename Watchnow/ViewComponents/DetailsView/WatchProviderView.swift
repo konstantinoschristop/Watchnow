@@ -55,19 +55,19 @@ struct WatchProviderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             if !flatrates.isEmpty {
-                providerGroup(label: "Stream",
+                providerGroup(label: String(localized: "Stream", comment: "Where to watch: included with a subscription"),
                               tint: streamTint,
                               items: flatrates)
             }
 
             if !rent.isEmpty {
-                providerGroup(label: "Rent",
+                providerGroup(label: String(localized: "Rent", comment: "Where to watch: available to rent"),
                               tint: rentTint,
                               items: rent)
             }
 
             if !buy.isEmpty {
-                providerGroup(label: "Buy",
+                providerGroup(label: String(localized: "Buy", comment: "Where to watch: available to buy"),
                               tint: buyTint,
                               items: buy)
             }
@@ -103,7 +103,7 @@ struct WatchProviderView: View {
                 Circle()
                     .fill(tint)
                     .frame(width: 7, height: 7)
-                Text(label.uppercased())
+                Text(label.uppercased(with: .current))
                     .appFont(11, weight: .bold, relativeTo: .caption2, design: .rounded)
                     .tracking(0.6)
                     .foregroundStyle(tint)

@@ -255,7 +255,7 @@ private struct ListSectionRow: View {
                 HStack(spacing: 3) {
                     Image(systemName: "star.fill")
                         .appFont(11, weight: .bold, relativeTo: .caption2)
-                    Text(String(format: "%.1f", rating))
+                    Text(rating.ratingText)
                         .appFont(13, weight: .bold, relativeTo: .footnote, design: .rounded)
                 }
                 .foregroundStyle(RatingStyle.tint(for: rating))
@@ -302,6 +302,6 @@ private struct ListSectionRow: View {
     /// competing with the title for attention.
     private var genrePills: [String] {
         guard let ids = result.genre_ids else { return [] }
-        return ids.prefix(2).compactMap { tmdbGenreNames[$0] }
+        return ids.prefix(2).compactMap { tmdbGenreDisplayNames[$0] }
     }
 }

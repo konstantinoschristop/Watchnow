@@ -61,15 +61,15 @@ extension ViewSections {
     /// the glyph (e.g. the live pulse on trending).
     var cleanTitle: String {
         switch self {
-        case .trendingMovies: return "Hot Right Now"
-        case .latestMovies: return "In Theaters Now"
-        case .popularMovies, .popularSeries: return "Most Watched"
-        case .upcomingMovies: return "Coming Soon"
-        case .trendingSeries: return "Binge-Worthy Today"
-        case .airingTodaySeries: return "Fresh Episodes"
-        case .latestSeries: return "Critics' Choice"
-        case .topRatedMovies, .topRatedSeries: return "Top 10 of All Time"
-        case .streamingServicesMovies, .streamingServicesSeries: return "Browse by Streaming"
+        case .trendingMovies: return String(localized: "Hot Right Now", comment: "Home feed section title")
+        case .latestMovies: return String(localized: "In Theaters Now", comment: "Home feed section title")
+        case .popularMovies, .popularSeries: return String(localized: "Most Watched", comment: "Home feed section title")
+        case .upcomingMovies: return String(localized: "Coming Soon", comment: "Home feed section title")
+        case .trendingSeries: return String(localized: "Binge-Worthy Today", comment: "Home feed section title")
+        case .airingTodaySeries: return String(localized: "Fresh Episodes", comment: "Home feed section title")
+        case .latestSeries: return String(localized: "Critics' Choice", comment: "Home feed section title")
+        case .topRatedMovies, .topRatedSeries: return String(localized: "Top 10 of All Time", comment: "Home feed section title")
+        case .streamingServicesMovies, .streamingServicesSeries: return String(localized: "Browse by Streaming", comment: "Home feed section title")
         }
     }
 
@@ -150,7 +150,8 @@ extension ViewSections {
 struct GenericResultResponse: Codable, Equatable {
     var results: [Result]
     var total_pages: Int?
-    
+    var total_results: Int?
+
     static func == (lhs: GenericResultResponse, rhs: GenericResultResponse) -> Bool {
         return lhs.results == rhs.results
     }
@@ -287,8 +288,12 @@ struct Result: Codable, Hashable, Equatable, Sendable {
     mutating func refresh(from details: ResultDetailsResponse) {
         if let path = details.poster_path, !path.isEmpty { poster_path = path }
         if let path = details.backdrop_path, !path.isEmpty { backdrop_path = path }
-        if let value = details.title, !value.isEmpty { title = value }
-        if let value = details.name, !value.isEmpty { name = value }
+        // Never trade a title for its untranslated original: that's what
+        // TMDB sends when the device language has no translation and the
+        // English backfill didn't arrive. Fine as a first value, not as a
+        // replacement.
+        if let value = details.title, !value.isEmpty, value != details.original_title || (title ?? "").isEmpty { title = value }
+        if let value = details.name, !value.isEmpty, value != details.original_name || (name ?? "").isEmpty { name = value }
         if let value = details.overview, !value.isEmpty { overview = value }
         if let value = details.release_date, !value.isEmpty { release_date = value }
         if let value = details.first_air_date, !value.isEmpty { first_air_date = value }

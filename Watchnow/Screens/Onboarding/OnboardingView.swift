@@ -536,7 +536,7 @@ struct OnboardingView: View {
     /// over-estimate would make a screen with nothing to scroll scrollable.
     private var welcomeMinimumHeight: CGFloat { 560 }
 
-    private func welcomePoint(_ icon: String, _ text: String) -> some View {
+    private func welcomePoint(_ icon: String, _ text: LocalizedStringKey) -> some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .appFont(16, weight: .semibold, relativeTo: .body)
@@ -597,9 +597,12 @@ struct OnboardingView: View {
                 .contentTransition(.symbolEffect(.replace))
                 .accessibilityHidden(true)
 
-            Text(vm.selectedProviderIDs.isEmpty
-                 ? "We'll use this to tell you when something you saved lands somewhere you can actually watch it."
-                 : "^[\(vm.selectedProviderIDs.count) service](inflect: true) selected. We'll tell you the moment a saved title lands on one.")
+            // A plural variation rather than `inflect: true`: automatic
+            // grammar agreement doesn't cover Greek.
+            (vm.selectedProviderIDs.isEmpty
+                ? Text("We'll use this to tell you when something you saved lands somewhere you can actually watch it.")
+                : Text("\(vm.selectedProviderIDs.count) services selected. We'll tell you the moment a saved title lands on one.",
+                       comment: "Onboarding: how many streaming services the user picked"))
                 .appFont(14, relativeTo: .subheadline)
                 .foregroundStyle(secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -680,8 +683,8 @@ struct OnboardingView: View {
                     }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Saved: " + vm.savedResults
-                    .map { $0.getResultTitle() }.joined(separator: ", "))
+                .accessibilityLabel(Text("Saved: \(vm.savedResults.map { $0.getResultTitle() }.joined(separator: ", "))",
+                                         comment: "Accessibility: the titles the user saved during onboarding"))
             }
 
             // Renders nothing at all on a device without Foundation Models,
@@ -742,7 +745,7 @@ struct OnboardingView: View {
                     // and a target getting closer.
                     .contentTransition(.numericText())
                     .animation(reduceMotion ? nil : AppMotion.springSnappy, value: progress)
-                    .accessibilityLabel("\(progress) chosen")
+                    .accessibilityLabel(Text("\(progress) chosen", comment: "Accessibility: onboarding progress, e.g. 3 of 5 chosen"))
             }
 
             primaryButton

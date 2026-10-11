@@ -208,7 +208,7 @@ private struct WatchlistPosterCell: View {
                 Label("Remove from Watchlist", systemImage: "bookmark.slash")
             }
         }
-        .confirmationDialog("Remove \(result.getResultTitle()) from your Watchlist?",
+        .confirmationDialog(Text("Remove \(result.getResultTitle()) from your Watchlist?"),
                             isPresented: $confirmingRemove,
                             titleVisibility: .visible) {
             Button("Remove", role: .destructive) { onRemove() }
@@ -493,7 +493,9 @@ private struct WatchlistPosterCell: View {
     }
 
     private var typeLabel: String {
-        result.inferredScreenType == .tv ? "Series" : "Movie"
+        result.inferredScreenType == .tv
+            ? String(localized: "mediaType.series", defaultValue: "Series", comment: "Media type label on one title (singular): a TV series. Shown in capitals on badges.")
+            : String(localized: "Movie", comment: "Media type label")
     }
 
     private var hasFacts: Bool {
@@ -508,23 +510,23 @@ private struct WatchlistPosterCell: View {
     /// rather than as an unrated one.
     private var rating: String? {
         guard let average = result.vote_average, average > 0 else { return nil }
-        return String(format: "%.1f", average)
+        return average.ratingText
     }
 
     private var accessibilityDescription: String {
         var parts = [result.getResultTitle(), typeLabel]
         if !year.isEmpty { parts.append(year) }
-        if let rating { parts.append("rated \(rating)") }
+        if let rating { parts.append(String(localized: "rated \(rating)", comment: "Accessibility, part of a list: the title's rating")) }
         if let provider {
             parts.append(provider.availability == .rent
-                         ? "rent on \(provider.name)"
-                         : "streaming on \(provider.name)")
+                         ? String(localized: "rent on \(provider.name)", comment: "Accessibility, part of a list: where to rent the title")
+                         : String(localized: "streaming on \(provider.name)", comment: "Accessibility, part of a list: where the title streams"))
         }
-        if let folder { parts.append("in \(folder.name)") }
+        if let folder { parts.append(String(localized: "in \(folder.name)", comment: "Accessibility, part of a list: the watchlist folder holding the title")) }
         // The badge and the dim are both purely visual, so without this a
         // VoiceOver user has no way to tell a watched cover from an unwatched
         // one.
-        if isWatched { parts.append("watched") }
+        if isWatched { parts.append(String(localized: "watched", comment: "Accessibility, part of a list: the user has watched the title")) }
         return parts.joined(separator: ", ")
     }
 }

@@ -62,12 +62,12 @@ struct SearchView: View {
         .toast(isPresenting: $viewModel.showAddedAlert) {
             AlertToast(displayMode: .alert,
                        type: .complete(.green),
-                       title: "Added to Watchlist")
+                       title: String(localized: "Added to Watchlist"))
         }
         .toast(isPresenting: $viewModel.showRemovedAlert) {
             AlertToast(displayMode: .alert,
                        type: .error(.red),
-                       title: "Removed from Watchlist")
+                       title: String(localized: "Removed from Watchlist"))
         }
         // The bar has to exist before it can take focus, so arming search
         // renders it first and this hands it the keyboard on the next pass.
@@ -216,7 +216,7 @@ private extension SearchView {
 
     var errorState: some View {
         ContentUnavailableView {
-            themedLabel(title: "Couldn't search",
+            themedLabel(title: String(localized: "Couldn't search"),
                         systemImage: "wifi.exclamationmark",
                         tint: .orange)
         } description: {
@@ -243,7 +243,7 @@ private extension SearchView {
             // browse — so this path gets its own copy rather than an empty
             // pair of quotes.
             ContentUnavailableView {
-                themedLabel(title: "No \(genre.name.lowercased()) titles",
+                themedLabel(title: String(localized: "No titles in \(genre.name)", comment: "Genre browse empty state; the genre name, e.g. No titles in Comedy"),
                             systemImage: genre.symbol,
                             tint: .accentColor)
             } description: {
@@ -387,7 +387,7 @@ private extension SearchView {
     var filterEmptyState: some View {
         let chipTint = tint(for: viewModel.selectedChooser)
         return ContentUnavailableView {
-            themedLabel(title: "No \(viewModel.selectedChooser.getTitle().lowercased())",
+            themedLabel(title: viewModel.selectedChooser.emptyTitle,
                         systemImage: "line.3.horizontal.decrease.circle",
                         tint: chipTint)
         } description: {
@@ -414,7 +414,7 @@ private extension SearchView {
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(Color.accentColor)
                     .symbolRenderingMode(.hierarchical)
-                    .accessibilityLabel("Browsing \(genre.name)")
+                    .accessibilityLabel(Text("Browsing \(genre.name)", comment: "Accessibility: the genre being browsed"))
 
                 Text("·")
                     .font(.footnote)
@@ -435,9 +435,9 @@ private extension SearchView {
     func resultCountText(total: Int) -> String {
         let filtered = viewModel.filteredResults.count
         if viewModel.selectedChooser == .all {
-            return "\(total) result\(total == 1 ? "" : "s")"
+            return String(localized: "\(total) results", comment: "Search result count")
         }
-        return "\(filtered) of \(total) \(total == 1 ? "result" : "results")"
+        return String(localized: "\(filtered) of \(total) results", comment: "Search result count under a filter, e.g. 3 of 20 results")
     }
 }
 

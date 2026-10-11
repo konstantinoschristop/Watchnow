@@ -85,7 +85,7 @@ struct SeasonsView: View {
                     .foregroundStyle(.primary)
 
                 if let episodes = season.episode_count {
-                    Text("\(episodes) episode\(episodes == 1 ? "" : "s")")
+                    Text("\(episodes) episodes", comment: "Number of episodes in a season")
                         .appFont(11, relativeTo: .caption2)
                         .foregroundStyle(.secondary)
                 }

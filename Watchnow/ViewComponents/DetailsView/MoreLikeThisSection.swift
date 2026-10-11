@@ -15,6 +15,13 @@ struct MoreLikeThisSection: View {
         case similar    = "Similar"
         case collection = "Collection"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .similar:    return String(localized: "Similar", comment: "Picker: titles similar to this one")
+            case .collection: return String(localized: "Collection", comment: "Picker: other films in the same collection")
+            }
+        }
     }
 
     let similars: [Result]
@@ -41,7 +48,7 @@ struct MoreLikeThisSection: View {
                     if hasBoth {
                         Picker("", selection: $mode) {
                             ForEach(Mode.allCases) { m in
-                                Text(m.rawValue).tag(m)
+                                Text(m.title).tag(m)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -72,15 +79,17 @@ struct MoreLikeThisSection: View {
     }
 
     private var sectionTitle: String {
-        if hasBoth { return "More like this" }
+        if hasBoth { return String(localized: "More like this") }
         if hasCollection, let name = collectionName { return name }
-        return "Similar \(screenType.rawValue)"
+        return screenType == .tv
+            ? String(localized: "Similar series", comment: "Details section title")
+            : String(localized: "Similar movies", comment: "Details section title")
     }
 
     private var sectionSubtitle: String? {
         if hasBoth { return nil }
-        if hasCollection { return "Parts of the collection" }
-        return "You might also like"
+        if hasCollection { return String(localized: "Parts of the collection", comment: "Subtitle: other films in the same series of films") }
+        return String(localized: "You might also like")
     }
 
     /// Icon flips between grid (similar / mixed) and film reel (collection-

@@ -100,9 +100,9 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     /// the user has scrolled the chip bar past the active selection.
     private var subtitle: String {
         if let name = viewModel.selectedProvider?.provider_name {
-            return "Showing what's on \(name)"
+            return String(localized: "Showing what's on \(name)", comment: "Browse by Streaming subtitle; a streaming service's name")
         }
-        return "Find what's on your subscription"
+        return String(localized: "Find what's on your subscription")
     }
 
     // MARK: - Chip bar
@@ -413,7 +413,7 @@ private struct ProviderResultThumb: View {
     private var metaRow: some View {
         let year = result.getReleaseDate(addSeparator: false)
         let rating = (result.vote_average ?? 0) > 0 ? result.vote_average : nil
-        let ratingText = rating.map { String(format: "%.1f", $0) }
+        let ratingText = rating.map(\.ratingText)
 
         if ratingText != nil || !year.isEmpty {
             HStack(spacing: 4) {

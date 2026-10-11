@@ -15,7 +15,7 @@ final class MovieService: BaseNetworkService {
     // MARK: - Public API
 
     func fetchUpcomingMovies(page: Int) async throws -> GenericResultResponse {
-        try await request(urlString: API.Movie.upcoming(page: page))
+        try await requestRegional { API.Movie.upcoming(page: page, region: $0) }
     }
 
     func fetchPopularMovies(page: Int) async throws -> GenericResultResponse {
@@ -27,7 +27,7 @@ final class MovieService: BaseNetworkService {
     }
 
     func fetchLatestMovies(page: Int) async throws -> GenericResultResponse {
-        try await request(urlString: API.Movie.nowPlaying(page: page))
+        try await requestRegional { API.Movie.nowPlaying(page: page, region: $0) }
     }
 
     func fetchTopRatedMovies(page: Int) async throws -> GenericResultResponse {

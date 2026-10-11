@@ -28,7 +28,9 @@ struct MovieNightMatchView: View {
                     heroCard(top)
                     actionRow(for: top)
                     if vm.matches.count > 1 {
-                        posterRow(title: vm.playerCount > 1 ? "Everyone also liked" : "Also kept",
+                        posterRow(title: vm.playerCount > 1
+                                    ? String(localized: "Everyone also liked", comment: "Movie Night results: other films every player kept")
+                                    : String(localized: "Also kept", comment: "Movie Night results: other films the single player kept"),
                                   results: Array(vm.matches.dropFirst()))
                     }
                 } else {
@@ -124,7 +126,7 @@ struct MovieNightMatchView: View {
             }
 
             if !vm.closestPicks.isEmpty {
-                posterRow(title: "Closest calls", results: vm.closestPicks)
+                posterRow(title: String(localized: "Closest calls", comment: "Movie Night results with no match: the films that came closest"), results: vm.closestPicks)
             }
 
             VStack(spacing: 12) {
@@ -153,7 +155,7 @@ struct MovieNightMatchView: View {
 
     // MARK: - Buttons
 
-    private func primaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func primaryButton(_ title: LocalizedStringKey, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
                 .appFont(17, weight: .bold, relativeTo: .body)
@@ -167,7 +169,7 @@ struct MovieNightMatchView: View {
         .buttonStyle(MNPressableStyle())
     }
 
-    private func secondaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func secondaryButton(_ title: LocalizedStringKey, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
                 .appFont(15, weight: .semibold, relativeTo: .subheadline)

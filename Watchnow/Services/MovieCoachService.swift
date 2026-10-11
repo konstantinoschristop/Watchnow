@@ -42,6 +42,17 @@ enum MovieCoachVerdict: String, Codable, Sendable {
     /// not a hedge — this is the line the whole feature exists to deliver.
     var headline: String {
         switch self {
+        case .greatPick:        return String(localized: "Great pick", comment: "Movie Coach verdict headline")
+        case .goodPick:         return String(localized: "Worth a watch", comment: "Movie Coach verdict headline")
+        case .maybeLater:       return String(localized: "Save this for later", comment: "Movie Coach verdict headline")
+        case .notIdealRightNow: return String(localized: "Probably not tonight", comment: "Movie Coach verdict headline")
+        }
+    }
+
+    /// `headline` as the prompt names it. The prompt is written in English
+    /// whatever the app's language, and so is this.
+    var promptName: String {
+        switch self {
         case .greatPick:        return "Great pick"
         case .goodPick:         return "Worth a watch"
         case .maybeLater:       return "Save this for later"
@@ -53,10 +64,10 @@ enum MovieCoachVerdict: String, Codable, Sendable {
     /// judgement rather than a label.
     var subhead: String {
         switch self {
-        case .greatPick:        return "This one's for you"
-        case .goodPick:         return "A solid option tonight"
-        case .maybeLater:       return "Right film, wrong moment"
-        case .notIdealRightNow: return "There are better calls tonight"
+        case .greatPick:        return String(localized: "This one's for you", comment: "Movie Coach verdict subheading")
+        case .goodPick:         return String(localized: "A solid option tonight", comment: "Movie Coach verdict subheading")
+        case .maybeLater:       return String(localized: "Right film, wrong moment", comment: "Movie Coach verdict subheading")
+        case .notIdealRightNow: return String(localized: "There are better calls tonight", comment: "Movie Coach verdict subheading")
         }
     }
 
@@ -138,8 +149,9 @@ enum MovieCoachService {
     /// (the model parroted an example phrase from the v5 instructions).
     /// Dropped the quotable example, banned stock openers, added a rotating
     /// opening angle per generation, and raised temperature.
+    /// v7 — answers in the app's language when the model supports it.
     /// Bumping discards answers generated under any older prompt.
-    static let promptVersion = 6
+    static let promptVersion = 7
 
     /// Coach only speaks up once it has enough saved titles to actually know
     /// the user's taste. Below this it would be guessing dressed up as advice,
@@ -179,7 +191,16 @@ enum MovieCoachService {
         #if canImport(FoundationModels)
         guard #available(iOS 26.0, *) else { return .unsupportedOS }
         switch SystemLanguageModel.default.availability {
-        case .available:      return .ready
+        case .available:
+            // Coach reads the title's facts in the TMDB language and words its
+            // card in the app's; a model that can't handle either would fail
+            // on every card rather than answer, so it stays hidden instead.
+            let model = SystemLanguageModel.default
+            let appLanguage = Bundle.main.preferredLocalizations.first ?? "en"
+            guard model.supportsLocale(Locale(identifier: appLanguage)),
+                  model.supportsLocale(Locale(identifier: API.language))
+            else { return .modelUnavailable }
+            return .ready
         case .unavailable:    return .modelUnavailable
         @unknown default:     return .modelUnavailable
         }
@@ -196,7 +217,34 @@ enum MovieCoachService {
 
     /// The system prompt. Centralised here (never inline in a View) and
     /// covered by `promptVersion`.
-    private static let instructions = """
+    #if canImport(FoundationModels)
+    @available(iOS 26.0, *)
+    private static var instructions: String {
+        // Said even for English: the facts may arrive in another language
+        // (TMDB follows the device's), and the answer must still match the
+        // app's own.
+        baseInstructions + "\n- Write every answer in \(responseLanguage ?? "English"), naturally, as a native speaker would."
+    }
+
+    /// The language Coach answers in, named in English for the prompt: the
+    /// language the app's own text is in, so the card reads as one piece.
+    /// Nil for English. (A language the model doesn't support never gets
+    /// this far: `availability` hides Coach for it.)
+    @available(iOS 26.0, *)
+    private static var responseLanguage: String? {
+        guard let code = Bundle.main.preferredLocalizations.first, !code.hasPrefix("en"),
+              SystemLanguageModel.default.supportsLocale(Locale(identifier: code))
+        else { return nil }
+        return Locale(identifier: "en").localizedString(forIdentifier: code)
+    }
+    #endif
+
+    /// Room for one to three sentences. More than English needs, because the
+    /// same sentences in German, French or Spanish run to more tokens and a
+    /// guided answer cut off at the cap fails outright.
+    private static let responseTokenLimit = 300
+
+    private static let baseInstructions = """
     You are Movie Coach inside the WatchNow app. You help the user decide \
     whether the movie or series they are looking at is a good choice for them.
 
@@ -266,7 +314,7 @@ enum MovieCoachService {
             ? "There is real personal signal here — use it where it helps."
             : "There is little personal signal — assess the title on its own merits and do not imply personalisation.")
 
-        The verdict has already been decided: "\(call.verdict.headline)".
+        The verdict has already been decided: "\(call.verdict.promptName)".
         The reason is: \(call.reason).
 
         Write one to three short sentences telling the user that, in your own \
@@ -282,7 +330,7 @@ enum MovieCoachService {
         let response = try await session.respond(
             to: prompt,
             generating: MovieCoachResponse.self,
-            options: GenerationOptions(temperature: 0.8, maximumResponseTokens: 220)
+            options: GenerationOptions(temperature: 0.8, maximumResponseTokens: responseTokenLimit)
         )
         let message = response.content.message.trimmingCharacters(in: .whitespacesAndNewlines)
         return MovieCoachAnswer(verdict: call.verdict, message: message)
@@ -313,7 +361,7 @@ enum MovieCoachService {
 
         let response = try await session.respond(
             to: prompt,
-            options: GenerationOptions(temperature: 0.5, maximumResponseTokens: 220)
+            options: GenerationOptions(temperature: 0.5, maximumResponseTokens: responseTokenLimit)
         )
         return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
         #else
@@ -324,20 +372,23 @@ enum MovieCoachService {
     /// Suggested questions, tailored to movie vs series so the sheet is
     /// useful without typing.
     static func suggestedQuestions(for context: MovieCoachContext) -> [String] {
-        var questions = ["Is this a good choice tonight?", "Is it slow?"]
+        var questions = [String(localized: "Is this a good choice tonight?", comment: "Movie Coach suggested question"),
+                         String(localized: "Is it slow?", comment: "Movie Coach suggested question: is the pacing slow")]
 
         if context.kind == "series" {
-            questions.append("Is it a big commitment?")
+            questions.append(String(localized: "Is it a big commitment?", comment: "Movie Coach suggested question: does the series take a lot of time"))
         } else if let runtime = context.runtimeMinutes, runtime >= 140 {
-            questions.append("Is it worth the runtime?")
+            questions.append(String(localized: "Is it worth the runtime?", comment: "Movie Coach suggested question: is the long film worth its length"))
         }
-        if context.genres.contains(where: { ["Horror", "Thriller", "Mystery"].contains($0) }) {
-            questions.append("Is it scary?")
+        // Horror, Thriller, Mystery. By id: `genres` is in the app's TMDB
+        // language.
+        if context.genreIDs.contains(where: [27, 53, 9648].contains) {
+            questions.append(String(localized: "Is it scary?", comment: "Movie Coach suggested question"))
         }
         if !context.similarSaved.isEmpty {
-            questions.append("Is it similar to something I like?")
+            questions.append(String(localized: "Is it similar to something I like?", comment: "Movie Coach suggested question"))
         }
-        questions.append("Why should I watch this?")
+        questions.append(String(localized: "Why should I watch this?", comment: "Movie Coach suggested question"))
 
         return Array(questions.prefix(5))
     }

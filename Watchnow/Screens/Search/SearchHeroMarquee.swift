@@ -125,7 +125,7 @@ struct HintChip: View {
             }
             .buttonStyle(GenreChipPressStyle(reduceMotion: reduceMotion))
             .accessibilityLabel("Search")
-            .accessibilityHint(hintTarget.map { "Suggestions like \($0)" } ?? "")
+            .accessibilityHint(hintTarget.map { String(localized: "Suggestions like \($0)", comment: "Accessibility hint: an example search") } ?? "")
         } else {
             Text("Movies, series and the people who make them.")
                 .appFont(14, relativeTo: .subheadline)

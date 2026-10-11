@@ -137,7 +137,7 @@ struct HeroOverlayView: View {
                 HStack(spacing: 3) {
                     Image(systemName: "star.fill")
                         .foregroundColor(RatingStyle.tint(for: rating))
-                    Text(String(format: "%.1f", rating))
+                    Text(rating.ratingText)
                 }
             )))
         }

@@ -32,20 +32,20 @@ struct Mood: Identifiable, Hashable {
     let genreIDs: [Int]
 
     static let all: [Mood] = [
-        Mood(id: "funny",     label: "Funny",     symbol: "face.smiling",      genreIDs: [35]),
-        Mood(id: "action",    label: "Action",    symbol: "flame.fill",        genreIDs: [28]),
-        Mood(id: "scary",     label: "Scary",     symbol: "moon.stars.fill",   genreIDs: [27]),
-        Mood(id: "romantic",  label: "Romantic",  symbol: "heart.fill",        genreIDs: [10749]),
-        Mood(id: "tense",     label: "Tense",     symbol: "bolt.fill",         genreIDs: [53, 80]),
-        Mood(id: "scifi",     label: "Sci-fi",    symbol: "atom",              genreIDs: [878]),
-        Mood(id: "mystery",   label: "Mystery",   symbol: "magnifyingglass",   genreIDs: [9648]),
-        Mood(id: "drama",     label: "Drama",     symbol: "cloud.rain.fill",   genreIDs: [18]),
-        Mood(id: "feelgood",  label: "Feel-good", symbol: "sun.max.fill",      genreIDs: [35, 10402]),
-        Mood(id: "family",    label: "Family",    symbol: "teddybear.fill",    genreIDs: [10751]),
-        Mood(id: "fantasy",   label: "Fantasy",   symbol: "wand.and.stars",    genreIDs: [14]),
-        Mood(id: "adventure", label: "Adventure", symbol: "map.fill",          genreIDs: [12]),
-        Mood(id: "animated",  label: "Animated",  symbol: "paintpalette.fill", genreIDs: [16]),
-        Mood(id: "western",   label: "Western",   symbol: "hat.cap.fill",      genreIDs: [37])
+        Mood(id: "funny",     label: String(localized: "Funny", comment: "Movie Night mood"),     symbol: "face.smiling",      genreIDs: [35]),
+        Mood(id: "action",    label: String(localized: "Action", comment: "Movie Night mood"),    symbol: "flame.fill",        genreIDs: [28]),
+        Mood(id: "scary",     label: String(localized: "Scary", comment: "Movie Night mood"),     symbol: "moon.stars.fill",   genreIDs: [27]),
+        Mood(id: "romantic",  label: String(localized: "Romantic", comment: "Movie Night mood"),  symbol: "heart.fill",        genreIDs: [10749]),
+        Mood(id: "tense",     label: String(localized: "Tense", comment: "Movie Night mood"),     symbol: "bolt.fill",         genreIDs: [53, 80]),
+        Mood(id: "scifi",     label: String(localized: "Sci-fi", comment: "Movie Night mood"),    symbol: "atom",              genreIDs: [878]),
+        Mood(id: "mystery",   label: String(localized: "Mystery", comment: "Movie Night mood"),   symbol: "magnifyingglass",   genreIDs: [9648]),
+        Mood(id: "drama",     label: String(localized: "Drama", comment: "Movie Night mood"),     symbol: "cloud.rain.fill",   genreIDs: [18]),
+        Mood(id: "feelgood",  label: String(localized: "Feel-good", comment: "Movie Night mood"), symbol: "sun.max.fill",      genreIDs: [35, 10402]),
+        Mood(id: "family",    label: String(localized: "Family", comment: "Movie Night mood"),    symbol: "teddybear.fill",    genreIDs: [10751]),
+        Mood(id: "fantasy",   label: String(localized: "Fantasy", comment: "Movie Night mood"),   symbol: "wand.and.stars",    genreIDs: [14]),
+        Mood(id: "adventure", label: String(localized: "Adventure", comment: "Movie Night mood"), symbol: "map.fill",          genreIDs: [12]),
+        Mood(id: "animated",  label: String(localized: "Animated", comment: "Movie Night mood"),  symbol: "paintpalette.fill", genreIDs: [16]),
+        Mood(id: "western",   label: String(localized: "Western", comment: "Movie Night mood"),   symbol: "hat.cap.fill",      genreIDs: [37])
     ]
 }
 
@@ -60,9 +60,9 @@ enum LengthBucket: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .quick:    return "Quick"
-        case .standard: return "~2 hrs"
-        case .any:      return "Any"
+        case .quick:    return String(localized: "Quick", comment: "Movie Night length option: a short film")
+        case .standard: return String(localized: "~2 hrs", comment: "Movie Night length option: about two hours. Keep it short.")
+        case .any:      return String(localized: "Any", comment: "Movie Night length option: any length")
         }
     }
 
@@ -70,9 +70,9 @@ enum LengthBucket: String, CaseIterable, Identifiable {
     /// so the three duration chips stay the same height.
     var caption: String {
         switch self {
-        case .quick:    return "< 90 min"
-        case .standard: return "< 2½ hrs"
-        case .any:      return "No limit"
+        case .quick:    return String(localized: "< 90 min", comment: "Movie Night length caption: under 90 minutes. Keep it short.")
+        case .standard: return String(localized: "< 2½ hrs", comment: "Movie Night length caption: under two and a half hours. Keep it short.")
+        case .any:      return String(localized: "No limit", comment: "Movie Night length caption")
         }
     }
 
@@ -130,13 +130,12 @@ enum MovieNightPhase {
 /// `genre_ids` on the discover response) without an extra fetch.
 enum MovieGenres {
 
-    static let names: [Int: String] = [
-        28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
-        80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
-        14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
-        9648: "Mystery", 10749: "Romance", 878: "Sci-Fi", 10770: "TV Movie",
-        53: "Thriller", 10752: "War", 37: "Western"
-    ]
+    /// `tmdbGenreDisplayNames`, plus the two movie genres the feed's table
+    /// leaves out.
+    static let names: [Int: String] = tmdbGenreDisplayNames.merging([
+        10402: String(localized: "Music", comment: "Genre"),
+        10770: String(localized: "TV Movie", comment: "Genre: a film made for television"),
+    ]) { current, _ in current }
 
     /// The first `limit` named genres for a result's `genre_ids`.
     static func names(for ids: [Int]?, limit: Int = 3) -> [String] {

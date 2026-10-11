@@ -143,9 +143,11 @@ struct MovieNightSwipeView: View {
         let liking = drag.width > 0
         let strength = min(Double(abs(drag.width)) / swipeThreshold, 1)
         ZStack {
-            stamp("KEEP", color: .green, rotation: -18, alignment: .topLeading)
+            stamp(String(localized: "Keep", comment: "Movie Night: keep this film. Button label, and the stamp on a card swiped right (shown in capitals).").uppercased(with: .current),
+                  color: .green, rotation: -18, alignment: .topLeading)
                 .opacity(liking ? strength : 0)
-            stamp("NOPE", color: .red, rotation: 18, alignment: .topTrailing)
+            stamp(String(localized: "Nope", comment: "Movie Night: stamp on a card swiped left, rejecting the film. Informal, one short word, shown in capitals.").uppercased(with: .current),
+                  color: .red, rotation: 18, alignment: .topTrailing)
                 .opacity(liking ? 0 : strength)
         }
         .padding(22)
@@ -168,8 +170,14 @@ struct MovieNightSwipeView: View {
 
     private var actionButtons: some View {
         HStack(spacing: 44) {
-            circleButton(icon: "xmark", label: "Pass", tint: .red) { fling(liked: false) }
-            circleButton(icon: "heart.fill", label: "Keep", tint: .green) { fling(liked: true) }
+            circleButton(icon: "xmark",
+                         label: String(localized: "Pass", comment: "Movie Night button: skip this film"),
+                         hint: String(localized: "Skips this title"),
+                         tint: .red) { fling(liked: false) }
+            circleButton(icon: "heart.fill",
+                         label: String(localized: "Keep", comment: "Movie Night: keep this film. Button label, and the stamp on a card swiped right (shown in capitals)."),
+                         hint: String(localized: "Adds this title to your picks"),
+                         tint: .green) { fling(liked: true) }
         }
         .padding(.bottom, 8)
     }
@@ -181,6 +189,7 @@ struct MovieNightSwipeView: View {
     /// screen unusable with a screen reader.
     private func circleButton(icon: String,
                               label: String,
+                              hint: String,
                               tint: Color,
                               action: @escaping () -> Void) -> some View {
         Button(action: action) {
@@ -194,9 +203,7 @@ struct MovieNightSwipeView: View {
         .buttonStyle(.plain)
         .disabled(isAnimating || vm.cardIndex >= vm.deck.count)
         .accessibilityLabel(label)
-        .accessibilityHint(label == "Keep"
-                           ? "Adds this title to your picks"
-                           : "Skips this title")
+        .accessibilityHint(hint)
     }
 
     // MARK: - Handoff
@@ -421,7 +428,7 @@ struct SwipeCard: View {
                 let year = result.getReleaseDate(addSeparator: false)
                 if !year.isEmpty { Text(year) }
                 if let rating = result.vote_average, rating > 0 {
-                    Label(String(format: "%.1f", rating), systemImage: "star.fill")
+                    Label(rating.ratingText, systemImage: "star.fill")
                         .foregroundStyle(.yellow)
                 }
                 if let votes = result.vote_count, votes > 0 {
@@ -455,11 +462,10 @@ struct SwipeCard: View {
         .padding(18)
     }
 
-    /// Compact vote-count label, e.g. "12k votes".
+    /// Compact vote-count label, e.g. "12K votes", abbreviated the way the
+    /// app's language does it ("12.000" in German).
     private static func formatVotes(_ count: Int) -> String {
-        if count >= 1000 {
-            return String(format: "%.0fk votes", Double(count) / 1000)
-        }
-        return "\(count) votes"
+        let number = count.formatted(.number.notation(.compactName))
+        return String(localized: "\(number) votes", comment: "Movie Night card: how many people rated the film, e.g. 12K votes. Always at least 200.")
     }
 }

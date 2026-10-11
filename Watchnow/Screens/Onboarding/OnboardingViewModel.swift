@@ -92,8 +92,8 @@ final class OnboardingViewModel: ObservableObject {
 
     var progressText: String? {
         switch step {
-        case .loved: return "\(min(lovedPickIDs.count, Self.requiredLoved)) of \(Self.requiredLoved)"
-        case .save:  return "\(min(savePickIDs.count, Self.requiredSaves)) of \(Self.requiredSaves)"
+        case .loved: return String(localized: "\(min(lovedPickIDs.count, Self.requiredLoved)) of \(Self.requiredLoved)", comment: "Onboarding progress, e.g. 3 of 5")
+        case .save:  return String(localized: "\(min(savePickIDs.count, Self.requiredSaves)) of \(Self.requiredSaves)", comment: "Onboarding progress, e.g. 3 of 5")
         default:     return nil
         }
     }

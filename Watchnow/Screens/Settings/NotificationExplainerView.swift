@@ -86,7 +86,7 @@ struct NotificationExplainerView: View {
         }
     }
 
-    private func reason(icon: String, title: String, detail: String) -> some View {
+    private func reason(icon: String, title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .appFont(17, weight: .semibold, relativeTo: .body)

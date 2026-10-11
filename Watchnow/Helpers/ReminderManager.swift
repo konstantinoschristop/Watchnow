@@ -287,8 +287,8 @@ enum ReminderManager {
         }
 
         await schedule(identifier: nudgeIdentifier(mediaID: nudge.mediaID),
-                       title: "Ready when you are",
-                       body: "\(nudge.title) is on a service you have. Fancy it tonight?",
+                       title: String(localized: "Ready when you are", comment: "Notification title: nudge to watch a saved title"),
+                       body: String(localized: "\(nudge.title) is on a service you have. Fancy it tonight?", comment: "Notification body"),
                        on: nudge.due,
                        atHour: nudgeHour,
                        deepLink: DeepLink(id: nudge.mediaID,

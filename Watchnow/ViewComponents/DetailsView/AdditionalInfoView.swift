@@ -64,7 +64,7 @@ struct AdditionalInfoView: View {
     /// Sits between the header and the stats bar. Italicised + secondary
     /// because it's editorial flavour, not a fact users should read first.
     private func taglineRow(_ tagline: String) -> some View {
-        Text("\u{201C}\(tagline)\u{201D}")
+        Text("\u{201C}\(tagline)\u{201D}", comment: "A film's tagline in quotation marks. Use your language's quotation marks.")
             .appFont(15, weight: .regular, relativeTo: .subheadline, design: .serif)
             .italic()
             .foregroundStyle(.secondary)
@@ -91,29 +91,43 @@ struct AdditionalInfoView: View {
     private var statTiles: [Stat] {
         var tiles: [Stat] = []
         if let date = details.getDate() {
-            tiles.append(.init(label: "Released",  value: date))
+            tiles.append(.init(label: String(localized: "Released", comment: "Details stat label: release date"), value: date))
         }
         if let runtime = details.getRuntime() {
-            tiles.append(.init(label: "Runtime",   value: runtime))
+            tiles.append(.init(label: String(localized: "Runtime", comment: "Details stat label"), value: runtime))
         }
         // Status is informative for TV ("Returning Series", "Ended",
         // "Canceled") but redundant for movies (almost always "Released"
         // by the time anyone's looking at the details). Detect TV via
         // `number_of_seasons` — only series populate it.
         if isSeries, let status = details.status, !status.isEmpty {
-            tiles.append(.init(label: "Status",    value: status))
+            tiles.append(.init(label: String(localized: "Status", comment: "Details stat label: a series' production status"), value: Self.seriesStatus(status)))
         }
         if let budget = details.getBudget() {
-            tiles.append(.init(label: "Budget",    value: budget))
+            tiles.append(.init(label: String(localized: "Budget", comment: "Details stat label"), value: budget))
         }
         if let revenue = details.getRevenue() {
-            tiles.append(.init(label: "Revenue",   value: revenue))
+            tiles.append(.init(label: String(localized: "Revenue", comment: "Details stat label: box office"), value: revenue))
         }
         return tiles
     }
 
     private var isSeries: Bool {
         details.number_of_seasons != nil
+    }
+
+    /// TMDB's series status, which it sends in English whatever the request's
+    /// language. Anything unrecognised is shown as TMDB wrote it.
+    private static func seriesStatus(_ status: String) -> String {
+        switch status {
+        case "Returning Series": return String(localized: "Returning Series", comment: "Series status: renewed, more seasons coming")
+        case "Ended":            return String(localized: "Ended", comment: "Series status")
+        case "Canceled":         return String(localized: "Canceled", comment: "Series status")
+        case "In Production":    return String(localized: "In Production", comment: "Series status")
+        case "Planned":          return String(localized: "Planned", comment: "Series status")
+        case "Pilot":            return String(localized: "Pilot", comment: "Series status: only a pilot episode exists")
+        default:                 return status
+        }
     }
 
     private struct Stat {
@@ -130,15 +144,15 @@ struct AdditionalInfoView: View {
     private var longFormRows: some View {
         VStack(alignment: .leading, spacing: 14) {
             if let createdBy = details.getCreatedBy(), !createdBy.isEmpty {
-                LabelledRow(label: "Created By", value: createdBy.joined(separator: ", "))
+                LabelledRow(label: String(localized: "Created By", comment: "Details label: a series' creators"), value: createdBy.joined(separator: ", "))
             }
 
             if let languages = details.getLanguages(), !languages.isEmpty {
-                LabelledRow(label: "Languages",  value: languages.joined(separator: ", "))
+                LabelledRow(label: String(localized: "Languages", comment: "Details label: spoken languages"),  value: languages.joined(separator: ", "))
             }
 
             if let homepage = details.homepage, !homepage.isEmpty {
-                LabelledLinkRow(label: "Homepage", value: homepage) {
+                LabelledLinkRow(label: String(localized: "Homepage", comment: "Details label: the title's official website"), value: homepage) {
                     isHomepagePresented = true
                 }
             }
@@ -158,7 +172,7 @@ private struct StatTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label.uppercased())
+            Text(label.uppercased(with: .current))
                 .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.6)
                 .foregroundStyle(.secondary)
@@ -191,7 +205,7 @@ private struct LabelledRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label.uppercased())
+            Text(label.uppercased(with: .current))
                 .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.6)
                 .foregroundStyle(.secondary)
@@ -215,7 +229,7 @@ private struct LabelledLinkRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label.uppercased())
+            Text(label.uppercased(with: .current))
                 .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
                 .tracking(0.6)
                 .foregroundStyle(.secondary)

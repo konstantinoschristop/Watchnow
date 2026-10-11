@@ -203,8 +203,8 @@ struct GenreBrowseChip: View {
             .contentShape(Capsule(style: .continuous))
         }
         .buttonStyle(GenreChipPressStyle(reduceMotion: reduceMotion))
-        .accessibilityLabel("Browse \(genre.name)")
-        .accessibilityHint("Shows popular \(genre.name.lowercased()) titles")
+        .accessibilityLabel(Text("Browse \(genre.name)", comment: "Accessibility: genre chip, e.g. Browse Comedy"))
+        .accessibilityHint(Text("Shows popular titles in \(genre.name)", comment: "Accessibility hint: genre chip"))
     }
 }
 
@@ -266,7 +266,7 @@ struct RecentSearchChip: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(ChipPressStyle(reduceMotion: reduceMotion))
-            .accessibilityLabel("Search \(query)")
+            .accessibilityLabel(Text("Search \(query)", comment: "Accessibility: recent search chip; the query"))
 
             // Hairline separator clarifies that the X is its own tap
             // zone — without it the chip reads as one solid pill and
@@ -284,7 +284,7 @@ struct RecentSearchChip: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(ChipPressStyle(reduceMotion: reduceMotion))
-            .accessibilityLabel("Remove \(query) from recent searches")
+            .accessibilityLabel(Text("Remove \(query) from recent searches"))
         }
         .background {
             Capsule(style: .continuous)

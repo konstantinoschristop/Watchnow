@@ -75,8 +75,8 @@ struct ContentDetailsView: View {
         }
         .toast(isPresenting: $showAlert, alert: {
             detailsViewModel.isInWatchList == false ?
-            AlertToast(displayMode: .alert, type: .error(.red), title: "Removed from Watchlist")  :
-            AlertToast(displayMode: .alert, type: .complete(.green), title: "Added to Watchlist")
+            AlertToast(displayMode: .alert, type: .error(.red), title: String(localized: "Removed from Watchlist"))  :
+            AlertToast(displayMode: .alert, type: .complete(.green), title: String(localized: "Added to Watchlist"))
         })
         .alert("Notifications are off",
                isPresented: $showNotificationSettingsAlert) {
@@ -87,13 +87,13 @@ struct ContentDetailsView: View {
         }
         .toast(isPresenting: $showReminderAlert, alert: {
             isReminderOn ?
-            AlertToast(displayMode: .alert, type: .complete(.green), title: "Reminder Set") :
-            AlertToast(displayMode: .alert, type: .error(.red), title: "Reminder Removed")
+            AlertToast(displayMode: .alert, type: .complete(.green), title: String(localized: "Reminder Set")) :
+            AlertToast(displayMode: .alert, type: .error(.red), title: String(localized: "Reminder Removed"))
         })
         .toast(isPresenting: $showAlertsToast, alert: {
             alertsOn ?
-            AlertToast(displayMode: .alert, type: .complete(.green), title: "Alerts On") :
-            AlertToast(displayMode: .alert, type: .error(.red), title: "Alerts Muted")
+            AlertToast(displayMode: .alert, type: .complete(.green), title: String(localized: "Alerts On", comment: "Toast: alerts turned on for this title")) :
+            AlertToast(displayMode: .alert, type: .error(.red), title: String(localized: "Alerts Muted", comment: "Toast: alerts muted for this title"))
         })
         .sheet(isPresented: $videoPresented) {
             WebViewSheet(url: detailsViewModel.videos?.getVideoURL())
@@ -179,7 +179,7 @@ extension ContentDetailsView {
             return detailsViewModel.details?.getRuntime()
         case .tv:
             guard let seasons = detailsViewModel.details?.number_of_seasons, seasons > 0 else { return nil }
-            return "\(seasons) Season\(seasons == 1 ? "" : "s")"
+            return String(localized: "\(seasons) Seasons", comment: "Number of seasons in a series")
         case .person:
             return nil
         }
@@ -192,7 +192,7 @@ extension ContentDetailsView {
         PrimaryActionRow(
             isInWatchList: detailsViewModel.isInWatchList,
             hasTrailer: detailsViewModel.videos?.getVideoURL() != nil,
-            mediaKind: detailsViewModel.mediaKindLabel,
+            isSeries: detailsViewModel.screenType == .tv,
             isLiked: isLiked,
             isWatched: isWatched,
             onWatchlistTap: toggleWatchlist,
@@ -303,14 +303,14 @@ extension ContentDetailsView {
 
         let title = detailsViewModel.result.getResultTitle()
         let body = detailsViewModel.screenType == .movie
-            ? "\(title) is out today — time to watch."
-            : "\(title) starts today — time to tune in."
+            ? String(localized: "\(title) is out today — time to watch.", comment: "Release reminder notification body, movie")
+            : String(localized: "\(title) starts today — time to tune in.", comment: "Release reminder notification body, series")
         let deepLink = detailsViewModel.reminderDeepLink
 
         Task {
             let result = await ReminderManager.schedule(
                 identifier: identifier,
-                title: "Out now",
+                title: String(localized: "Out now", comment: "Release reminder notification title"),
                 body: body,
                 on: releaseDate,
                 deepLink: deepLink
@@ -470,8 +470,9 @@ extension ContentDetailsView {
             let seriesID = detailsViewModel.details?.id ?? 0
 
             SectionHeaderView(
-                title: "Seasons",
-                subtitle: "\(numberOfSeasons) Seasons | \(numberOfEpisodes) Episodes",
+                title: String(localized: "Seasons"),
+                subtitle: String(localized: "\(numberOfSeasons) Seasons", comment: "Number of seasons in a series")
+                    + " | " + String(localized: "\(numberOfEpisodes) Episodes", comment: "Number of episodes"),
                 icon: "rectangle.stack.fill",
                 tint: .accentColor
             ) {
@@ -507,7 +508,7 @@ extension ContentDetailsView {
            let provider = detailsViewModel.watchProviderSafe {
 
             SectionHeaderView(
-                title: "Available on",
+                title: String(localized: "Available on", comment: "Details section: streaming services carrying the title"),
                 icon: "play.rectangle.fill",
                 tint: .accentColor
             )
@@ -525,7 +526,7 @@ extension ContentDetailsView {
     private func castSection() -> some View {
         if detailsViewModel.hasCast {
             SectionHeaderView(
-                title: "Cast",
+                title: String(localized: "Cast"),
                 icon: "person.2.fill",
                 tint: .accentColor
             )
@@ -538,7 +539,7 @@ extension ContentDetailsView {
     private func reviewsSection() -> some View {
         if detailsViewModel.hasReviews {
             SectionHeaderView(
-                title: "User Reviews",
+                title: String(localized: "User Reviews"),
                 icon: "quote.bubble.fill",
                 tint: .accentColor
             )

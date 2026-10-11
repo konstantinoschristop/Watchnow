@@ -111,12 +111,12 @@ struct SettingsView: View {
 
     private var alertsFooter: String {
         if permission.isAuthorized {
-            return "Alerts cover titles you have saved. Mute a single title with the bell on its page."
+            return String(localized: "Alerts cover titles you have saved. Mute a single title with the bell on its page.")
         }
         if permission.canStillAsk {
-            return "Notifications are off for Watchnow, so nothing will be delivered yet."
+            return String(localized: "Notifications are off for Watchnow, so nothing will be delivered yet.")
         }
-        return "Notifications are turned off for Watchnow in iOS Settings, so nothing will be delivered."
+        return String(localized: "Notifications are turned off for Watchnow in iOS Settings, so nothing will be delivered.")
     }
 
     // MARK: - Services
@@ -172,8 +172,8 @@ struct SettingsView: View {
     }
 
     private var syncCaption: String {
-        guard let date = syncStatus.lastSyncedAt else { return "Synced" }
-        if Date().timeIntervalSince(date) < 5 { return "Just now" }
+        guard let date = syncStatus.lastSyncedAt else { return String(localized: "Synced", comment: "iCloud sync status") }
+        if Date().timeIntervalSince(date) < 5 { return String(localized: "Just now", comment: "iCloud sync status: synced a moment ago") }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: date, relativeTo: Date())

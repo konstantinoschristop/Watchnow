@@ -38,22 +38,22 @@ struct ResultDetailsResponse: Codable {
     let last_episode_to_air: Episode?
     /// TV only — the next scheduled episode, if TMDB knows one.
     let next_episode_to_air: Episode?
+    /// What `title` / `name` fall back to when TMDB has no translation in the
+    /// requested language.
+    var original_title: String? = nil
+    var original_name: String? = nil
 
     func getSeasons() -> [Season]? {
         return seasons?.filter({ $0.season_number != 0 })
     }
     
+    /// "2h 5m", abbreviated the way the app's language does it.
     func getRuntime() -> String? {
-        
-        guard let runtime = runtime else {
-            return nil
-        }
-        
-        let hours = String(runtime / 60)
-        let minutes = String(runtime % 60)
-        let runtimeString = String(hours + "h " + minutes + "m")
-        
-        return runtimeString
+        guard let runtime, runtime > 0 else { return nil }
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute]
+        formatter.unitsStyle = .abbreviated
+        return formatter.string(from: TimeInterval(runtime * 60))
     }
     
     func getBudget() -> String? {
@@ -63,15 +63,8 @@ struct ResultDetailsResponse: Codable {
             return nil
         }
         
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale.current
-        
-        if let formattedString = formatter.string(for: budget) {
-            return "$" + formattedString
-        }
-        
-        return nil
+        // TMDB reports money in US dollars.
+        return budget.formatted(.currency(code: "USD").precision(.fractionLength(0)))
     }
     
     func getRevenue() -> String? {
@@ -81,15 +74,7 @@ struct ResultDetailsResponse: Codable {
             return nil
         }
         
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale.current
-        
-        if let formattedString = formatter.string(for: revenue) {
-            return "$" + formattedString
-        }
-        
-        return nil
+        return revenue.formatted(.currency(code: "USD").precision(.fractionLength(0)))
     }
     
     func getLanguages() -> [String]? {
@@ -100,8 +85,14 @@ struct ResultDetailsResponse: Codable {
         
         var languages: [String]? = []
         
+        // Named in the app's language, falling back to TMDB's English name.
         spokenLanguages.forEach { language in
-            languages?.append(language.english_name ?? "")
+            // Capitalised as a list item: French and Spanish name languages in
+            // lower case ("anglais").
+            let localized = language.iso_639_1
+                .flatMap { Locale.current.localizedString(forLanguageCode: $0) }
+                .map { $0.prefix(1).uppercased(with: .current) + $0.dropFirst() }
+            languages?.append(localized ?? language.english_name ?? "")
         }
         
         return languages
@@ -130,42 +121,20 @@ struct ResultDetailsResponse: Codable {
             return nil
         }
         
-        return "'" + tagline + "'"
+        return tagline
     }
     
+    /// The release date written out in the app's language: "10 October 2026",
+    /// "10. Oktober 2026".
     func getDate() -> String? {
-        
-        guard let release_date = release_date,
-              release_date.isEmpty == false else {
-            return nil
-        }
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy/MM/dd"
-        guard let date = formatter.date(from: release_date) else {
-            return nil
-        }
-        
-        formatter.dateFormat = "yyyy"
-        let year = formatter.string(from: date)
-        formatter.dateFormat = "MM"
-        let month = monthFromDate(aDate: date)
-        formatter.dateFormat = "dd"
-        let day = formatter.string(from: date)
-        
-        return "\(day) \(month) \(year)"
-    }
-    
-    private func monthFromDate(aDate: Date) -> String {
-        
-        var myCurrentCalendar = Calendar(identifier: .gregorian)
-        myCurrentCalendar.locale = Locale(identifier: "en_GB")
-        let currentComponents = myCurrentCalendar.dateComponents([.day, .month, .year], from: aDate)
-        let monthSymbols = myCurrentCalendar.monthSymbols
-        if let theMonth = currentComponents.month {
-            return monthSymbols[theMonth - 1 ]
-        }
-        return ""
+        guard let release_date, !release_date.isEmpty else { return nil }
+
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.dateFormat = "yyyy-MM-dd"
+        guard let date = parser.date(from: release_date) else { return nil }
+
+        return date.formatted(date: .long, time: .omitted)
     }
     
     func getReleaseDate(addSeparator: Bool = true) -> String {
@@ -215,6 +184,7 @@ struct Season: Codable, Hashable, Identifiable {
 struct Language: Codable, Hashable {
     
     var english_name: String?
+    var iso_639_1: String?
 }
 
 struct Collection: Codable, Hashable {

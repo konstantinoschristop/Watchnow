@@ -172,7 +172,7 @@ struct WhatsNewView: View {
     private var headerAccessibilityLabel: String {
         guard !vm.isSingleChange else { return "\(vm.headline). \(vm.subheadline)" }
         let count = max(vm.totalUnseenCount, vm.briefing.count)
-        return "\(vm.headline). \(count) updates in your watchlist"
+        return "\(vm.headline). " + String(localized: "\(count) updates in your watchlist")
     }
 
     /// Up to four changed titles, overlapped and splayed like a hand of
@@ -227,7 +227,8 @@ struct WhatsNewView: View {
                 // — which makes it the thing you look at instead of the
                 // titles it is counting.
                 .symbolEffect(.bounce, value: dealt)
-            Text(vm.totalUnseenCount == 1 ? "1 UPDATE" : "\(vm.totalUnseenCount) UPDATES")
+            Text("\(vm.totalUnseenCount) updates", comment: "What's New badge, shown in capitals")
+                .textCase(.uppercase)
                 .font(.caption2.weight(.heavy))
                 .fontDesign(.rounded)
                 .tracking(1.2)
@@ -517,7 +518,7 @@ struct WhatsNewView: View {
         HStack(spacing: 4) {
             Image(systemName: kind.icon)
                 .font(.caption2.weight(.bold))
-            Text(kind.label.uppercased())
+            Text(kind.label.uppercased(with: .current))
                 .font(.caption2.weight(.heavy))
                 .fontDesign(.rounded)
                 .tracking(0.6)
@@ -576,7 +577,7 @@ struct WhatsNewView: View {
             }
         }
         .buttonStyle(WhatsNewPressStyle())
-        .accessibilityLabel("Watch trailer for \(change.title)")
+        .accessibilityLabel(Text("Watch trailer for \(change.title)"))
     }
 
     /// Pinned via `safeAreaInset`, so the scroll view reserves room for it
@@ -606,7 +607,7 @@ struct WhatsNewView: View {
     /// One spoken sentence per card instead of four disconnected fragments.
     private func accessibilityLabel(for change: WatchlistChange) -> String {
         var parts = [change.kind.label, change.title, change.detailText]
-        if change.hasReminder { parts.append("You asked us to remind you") }
+        if change.hasReminder { parts.append(String(localized: "You asked us to remind you", comment: "Accessibility: the user set a reminder for this title")) }
         return parts.joined(separator: ". ")
     }
 }

@@ -66,18 +66,20 @@ final class WhatsNewViewModel: ObservableObject {
     var isSingleChange: Bool { briefing.count == 1 }
 
     var headline: String {
-        isSingleChange ? "Something changed" : "While You Were Away"
+        isSingleChange
+            ? String(localized: "Something changed", comment: "What's New sheet title, one update")
+            : String(localized: "While You Were Away", comment: "What's New sheet title, several updates")
     }
 
     var subheadline: String {
-        if isSingleChange { return "One update in your watchlist" }
-        return "\(briefing.count) things changed in your watchlist"
+        if isSingleChange { return String(localized: "One update in your watchlist") }
+        return String(localized: "\(briefing.count) things changed in your watchlist")
     }
 
     /// "Showing 5 of 12" — only when there's genuinely more than shown.
     var overflowText: String? {
         guard totalUnseenCount > briefing.count else { return nil }
-        return "Showing \(briefing.count) of \(totalUnseenCount) updates"
+        return String(localized: "Showing \(briefing.count) of \(totalUnseenCount) updates")
     }
 
     // MARK: - Launch flow
@@ -263,9 +265,10 @@ final class WhatsNewViewModel: ObservableObject {
         let titleGenres = watchlist.first {
             $0.id == change.mediaID && $0.inferredScreenType == change.screenType
         }?.genre_ids ?? []
-        let overlap = titleGenres.compactMap { tmdbGenreNames[$0] }.filter(topGenres.contains)
-
-        guard let genre = overlap.first else { return nil }
-        return "Right in your \(genre) lane."
+        // Matched on the English names `topGenres` is built from, shown in
+        // the app's language.
+        guard let genreID = titleGenres.first(where: { tmdbGenreNames[$0].map(topGenres.contains) ?? false }),
+              let genre = tmdbGenreDisplayNames[genreID] else { return nil }
+        return String(localized: "Right in your \(genre) lane.", comment: "What's New: the title's genre is one the user saves a lot")
     }
 }

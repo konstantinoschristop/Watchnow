@@ -40,8 +40,8 @@ struct WatchlistModel {
 
         var title: String {
             switch self {
-            case .grid: return "Grid"
-            case .list: return "List"
+            case .grid: return String(localized: "Grid", comment: "Watchlist layout option")
+            case .list: return String(localized: "List", comment: "Watchlist layout option")
             }
         }
     }

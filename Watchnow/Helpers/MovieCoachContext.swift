@@ -113,6 +113,11 @@ struct MovieCoachContext {
 
         // --- Title facts -------------------------------------------------
         let genreNames = (details?.genres ?? []).compactMap(\.name)
+        let genreIDs = (details?.genres ?? []).compactMap(\.id)
+        // The same genres in `tmdbGenreNames`' English key space, which the
+        // watchlist profile is built from. `genreNames` can't be matched
+        // against it: details arrive in the app's TMDB language.
+        let genreKeys = genreIDs.compactMap { tmdbGenreNames[$0] }
         let releaseRaw = details?.release_date ?? details?.first_air_date
         let releaseDate = Self.parseDate(releaseRaw)
         let unreleased = releaseDate.map { $0 > Date() } ?? false
@@ -147,13 +152,11 @@ struct MovieCoachContext {
             ReminderManager.isScheduled(identifier: ReminderManager.titleIdentifier(resultID: $0))
         } ?? false
 
-        // Compare through a normaliser: the watchlist profile is built from
-        // `tmdbGenreNames` (short forms like "Sci-Fi") while the title's own
-        // genres come from the details endpoint ("Science Fiction"), so a
-        // literal string match would almost never line up.
+        // Compare through a normaliser: TV genres fold into their movie
+        // counterparts ("Kids" counts as "Family").
         let userGenres = Self.topGenres(in: watchlist)
         let normalizedUserGenres = Set(userGenres.map(Self.normalizedGenre))
-        let overlap = genreNames.filter { normalizedUserGenres.contains(Self.normalizedGenre($0)) }
+        let overlap = genreKeys.filter { normalizedUserGenres.contains(Self.normalizedGenre($0)) }
 
         let savedIDs = Set(watchlist.compactMap(\.id))
         let similarSaved = similars
@@ -182,7 +185,7 @@ struct MovieCoachContext {
             kind: isSeries ? "series" : "movie",
             year: Self.nonEmpty(details?.getReleaseDate(addSeparator: false)),
             genres: genreNames,
-            genreIDs: (details?.genres ?? []).compactMap(\.id),
+            genreIDs: genreIDs,
             runtimeMinutes: (details?.runtime).flatMap { $0 > 0 ? $0 : nil },
             seasonCount: isSeries ? details?.number_of_seasons : nil,
             episodeCount: isSeries ? details?.number_of_episodes : nil,
@@ -210,7 +213,7 @@ struct MovieCoachContext {
             similarSaved: Array(similarSaved),
             matchedProviders: Array(userProviderNames),
             dayContext: Self.dayContext(),
-            genreAffinity: Self.affinity(of: genreNames, in: watchlist),
+            genreAffinity: Self.affinity(of: genreKeys, in: watchlist),
             originalLanguage: Self.nonEmpty(result.original_language),
             userLanguages: Set(watchlist.compactMap(\.original_language)),
             // TV always counts; a "movie" under 40 minutes is a short or a
@@ -467,7 +470,9 @@ struct MovieCoachContext {
             userThemes.prefix(4).sorted().joined(separator: ","),
             similarSaved.sorted().joined(separator: ","),
             matchedProviders.sorted().joined(separator: ","),
-            dayContext
+            dayContext,
+            // The answer is written in the app's language.
+            Bundle.main.preferredLocalizations.first ?? ""
         ]
         return Self.fnv1a(parts.joined(separator: "|"))
     }

@@ -81,12 +81,12 @@ struct WatchlistView: View {
         .toast(isPresenting: $watchlistViewModel.showRemovedAlert) {
             AlertToast(displayMode: .alert,
                        type: .error(.red),
-                       title: "Removed from Watchlist")
+                       title: String(localized: "Removed from Watchlist"))
         }
         .toast(isPresenting: $watchlistViewModel.showAddedAlert) {
             AlertToast(displayMode: .alert,
                        type: .complete(.green),
-                       title: "Added to Watchlist")
+                       title: String(localized: "Added to Watchlist"))
         }
         .confirmationDialog("Move to folder",
                             isPresented: Binding(
@@ -455,7 +455,7 @@ struct WatchlistView: View {
     /// where creating the folder is only half of what the user asked for.
     private func createAndEditFolder(filing resultID: Int? = nil) {
         let store = watchlistViewModel.folderStore
-        let created = store.createFolder(name: "New Folder",
+        let created = store.createFolder(name: String(localized: "New Folder", comment: "Default name for a folder the user just created"),
                                          symbol: Folder.defaultSymbol)
         if let resultID {
             store.assign(resultID: resultID, to: created.id)
@@ -528,7 +528,7 @@ struct WatchlistView: View {
 
     private var globalEmptyState: some View {
         ContentUnavailableView {
-            themedLabel(title: "Nothing saved yet",
+            themedLabel(title: String(localized: "Nothing saved yet"),
                         systemImage: "bookmark",
                         tint: .accentColor)
         } description: {
@@ -548,7 +548,7 @@ struct WatchlistView: View {
     @ViewBuilder
     private var folderEmptyState: some View {
         ContentUnavailableView {
-            themedLabel(title: "Folder is empty",
+            themedLabel(title: String(localized: "Folder is empty"),
                         systemImage: folderEmptyIcon,
                         tint: .accentColor)
         } description: {
@@ -566,8 +566,8 @@ struct WatchlistView: View {
     /// sends the user looking for a gesture that isn't there.
     private var folderEmptyHint: String {
         switch layout {
-        case .grid: return "Press and hold any saved poster, then tap Move to Folder."
-        case .list: return "Swipe a saved title and tap Move to file it here."
+        case .grid: return String(localized: "Press and hold any saved poster, then tap Move to Folder.", comment: "Empty folder hint. 'Move to Folder' is the menu action's label: use the same wording.")
+        case .list: return String(localized: "Swipe a saved title and tap Move to file it here.", comment: "Empty folder hint. 'Move' is the swipe action's label: use the same wording.")
         }
     }
 
@@ -611,13 +611,14 @@ struct WatchlistView: View {
     }
 
     private var syncCaption: String {
-        guard let date = syncStatus.lastSyncedAt else { return "Synced via iCloud" }
+        guard let date = syncStatus.lastSyncedAt else { return String(localized: "Synced via iCloud") }
         if Date().timeIntervalSince(date) < 5 {
-            return "Synced via iCloud · just now"
+            return String(localized: "Synced via iCloud · just now")
         }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
-        return "Synced via iCloud · \(formatter.localizedString(for: date, relativeTo: Date()))"
+        let ago = formatter.localizedString(for: date, relativeTo: Date())
+        return String(localized: "Synced via iCloud · \(ago)", comment: "Watchlist footer; how long ago, e.g. 5 min. ago")
     }
 
     // MARK: - Data shaping

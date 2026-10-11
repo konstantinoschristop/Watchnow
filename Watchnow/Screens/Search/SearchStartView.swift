@@ -448,7 +448,7 @@ private extension SearchStartView {
                 .contentShape(Capsule(style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Trending \(scope.title)")
+        .accessibilityLabel(Text("Trending \(scope.title)", comment: "Accessibility: trending scope chip, e.g. Trending Movies"))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
@@ -521,7 +521,7 @@ private extension SearchStartView {
     /// Small tinted-icon + title pair. Intentionally *not* `SectionHeaderView`
     /// — that component's 25pt heavy title is sized to head a full feed and
     /// would out-shout the "Search" navigation title one line above it.
-    func sectionLabel(_ title: String,
+    func sectionLabel(_ title: LocalizedStringKey,
                       icon: String,
                       tint: Color = .secondary,
                       pulses: Bool = false) -> some View {

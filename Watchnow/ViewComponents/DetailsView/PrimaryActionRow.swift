@@ -22,8 +22,8 @@ struct PrimaryActionRow: View {
 
     let isInWatchList: Bool
     let hasTrailer: Bool
-    /// "movie" or "series" — only used to word the taste button.
-    let mediaKind: String
+    /// Only used to word the taste button.
+    let isSeries: Bool
     let isLiked: Bool
     let isWatched: Bool
 
@@ -44,13 +44,15 @@ struct PrimaryActionRow: View {
         VStack(spacing: 10) {
             let watchlistPill = ActionPill(
                 icon:    isInWatchList ? "bookmark.fill" : "bookmark",
-                label:   isInWatchList ? "Saved" : "Watch Later",
+                label:   isInWatchList
+                    ? String(localized: "Saved", comment: "Button state: the title is in the watchlist")
+                    : String(localized: "Watch Later", comment: "Button: add the title to the watchlist"),
                 style:   isInWatchList ? .activeAccent : .neutral,
                 action:  onWatchlistTap
             )
             let trailerPill = ActionPill(
                 icon:   "play.fill",
-                label:  "Trailer",
+                label:  String(localized: "Trailer", comment: "Button: play the trailer"),
                 style:  .neutral,
                 action: onTrailerTap
             )
@@ -71,14 +73,14 @@ struct PrimaryActionRow: View {
             // lighter than the row above so it reads as secondary.
             ActionPill(
                 icon:   isLiked ? "heart.fill" : "heart",
-                label:  isLiked ? "Liked" : "I like this \(mediaKind)",
+                label:  isLiked ? String(localized: "Liked", comment: "Button state: the user liked this title") : likeLabel,
                 style:  isLiked ? .activeAccent : .neutral,
                 height: 44,
                 action: onLikeTap
             )
             .accessibilityLabel(isLiked
-                                ? "Liked. Tap to remove from your taste profile."
-                                : "I like this \(mediaKind)")
+                                ? String(localized: "Liked. Tap to remove from your taste profile.")
+                                : likeLabel)
 
             // Closing the loop. Its own row rather than a third pill up top
             // for the same reason the taste button is: "Mark as watched"
@@ -86,16 +88,24 @@ struct PrimaryActionRow: View {
             // take "Watch Later" down with it.
             ActionPill(
                 icon:   isWatched ? "checkmark.circle.fill" : "checkmark.circle",
-                label:  isWatched ? "Watched" : "Mark as watched",
+                label:  isWatched
+                    ? String(localized: "Watched", comment: "Button state: the user has watched this title")
+                    : String(localized: "Mark as watched"),
                 style:  isWatched ? .activeAccent : .neutral,
                 height: 44,
                 action: onWatchedTap
             )
             .accessibilityLabel(isWatched
-                                ? "Watched. Tap to unmark."
-                                : "Mark as watched")
+                                ? String(localized: "Watched. Tap to unmark.")
+                                : String(localized: "Mark as watched"))
         }
         .padding(.horizontal, 16)
+    }
+
+    private var likeLabel: String {
+        isSeries
+            ? String(localized: "I like this series", comment: "Button: add this series to the user's taste profile")
+            : String(localized: "I like this movie", comment: "Button: add this movie to the user's taste profile")
     }
 }
 

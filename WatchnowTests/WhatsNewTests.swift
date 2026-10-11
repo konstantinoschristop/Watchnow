@@ -123,6 +123,20 @@ final class ChangeClassifierTests: XCTestCase {
         XCTAssertEqual(changes.first?.metadata.videoKey, "abc123")
     }
 
+    /// The videos request also returns trailers in the device language and
+    /// with no language. Only English ones are tracked, as before the request
+    /// changed, so trailers that were always there never surface as new.
+    func testNonEnglishTrailersAreNotTracked() {
+        let snapshot = makeSnapshot(videoIDs: ["en"])
+        var english = makeVideo(id: "en"); english.iso_639_1 = "en"
+        var greek = makeVideo(id: "el"); greek.iso_639_1 = "el"
+        var silent = makeVideo(id: "xx"); silent.iso_639_1 = "xx"
+        let fresh = ChangeClassifier.Fresh(videos: [english, greek, silent])
+        let changes = ChangeClassifier.changes(from: snapshot, fresh: fresh,
+                                               hasReminder: false, now: fixedNow)
+        XCTAssertTrue(changes.isEmpty)
+    }
+
     func testNonTrailerVideosAreIgnored() {
         let snapshot = makeSnapshot(videoIDs: [])
         let fresh = ChangeClassifier.Fresh(videos: [makeVideo(id: "bts", type: "Behind the Scenes"),

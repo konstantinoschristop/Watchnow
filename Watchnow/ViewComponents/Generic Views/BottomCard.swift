@@ -95,7 +95,7 @@ struct BottomCard: View {
     @ViewBuilder
     private var metaRow: some View {
         let year = yearString
-        let ratingText = rating.map { String(format: "%.1f", $0) }
+        let ratingText = rating.map(\.ratingText)
 
         if ratingText != nil || year != nil {
             HStack(spacing: 5) {
