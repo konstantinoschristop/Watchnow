@@ -1,0 +1,44 @@
+Watchnow, c’est la liste gratuite de vos films et séries à voir. Elle vous indique où les regarder en ligne et vous prévient dès leur sortie. Pas besoin de compte : votre liste reste sur vos appareils et dans votre iCloud.
+
+MA LISTE
+• Enregistrez films et séries d’un simple toucher
+• Rangez-les dans des dossiers : En amoureux, Halloween, Marathon SF
+• Marquez vos titres comme vus et retrouvez tout ce que vous avez déjà regardé
+• Chaque affiche enregistrée indique où regarder le titre en ligne
+• Synchronisée sur tous vos appareils via iCloud
+
+OÙ REGARDER
+• Découvrez sur quels services un titre est disponible dans votre région
+• Comparez les offres de diffusion en continu, de location et d’achat
+• Accédez directement au service de votre choix
+• Données fournies par JustWatch
+
+NE MANQUEZ PLUS RIEN
+• Enregistrez une série : Watchnow vous prévient le jour de la diffusion du prochain épisode
+• Recevez une alerte dès qu’un titre de votre liste arrive sur l’un de vos services
+• « Pendant votre absence » fait le point sur les nouvelles bandes-annonces, les nouveaux épisodes et les arrivées sur les plateformes
+
+SOIRÉE CINÉ
+• Impossible de vous mettre d’accord ? Choisissez une ambiance, passez-vous l’iPhone et glissez jusqu’au match
+• Adaptée aux services que vous avez vraiment
+
+MOVIE COACH
+• Un deuxième avis personnalisé sur chaque film et chaque série
+• Demandez-lui : « Le rythme est lent ? » ou « Ça vaut le coup malgré la durée ? »
+• Apprend de ce que vous enregistrez et de ce que vous aimez
+• Fonctionne entièrement sur votre appareil, grâce aux Foundation Models d’Apple
+• Nécessite un iPhone compatible avec Apple Intelligence (iPhone 15 Pro ou modèle ultérieur) sous iOS 26 ou version ultérieure
+
+DÉCOUVRIR
+• Tendances, À l’affiche et Prochainement, le tout actualisé chaque jour
+• Explorez par genre ou par plateforme
+• Bandes-annonces, critiques, saisons, épisodes, distribution et équipe technique avec leurs filmographies
+• Recherchez instantanément films, séries et acteurs
+
+CONÇU POUR iOS
+• SwiftUI natif, mode sombre, animations fluides
+• Compatible avec VoiceOver, Texte plus grand et Réduire les animations
+• Disponible en anglais, espagnol, portugais, allemand, français et grec
+• Votre liste et vos préférences restent sur vos appareils et dans votre iCloud
+
+Données sur les films et les séries fournies par TMDB. Données de disponibilité fournies par JustWatch.

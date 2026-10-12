@@ -1,0 +1,8 @@
+Watchnow parle désormais votre langue.
+
+• Toute l’app est disponible en espagnol, portugais (Brésil), allemand, français et grec, et s’affiche dans la langue de votre iPhone.
+• Vous préférez une autre langue que celle de votre iPhone ? Choisissez-la dans Réglages → Langue.
+• Les titres, synopsis et genres proviennent eux aussi de TMDB dans votre langue, l’anglais prenant le relais pour ce qui n’est pas encore traduit.
+• « À l’affiche » et « Prochainement » s’adaptent désormais à votre région.
+• Les dates, durées, notes et prix s’affichent au format de votre région.
+• Movie Coach vous répond dans votre langue lorsqu’Apple Intelligence la prend en charge.

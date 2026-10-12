@@ -1,0 +1,44 @@
+Watchnow es una app gratuita para guardar las películas y series que te apetece ver, saber dónde verlas en streaming y enterarte de cuándo se estrenan. No necesitas crear una cuenta: tu lista se queda en tus dispositivos y en tu iCloud.
+
+MI LISTA
+• Guarda películas y series con un solo toque
+• Organízalas en carpetas como «Para ver en pareja», «Halloween» o «Maratón de ciencia ficción»
+• Marca títulos como vistos y lleva tu historial al día
+• Cada póster guardado te muestra en qué plataforma está disponible
+• Se sincroniza entre tus dispositivos con iCloud
+
+DÓNDE VERLO
+• Consulta en qué plataformas de tu región está cada título
+• Compara las opciones de streaming, alquiler y compra
+• Entra directamente en la plataforma que quieras
+• Con datos de JustWatch
+
+NO TE PIERDAS NADA
+• Guarda una serie y te avisaremos cuando se estrene el próximo episodio
+• Entérate en cuanto algo de tu lista llegue a una de tus plataformas
+• «Mientras no estabas» te pone al día de los tráileres y episodios nuevos, y de lo que ya está en streaming
+
+NOCHE DE CINE
+• ¿No os ponéis de acuerdo? Elegid un estado de ánimo, pasad el móvil y deslizad hasta que tengáis película
+• Ajustada a las plataformas que tenéis de verdad
+
+MOVIE COACH
+• Una segunda opinión personalizada sobre cualquier película o serie
+• Pregúntale «¿Es lenta?» o «¿Vale la pena lo que dura?»
+• Aprende de lo que guardas y de lo que te gusta
+• Funciona por completo en tu dispositivo con los Foundation Models de Apple
+• Requiere un iPhone compatible con Apple Intelligence (iPhone 15 Pro o más reciente) y iOS 26 o posterior
+
+DESCUBRE
+• Tendencias, «Ahora en cines» y «Próximamente», que se actualizan cada día
+• Explora por género o por tus plataformas de streaming
+• Reparto y equipo técnico con sus filmografías, además de tráileres, reseñas, temporadas y episodios
+• Busca películas, series y actores al instante
+
+DISEÑADA PARA iOS
+• SwiftUI nativo, modo oscuro y animaciones fluidas
+• Compatible con VoiceOver, Texto más grande y Reducir movimiento
+• Disponible en inglés, español, portugués, alemán, francés y griego
+• Tu lista y tus preferencias se quedan en tus dispositivos y en tu iCloud
+
+Datos de películas y series proporcionados por TMDB. Disponibilidad en streaming proporcionada por JustWatch.

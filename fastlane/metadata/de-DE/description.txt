@@ -1,0 +1,44 @@
+Watchnow ist die kostenlose Merkliste für Filme und Serien, die dir zeigt, wo du sie streamen kannst, und dir Bescheid sagt, sobald sie laufen. Kein Konto nötig – deine Merkliste bleibt auf deinen Geräten und in deiner iCloud.
+
+DEINE MERKLISTE
+• Merk dir Filme und Serien mit einem Fingertipp
+• Sortiere alles in Ordner wie „Kuschelabend“, „Halloween“ oder „Sci-Fi-Marathon“
+• Markiere Titel als gesehen und behalte im Blick, was du schon kennst
+• Auf jedem gemerkten Poster siehst du, wo du den Titel streamen kannst
+• Per iCloud auf all deinen Geräten synchron
+
+WO LÄUFT WAS?
+• Finde heraus, welche Dienste einen Titel in deiner Region anbieten
+• Vergleiche Angebote zum Streamen, Leihen und Kaufen
+• Spring direkt zum Dienst deiner Wahl
+• Mit Daten von JustWatch
+
+NICHTS MEHR VERPASSEN
+• Merk dir eine Serie – wir sagen dir Bescheid, sobald die nächste Folge läuft
+• Erfahre, wann ein gemerkter Titel bei einem deiner Dienste landet
+• „Während du weg warst“ bringt dich auf den neuesten Stand: neue Trailer, Folgen und Streaming-Starts
+
+FILMABEND
+• Ihr könnt euch nicht einigen? Wählt eine Stimmung, reicht das iPhone weiter und wischt euch zum Volltreffer
+• Abgestimmt auf die Streamingdienste, die ihr wirklich habt
+
+MOVIE COACH
+• Deine persönliche zweite Meinung zu jedem Film und jeder Serie
+• Frag etwa „Ist das langatmig?“ oder „Lohnt sich die Länge?“
+• Lernt aus dem, was du dir merkst und was dir gefällt
+• Läuft komplett auf deinem Gerät – mit den Foundation Models von Apple
+• Benötigt iOS 26 oder neuer und ein iPhone, das Apple Intelligence unterstützt (iPhone 15 Pro oder neuer)
+
+ENTDECKEN
+• „Heute angesagt“, „Jetzt im Kino“ und „Demnächst“ – täglich aktualisiert
+• Nach Genre stöbern – oder nach deinen Streamingdiensten
+• Besetzung und Crew samt Filmografien, dazu Trailer, Rezensionen, Staffeln und Folgen
+• Filme, Serien und Schauspieler im Handumdrehen finden
+
+GEMACHT FÜR iOS
+• Nativ in SwiftUI entwickelt, mit Dunkelmodus und flüssigen Animationen
+• Unterstützt VoiceOver, „Größerer Text“ und „Bewegung reduzieren“
+• Verfügbar auf Deutsch, Englisch, Spanisch, Portugiesisch, Französisch und Griechisch
+• Deine Merkliste und Einstellungen bleiben auf deinen Geräten und in deiner iCloud
+
+Film- und Seriendaten stammen von TMDB, Angaben zur Streaming-Verfügbarkeit von JustWatch.

@@ -1,0 +1,44 @@
+Watchnow is a free watchlist for movies and series that shows you where to stream them and tells you when they air. No account needed — your watchlist stays on your devices and in your iCloud.
+
+YOUR WATCHLIST
+• Save movies and series with one tap
+• Organize into folders — Date Night, Halloween, Sci-Fi Marathon
+• Mark titles watched and keep track of what you've seen
+• Every saved poster shows where you can stream it
+• Syncs across your devices with iCloud
+
+WHERE TO WATCH
+• See which services have a title in your region
+• Compare streaming, rental and purchase options
+• Jump straight to the service you want
+• Powered by JustWatch
+
+NEVER MISS WHAT'S NEXT
+• Save a series and get told when the next episode airs
+• Get told when something on your list lands on a service you have
+• While You Were Away catches you up on new trailers, episodes and streaming arrivals
+
+MOVIE NIGHT
+• Can't agree? Pick a mood, pass the phone, swipe to a match
+• Tuned to the services you actually have
+
+MOVIE COACH
+• A personal second opinion on any movie or series
+• Ask "Is it slow?" or "Is it worth the runtime?"
+• Learns from what you save and like
+• Runs entirely on your device with Apple's Foundation Models
+• Requires an Apple Intelligence–capable iPhone (iPhone 15 Pro or newer) on iOS 26 or later
+
+DISCOVER
+• Trending, in theaters and coming soon, refreshed daily
+• Browse by genre or by your streaming services
+• Cast and crew with filmographies, trailers, reviews, seasons and episodes
+• Search movies, series and actors instantly
+
+DESIGNED FOR iOS
+• Native SwiftUI, dark mode, smooth animations
+• VoiceOver, larger text and Reduce Motion supported
+• Available in English, Spanish, Portuguese, German, French and Greek
+• Your watchlist and preferences stay on your devices and in your iCloud
+
+Movie and TV data provided by TMDB. Streaming availability provided by JustWatch.

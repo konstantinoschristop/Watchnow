@@ -1,0 +1,44 @@
+O Watchnow é um app gratuito para montar sua lista de filmes e séries: ele mostra onde assistir e avisa quando cada título estreia. Sem cadastro — sua lista fica nos seus dispositivos e no seu iCloud.
+
+MINHA LISTA
+• Salve filmes e séries com um só toque
+• Organize tudo em pastas, como Noite a dois, Halloween ou Maratona sci-fi
+• Marque títulos como assistidos e tenha um registro de tudo o que já viu
+• Cada pôster salvo mostra onde dá para assistir
+• Sincroniza entre seus dispositivos pelo iCloud
+
+ONDE ASSISTIR
+• Veja quais serviços têm cada título na sua região
+• Compare as opções de streaming, aluguel e compra
+• Vá direto para o serviço que você quiser
+• Com dados da JustWatch
+
+NÃO PERCA O QUE VEM POR AÍ
+• Salve uma série e receba um aviso quando o próximo episódio for ao ar
+• Fique sabendo quando algo da sua lista chegar a um dos seus serviços
+• No resumo “Enquanto você estava fora”, fique em dia com novos trailers, episódios e estreias no streaming
+
+NOITE DE CINEMA
+• Cada um quer ver uma coisa? Escolha o clima, passe o iPhone e deslize até dar match
+• Sugestões com base nos serviços que você assina de verdade
+
+MOVIE COACH
+• Uma segunda opinião personalizada sobre qualquer filme ou série
+• Pergunte “É arrastado?” ou “Compensa a duração?”
+• Aprende com o que você salva e curte
+• Funciona totalmente no seu dispositivo, com os Foundation Models da Apple
+• Requer o iOS 26 ou posterior e um iPhone compatível com a Apple Intelligence (iPhone 15 Pro ou modelo mais recente)
+
+DESCUBRA
+• Listas “Em alta hoje”, “Agora nos cinemas” e “Em breve”, atualizadas todo dia
+• Explore por gênero ou pelos seus serviços de streaming
+• Elenco e equipe técnica com filmografias, além de trailers, avaliações, temporadas e episódios
+• Busque filmes, séries e atores na hora
+
+FEITO PARA O iOS
+• SwiftUI nativo, Modo Escuro e animações fluidas
+• Compatível com VoiceOver, Texto Maior e Reduzir Movimento
+• Disponível em inglês, espanhol, português, alemão, francês e grego
+• Sua lista e suas preferências ficam nos seus dispositivos e no seu iCloud
+
+Dados de filmes e séries fornecidos pelo TMDB. Disponibilidade nos serviços de streaming fornecida pela JustWatch.
