@@ -81,6 +81,9 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+# App Store Connect API keys belong outside the repo (see fastlane/Deliverfile).
+*.p8
+asc_key.json
 
 # Code Injection
 #

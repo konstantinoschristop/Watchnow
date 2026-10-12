@@ -1,0 +1,68 @@
+# Uploads the App Store listing text in fastlane/metadata/<locale>/ — name,
+# subtitle, promotional text, description, keywords and release notes for
+# every locale there. No build, no screenshots, no submission.
+#
+#   fastlane deliver
+#
+# Run from the project root. It shows an HTML preview of everything it is
+# about to change and asks before uploading.
+#
+# Needs an App Store Connect API key (Users and Access → Integrations →
+# App Store Connect API, role App Manager), kept outside this repo:
+#
+#   ~/.appstoreconnect/asc_key.json
+#   {
+#     "key_id": "…",
+#     "issuer_id": "…",
+#     "key_filepath": "/Users/<you>/.appstoreconnect/AuthKey_<key_id>.p8"
+#   }
+#
+# ASC_KEY_PATH points somewhere else if the JSON lives elsewhere. The key is
+# read from its .p8 file; the JSON only says where it is.
+
+require "json"
+
+app_identifier("k.christopoulos.Watchnow")
+
+key_path = File.expand_path(ENV["ASC_KEY_PATH"] || "~/.appstoreconnect/asc_key.json")
+unless File.exist?(key_path)
+  raise "No App Store Connect API key at #{key_path}. See the top of fastlane/Deliverfile."
+end
+# Passed as a hash rather than `api_key_path`: deliver's JSON loader wants the
+# key's contents inside the JSON, and a hash with `filepath` reads the .p8.
+key_config = JSON.parse(File.read(key_path))
+missing = %w[key_id issuer_id key_filepath].reject { |field| key_config[field].to_s.strip.length > 0 }
+raise "#{key_path} is missing #{missing.join(', ')}." unless missing.empty?
+key_file = File.expand_path(key_config["key_filepath"])
+raise "No .p8 key at #{key_file}." unless File.exist?(key_file)
+api_key(
+  key_id: key_config["key_id"],
+  issuer_id: key_config["issuer_id"],
+  filepath: key_file,
+  in_house: false
+)
+
+# The version to edit: the app target's MARKETING_VERSION in the Xcode
+# project, so it matches the build that was uploaded. It has to exist in
+# App Store Connect already. `fastlane deliver --app_version X.Y` overrides it.
+# fastlane runs this from the project root; the second path covers the
+# fastlane directory.
+pbxproj = ["Watchnow.xcodeproj/project.pbxproj", "../Watchnow.xcodeproj/project.pbxproj"].find { |path| File.exist?(path) }
+raise "Run fastlane from the project root (Watchnow.xcodeproj not found)." unless pbxproj
+project = File.read(pbxproj)
+app_versions = project.scan(/buildSettings = \{(.*?)\n\t\t\t\};/m).flatten
+                      .select { |settings| settings.include?("PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;") }
+                      .map { |settings| settings[/MARKETING_VERSION = ([\d.]+);/, 1] }
+                      .compact.uniq
+raise "Couldn't read the app's MARKETING_VERSION (found #{app_versions.inspect})." unless app_versions.size == 1
+app_version(app_versions.first)
+
+metadata_path("./fastlane/metadata")
+
+skip_binary_upload(true)
+skip_screenshots(true)
+submit_for_review(false)
+
+# precheck can't look at in-app purchases when signed in with an API key, and
+# fails the run at the very end if asked to. The app has none.
+precheck_include_in_app_purchases(false)
