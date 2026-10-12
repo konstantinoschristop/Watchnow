@@ -38,6 +38,7 @@ struct SettingsView: View {
             Form {
                 alertsSection
                 servicesSection
+                languageSection
                 syncSection
                 aboutSection
                 #if DEBUG
@@ -148,6 +149,49 @@ struct SettingsView: View {
         if selectedProviderIDs.contains(id) { selectedProviderIDs.remove(id) }
         else { selectedProviderIDs.insert(id) }
         StreamingPreferences.save(selectedProviderIDs)
+    }
+
+    // MARK: - Language
+
+    /// The app's language is chosen where iOS keeps it: on Watchnow's page in
+    /// Settings, which lists every language the app is translated into and
+    /// relaunches it in the new one. An in-app picker would have to override
+    /// `AppleLanguages` behind the system's back and still need a restart.
+    /// TMDB requests read the same preference, so titles and synopses follow.
+    private var languageSection: some View {
+        Section {
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                HStack {
+                    Text("Language", comment: "Settings row: the app's language")
+                        .foregroundStyle(.primary)
+                    Spacer(minLength: 0)
+                    Text(currentLanguageName)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "arrow.up.right.square")
+                        .foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .combine)
+            .accessibilityHint(Text("Opens iOS Settings", comment: "Accessibility hint: the Language row opens the iOS Settings app"))
+        } footer: {
+            Text("Choose Watchnow's language in iOS Settings. Titles and synopses follow it too.",
+                 comment: "Settings footer under the Language row")
+        }
+    }
+
+    /// The language the app is running in, named in that language and
+    /// capitalised as a list value ("Français", not "français").
+    private var currentLanguageName: String {
+        let code = Bundle.main.preferredLocalizations.first ?? "en"
+        let name = Locale.current.localizedString(forIdentifier: code) ?? code
+        return name.prefix(1).uppercased(with: .current) + name.dropFirst()
     }
 
     // MARK: - Sync

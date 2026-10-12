@@ -15,7 +15,7 @@ import SwiftUI
 ///
 /// A key space, not a label: `TasteProfile` persists tallies keyed by these
 /// names, and Movie Coach and What's New match genres on them, so they must
-/// not change with the app's language. Show `tmdbGenreDisplayNames` instead.
+/// not change with the app's language. Show `GenreNames` instead.
 let tmdbGenreNames: [Int: String] = [
     28: "Action",     12: "Adventure",   16: "Animation",   35: "Comedy",
     80: "Crime",      99: "Documentary", 18: "Drama",     10751: "Family",
@@ -25,8 +25,9 @@ let tmdbGenreNames: [Int: String] = [
  10762: "Kids",   10763: "News",      10764: "Reality",  10766: "Soap"
 ]
 
-/// `tmdbGenreNames` in the app's language, for display.
-let tmdbGenreDisplayNames: [Int: String] = [
+/// Genre names bundled with the app, for the moment before TMDB's own list
+/// has ever loaded. Every screen shows `GenreNames`, which is TMDB's names.
+let bundledGenreNames: [Int: String] = [
     28:    String(localized: "Action", comment: "Genre"),
     12:    String(localized: "Adventure", comment: "Genre"),
     16:    String(localized: "Animation", comment: "Genre"),
@@ -51,6 +52,8 @@ let tmdbGenreDisplayNames: [Int: String] = [
     10763: String(localized: "News", comment: "Genre"),
     10764: String(localized: "Reality", comment: "Genre"),
     10766: String(localized: "Soap", comment: "Genre: soap opera"),
+    10402: String(localized: "Music", comment: "Genre"),
+    10770: String(localized: "TV Movie", comment: "Genre: a film made for television"),
 ]
 
 /// Zoom-transition source ID for a card. The title's ID alone is not
@@ -565,7 +568,7 @@ private struct PressableCardStyle: ButtonStyle {
 /// lists and give the most useful filter signal with just a single tap.
 struct PopularGenre: Identifiable {
     let id: Int
-    var name: String { tmdbGenreDisplayNames[id] ?? "" }
+    @MainActor var name: String { GenreNames.shared.name(for: id) ?? "" }
 
     static let movies: [PopularGenre] = [28, 35, 18, 27, 878].map(PopularGenre.init)
 
@@ -643,7 +646,7 @@ extension ContentMainView {
     /// Maps up to 2 genre IDs on a `Result` to their display names.
     private func resolvedGenres(for content: Result) -> [String] {
         guard let ids = content.genre_ids else { return [] }
-        return ids.prefix(2).compactMap { tmdbGenreDisplayNames[$0] }
+        return ids.prefix(2).compactMap(GenreNames.shared.name)
     }
 
     /// Display-only genre tag on the home-feed hero image. On iOS 26

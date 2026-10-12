@@ -302,6 +302,6 @@ private struct ListSectionRow: View {
     /// competing with the title for attention.
     private var genrePills: [String] {
         guard let ids = result.genre_ids else { return [] }
-        return ids.prefix(2).compactMap { tmdbGenreDisplayNames[$0] }
+        return ids.prefix(2).compactMap(GenreNames.shared.name)
     }
 }

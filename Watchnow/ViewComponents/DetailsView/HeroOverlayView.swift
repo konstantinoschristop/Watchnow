@@ -155,7 +155,7 @@ struct HeroOverlayView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(genres, id: \.self) { genre in
-                    GenrePill(name: genre.name ?? "- -")
+                    GenrePill(name: genre.displayName)
                 }
             }
         }

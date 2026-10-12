@@ -15,7 +15,7 @@ struct GenresView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(genres, id: \.self) { genre in
-                    Text(genre.name ?? "- -")
+                    Text(genre.displayName)
                         .padding()
                         .appFont(11, relativeTo: .caption2)
                         .background(.ultraThinMaterial)

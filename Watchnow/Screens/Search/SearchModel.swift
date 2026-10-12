@@ -76,10 +76,15 @@ struct SearchModel {
     /// endpoints can actually answer it, which is what keeps a genre browse
     /// as mixed-media as the multi-search it sits next to.
     struct Genre: Identifiable, Hashable {
-        let name: String
         let symbol: String
         let movieID: Int?
         let seriesID: Int?
+
+        /// Named as every other screen names it (`GenreNames`), after its
+        /// movie genre — the TV id only for a genre movies don't have.
+        @MainActor var name: String {
+            (movieID ?? seriesID).flatMap(GenreNames.shared.name) ?? ""
+        }
 
         /// The TMDB ids, not `name`: that's in the app's language.
         var id: String { "\(movieID ?? 0)/\(seriesID ?? 0)" }
@@ -98,22 +103,22 @@ struct SearchModel {
         /// shortcut into a wall of chips. These are the tags people
         /// actually reach for, ordered roughly by how often.
         static let browsable: [Genre] = [
-            .init(name: String(localized: "Action", comment: "Genre"),      symbol: "bolt.fill",              movieID: 28,    seriesID: 10759),
-            .init(name: String(localized: "Comedy", comment: "Genre"),      symbol: "face.smiling.inverse",   movieID: 35,    seriesID: 35),
-            .init(name: String(localized: "Drama", comment: "Genre"),       symbol: "theatermasks.fill",      movieID: 18,    seriesID: 18),
-            .init(name: String(localized: "Sci-Fi", comment: "Genre"),      symbol: "sparkles",               movieID: 878,   seriesID: 10765),
-            .init(name: String(localized: "Horror", comment: "Genre"),      symbol: "moon.stars.fill",        movieID: 27,    seriesID: nil),
-            .init(name: String(localized: "Thriller", comment: "Genre"),    symbol: "eye.fill",               movieID: 53,    seriesID: nil),
-            .init(name: String(localized: "Romance", comment: "Genre"),     symbol: "heart.fill",             movieID: 10749, seriesID: nil),
-            .init(name: String(localized: "Crime", comment: "Genre"),       symbol: "key.fill",            movieID: 80,    seriesID: 80),
-            .init(name: String(localized: "Fantasy", comment: "Genre"),     symbol: "wand.and.sparkles",         movieID: 14,    seriesID: nil),
-            .init(name: String(localized: "Animation", comment: "Genre"),   symbol: "paintpalette.fill",      movieID: 16,    seriesID: 16),
-            .init(name: String(localized: "Mystery", comment: "Genre"),     symbol: "questionmark.circle.fill", movieID: 9648, seriesID: 9648),
-            .init(name: String(localized: "Documentary", comment: "Genre"), symbol: "book.closed.fill",       movieID: 99,    seriesID: 99),
-            .init(name: String(localized: "Family", comment: "Genre"),      symbol: "figure.2.and.child.holdinghands", movieID: 10751, seriesID: 10751),
-            .init(name: String(localized: "Adventure", comment: "Genre"),   symbol: "map.fill",               movieID: 12,    seriesID: nil),
-            .init(name: String(localized: "War", comment: "Genre"),         symbol: "shield.fill",            movieID: 10752, seriesID: 10768),
-            .init(name: String(localized: "Western", comment: "Genre"),     symbol: "hat.widebrim.fill",          movieID: 37,    seriesID: 37),
+            .init(symbol: "bolt.fill",              movieID: 28,    seriesID: 10759), // Action
+            .init(symbol: "face.smiling.inverse",   movieID: 35,    seriesID: 35), // Comedy
+            .init(symbol: "theatermasks.fill",      movieID: 18,    seriesID: 18), // Drama
+            .init(symbol: "sparkles",               movieID: 878,   seriesID: 10765), // Sci-Fi
+            .init(symbol: "moon.stars.fill",        movieID: 27,    seriesID: nil), // Horror
+            .init(symbol: "eye.fill",               movieID: 53,    seriesID: nil), // Thriller
+            .init(symbol: "heart.fill",             movieID: 10749, seriesID: nil), // Romance
+            .init(symbol: "key.fill",            movieID: 80,    seriesID: 80), // Crime
+            .init(symbol: "wand.and.sparkles",         movieID: 14,    seriesID: nil), // Fantasy
+            .init(symbol: "paintpalette.fill",      movieID: 16,    seriesID: 16), // Animation
+            .init(symbol: "questionmark.circle.fill", movieID: 9648, seriesID: 9648), // Mystery
+            .init(symbol: "book.closed.fill",       movieID: 99,    seriesID: 99), // Documentary
+            .init(symbol: "figure.2.and.child.holdinghands", movieID: 10751, seriesID: 10751), // Family
+            .init(symbol: "map.fill",               movieID: 12,    seriesID: nil), // Adventure
+            .init(symbol: "shield.fill",            movieID: 10752, seriesID: 10768), // War
+            .init(symbol: "hat.widebrim.fill",          movieID: 37,    seriesID: 37), // Western
         ]
     }
 

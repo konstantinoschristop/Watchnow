@@ -60,6 +60,11 @@ struct WatchnowApp: App {
                     // enriched.
                     await KeywordEnricher.enrichWatchlist()
                 }
+                .task {
+                    // TMDB's genre names for every screen; cached, so this
+                    // only refreshes them.
+                    await GenreNames.shared.refresh()
+                }
         }
     }
 

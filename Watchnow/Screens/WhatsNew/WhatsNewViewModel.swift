@@ -268,7 +268,7 @@ final class WhatsNewViewModel: ObservableObject {
         // Matched on the English names `topGenres` is built from, shown in
         // the app's language.
         guard let genreID = titleGenres.first(where: { tmdbGenreNames[$0].map(topGenres.contains) ?? false }),
-              let genre = tmdbGenreDisplayNames[genreID] else { return nil }
+              let genre = GenreNames.shared.name(for: genreID) else { return nil }
         return String(localized: "Right in your \(genre) lane.", comment: "What's New: the title's genre is one the user saves a lot")
     }
 }

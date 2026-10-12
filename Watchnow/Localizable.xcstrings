@@ -2515,7 +2515,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "SCHAUSPIEL"
+            "value": "SCHAUSPIELER"
           }
         },
         "el": {
@@ -2579,7 +2579,7 @@
       }
     },
     "Action": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -2821,7 +2821,7 @@
       }
     },
     "Adventure": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -3162,41 +3162,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Você também curtiu"
-          }
-        }
-      }
-    },
-    "Animated": {
-      "comment": "Movie Night mood",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animation"
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Κινούμενα σχέδια"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animación"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animation"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animação"
           }
         }
       }
@@ -4165,6 +4130,41 @@
         }
       }
     },
+    "Choose Watchnow's language in iOS Settings. Titles and synopses follow it too.": {
+      "comment": "Settings footer under the Language row",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle die Sprache von Watchnow in den iOS-Einstellungen. Titel und Beschreibungen erscheinen dann ebenfalls in dieser Sprache."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Διάλεξε τη γλώσσα του Watchnow στις Ρυθμίσεις του iOS. Στην ίδια γλώσσα εμφανίζονται και οι τίτλοι και οι περιλήψεις."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el idioma de Watchnow en Ajustes de iOS. Los títulos y las sinopsis también se mostrarán en ese idioma."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez la langue de Watchnow dans l’app Réglages. Les titres et les résumés s’affichent aussi dans cette langue."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha o idioma do Watchnow nos Ajustes do iOS. Títulos e sinopses também aparecem nesse idioma."
+          }
+        }
+      }
+    },
     "Clear All": {
       "localizations": {
         "de": {
@@ -5100,7 +5100,7 @@
       }
     },
     "Drama": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -5479,7 +5479,7 @@
       }
     },
     "Family": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -5514,7 +5514,7 @@
       }
     },
     "Fantasy": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -5595,7 +5595,7 @@
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Φιλμ"
+            "value": "Ταινία"
           }
         },
         "es": {
@@ -5607,7 +5607,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pellicule"
+            "value": "Film"
           }
         },
         "pt-BR": {
@@ -6401,7 +6401,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "¿Cuántos jugadores?"
+            "value": "¿Cuántas personas?"
           }
         },
         "fr": {
@@ -7176,6 +7176,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Principais trabalhos"
+          }
+        }
+      }
+    },
+    "Language": {
+      "comment": "Settings row: the app's language",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprache"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Γλώσσα"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langue"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma"
           }
         }
       }
@@ -8251,7 +8286,7 @@
       }
     },
     "Mystery": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -8399,7 +8434,7 @@
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Νέος φάκελος"
+            "value": "Νέο"
           }
         },
         "es": {
@@ -10047,6 +10082,41 @@
         }
       }
     },
+    "Opens iOS Settings": {
+      "comment": "Accessibility hint: the Language row opens the iOS Settings app",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet die iOS-Einstellungen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ανοίγει τις Ρυθμίσεις του iOS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Ajustes de iOS"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre l’app Réglages"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre os Ajustes do iOS"
+          }
+        }
+      }
+    },
     "Out now": {
       "comment": "Release reminder notification title",
       "localizations": {
@@ -10353,7 +10423,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Retomar apresentação"
+            "value": "Reproduzir apresentação"
           }
         }
       }
@@ -12300,41 +12370,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Science-fiction"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ficção científica"
-          }
-        }
-      }
-    },
-    "Sci-fi": {
-      "comment": "Movie Night mood",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sci-Fi"
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sci-fi"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ciencia ficción"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SF"
           }
         },
         "pt-BR": {
@@ -14943,7 +14978,7 @@
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Η κορυφαία από τις ταινίες που κράτησες."
+            "value": "Ο κορυφαίος τίτλος από όσους κράτησες."
           }
         },
         "es": {
@@ -15970,7 +16005,7 @@
       }
     },
     "Western": {
-      "comment": "Genre\nMovie Night mood",
+      "comment": "Genre",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -16070,7 +16105,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Qual é o clima de hoje?"
+            "value": "O que todo mundo está a fim de assistir?"
           }
         }
       }

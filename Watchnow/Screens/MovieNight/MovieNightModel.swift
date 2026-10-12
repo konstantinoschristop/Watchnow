@@ -25,27 +25,34 @@ import Foundation
 struct Mood: Identifiable, Hashable {
 
     let id: String
-    let label: String
+    /// The mood's own word ("Funny", "Tense"). Nil for a mood that is simply
+    /// a genre, which is named as everywhere else in the app.
+    let moodLabel: String?
     /// SF Symbol shown on the unselected chip.
     let symbol: String
     /// TMDB movie genre IDs this mood maps to.
     let genreIDs: [Int]
 
+    /// What the chip says.
+    @MainActor var label: String {
+        moodLabel ?? genreIDs.first.flatMap(GenreNames.shared.name) ?? id
+    }
+
     static let all: [Mood] = [
-        Mood(id: "funny",     label: String(localized: "Funny", comment: "Movie Night mood"),     symbol: "face.smiling",      genreIDs: [35]),
-        Mood(id: "action",    label: String(localized: "Action", comment: "Movie Night mood"),    symbol: "flame.fill",        genreIDs: [28]),
-        Mood(id: "scary",     label: String(localized: "Scary", comment: "Movie Night mood"),     symbol: "moon.stars.fill",   genreIDs: [27]),
-        Mood(id: "romantic",  label: String(localized: "Romantic", comment: "Movie Night mood"),  symbol: "heart.fill",        genreIDs: [10749]),
-        Mood(id: "tense",     label: String(localized: "Tense", comment: "Movie Night mood"),     symbol: "bolt.fill",         genreIDs: [53, 80]),
-        Mood(id: "scifi",     label: String(localized: "Sci-fi", comment: "Movie Night mood"),    symbol: "atom",              genreIDs: [878]),
-        Mood(id: "mystery",   label: String(localized: "Mystery", comment: "Movie Night mood"),   symbol: "magnifyingglass",   genreIDs: [9648]),
-        Mood(id: "drama",     label: String(localized: "Drama", comment: "Movie Night mood"),     symbol: "cloud.rain.fill",   genreIDs: [18]),
-        Mood(id: "feelgood",  label: String(localized: "Feel-good", comment: "Movie Night mood"), symbol: "sun.max.fill",      genreIDs: [35, 10402]),
-        Mood(id: "family",    label: String(localized: "Family", comment: "Movie Night mood"),    symbol: "teddybear.fill",    genreIDs: [10751]),
-        Mood(id: "fantasy",   label: String(localized: "Fantasy", comment: "Movie Night mood"),   symbol: "wand.and.stars",    genreIDs: [14]),
-        Mood(id: "adventure", label: String(localized: "Adventure", comment: "Movie Night mood"), symbol: "map.fill",          genreIDs: [12]),
-        Mood(id: "animated",  label: String(localized: "Animated", comment: "Movie Night mood"),  symbol: "paintpalette.fill", genreIDs: [16]),
-        Mood(id: "western",   label: String(localized: "Western", comment: "Movie Night mood"),   symbol: "hat.cap.fill",      genreIDs: [37])
+        Mood(id: "funny",     moodLabel: String(localized: "Funny", comment: "Movie Night mood"),     symbol: "face.smiling",      genreIDs: [35]),
+        Mood(id: "action",    moodLabel: nil,                                                         symbol: "flame.fill",        genreIDs: [28]),
+        Mood(id: "scary",     moodLabel: String(localized: "Scary", comment: "Movie Night mood"),     symbol: "moon.stars.fill",   genreIDs: [27]),
+        Mood(id: "romantic",  moodLabel: String(localized: "Romantic", comment: "Movie Night mood"),  symbol: "heart.fill",        genreIDs: [10749]),
+        Mood(id: "tense",     moodLabel: String(localized: "Tense", comment: "Movie Night mood"),     symbol: "bolt.fill",         genreIDs: [53, 80]),
+        Mood(id: "scifi",     moodLabel: nil,                                                         symbol: "atom",              genreIDs: [878]),
+        Mood(id: "mystery",   moodLabel: nil,                                                         symbol: "magnifyingglass",   genreIDs: [9648]),
+        Mood(id: "drama",     moodLabel: nil,                                                         symbol: "cloud.rain.fill",   genreIDs: [18]),
+        Mood(id: "feelgood",  moodLabel: String(localized: "Feel-good", comment: "Movie Night mood"), symbol: "sun.max.fill",      genreIDs: [35, 10402]),
+        Mood(id: "family",    moodLabel: nil,                                                         symbol: "teddybear.fill",    genreIDs: [10751]),
+        Mood(id: "fantasy",   moodLabel: nil,                                                         symbol: "wand.and.stars",    genreIDs: [14]),
+        Mood(id: "adventure", moodLabel: nil,                                                         symbol: "map.fill",          genreIDs: [12]),
+        Mood(id: "animated",  moodLabel: nil,                                                         symbol: "paintpalette.fill", genreIDs: [16]),
+        Mood(id: "western",   moodLabel: nil,                                                         symbol: "hat.cap.fill",      genreIDs: [37])
     ]
 }
 
@@ -130,15 +137,10 @@ enum MovieNightPhase {
 /// `genre_ids` on the discover response) without an extra fetch.
 enum MovieGenres {
 
-    /// `tmdbGenreDisplayNames`, plus the two movie genres the feed's table
-    /// leaves out.
-    static let names: [Int: String] = tmdbGenreDisplayNames.merging([
-        10402: String(localized: "Music", comment: "Genre"),
-        10770: String(localized: "TV Movie", comment: "Genre: a film made for television"),
-    ]) { current, _ in current }
-
-    /// The first `limit` named genres for a result's `genre_ids`.
+    /// The first `limit` named genres for a result's `genre_ids`, named as
+    /// every other screen names them (`GenreNames`).
+    @MainActor
     static func names(for ids: [Int]?, limit: Int = 3) -> [String] {
-        (ids ?? []).compactMap { names[$0] }.prefix(limit).map { $0 }
+        (ids ?? []).compactMap(GenreNames.shared.name).prefix(limit).map { $0 }
     }
 }

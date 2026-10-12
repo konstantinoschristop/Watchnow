@@ -131,6 +131,10 @@ enum API {
         static func personCombinedCredits(id: Int) -> String {
             return "\(API.baseURL)/person/\(id)/combined_credits?api_key=\(API.key)&language=\(API.language)"
         }
+        /// TMDB's genre names for `type` ("movie" or "tv") — see `GenreNames`.
+        static func genres(type: String) -> String {
+            return "\(API.baseURL)/genre/\(type)/list?api_key=\(API.key)&language=\(API.language)"
+        }
         static func collection(id: Int) -> String {
             return "\(API.baseURL)/collection/\(id)?api_key=\(API.key)&language=\(API.language)"
         }

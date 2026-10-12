@@ -75,6 +75,11 @@ final class ServiceInvocation: BaseNetworkService,
         return try await request(urlString: urlString)
     }
 
+    /// TMDB's genre list for one media type, in the app's TMDB language.
+    func fetchGenres(screenType: ScreenTypes) async throws -> GenresResponse {
+        try await request(urlString: API.Common.genres(type: screenType.rawValue))
+    }
+
     func fetchCollection(collectionID: Int) async throws -> CollectionResponse {
         let urlString = API.Common.collection(id: collectionID)
         return try await request(urlString: urlString)
