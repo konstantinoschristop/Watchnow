@@ -258,9 +258,9 @@ struct WhatsNewDebugView: View {
         NavigationStack {
             Form {
                 Section {
-                    Button("Show What's New") { showBriefing(force: true) }
-                    Button("Run Real Launch Check") { showBriefing(force: false) }
-                    Button("Run Real Sync Now") {
+                    Button(debug: "Show What's New") { showBriefing(force: true) }
+                    Button(debug: "Run Real Launch Check") { showBriefing(force: false) }
+                    Button(debug: "Run Real Sync Now") {
                         status = "Syncing watchlist against TMDB…"
                         Task {
                             let found = await WatchlistChangeMonitor.syncIfNeeded(force: true)
@@ -269,12 +269,12 @@ struct WhatsNewDebugView: View {
                         }
                     }
                 } header: {
-                    Text("Present")
+                    Text(verbatim: "Present")
                 } footer: {
-                    Text("\"Show\" presents whatever is unseen through the real pipeline. \"Launch Check\" also applies the away-for-24h gate.")
+                    Text(verbatim: "\"Show\" presents whatever is unseen through the real pipeline. \"Launch Check\" also applies the away-for-24h gate.")
                 }
 
-                Section("Generate Scenario") {
+                Section(debug: "Generate Scenario") {
                     ForEach(WhatsNewDebugScenario.allCases) { scenario in
                         Button(scenario.rawValue) {
                             status = "Generating…"
@@ -286,42 +286,42 @@ struct WhatsNewDebugView: View {
                     }
                 }
 
-                Section("Time Travel") {
-                    Button("Simulate Returning After 1 Day") {
+                Section(debug: "Time Travel") {
+                    Button(debug: "Simulate Returning After 1 Day") {
                         WatchlistChangeStore.debugShiftLastLaunch(by: 25 * 3600)
                         status = "Last open moved 25h back — the launch gate now sees you as away."
                     }
-                    Button("Simulate Returning After 7 Days") {
+                    Button(debug: "Simulate Returning After 7 Days") {
                         WatchlistChangeStore.debugShiftLastLaunch(by: 7 * 24 * 3600)
                         status = "Last open moved 7 days back."
                     }
                 }
 
                 Section {
-                    Button("Mark All Seen") {
+                    Button(debug: "Mark All Seen") {
                         WatchlistChangeStore.markAllSeen()
                         status = "All pending changes marked seen."
                         refreshTick += 1
                     }
-                    Button("Reset What's New State", role: .destructive) {
+                    Button(debug: "Reset What's New State", role: .destructive) {
                         WatchlistChangeStore.reset()
                         status = "Snapshots, changes, seen ids and timestamps wiped."
                         refreshTick += 1
                     }
                 } header: {
-                    Text("State")
+                    Text(verbatim: "State")
                 } footer: {
                     stateFooter
                 }
 
                 if !status.isEmpty {
-                    Section("Result") {
+                    Section(debug: "Result") {
                         Text(status)
                             .font(.footnote)
                     }
                 }
             }
-            .navigationTitle("What's New Testing")
+            .navigationTitle(Text(verbatim: "What's New Testing"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -334,7 +334,7 @@ struct WhatsNewDebugView: View {
     private var stateFooter: some View {
         // refreshTick forces this to re-read the store after actions.
         let unseen = WatchlistChangeStore.unseenChanges().count
-        return Text("Unseen: \(unseen) · Seen: \(WatchlistChangeStore.seenCount) · Snapshots: \(WatchlistChangeStore.snapshotCount) · Tick \(refreshTick)")
+        return Text(verbatim: "Unseen: \(unseen) · Seen: \(WatchlistChangeStore.seenCount) · Snapshots: \(WatchlistChangeStore.snapshotCount) · Tick \(refreshTick)")
             .font(.caption2)
     }
 

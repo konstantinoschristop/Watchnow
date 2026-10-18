@@ -73,3 +73,26 @@ extension View {
             .listRowBackground(Color.clear)
     }
 }
+
+// MARK: - Debug-only text
+
+#if DEBUG
+// The debug screens' text is never translated, so it is kept out of the
+// String Catalog. Plain literals would be extracted into it — and since a
+// Release build doesn't compile these screens, every archive would drop the
+// entries and the next Debug build would add them back.
+
+extension Button where Label == Text {
+    /// A button whose title is shown as written, never localized.
+    init(debug title: String, role: ButtonRole? = nil, action: @escaping () -> Void) {
+        self.init(role: role, action: action) { Text(verbatim: title) }
+    }
+}
+
+extension Section where Parent == Text, Content: View, Footer == EmptyView {
+    /// A section whose header is shown as written, never localized.
+    init(debug title: String, @ViewBuilder content: () -> Content) {
+        self.init(content: content, header: { Text(verbatim: title) })
+    }
+}
+#endif

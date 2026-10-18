@@ -269,7 +269,7 @@ extension ContentView {
                             } label: {
                                 Image(systemName: "hammer.circle")
                             }
-                            .accessibilityLabel("What's New Testing")
+                            .accessibilityLabel(Text(verbatim: "What's New Testing"))
                         }
                     }
                 }

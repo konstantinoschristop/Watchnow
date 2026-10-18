@@ -26,23 +26,23 @@ struct SettingsDebugSection: View {
 
     var body: some View {
         Section {
-            Button("Run refresh + plan now") { run(runRefresh) }
-            Button("Show planned alerts") { run(showPlan) }
-            Button("Show pending notifications") { run(showPending) }
-            Button("Fire sample alert") { run(fireSample) }
-            Button("Reset alert preferences", role: .destructive) {
+            Button(debug: "Run refresh + plan now") { run(runRefresh) }
+            Button(debug: "Show planned alerts") { run(showPlan) }
+            Button(debug: "Show pending notifications") { run(showPending) }
+            Button(debug: "Fire sample alert") { run(fireSample) }
+            Button(debug: "Reset alert preferences", role: .destructive) {
                 // Also clears the alerted-change ledger, so a "now
                 // streaming" change can be offered again for testing.
                 AlertPreferences.reset()
                 status = "Alert preferences and alerted-change ledger reset"
                 lines = []
             }
-            Button("Reset onboarding", role: .destructive) {
+            Button(debug: "Reset onboarding", role: .destructive) {
                 OnboardingState.reset()
                 status = "Onboarding will run again on next launch"
                 lines = []
             }
-            Button("Mark all as unwatched", role: .destructive) {
+            Button(debug: "Mark all as unwatched", role: .destructive) {
                 WatchedStore.reset()
                 status = "Watched state cleared"
                 lines = []
@@ -59,9 +59,9 @@ struct SettingsDebugSection: View {
                     .foregroundStyle(.secondary)
             }
         } header: {
-            Text("Developer")
+            Text(verbatim: "Developer")
         } footer: {
-            Text("Debug builds only. Note that manual bell reminders fire ~3s after being set in Debug, so their dates here are not the real ones.")
+            Text(verbatim: "Debug builds only. Note that manual bell reminders fire ~3s after being set in Debug, so their dates here are not the real ones.")
         }
         .disabled(isWorking)
     }
