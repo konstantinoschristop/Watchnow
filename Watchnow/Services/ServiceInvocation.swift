@@ -50,7 +50,13 @@ final class ServiceInvocation: BaseNetworkService,
     }
 
     func fetchDetails(screenType: ScreenTypes, id: String) async throws -> ResultDetailsResponse {
-        let urlString = API.Common.details(screenType: screenType.rawValue, id: id)
+        // Age ratings, and for series the IMDb id they keep in
+        // `external_ids` — a few hundred bytes more on each request beats a
+        // second round trip.
+        let urlString = API.Common.details(screenType: screenType.rawValue, id: id,
+                                           appending: screenType == .tv
+                                               ? ["external_ids", "content_ratings"]
+                                               : ["release_dates"])
         return try await request(urlString: urlString)
     }
 

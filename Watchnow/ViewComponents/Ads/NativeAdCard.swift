@@ -93,7 +93,22 @@ extension NativeAdLoader: NativeAdLoaderDelegate {
 /// the failure branch really does occupy zero space.
 struct NativeAdCard: View {
 
+    enum Layout {
+        /// Media in the poster's place, headline and CTA under it, like
+        /// the home feed's `BottomCard`.
+        case poster
+        /// One card that holds the whole ad: the media across the top at
+        /// close to its own aspect ratio, then the label, headline and a
+        /// CTA button. For rows of 2:3 posters, where most creatives —
+        /// landscape banners — would otherwise sit letterboxed in a tall
+        /// frame. Give it about two posters' width: AdMob wants the media
+        /// at least 120pt in each direction, which a landscape creative
+        /// only reaches in a wide card.
+        case sponsored
+    }
+
     let posterHeight: CGFloat
+    var layout: Layout = .poster
     /// Card footprint, matching the neighbouring poster cards.
     var cardWidth: CGFloat? = nil
     var cardHeight: CGFloat? = nil
@@ -108,7 +123,7 @@ struct NativeAdCard: View {
         Group {
             if let ad = loader.nativeAd {
                 sized {
-                    NativeAdCardView(nativeAd: ad, posterHeight: posterHeight)
+                    NativeAdCardView(nativeAd: ad, posterHeight: posterHeight, layout: layout)
                 }
             } else if loader.failed {
                 // No fill — take up no space at all.
@@ -116,7 +131,8 @@ struct NativeAdCard: View {
             } else {
                 // Neutral placeholder keeps the row height steady while loading.
                 sized {
-                    RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
+                    RoundedRectangle(cornerRadius: layout == .sponsored ? AppRadius.panel : AppRadius.card,
+                                     style: .continuous)
                         .fill(Color(.secondarySystemBackground))
                         .frame(height: posterHeight)
                         .frame(maxHeight: .infinity, alignment: .top)
@@ -144,8 +160,16 @@ private struct NativeAdCardView: UIViewRepresentable {
 
     let nativeAd: NativeAd
     let posterHeight: CGFloat
+    var layout: NativeAdCard.Layout = .poster
 
     func makeUIView(context: Context) -> NativeAdView {
+        switch layout {
+        case .poster:    return makePosterView()
+        case .sponsored: return makeSponsoredView()
+        }
+    }
+
+    private func makePosterView() -> NativeAdView {
         let adView = NativeAdView()
 
         let media = MediaView()
@@ -217,6 +241,107 @@ private struct NativeAdCardView: UIViewRepresentable {
 
         // Assigning the ad last wires everything up and starts impression
         // tracking.
+        adView.nativeAd = nativeAd
+        return adView
+    }
+
+    /// See `NativeAdCard.Layout.sponsored`.
+    private func makeSponsoredView() -> NativeAdView {
+        let adView = NativeAdView()
+        adView.backgroundColor = .tertiarySystemBackground
+        adView.layer.cornerRadius = 16
+        adView.layer.cornerCurve = .continuous
+        adView.clipsToBounds = true
+        adView.layer.borderWidth = 0.5
+        adView.layer.borderColor = UIColor.separator.cgColor
+
+        let media = MediaView()
+        media.translatesAutoresizingMaskIntoConstraints = false
+        media.contentMode = .scaleAspectFill
+        media.clipsToBounds = true
+        media.backgroundColor = .secondarySystemBackground
+
+        let badge = PaddingLabel()
+        badge.translatesAutoresizingMaskIntoConstraints = false
+        badge.text = String(localized: "Ad", comment: "Label marking an advertisement")
+        badge.font = .systemFont(ofSize: 9, weight: .bold)
+        badge.textColor = .black
+        badge.backgroundColor = .systemYellow
+        badge.layer.cornerRadius = 4
+        badge.clipsToBounds = true
+
+        let headline = UILabel()
+        headline.translatesAutoresizingMaskIntoConstraints = false
+        headline.font = .systemFont(ofSize: 13, weight: .semibold)
+        headline.numberOfLines = 2
+        headline.textColor = .label
+        headline.text = nativeAd.headline
+
+        // A label dressed as a button: the SDK takes the tap on the ad
+        // view, so the CTA mustn't intercept it.
+        let cta = UILabel()
+        cta.translatesAutoresizingMaskIntoConstraints = false
+        cta.font = .systemFont(ofSize: 12, weight: .bold)
+        cta.textColor = .white
+        cta.textAlignment = .center
+        cta.backgroundColor = .tintColor
+        cta.layer.cornerRadius = 14
+        cta.layer.cornerCurve = .continuous
+        cta.clipsToBounds = true
+        cta.isUserInteractionEnabled = false
+        cta.adjustsFontSizeToFitWidth = true
+        cta.minimumScaleFactor = 0.8
+
+        adView.addSubview(media)
+        adView.addSubview(badge)
+        adView.addSubview(headline)
+        adView.addSubview(cta)
+
+        // The creative at its own shape, as wide as the card, held between
+        // AdMob's 120pt minimum and a cap that leaves room for the text;
+        // outside that range it is cropped (never stretched) to fit.
+        let ratio = nativeAd.mediaContent.aspectRatio > 0 ? nativeAd.mediaContent.aspectRatio : 16.0 / 9.0
+        let naturalHeight = media.heightAnchor.constraint(equalTo: media.widthAnchor, multiplier: 1 / ratio)
+        naturalHeight.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            media.topAnchor.constraint(equalTo: adView.topAnchor),
+            media.leadingAnchor.constraint(equalTo: adView.leadingAnchor),
+            media.trailingAnchor.constraint(equalTo: adView.trailingAnchor),
+            naturalHeight,
+            media.heightAnchor.constraint(greaterThanOrEqualToConstant: 120),
+            media.heightAnchor.constraint(lessThanOrEqualToConstant: 136),
+
+            badge.topAnchor.constraint(equalTo: media.bottomAnchor, constant: 8),
+            badge.leadingAnchor.constraint(equalTo: adView.leadingAnchor, constant: 10),
+
+            headline.topAnchor.constraint(equalTo: badge.bottomAnchor, constant: 5),
+            headline.leadingAnchor.constraint(equalTo: adView.leadingAnchor, constant: 10),
+            headline.trailingAnchor.constraint(equalTo: adView.trailingAnchor, constant: -10),
+            headline.bottomAnchor.constraint(lessThanOrEqualTo: cta.topAnchor, constant: -6),
+
+            cta.leadingAnchor.constraint(equalTo: adView.leadingAnchor, constant: 10),
+            cta.trailingAnchor.constraint(equalTo: adView.trailingAnchor, constant: -10),
+            cta.bottomAnchor.constraint(equalTo: adView.bottomAnchor, constant: -10),
+            cta.heightAnchor.constraint(equalToConstant: 28)
+        ])
+
+        adView.mediaView = media
+        media.mediaContent = nativeAd.mediaContent
+        adView.headlineView = headline
+
+        if let action = nativeAd.callToAction {
+            cta.text = action.uppercased(with: .current)
+            adView.callToActionView = cta
+        } else if let advertiser = nativeAd.advertiser {
+            cta.text = advertiser
+            cta.textColor = .tintColor
+            cta.backgroundColor = UIColor.tintColor.withAlphaComponent(0.12)
+            adView.advertiserView = cta
+        } else {
+            cta.isHidden = true
+        }
+
         adView.nativeAd = nativeAd
         return adView
     }

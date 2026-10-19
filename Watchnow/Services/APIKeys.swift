@@ -90,6 +90,10 @@ enum API {
         case poster = "w342"
         /// Full-width backdrops and hero art.
         case backdrop = "w780"
+        /// A backdrop scaled *up* to fill a short, full-bleed band — the
+        /// details hero, where a 16:9 still is cropped at the sides to fill
+        /// a strip ~1.3:1 and 780px would be visibly soft at 3x.
+        case heroBackdrop = "w1280"
         /// The master. Only for something being viewed at full size.
         case original
     }
@@ -230,8 +234,14 @@ enum API {
             return "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&include_adult=false&sort_by=popularity.desc&vote_count.gte=\(voteCountGTE)&with_genres=\(genreID)&page=\(page)"
         }
 
-        static func details(screenType: String, id: String) -> String {
-            return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)&language=\(API.language)"
+        /// - Parameter appending: sub-requests TMDB folds into the same
+        ///   response (`append_to_response`) — the details screen asks for
+        ///   age ratings and, for series, the IMDb id. Empty for every other
+        ///   caller, so the list backfill's lookups stay as small as they
+        ///   were.
+        static func details(screenType: String, id: String, appending: [String] = []) -> String {
+            let extras = appending.isEmpty ? "" : "&append_to_response=" + appending.joined(separator: ",")
+            return "\(API.baseURL)/\(screenType)/\(id)?api_key=\(API.key)&language=\(API.language)\(extras)"
         }
         static func imageUrl(imageId: String) -> String {
             return API.imageBaseURL + imageId

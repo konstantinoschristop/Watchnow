@@ -42,6 +42,77 @@ struct ResultDetailsResponse: Codable {
     /// requested language.
     var original_title: String? = nil
     var original_name: String? = nil
+    /// Series only, and only when asked for (`append_to_response`). The
+    /// About card reads the IMDb id from here for series; movies have
+    /// `imdb_id` above.
+    var external_ids: ExternalIDs? = nil
+    /// Series: the age rating per country (`append_to_response`).
+    var content_ratings: ContentRatings? = nil
+    /// Films: release dates per country, which is where TMDB keeps their
+    /// age ratings (`append_to_response`).
+    var release_dates: ReleaseDates? = nil
+    /// Series: typical episode lengths in minutes. Often empty on newer
+    /// shows, which is why `typicalEpisodeMinutes` falls back.
+    var episode_run_time: [Int]? = nil
+
+    struct ExternalIDs: Codable, Hashable {
+        let imdb_id: String?
+    }
+
+    struct ContentRatings: Codable, Hashable {
+        let results: [Entry]?
+        struct Entry: Codable, Hashable {
+            let iso_3166_1: String?
+            let rating: String?
+        }
+    }
+
+    struct ReleaseDates: Codable, Hashable {
+        let results: [Entry]?
+        struct Entry: Codable, Hashable {
+            let iso_3166_1: String?
+            let release_dates: [Release]?
+        }
+        struct Release: Codable, Hashable {
+            let certification: String?
+            /// 1 premiere, 2 limited, 3 theatrical, 4 digital, 5 physical, 6 TV.
+            let type: Int?
+        }
+    }
+
+    /// The age rating in `region` — "TV-MA", "PG-13", "16" — or the US one
+    /// when that country has none on file.
+    func certification(region: String) -> String? {
+        for code in [region, "US"] {
+            if let rating = content_ratings?.results?
+                .first(where: { $0.iso_3166_1 == code })?.rating,
+               !rating.isEmpty {
+                return rating
+            }
+            if let releases = release_dates?.results?.first(where: { $0.iso_3166_1 == code })?.release_dates {
+                // The theatrical release's rating first; any other after.
+                let rated = releases.filter { !($0.certification ?? "").isEmpty }
+                if let rating = (rated.first(where: { $0.type == 3 }) ?? rated.first)?.certification {
+                    return rating
+                }
+            }
+        }
+        return nil
+    }
+
+    /// How long an episode usually runs, in minutes.
+    var typicalEpisodeMinutes: Int? {
+        if let listed = episode_run_time?.first(where: { $0 > 0 }) { return listed }
+        if let last = last_episode_to_air?.runtime, last > 0 { return last }
+        return nil
+    }
+
+    /// The title's IMDb page, from whichever field this kind of title
+    /// keeps its id in.
+    var imdbURL: URL? {
+        guard let id = imdb_id ?? external_ids?.imdb_id, !id.isEmpty else { return nil }
+        return URL(string: "https://www.imdb.com/title/\(id)/")
+    }
 
     func getSeasons() -> [Season]? {
         return seasons?.filter({ $0.season_number != 0 })
@@ -158,6 +229,9 @@ struct Season: Codable, Hashable, Identifiable {
     var overview: String?
     var poster_path: String?
     var season_number: Int?
+    /// TMDB's season score, 0–10. `0` means nobody has rated it yet — unaired
+    /// seasons and Specials both come back that way.
+    var vote_average: Double?
 
     func getAirDate() -> String? {
 
@@ -193,4 +267,6 @@ struct Collection: Codable, Hashable {
     var name: String?
     var backdrop_path: String?
     var poster_path: String?
+    /// Set on `created_by` entries (people), nil on a film collection.
+    var profile_path: String? = nil
 }

@@ -14,16 +14,16 @@ struct VideoResponse: Codable {
     /// in English, then whatever there is. The videos request asks for the
     /// device language, English and no language at all.
     func getVideoURL() -> URL? {
-        let trailers = results?.filter { $0.official == true && $0.type == "Trailer" } ?? []
+        trailerKey.flatMap { URL(string: API.Common.youtubeUrl(videoId: $0)) }
+    }
+
+    /// The YouTube id of that trailer.
+    var trailerKey: String? {
+        let trailers = results?.filter { $0.official == true && $0.type == "Trailer" && ($0.site ?? "YouTube") == "YouTube" } ?? []
         let trailer = trailers.first { $0.iso_639_1 == API.languageCode }
             ?? trailers.first { $0.iso_639_1 == "en" }
             ?? trailers.first
-
-        if let key = trailer?.key {
-            return URL(string: API.Common.youtubeUrl(videoId: key))
-        }
-
-        return nil
+        return trailer?.key
     }
 }
 

@@ -8,6 +8,7 @@ import Foundation
 protocol DetailServiceProtocol: AnyObject, Sendable {
     func fetchCredits(screenType: ScreenTypes, id: String) async throws -> ResultCreditsResponse
     func fetchSimilars(screenType: ScreenTypes, id: String) async throws -> GetSimilarModel
+    func fetchRecommendations(screenType: ScreenTypes, id: Int) async throws -> GenericResultResponse
     func fetchReviews(screenType: ScreenTypes, id: String) async throws -> ResultReviewsResponse
     func fetchSearchResults(search: String) async throws -> SearchResponse
     func fetchVideos(screenType: ScreenTypes, id: String) async throws -> VideoResponse

@@ -38,15 +38,10 @@ struct MoreLikeThisSection: View {
 
     var body: some View {
         if hasSimilars || hasCollection {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionHeaderView(
-                    title: sectionTitle,
-                    subtitle: sectionSubtitle,
-                    icon: sectionIcon,
-                    tint: sectionTint
-                ) {
+            VStack(alignment: .leading, spacing: 12) {
+                DetailsSectionHeader(title: sectionTitle) {
                     if hasBoth {
-                        Picker("", selection: $mode) {
+                        Picker("", selection: $mode.animation(.snappy)) {
                             ForEach(Mode.allCases) { m in
                                 Text(m.title).tag(m)
                             }
@@ -61,6 +56,10 @@ struct MoreLikeThisSection: View {
                     screenType: screenType,
                     namespace: namespace
                 )
+                // A fresh row per mode, cross-faded, rather than one row
+                // whose cards morph into other titles.
+                .id(mode)
+                .transition(.opacity)
             }
             .onAppear {
                 // If only one of the two exists, make sure the picker mode
@@ -85,29 +84,4 @@ struct MoreLikeThisSection: View {
             ? String(localized: "Similar series", comment: "Details section title")
             : String(localized: "Similar movies", comment: "Details section title")
     }
-
-    private var sectionSubtitle: String? {
-        if hasBoth { return nil }
-        if hasCollection { return String(localized: "Parts of the collection", comment: "Subtitle: other films in the same series of films") }
-        return String(localized: "You might also like")
-    }
-
-    /// Icon flips between grid (similar / mixed) and film reel (collection-
-    /// only) so the glyph gives a second visual cue about what's in the row
-    /// before the user reads the title.
-    private var sectionIcon: String {
-        if hasBoth { return "square.grid.2x2.fill" }
-        if hasCollection { return "film.stack.fill" }
-        return "square.grid.2x2.fill"
-    }
-
-    /// Accent for mixed/similar, indigo for collection-only — the collection
-    /// gets its own colour so a user flipping between details screens can
-    /// tell at a glance "this title is part of a franchise" just from the
-    /// header tint.
-    /// Always the accent — colour-coding "this is a collection" vs
-    /// "more like this" was visual noise once the rest of the app
-    /// settled on a single accent palette. The icon (a different SF
-    /// Symbol per mode) still carries the differentiation.
-    private var sectionTint: Color { .accentColor }
 }

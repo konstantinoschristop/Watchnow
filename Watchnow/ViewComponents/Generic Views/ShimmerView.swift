@@ -105,9 +105,9 @@ struct DetailsSkeleton: View {
     var body: some View {
         InlineShimmerContainer {
             VStack(alignment: .leading, spacing: 18) {
-                // Hero — the tall band the poster fills.
+                // Hero — the band the backdrop fills.
                 ShimmerBox(cornerRadius: 0)
-                    .frame(height: 420)
+                    .frame(height: 300)
 
                 VStack(alignment: .leading, spacing: 10) {
                     ShimmerBox(cornerRadius: AppRadius.micro)
@@ -117,14 +117,17 @@ struct DetailsSkeleton: View {
                 }
                 .padding(.horizontal, 16)
 
-                // Action row.
-                HStack(spacing: 10) {
-                    ShimmerBox(cornerRadius: AppRadius.panel)
+                // Action row: Save, Like, Watched, Trailer.
+                HStack(spacing: 8) {
+                    ShimmerBox(cornerRadius: AppRadius.surface)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                    ShimmerBox(cornerRadius: AppRadius.panel)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
+                        .frame(height: 50)
+                    ShimmerBox(cornerRadius: 25)
+                        .frame(width: 50, height: 50)
+                    ShimmerBox(cornerRadius: 25)
+                        .frame(width: 50, height: 50)
+                    ShimmerBox(cornerRadius: AppRadius.surface)
+                        .frame(width: 104, height: 50)
                 }
                 .padding(.horizontal, 16)
 

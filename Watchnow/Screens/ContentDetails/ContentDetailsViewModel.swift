@@ -11,6 +11,14 @@ import Foundation
 class ContentDetailsViewModel: ObservableObject {
     
     @Published private var model: ContentDetailsModel
+    /// Results that have landed but not yet reached the page. The section
+    /// requests come back within moments of each other, and every publish
+    /// re-renders the whole details page — mid-way through the arrival of
+    /// the section before. So they're gathered here and published together
+    /// a beat later, and arrive as one staggered entrance (see
+    /// `sectionArrival`). Reads see them straight away.
+    private var staged: ContentDetailsModel?
+    private var flush: Task<Void, Never>?
     @Published var apiError: Bool = false
     @Published var selectedSeason: Season = Season()
     
@@ -24,6 +32,35 @@ class ContentDetailsViewModel: ObservableObject {
         self.model.isInWatchList = WatchlistManager.existsInWatchList(result: result)
     }
     
+    /// The model as it stands, including results not yet published.
+    private var current: ContentDetailsModel { staged ?? model }
+
+    /// Changes the model. `now` publishes at once — with anything staged —
+    /// for what the reader did or is waiting on; otherwise the change joins
+    /// whatever else lands in the next moment.
+    private func write(now: Bool = false, _ change: (inout ContentDetailsModel) -> Void) {
+        var next = current
+        change(&next)
+        if now {
+            flush?.cancel()
+            flush = nil
+            staged = nil
+            model = next
+            return
+        }
+        staged = next
+        guard flush == nil else { return }
+        flush = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(120))
+            guard let self, !Task.isCancelled else { return }
+            self.flush = nil
+            if let staged = self.staged {
+                self.staged = nil
+                self.model = staged
+            }
+        }
+    }
+
     private func checkIfFetchingIsFinished() {
         
         if details != nil && credits != nil {
@@ -42,13 +79,35 @@ class ContentDetailsViewModel: ObservableObject {
         checkIfFetchingIsFinished()
     }
     
+    /// The "More like this" row — and Movie Coach's "similar to something
+    /// you saved" — prefer TMDB's recommendations ("people who liked this
+    /// also liked") over its similar-titles endpoint, which matches on
+    /// shared keywords and turns up things like a 1973 German melodrama
+    /// for Inception, or a Japanese anime with one vote for Breaking Bad.
+    /// Similar is the fallback for titles too obscure to have
+    /// recommendations.
+    ///
+    /// Titles almost nobody has rated are left out either way, unless that
+    /// would leave the row nearly empty.
     func getSimilars() async {
-        
-        do {
-            self.similar = try await service.fetchSimilars(screenType: self.screenType, id: self.id)
-        } catch {
-            apiError = true
+        var candidates: [Result] = []
+        if let numericID = result.id,
+           let recommended = try? await service.fetchRecommendations(screenType: screenType, id: numericID) {
+            candidates = recommended.results
         }
+        if candidates.isEmpty {
+            do {
+                candidates = try await service.fetchSimilars(screenType: self.screenType, id: self.id).results ?? []
+            } catch {
+                apiError = true
+                return
+            }
+        }
+        let established = candidates.filter { ($0.vote_count ?? 0) >= 25 }
+        self.similar = GetSimilarModel(page: 1,
+                                       results: established.count >= 4 ? established : candidates,
+                                       total_pages: 1,
+                                       total_results: nil)
     }
     
     func getReviews() async {
@@ -79,7 +138,8 @@ class ContentDetailsViewModel: ObservableObject {
             // reads directly — title, poster/backdrop — from the freshly
             // fetched details so the screen renders correctly instead of
             // showing "- -" with a broken image.
-            self.model.result = mergeIntoResult(self.model.result, from: fetched)
+            let merged = mergeIntoResult(current.result, from: fetched)
+            write(now: true) { $0.result = merged }
             if let firstSeason = fetched.seasons?.first(where: { $0.air_date != nil }) {
                 self.selectedSeason = firstSeason
             }
@@ -191,67 +251,70 @@ class ContentDetailsViewModel: ObservableObject {
 extension ContentDetailsViewModel {
     
     var credits: ResultCreditsResponse? {
-        get { model.credits }
-        set { model.credits = newValue }
+        get { current.credits }
+        set { write { $0.credits = newValue } }
     }
     
     var similar: GetSimilarModel? {
-        get { model.similar }
-        set { model.similar = newValue }
+        get { current.similar }
+        set { write { $0.similar = newValue } }
     }
     
     var reviews: ResultReviewsResponse? {
-        get { model.reviews }
-        set { model.reviews = newValue }
+        get { current.reviews }
+        set { write { $0.reviews = newValue } }
     }
     
     var videos: VideoResponse? {
-        get { model.videos }
-        set { model.videos = newValue }
+        get { current.videos }
+        set { write { $0.videos = newValue } }
     }
     
+    /// The first thing the page draws — straight to it.
     var details: ResultDetailsResponse? {
-        get { model.details }
-        set { model.details = newValue }
+        get { current.details }
+        set { write(now: true) { $0.details = newValue } }
     }
     
     var collection: CollectionResponse? {
-        get { model.collection }
-        set { model.collection = newValue }
+        get { current.collection }
+        set { write { $0.collection = newValue } }
     }
     
     var watchProviders: WatchProvidersResponse? {
-        get { model.watchProviders }
-        set { model.watchProviders = newValue }
+        get { current.watchProviders }
+        set { write { $0.watchProviders = newValue } }
     }
 
     var keywords: [String]? {
-        get { model.keywords }
-        set { model.keywords = newValue }
+        get { current.keywords }
+        set { write { $0.keywords = newValue } }
     }
     
+    /// The reader's own tap — straight to the page.
     var isInWatchList: Bool {
-        get { model.isInWatchList }
-        set { model.isInWatchList = newValue }
+        get { current.isInWatchList }
+        set { write(now: true) { $0.isInWatchList = newValue } }
     }
 
 
     var viewModelFinishedFetching: Bool {
-        get { model.viewModelFinishedFetching }
-        set { model.viewModelFinishedFetching = newValue }
+        get { current.viewModelFinishedFetching }
+        set { write { $0.viewModelFinishedFetching = newValue } }
     }
 
+    /// The last of the loading — publishes it, with anything still staged.
     var allSectionsLoaded: Bool {
-        get { model.allSectionsLoaded }
-        set { model.allSectionsLoaded = newValue }
+        get { current.allSectionsLoaded }
+        set { write(now: true) { $0.allSectionsLoaded = newValue } }
     }
     
     var screenType: ScreenTypes  {
-        get { model.screenType }
+        get { current.screenType }
     }
     
     var result: Result {
-        get { model.result }
+        get { current.result }
     }
     
     var id: String {
@@ -303,6 +366,23 @@ extension ContentDetailsViewModel {
 
     var watchProviderSafe: ProviderResults? {
         watchProviders?.results?[Self.currentRegionCode]
+    }
+
+    /// The age rating for the user's region.
+    var certification: String? {
+        details?.certification(region: Self.currentRegionCode)
+    }
+
+    /// The streaming services this title is on that the user has told us
+    /// they pay for (Movie Night's "which do you have?"), by name.
+    var ownedServiceNames: [String] {
+        let owned = Set(StreamingPreferences.providerIDs)
+        guard !owned.isEmpty else { return [] }
+        var seen = Set<Int>()
+        return (watchProviderSafe?.flatrate ?? []).compactMap { provider in
+            guard let id = provider.providerID, owned.contains(id), seen.insert(id).inserted else { return nil }
+            return provider.providerName
+        }
     }
 
     /// User's actual region (e.g. "GR", "DE", "US") — taken from
@@ -461,6 +541,24 @@ extension ContentDetailsViewModel {
     /// Nil until every parallel fetch has settled (and never for people), so
     /// the card generates once with the full picture rather than re-running
     /// as each request lands.
+    /// Posters for the Coach card's fan: this title in front, and behind it
+    /// up to two from the user's own list that sit near it — titles TMDB
+    /// calls similar first, then ones sharing a genre.
+    ///
+    /// Only ever saved titles. The fan reads as "because of these", so a
+    /// stranger's poster behind this one would be a claim Coach isn't
+    /// making. With nothing related saved, the fan is just this poster.
+    var coachPosterPaths: [String] {
+        guard let own = result.poster_path ?? details?.poster_path else { return [] }
+        let similarIDs = Set(similarsSafe.compactMap(\.id))
+        let genres = Set(likeGenreIDs)
+        let saved = WatchlistManager.watchlist.filter { $0.id != result.id && $0.poster_path != nil }
+        let isSimilar: (Result) -> Bool = { $0.id.map(similarIDs.contains) ?? false }
+        let sharesGenre: (Result) -> Bool = { !Set($0.genre_ids ?? []).isDisjoint(with: genres) }
+        let companions = saved.filter(isSimilar) + saved.filter { !isSimilar($0) && sharesGenre($0) }
+        return [own] + companions.prefix(2).compactMap(\.poster_path)
+    }
+
     var coachContext: MovieCoachContext? {
         guard screenType != .person, allSectionsLoaded, details != nil else { return nil }
         return MovieCoachContext.build(result: result,

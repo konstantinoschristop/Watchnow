@@ -47,8 +47,14 @@ enum AppRadius {
     static let panel: CGFloat = 16
 
     /// Hero surfaces: the briefing cards, swipe-deck cards, featured
-    /// carousel slides, sheets. The roundest thing on any screen.
+    /// carousel slides, sheets.
     static let hero: CGFloat = 20
+
+    /// Grouped surfaces on the details screen — the action pills, the Coach
+    /// card, the ratings card. Rounder than `hero` because they hold whole
+    /// sections rather than one piece of artwork, and at the pills' 50pt
+    /// height it reads as a capsule with a hint of shoulder.
+    static let surface: CGFloat = 24
 
     /// A `RoundedRectangle` at the given role, always `.continuous` — the
     /// squircle Apple uses, and the one the rest of the app already picked.

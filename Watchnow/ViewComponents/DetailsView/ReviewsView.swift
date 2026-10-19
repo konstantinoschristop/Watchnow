@@ -4,12 +4,21 @@
 //
 //  Created by Konstantinos Christopoulos on 5/6/22.
 //
-//  Redesigned review cards:
-//    - Circle avatar (Gravatar when available, initials fallback)
-//    - Author + date in a two-line identity block
-//    - Orange rating badge (★ N/10) pinned to the top-right
-//    - 3-line content preview with inline "Read more" expand toggle
-//    - Tapping the card opens the full review in a detail sheet
+//  The User Reviews section on the details screen.
+//
+//    User Reviews                                See all ›
+//    8 reviews · ★ 7.6 average
+//    [ quote card ][ quote card ][ quo…
+//
+//  A swipeable row of quote cards, the App Store's grammar for reviews: the
+//  review's words are the point, so each card leads with them — a few lines
+//  of the text under a large quotation mark — with the stars, the date and
+//  who wrote it framing it. The next card peeks in from the edge to say
+//  there's more. Tapping a card opens the whole review; "See all" opens the
+//  sortable list.
+//
+//  TMDB hands review text over as the reviewer typed it — Markdown, stray
+//  HTML, Windows line endings — so previews are cleaned to plain prose.
 //
 
 import SwiftUI
@@ -17,44 +26,40 @@ import SwiftUI
 struct ReviewsView: View {
 
     let reviews: [Reviews]
-    private let inlineLimit = 2
+    private let inlineLimit = 10
 
     @State private var isAllPresented = false
     @State private var isReviewPresented = false
     @State private var selectedReview: Reviews?
 
-    private var visibleReviews: [Reviews] {
-        Array(reviews.prefix(inlineLimit))
-    }
-
-    private var hasMore: Bool { reviews.count > inlineLimit }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(visibleReviews, id: \.self) { review in
-                ReviewCard(review: review) {
-                    selectedReview = review
-                    isReviewPresented = true
-                }
+            DetailsSectionHeader(title: String(localized: "User Reviews"), subtitle: summary) {
+                SeeAllButton { isAllPresented = true }
             }
 
-            if hasMore {
-                Button {
-                    isAllPresented = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("See all \(reviews.count) reviews")
-                        Image(systemName: "chevron.right")
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 12) {
+                    ForEach(Array(reviews.prefix(inlineLimit)), id: \.self) { review in
+                        ReviewQuoteCard(review: review) {
+                            selectedReview = review
+                            isReviewPresented = true
+                        }
+                        // A single review takes the full width; otherwise
+                        // the next one peeks in from the edge.
+                        .containerRelativeFrame(.horizontal) { length, _ in
+                            reviews.count == 1 ? length - 32 : length * 0.82
+                        }
+                        .carouselDepth()
                     }
-                    .appFont(14, weight: .semibold, relativeTo: .subheadline)
-                    .foregroundStyle(Color.accentColor)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 8)
                 }
-                .buttonStyle(.plain)
+                .scrollTargetLayout()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
             }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollClipDisabled()
         }
-        .padding(.horizontal, 16)
         .sheet(isPresented: $isAllPresented) {
             AllReviewsSheet(reviews: reviews)
                 .presentationDetents([.large])
@@ -63,6 +68,181 @@ struct ReviewsView: View {
             ReviewSheet(review: $selectedReview)
                 .presentationDetents([.medium, .large])
         }
+    }
+
+    /// "8 reviews · ★ 7.6 average". The average only appears once two or
+    /// more reviewers left a score — one score isn't an average.
+    private var summary: String {
+        let count = String(localized: "\(reviews.count) reviews", comment: "How many user reviews a title has")
+        let scores = reviews.compactMap { $0.author_details?.rating }.filter { $0 > 0 }
+        guard scores.count >= 2 else { return count }
+        let average = Double(scores.reduce(0, +)) / Double(scores.count)
+        return count + " · ★ " + String(localized: "\(average.ratingText) average", comment: "Average score across user reviews, e.g. 7.6 average")
+    }
+}
+
+// MARK: - Quote card
+
+private struct ReviewQuoteCard: View {
+
+    let review: Reviews
+    let onTap: () -> Void
+
+    @ScaledMetric(relativeTo: .body) private var cardHeight: CGFloat = 196
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .center) {
+                    if let rating = review.author_details?.rating, rating > 0 {
+                        ReviewStars(rating: rating)
+                    }
+                    Spacer(minLength: 8)
+                    if let date = ReviewText.date(review.created_at) {
+                        Text(date)
+                            .appFont(12, relativeTo: .caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Text(ReviewText.plain(review.content ?? ""))
+                    .appFont(15, relativeTo: .subheadline)
+                    .foregroundStyle(.primary)
+                    .lineSpacing(1.5)
+                    .lineLimit(4)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(alignment: .topLeading) {
+                        // A large, faint opening quote behind the first
+                        // line — the card's one ornament.
+                        Text(verbatim: "\u{201C}")
+                            .font(.system(size: 64, weight: .bold, design: .serif))
+                            .foregroundStyle(Color.accentColor.opacity(0.14))
+                            .offset(x: -12, y: -31)
+                            .accessibilityHidden(true)
+                    }
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: 8) {
+                    ReviewAvatar(review: review, size: 26)
+                    Text(ReviewText.author(review))
+                        .appFont(13, weight: .semibold, relativeTo: .footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .appFont(12, weight: .semibold, relativeTo: .caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding(16)
+            .frame(height: cardHeight, alignment: .top)
+            .detailsCard(radius: AppRadius.hero)
+            .contentShape(AppRadius.shape(AppRadius.hero))
+        }
+        .buttonStyle(CarouselPressStyle())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(Text("Shows the full review", comment: "Accessibility hint on a review card"))
+    }
+}
+
+/// Five stars from TMDB's 0–10 score, halves included.
+private struct ReviewStars: View {
+    let rating: Int
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(0..<5, id: \.self) { index in
+                Image(systemName: symbol(for: index))
+            }
+            Text(verbatim: "\(rating)/10")
+                .monospacedDigit()
+                .padding(.leading, 4)
+                .foregroundStyle(.secondary)
+        }
+        .appFont(11, weight: .bold, relativeTo: .caption2)
+        .foregroundStyle(RatingStyle.tint(for: Double(rating)))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Rated \(Double(rating).ratingText) out of 10", comment: "Accessibility: a 0–10 rating"))
+    }
+
+    private func symbol(for index: Int) -> String {
+        let halfStars = rating            // 0–10 is already in half-stars
+        let filled = index * 2
+        if halfStars >= filled + 2 { return "star.fill" }
+        if halfStars == filled + 1 { return "star.leadinghalf.filled" }
+        return "star"
+    }
+}
+
+/// The reviewer's picture — TMDB stores either its own image path or a
+/// full Gravatar URL behind a stray leading slash — or their initial.
+struct ReviewAvatar: View {
+    let review: Reviews
+    let size: CGFloat
+
+    var body: some View {
+        Group {
+            if let url = ReviewText.avatarURL(review.author_details?.avatar_path) {
+                RemoteImage(url: url) {
+                    initial
+                }
+            } else {
+                initial
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
+    }
+
+    private var initial: some View {
+        Circle()
+            .fill(Color.accentColor.opacity(0.14))
+            .overlay {
+                Text(String(ReviewText.author(review).prefix(1)).uppercased(with: .current))
+                    .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.accentColor)
+            }
+    }
+}
+
+/// Cleaning and formatting shared by the review views.
+enum ReviewText {
+
+    static func author(_ review: Reviews) -> String {
+        review.author_details?.username ?? review.author
+            ?? String(localized: "Anonymous", comment: "Review author with no name")
+    }
+
+    /// Markdown and HTML reduced to plain prose, paragraphs to single
+    /// line breaks — for previews, where a blank line wastes one of four.
+    static func plain(_ content: String) -> String {
+        var text = content.replacingOccurrences(of: "\r\n", with: "\n")
+        text = text.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+        if let attributed = try? AttributedString(
+            markdown: text,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
+            text = String(attributed.characters)
+        }
+        text = text.replacingOccurrences(of: "\n{2,}", with: "\n", options: .regularExpression)
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func avatarURL(_ path: String?) -> URL? {
+        guard let path, !path.isEmpty else { return nil }
+        if path.hasPrefix("/http") { return URL(string: String(path.dropFirst())) }
+        if path.hasPrefix("http") { return URL(string: path) }
+        return URL(string: API.Common.imageUrl(imageId: path, width: .poster))
+    }
+
+    static func date(_ iso: String?) -> String? {
+        guard let iso else { return nil }
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let date = parser.date(from: iso) ?? ISO8601DateFormatter().date(from: iso) else { return nil }
+        return date.formatted(date: .abbreviated, time: .omitted)
     }
 }
 
@@ -146,28 +326,8 @@ private struct ReviewCard: View {
 
     // MARK: Helpers
 
-    @ViewBuilder
     private var authorAvatar: some View {
-        if let path = review.author_details?.avatar_path,
-           path.contains("https") {
-            GenericImageView(url: path,
-                             width: 36, height: 36,
-                             cornerRadius: 0,
-                             showShadow: false)
-                .clipShape(Circle())
-                .frame(width: 36, height: 36)
-        } else {
-            // Neutral initials fallback — author identity isn't a thing
-            // that needs colour, just clarity.
-            Circle()
-                .fill(Color(.tertiarySystemFill))
-                .frame(width: 36, height: 36)
-                .overlay {
-                    Text(initials)
-                        .appFont(14, weight: .bold, relativeTo: .subheadline)
-                        .foregroundStyle(.secondary)
-                }
-        }
+        ReviewAvatar(review: review, size: 36)
     }
 
     private func ratingBadge(_ rating: Int) -> some View {
@@ -414,24 +574,8 @@ struct ReviewSheet: View {
 
     @ViewBuilder
     private var avatarView: some View {
-        if let path = review?.author_details?.avatar_path,
-           path.contains("https") {
-            GenericImageView(url: path,
-                             width: 44, height: 44,
-                             cornerRadius: 0,
-                             showShadow: false)
-                .clipShape(Circle())
-                .frame(width: 44, height: 44)
-        } else {
-            let name = review?.author_details?.username ?? review?.author ?? "?"
-            Circle()
-                .fill(Color(.tertiarySystemFill))
-                .frame(width: 44, height: 44)
-                .overlay {
-                    Text(String(name.prefix(1)).uppercased())
-                        .appFont(18, weight: .bold, relativeTo: .title3)
-                        .foregroundStyle(.secondary)
-                }
+        if let review {
+            ReviewAvatar(review: review, size: 44)
         }
     }
 

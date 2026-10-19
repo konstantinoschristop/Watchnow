@@ -372,7 +372,7 @@ enum MovieCoachService {
     /// Suggested questions, tailored to movie vs series so the sheet is
     /// useful without typing.
     static func suggestedQuestions(for context: MovieCoachContext) -> [String] {
-        var questions = [String(localized: "Is this a good choice tonight?", comment: "Movie Coach suggested question"),
+        var questions = [tonightQuestion,
                          String(localized: "Is it slow?", comment: "Movie Coach suggested question: is the pacing slow")]
 
         if context.kind == "series" {
@@ -388,8 +388,21 @@ enum MovieCoachService {
         if !context.similarSaved.isEmpty {
             questions.append(String(localized: "Is it similar to something I like?", comment: "Movie Coach suggested question"))
         }
-        questions.append(String(localized: "Why should I watch this?", comment: "Movie Coach suggested question"))
+        questions.append(whyWatchQuestion)
 
         return Array(questions.prefix(5))
+    }
+
+    /// The question behind the card's "Why you'll like it" button. Shared
+    /// with the suggestions so the sheet recognises it as already asked and
+    /// doesn't offer it again underneath its own answer.
+    /// The question the card's verdict already answers — the Ask sheet
+    /// offers it, the card's quick questions skip it.
+    static var tonightQuestion: String {
+        String(localized: "Is this a good choice tonight?", comment: "Movie Coach suggested question")
+    }
+
+    static var whyWatchQuestion: String {
+        String(localized: "Why should I watch this?", comment: "Movie Coach suggested question")
     }
 }

@@ -27,8 +27,6 @@ struct EpisodeView: View {
     var seriesID: Int? = nil
 
     @State private var isExpanded = false
-    @State private var isReminderOn = false
-    @State private var showNotificationSettingsAlert = false
 
     private let thumbWidth: CGFloat = 128
     private let thumbHeight: CGFloat = 72
@@ -40,7 +38,9 @@ struct EpisodeView: View {
                 thumbnail
                 info
                 if isFutureEpisode {
-                    reminderBell
+                    EpisodeReminderButton(episode: episode,
+                                          seriesName: seriesName,
+                                          seriesID: seriesID)
                 }
             }
             .padding(.horizontal, 16)
@@ -50,17 +50,6 @@ struct EpisodeView: View {
             Divider()
                 .padding(.leading, 16 + thumbWidth + 12)
         }
-        .task {
-            await ReminderManager.reconcileWithSystem()
-            syncReminderState()
-        }
-        .alert("Notifications are off",
-               isPresented: $showNotificationSettingsAlert) {
-            Button("Open Settings") { ReminderManager.openNotificationSettings() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Enable notifications for Watchnow in Settings to set episode reminders.")
-        }
     }
 
     // MARK: - Reminder
@@ -68,79 +57,6 @@ struct EpisodeView: View {
     private var isFutureEpisode: Bool {
         guard let airDate = episode.airDateValue() else { return false }
         return airDate > Date()
-    }
-
-    private var reminderIdentifier: String? {
-        guard let id = episode.id else { return nil }
-        return ReminderManager.episodeIdentifier(episodeID: id)
-    }
-
-    private var reminderBell: some View {
-        Button(action: toggleReminder) {
-            Image(systemName: isReminderOn ? "bell.fill" : "bell")
-                .appFont(14, weight: .semibold, relativeTo: .subheadline)
-                .foregroundStyle(isReminderOn ? Color.accentColor : .secondary)
-                .frame(width: 32, height: 32)
-                .background {
-                    Circle()
-                        .fill(isReminderOn
-                              ? Color.accentColor.opacity(0.15)
-                              : Color(.secondarySystemBackground))
-                }
-                // Visible disc stays 32pt so the row's proportions hold; the
-                // target around it reaches 44. This sits at the trailing edge
-                // of a dense episode row, which is where a short target
-                // actually costs you the tap.
-                .frame(width: AppTouch.minTarget, height: AppTouch.minTarget)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(isReminderOn ? "Cancel reminder" : "Remind me on air date")
-    }
-
-    private func syncReminderState() {
-        guard let identifier = reminderIdentifier else { return }
-        isReminderOn = ReminderManager.isScheduled(identifier: identifier)
-    }
-
-    private func toggleReminder() {
-        guard let identifier = reminderIdentifier,
-              let airDate = episode.airDateValue() else {
-            return
-        }
-
-        if isReminderOn {
-            ReminderManager.cancel(identifier: identifier)
-            isReminderOn = false
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-            return
-        }
-
-        let episodeLabel = episode.name
-            ?? String(localized: "Episode \(episode.episode_number ?? 0)", comment: "An episode with no name, by its number")
-        let body = seriesName.map {
-            String(localized: "\(episodeLabel) of \($0) airs today.", comment: "Episode reminder notification body: episode name, then series name")
-        } ?? String(localized: "\(episodeLabel) airs today.", comment: "Episode reminder notification body: episode name")
-        let deepLink = seriesID.map { DeepLink(id: $0, mediaType: .tv) }
-        Task {
-            let result = await ReminderManager.schedule(
-                identifier: identifier,
-                title: String(localized: "Airing today", comment: "Episode reminder notification title"),
-                body: body,
-                on: airDate,
-                deepLink: deepLink
-            )
-            switch result {
-            case .scheduled:
-                isReminderOn = true
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
-            case .authorizationDenied:
-                showNotificationSettingsAlert = true
-                UINotificationFeedbackGenerator().notificationOccurred(.warning)
-            case .failed:
-                UINotificationFeedbackGenerator().notificationOccurred(.warning)
-            }
-        }
     }
 
     // MARK: - Thumbnail
@@ -244,6 +160,108 @@ struct EpisodeView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - EpisodeReminderButton
+
+/// The bell that sets a reminder for an episode's air date. Shared by the
+/// episode rows and the About card's "Next episode" banner, so both set —
+/// and show — the same reminder.
+struct EpisodeReminderButton: View {
+
+    let episode: Episode
+    /// Used in the notification body; "this episode" without it.
+    var seriesName: String? = nil
+    /// Embedded in the notification's deeplink so tapping the banner opens
+    /// the series.
+    var seriesID: Int? = nil
+
+    @State private var isReminderOn = false
+    @State private var showNotificationSettingsAlert = false
+
+    var body: some View {
+        Button(action: toggleReminder) {
+            Image(systemName: isReminderOn ? "bell.fill" : "bell")
+                .appFont(14, weight: .semibold, relativeTo: .subheadline)
+                .foregroundStyle(isReminderOn ? Color.accentColor : .secondary)
+                .frame(width: 32, height: 32)
+                .background {
+                    Circle()
+                        .fill(isReminderOn
+                              ? Color.accentColor.opacity(0.15)
+                              : Color(.secondarySystemBackground))
+                }
+                // Visible disc stays 32pt so the row's proportions hold; the
+                // target around it reaches 44. This sits at the trailing edge
+                // of a dense episode row, which is where a short target
+                // actually costs you the tap.
+                .frame(width: AppTouch.minTarget, height: AppTouch.minTarget)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(isReminderOn ? "Cancel reminder" : "Remind me on air date")
+        .task {
+            await ReminderManager.reconcileWithSystem()
+            syncReminderState()
+        }
+        .alert("Notifications are off",
+               isPresented: $showNotificationSettingsAlert) {
+            Button("Open Settings") { ReminderManager.openNotificationSettings() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enable notifications for Watchnow in Settings to set episode reminders.")
+        }
+    }
+
+    private var reminderIdentifier: String? {
+        guard let id = episode.id else { return nil }
+        return ReminderManager.episodeIdentifier(episodeID: id)
+    }
+
+    private func syncReminderState() {
+        guard let identifier = reminderIdentifier else { return }
+        isReminderOn = ReminderManager.isScheduled(identifier: identifier)
+    }
+
+    private func toggleReminder() {
+        guard let identifier = reminderIdentifier,
+              let airDate = episode.airDateValue() else {
+            return
+        }
+
+        if isReminderOn {
+            ReminderManager.cancel(identifier: identifier)
+            isReminderOn = false
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            return
+        }
+
+        let episodeLabel = episode.name
+            ?? String(localized: "Episode \(episode.episode_number ?? 0)", comment: "An episode with no name, by its number")
+        let body = seriesName.map {
+            String(localized: "\(episodeLabel) of \($0) airs today.", comment: "Episode reminder notification body: episode name, then series name")
+        } ?? String(localized: "\(episodeLabel) airs today.", comment: "Episode reminder notification body: episode name")
+        let deepLink = seriesID.map { DeepLink(id: $0, mediaType: .tv) }
+        Task {
+            let result = await ReminderManager.schedule(
+                identifier: identifier,
+                title: String(localized: "Airing today", comment: "Episode reminder notification title"),
+                body: body,
+                on: airDate,
+                deepLink: deepLink
+            )
+            switch result {
+            case .scheduled:
+                isReminderOn = true
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            case .authorizationDenied:
+                showNotificationSettingsAlert = true
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            case .failed:
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            }
+        }
     }
 }
 

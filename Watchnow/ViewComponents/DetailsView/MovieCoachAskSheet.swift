@@ -12,6 +12,9 @@ import SwiftUI
 struct MovieCoachAskSheet: View {
 
     let context: MovieCoachContext
+    /// Asked as soon as the sheet appears — set when the sheet was opened
+    /// from a shortcut on the card rather than from "Ask Coach".
+    var initialQuestion: String? = nil
 
     @Environment(\.dismiss) private var dismiss
 
@@ -81,6 +84,9 @@ struct MovieCoachAskSheet: View {
         }
         .presentationDetents([.medium, .large])
         .modifier(SoftScrollEdgeEffectStyleModifier())
+        .onAppear {
+            if let initialQuestion, asked == nil { ask(initialQuestion) }
+        }
     }
 
     // MARK: - Answer

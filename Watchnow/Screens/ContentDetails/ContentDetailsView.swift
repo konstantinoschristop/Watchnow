@@ -28,6 +28,14 @@ struct ContentDetailsView: View {
     @State private var showNotificationSettingsAlert = false
     @State private var isLiked = false
     @State private var isWatched = false
+    /// The hero artwork's colour, washed faintly into the page.
+    @State private var artworkTint: Color?
+    /// The shareable image, made once the details have loaded.
+    @State private var shareImage: UIImage?
+    /// A sheet from one of the sections is up — see `CoversDetailsPageKey`.
+    @State private var sectionSheetUp = false
+    /// The trailer is playing in the hero; the Trailer action closes it.
+    @State private var heroTrailerPlaying = false
     @Namespace private var namespace
 
     /// True while this screen has nothing of its own to draw yet.
@@ -47,25 +55,30 @@ struct ContentDetailsView: View {
 
     var body: some View {
 
-        Group {
-            if detailsViewModel.apiError && !detailsViewModel.viewModelFinishedFetching {
-                ContentUnavailableView("Couldn't load content",
-                                       systemImage: "exclamationmark.triangle",
-                                       description: Text("Check your connection and try again."))
-            } else if isAwaitingFirstContent {
-                DetailsSkeleton()
-            } else {
-                ScrollView(.vertical, showsIndicators: false) {
-                    self.constructContent()
-                    // Subtle inline banner — sits below all content sections,
-                    // takes up no space until a creative loads.
-                    InlineBannerSection()
-                        .padding(.top, 4)
+        // Measured out here, where the safe area still applies: the page
+        // below runs up under the status bar and nav buttons, and the
+        // hero's copy has to start beneath them on every device. A reader
+        // inside the `ignoresSafeArea` scope reports an inset of zero.
+        GeometryReader { proxy in
+            Group {
+                if detailsViewModel.apiError && !detailsViewModel.viewModelFinishedFetching {
+                    ContentUnavailableView("Couldn't load content",
+                                           systemImage: "exclamationmark.triangle",
+                                           description: Text("Check your connection and try again."))
+                } else if isAwaitingFirstContent {
+                    DetailsSkeleton()
+                } else {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        self.constructContent(topInset: proxy.safeAreaInsets.top)
+                        // Subtle inline banner — sits below all content sections,
+                        // takes up no space until a creative loads.
+                        InlineBannerSection()
+                            .padding(.top, 4)
+                    }
                 }
-                .redacted(reason: detailsViewModel.viewModelFinishedFetching ? [] : .placeholder)
             }
+            .ignoresSafeArea(edges: .top)
         }
-        .ignoresSafeArea(edges: .top)
         .background(Color(.background))
         .navigationBarTitleDisplayMode(.inline)
         .hideBackButtonOptionally()
@@ -120,6 +133,11 @@ struct ContentDetailsView: View {
             // context and generate exactly once.
             detailsViewModel.allSectionsLoaded = true
         }
+        // Drawn once everything is in, and again when the artwork's colour
+        // arrives, so the card wears it.
+        .task(id: ShareCardKey(loaded: detailsViewModel.allSectionsLoaded, tinted: artworkTint != nil)) {
+            await makeShareCard()
+        }
     }
 }
 
@@ -127,33 +145,36 @@ struct ContentDetailsView: View {
 
 extension ContentDetailsView {
 
-    fileprivate func constructContent() -> some View {
+    fileprivate func constructContent(topInset: CGFloat) -> some View {
 
         let result = detailsViewModel.result
-        let screenType = detailsViewModel.screenType
 
         return VStack(spacing: 18) {
 
-            MenuFeaturedView(results: [result],
-                             overlayContent: { _ in
-                                 HeroOverlayView(
-                                    title: result.getResultTitle(),
-                                    rating: detailsViewModel.details?.vote_average,
-                                    year: yearString,
-                                    runtimeOrSeasons: runtimeOrSeasonsString,
-                                    genres: detailsViewModel.genresSafe
-                                 )
-                             },
-                             screenType: screenType,
-                             isTappable: false)
-            // Single static image — no carousel interaction needed.
-            // Disabling hit-testing lets the parent ScrollView receive
-            // vertical pan gestures that start on the hero.
-            .allowsHitTesting(false)
+            DetailsHeroView(kind: kindLabel,
+                            title: result.getResultTitle(),
+                            rating: detailsViewModel.details?.vote_average,
+                            year: yearString,
+                            runtimeOrSeasons: runtimeOrSeasonsString,
+                            genres: detailsViewModel.genresSafe,
+                            backdropPath: result.backdrop_path ?? detailsViewModel.details?.backdrop_path,
+                            posterPath: result.poster_path,
+                            topInset: topInset,
+                            episodeMinutes: detailsViewModel.screenType == .tv ? detailsViewModel.details?.typicalEpisodeMinutes : nil,
+                            certification: detailsViewModel.certification,
+                            ownedServices: detailsViewModel.ownedServiceNames,
+                            pageColor: pageTopColor,
+                            onArtwork: takeTint(from:),
+                            trailerKey: detailsViewModel.videos?.trailerKey,
+                            isCovered: videoPresented || isSeasonsSheetPresented || sectionSheetUp,
+                            trailerPlaying: $heroTrailerPlaying,
+                            onFullTrailer: { videoPresented = true })
 
             primaryActionRow
-                .padding(.top, -32)
+                .padding(.top, -DetailsHeroView.actionOverlap)
             movieCoachSection()
+            // Everything below arrives with its own request — see
+            // `sectionArrival` — rather than being drawn empty and filled in.
             watchProvidersSection()
             detailsSection()
             seasonsSection()
@@ -163,9 +184,102 @@ extension ContentDetailsView {
             additionalInfoSection()
         }
         .padding(.bottom, 24)
+        // The artwork's colour, strongest under the hero and gone a screen
+        // further down — so each title's page has its own light without the
+        // cards losing their contrast.
+        .background(alignment: .top) {
+            LinearGradient(stops: [.init(color: pageTopColor, location: 0),
+                                   .init(color: pageTopColor, location: 0.3),
+                                   .init(color: Color(.background), location: 1)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: 1200)
+        }
+        // No page-wide animation as sections land: SwiftUI drives one
+        // frame by frame on the main thread, for everything below the
+        // newcomer, and it stuttered the arrivals it was meant to smooth.
+        // The placeholders hold each section's room instead, so there's
+        // little left to move — each section animates only itself
+        // (`sectionArrival`).
+        // A section's sheet over the page stops the hero's trailer preview.
+        .onPreferenceChange(CoversDetailsPageKey.self) { sectionSheetUp = $0 }
+    }
+
+    /// Requests are still out — sections without data yet hold their
+    /// place with a `SectionPlaceholder` until then.
+    private var isStillLoading: Bool {
+        !detailsViewModel.allSectionsLoaded && !detailsViewModel.apiError
+    }
+
+    // MARK: - Artwork tint
+
+    /// The page colour at the top: the background with a little of the
+    /// artwork mixed in. Plain background until the artwork has loaded.
+    private var pageTopColor: Color {
+        guard let artworkTint else { return Color(.background) }
+        return Color(.background).mix(with: artworkTint, by: 0.16)
+    }
+
+    private func takeTint(from image: UIImage) {
+        guard artworkTint == nil else { return }
+        Task.detached(priority: .userInitiated) {
+            // An area average on a CoreImage context — blocking, so off
+            // the main actor.
+            guard let tint = image.heroTint else { return }
+            await MainActor.run {
+                withAnimation(.easeInOut(duration: 0.8)) { artworkTint = Color(tint) }
+            }
+        }
+    }
+
+    // MARK: - Share card
+
+    /// Draws the share card once the details are in, from the images the
+    /// page already loaded (or the cache).
+    private func makeShareCard() async {
+        guard detailsViewModel.allSectionsLoaded, let details = detailsViewModel.details else { return }
+        let result = detailsViewModel.result
+
+        async let poster = loadImage(result.poster_path ?? details.poster_path, width: .backdrop)
+        async let backdrop = loadImage(result.backdrop_path ?? details.backdrop_path, width: .backdrop)
+        var logos: [UIImage] = []
+        for provider in (detailsViewModel.watchProviderSafe?.flatrate ?? []).prefix(4) {
+            if let logo = await loadImage(provider.logoPath, width: .poster) { logos.append(logo) }
+        }
+
+        let card = TitleShareCard(title: result.getResultTitle(),
+                                  kind: kindLabel,
+                                  year: yearString,
+                                  rating: details.vote_average,
+                                  certification: detailsViewModel.certification,
+                                  genres: detailsViewModel.genresSafe.map(\.displayName),
+                                  poster: await poster,
+                                  backdrop: await backdrop,
+                                  tint: artworkTint ?? Color(red: 0.12, green: 0.14, blue: 0.2),
+                                  providerLogos: logos)
+        shareImage = card.render()
+    }
+
+    private func loadImage(_ path: String?, width: API.ImageWidth) async -> UIImage? {
+        guard let path, !path.isEmpty,
+              let url = URL(string: API.Common.imageUrl(imageId: path, width: width)) else { return nil }
+        return await RemoteImageLoader.image(for: url)
+    }
+
+    private struct ShareCardKey: Hashable {
+        let loaded: Bool
+        let tinted: Bool
     }
 
     // MARK: - Hero meta helpers
+
+    private var kindLabel: String? {
+        switch detailsViewModel.screenType {
+        case .movie:  return String(localized: "Movie", comment: "Media type label")
+        case .tv:     return String(localized: "details.kind.series", defaultValue: "Series",
+                                    comment: "Label above a series' title on its details screen. One series, singular.")
+        case .person: return nil
+        }
+    }
 
     private var yearString: String? {
         let year = detailsViewModel.details?.getReleaseDate(addSeparator: false) ?? ""
@@ -195,8 +309,11 @@ extension ContentDetailsView {
             isSeries: detailsViewModel.screenType == .tv,
             isLiked: isLiked,
             isWatched: isWatched,
+            isTrailerPlaying: heroTrailerPlaying,
             onWatchlistTap: toggleWatchlist,
-            onTrailerTap: { videoPresented = true },
+            // Plays the trailer in the hero — or, while it's there, closes
+            // it. The hero opens the full trailer when it can't play it.
+            onTrailerTap: { heroTrailerPlaying.toggle() },
             onLikeTap: toggleLike,
             onWatchedTap: toggleWatched
         )
@@ -373,8 +490,24 @@ extension ContentDetailsView {
         HStack(alignment: .center, spacing: 20) {
             bellButton
 
-            if let url = URL(string: detailsViewModel.createShareLink()) {
-                ShareLink(item: url) {
+            // Every share carries the App Store link, so whoever receives it
+            // is one tap from the app: the card image with the link in the
+            // message once the card is drawn, the link alone until then.
+            let title = detailsViewModel.result.getResultTitle()
+            let message = Text(ShareMessage.text(title: title))
+            if let shareImage {
+                let image = Image(uiImage: shareImage)
+                ShareLink(item: image,
+                          subject: Text(title),
+                          message: message,
+                          preview: SharePreview(title, image: image)) {
+                    getnavBarLabel(imageName: "square.and.arrow.up")
+                }
+                .buttonStyle(.plain)
+            } else {
+                ShareLink(item: ShareMessage.appStoreURL,
+                          subject: Text(title),
+                          message: message) {
                     getnavBarLabel(imageName: "square.and.arrow.up")
                 }
                 .buttonStyle(.plain)
@@ -450,55 +583,63 @@ extension ContentDetailsView {
     @ViewBuilder
     private func movieCoachSection() -> some View {
         if detailsViewModel.screenType != .person {
-            MovieCoachView(context: detailsViewModel.coachContext)
+            MovieCoachView(context: detailsViewModel.coachContext,
+                           posterPaths: detailsViewModel.coachPosterPaths)
         }
     }
 
     @ViewBuilder
     private func detailsSection() -> some View {
-        DetailsView(details: detailsViewModel.details)
+        if let overview = detailsViewModel.details?.overview, !overview.isEmpty {
+            DetailsView(details: detailsViewModel.details)
+                .sectionArrival(step: 1)
+        } else if detailsViewModel.details == nil, isStillLoading {
+            SectionPlaceholder(kind: .text)
+        }
     }
 
+    /// Season and episode ratings, with the way into every season's
+    /// episode list as the card's footer.
+    ///
+    /// This replaced a grid of season tiles. Once the ratings card listed
+    /// every aired season and opened its episodes, the grid was a second
+    /// map of the same seasons a scroll below the first; what it still did
+    /// that the chart doesn't — unaired seasons, their premiere reminders —
+    /// lives in the sheet the footer opens.
     @ViewBuilder
     private func seasonsSection() -> some View {
-        let screenType = detailsViewModel.screenType
-        if screenType == .tv, detailsViewModel.hasSeasons {
+        if detailsViewModel.screenType == .tv,
+           detailsViewModel.hasSeasons,
+           let seriesID = detailsViewModel.details?.id {
             let seasons = detailsViewModel.seasonsSafe
             let numberOfSeasons = detailsViewModel.details?.number_of_seasons ?? 0
             let numberOfEpisodes = detailsViewModel.details?.number_of_episodes ?? 0
-            let name = detailsViewModel.details?.name ?? ""
-            let seriesID = detailsViewModel.details?.id ?? 0
 
-            SectionHeaderView(
-                title: String(localized: "Seasons"),
-                subtitle: String(localized: "\(numberOfSeasons) Seasons", comment: "Number of seasons in a series")
-                    + " | " + String(localized: "\(numberOfEpisodes) Episodes", comment: "Number of episodes"),
-                icon: "rectangle.stack.fill",
-                tint: .accentColor
-            ) {
-                Button {
-                    isSeasonsSheetPresented.toggle()
-                } label: {
-                    Text("See all")
-                        .appFont(15, weight: .semibold, relativeTo: .subheadline)
-                        .foregroundColor(.accentColor)
+            SeriesRatingsView(
+                seasons: seasons,
+                seriesID: seriesID,
+                seasonsSummary: String(localized: "\(numberOfSeasons) Seasons", comment: "Number of seasons in a series")
+                    + " · " + String(localized: "\(numberOfEpisodes) Episodes", comment: "Number of episodes"),
+                onOpenSeason: { season in
+                    if let season { detailsViewModel.selectedSeason = season }
+                    isSeasonsSheetPresented = true
                 }
+            )
+            // A different series pushed onto this screen must not inherit
+            // the last one's cached episodes or selection.
+            .id(seriesID)
+            .sectionArrival(step: 2)
+            .sheet(isPresented: $isSeasonsSheetPresented) {
+                SeasonsDetailsTabView(
+                    seasons: seasons,
+                    initialSeason: detailsViewModel.selectedSeason,
+                    seriesID: seriesID,
+                    seriesName: detailsViewModel.details?.name ?? ""
+                )
+                .presentationDetents([.large])
             }
-
-            SeasonsView(seasons: seasons,
-                        navBarTitle: name,
-                        seriesID: seriesID,
-                        selectedSeason: $detailsViewModel.selectedSeason,
-                        isSheetPresented: $isSeasonsSheetPresented)
-                .sheet(isPresented: $isSeasonsSheetPresented) {
-                    SeasonsDetailsTabView(
-                        seasons: seasons,
-                        selectedSeason: $detailsViewModel.selectedSeason,
-                        seriesID: seriesID,
-                        seriesName: name
-                    )
-                    .presentationDetents([.large])
-                }
+        } else if detailsViewModel.screenType == .tv, detailsViewModel.details == nil, isStillLoading {
+            SectionPlaceholder(kind: .card(height: 420))
         }
     }
 
@@ -506,62 +647,99 @@ extension ContentDetailsView {
     private func watchProvidersSection() -> some View {
         if detailsViewModel.hasWatchProviders,
            let provider = detailsViewModel.watchProviderSafe {
-
-            SectionHeaderView(
-                title: String(localized: "Available on", comment: "Details section: streaming services carrying the title"),
-                icon: "play.rectangle.fill",
-                tint: .accentColor
-            )
-
-            WatchProviderView(
+            ProviderStripView(
                 flatrates: provider.flatrate ?? [],
                 rent: provider.rent ?? [],
                 buy: provider.buy ?? [],
                 justWatchURL: detailsViewModel.watchNowURL
             )
+            .sectionArrival(step: 0)
+        } else if isStillLoading {
+            SectionPlaceholder(kind: .strip)
         }
     }
 
     @ViewBuilder
     private func castSection() -> some View {
         if detailsViewModel.hasCast {
-            SectionHeaderView(
-                title: String(localized: "Cast"),
-                icon: "person.2.fill",
-                tint: .accentColor
-            )
             CastView(cast: detailsViewModel.castSafe,
+                     crew: crewCredits,
                      currentTitleID: detailsViewModel.result.id)
+                .sectionArrival(step: 3)
+        } else if isStillLoading {
+            SectionPlaceholder(kind: .carousel(width: 116, height: 156))
+        }
+    }
+
+    /// Who made it, for the head of the cast row: a film's director(s), a
+    /// series' creator(s).
+    private var crewCredits: [CrewCredit] {
+        switch detailsViewModel.screenType {
+        case .movie:
+            var seen = Set<Int>()
+            return (detailsViewModel.credits?.crew ?? [])
+                .filter { $0.job == "Director" }
+                .compactMap { person -> CrewCredit? in
+                    guard let id = person.id, seen.insert(id).inserted else { return nil }
+                    return CrewCredit(id: id,
+                                      name: person.getName(),
+                                      role: String(localized: "Director", comment: "Badge on the director's photo in the cast row"),
+                                      symbol: "video.fill",
+                                      profilePath: person.profile_path)
+                }
+                .prefix(2)
+                .map { $0 }
+        case .tv:
+            return (detailsViewModel.details?.created_by ?? [])
+                .compactMap { person -> CrewCredit? in
+                    guard let id = person.id else { return nil }
+                    return CrewCredit(id: id,
+                                      name: person.name ?? "",
+                                      role: String(localized: "Creator", comment: "Badge on a series creator's photo in the cast row"),
+                                      symbol: "lightbulb.fill",
+                                      profilePath: person.profile_path)
+                }
+                .prefix(2)
+                .map { $0 }
+        case .person:
+            return []
         }
     }
 
     @ViewBuilder
     private func reviewsSection() -> some View {
         if detailsViewModel.hasReviews {
-            SectionHeaderView(
-                title: String(localized: "User Reviews"),
-                icon: "quote.bubble.fill",
-                tint: .accentColor
-            )
             ReviewsView(reviews: detailsViewModel.reviewsSafe)
+                .sectionArrival(step: 4)
+        } else if isStillLoading {
+            SectionPlaceholder(kind: .carousel(width: 300, height: 196))
         }
     }
 
     @ViewBuilder
     private func moreLikeThisSection() -> some View {
-        MoreLikeThisSection(
-            similars: detailsViewModel.similarsSafe,
-            collection: detailsViewModel.collectionSafe,
-            collectionName: detailsViewModel.details?.belongs_to_collection?.name,
-            screenType: detailsViewModel.screenType,
-            namespace: namespace
-        )
+        if detailsViewModel.hasSimilars || detailsViewModel.hasCollection {
+            MoreLikeThisSection(
+                similars: detailsViewModel.similarsSafe,
+                collection: detailsViewModel.collectionSafe,
+                collectionName: detailsViewModel.details?.belongs_to_collection?.name,
+                screenType: detailsViewModel.screenType,
+                namespace: namespace
+            )
+            .sectionArrival(step: 5)
+        } else if isStillLoading {
+            SectionPlaceholder(kind: .carousel(width: 128, height: 192))
+        }
     }
 
     @ViewBuilder
     private func additionalInfoSection() -> some View {
         if let details = detailsViewModel.details {
-            AdditionalInfoView(details: details)
+            AdditionalInfoView(details: details,
+                               tmdbURL: URL(string: detailsViewModel.createShareLink()))
+                .sectionArrival(step: 6)
+        } else if isStillLoading {
+            SectionPlaceholder(kind: .card(height: 260))
         }
     }
 }

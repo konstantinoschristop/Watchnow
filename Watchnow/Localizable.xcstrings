@@ -7,6 +7,41 @@
     " " : {
       "shouldTranslate" : false
     },
+    "Loading trailer" : {
+      "comment" : "Accessibility: spinner while the trailer loads at the top of the page",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer wird geladen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φόρτωση τρέιλερ"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando tráiler"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la bande-annonce"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando trailer"
+          }
+        }
+      }
+    },
     "·" : {
       "shouldTranslate" : false
     },
@@ -48,6 +83,41 @@
     "#" : {
       "shouldTranslate" : false
     },
+    "%@ — found on Watchnow" : {
+      "comment" : "Share message, followed by the App Store link. The name is a movie or series.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ – entdeckt auf Watchnow"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — το βρήκα στο Watchnow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — encontrado en Watchnow"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — trouvé sur Watchnow"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — encontrado no Watchnow"
+          }
+        }
+      }
+    },
     "%@ airs today." : {
       "comment" : "Episode reminder notification body: episode name",
       "localizations" : {
@@ -79,6 +149,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ vai ao ar hoje."
+          }
+        }
+      }
+    },
+    "%@ average" : {
+      "comment" : "Average score across user reviews, e.g. 7.6 average",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ø %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "μ.ό. %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "media de %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de moyenne"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "média %@"
           }
         }
       }
@@ -659,6 +764,7 @@
     },
     "%lld episodes" : {
       "comment" : "Number of episodes in a season",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "variations" : {
@@ -1299,6 +1405,137 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld resultados"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld reviews" : {
+      "comment" : "How many user reviews a title has",
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Rezension"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Rezensionen"
+                }
+              }
+            }
+          }
+        },
+        "el" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld κριτική"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld κριτικές"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld review"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reviews"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reseñas"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reseña"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reseñas"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld critiques"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld critique"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld critiques"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld avaliações"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld avaliação"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld avaliações"
                 }
               }
             }
@@ -2267,9 +2504,6 @@
       "shouldTranslate" : false
     },
     "•" : {
-      "shouldTranslate" : false
-    },
-    "+%lld" : {
       "shouldTranslate" : false
     },
     "< 2½ hrs" : {
@@ -3869,6 +4103,41 @@
         }
       }
     },
+    "Box office" : {
+      "comment" : "About card: a film's worldwide takings",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einspielergebnis"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εισπράξεις"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taquilla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Box-office"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilheteria"
+          }
+        }
+      }
+    },
     "Browse %@" : {
       "comment" : "Accessibility: genre chip, e.g. Browse Comedy",
       "localizations" : {
@@ -4455,6 +4724,7 @@
       }
     },
     "Close" : {
+      "comment" : "Button: close the trailer playing at the top of the page",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4484,6 +4754,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fechar"
+          }
+        }
+      }
+    },
+    "Close trailer" : {
+      "comment" : "Accessibility: closes the trailer playing at the top of the page",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer schließen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλείσιμο τρέιλερ"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar tráiler"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer la bande-annonce"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar trailer"
           }
         }
       }
@@ -5037,8 +5342,8 @@
         }
       }
     },
-    "Created By" : {
-      "comment" : "Details label: a series' creators",
+    "Created by" : {
+      "comment" : "About card: a series' creators",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5068,6 +5373,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Criada por"
+          }
+        }
+      }
+    },
+    "Created By" : {
+      "comment" : "Details label: a series' creators",
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entwickelt von"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δημιουργοί"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creada por"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créée par"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criada por"
+          }
+        }
+      }
+    },
+    "Creator" : {
+      "comment" : "Badge on a series creator's photo in the cast row",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idee"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δημιουργία"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Création"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criação"
           }
         }
       }
@@ -5275,6 +5651,82 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apagar pasta"
+          }
+        }
+      }
+    },
+    "details.kind.series" : {
+      "comment" : "Label above a series' title on its details screen. One series, singular.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Series"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série"
+          }
+        }
+      }
+    },
+    "Director" : {
+      "comment" : "Badge on the director's photo in the cast row",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regie"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σκηνοθεσία"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dirección"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réalisation"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direção"
           }
         }
       }
@@ -5555,6 +6007,7 @@
         }
       }
     },
+    "Episode" : {},
     "Episode %lld" : {
       "comment" : "An episode with no name, by its number",
       "localizations" : {
@@ -5620,6 +6073,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alertas de episódios"
+          }
+        }
+      }
+    },
+    "Episode ratings" : {
+      "comment" : "Ratings card: subtitle above the per-episode chart",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folgenbewertungen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βαθμολογίες επεισοδίων"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valoraciones de episodios"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes des épisodes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avaliações dos episódios"
+          }
+        }
+      }
+    },
+    "Episodes run about %@" : {
+      "comment" : "Accessibility: typical episode length, e.g. 47m",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folgen dauern etwa %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα επεισόδια διαρκούν περίπου %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los episodios duran unos %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les épisodes durent environ %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os episódios duram cerca de %@"
           }
         }
       }
@@ -6003,6 +6526,41 @@
         }
       }
     },
+    "First aired" : {
+      "comment" : "About card: a series' premiere date",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstausstrahlung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πρώτη προβολή"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estreno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première diffusion"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estreia"
+          }
+        }
+      }
+    },
     "Flame" : {
       "comment" : "Accessibility: name of a folder icon",
       "localizations" : {
@@ -6038,6 +6596,7 @@
         }
       }
     },
+    "Floor" : {},
     "Folder" : {
       "comment" : "Accessibility: name of a folder icon",
       "localizations" : {
@@ -6143,6 +6702,7 @@
       }
     },
     "Full cast" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6418,6 +6978,41 @@
         }
       }
     },
+    "Highest rated" : {
+      "comment" : "Badge on the season's best-rated episode",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am besten bewertet"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κορυφαία βαθμολογία"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor valorado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mieux noté"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais bem avaliado"
+          }
+        }
+      }
+    },
     "Highest Rated" : {
       "comment" : "Review sort order",
       "localizations" : {
@@ -6490,6 +7085,7 @@
     },
     "Homepage" : {
       "comment" : "Details label: the title's official website",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7558,6 +8154,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Idiomas"
+          }
+        }
+      }
+    },
+    "Last aired" : {
+      "comment" : "About card: when a finished series' last episode aired",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte Ausstrahlung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τελευταία προβολή"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última emisión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière diffusion"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última exibição"
           }
         }
       }
@@ -9195,6 +9826,41 @@
         }
       }
     },
+    "Next episode" : {
+      "comment" : "About card: when the series' next episode airs",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächste Folge"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επόμενο επεισόδιο"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo episodio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochain épisode"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo episódio"
+          }
+        }
+      }
+    },
     "Night" : {
       "comment" : "Accessibility: name of a folder icon",
       "localizations" : {
@@ -9261,6 +9927,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nenhum ator"
+          }
+        }
+      }
+    },
+    "No episode ratings yet" : {
+      "comment" : "Ratings card: the season has no rated episodes",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Bewertungen für Folgen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν υπάρχουν ακόμη βαθμολογίες επεισοδίων"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay valoraciones de episodios"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune note d’épisode pour l’instant"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há avaliações de episódios"
           }
         }
       }
@@ -10234,6 +10935,137 @@
         }
       }
     },
+    "On %lld of your services" : {
+      "comment" : "Hero pill: the title streams on several of the user's own services",
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bei %lld deiner Dienste"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bei %lld deiner Dienste"
+                }
+              }
+            }
+          }
+        },
+        "el" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Σε %lld από τις υπηρεσίες σου"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Σε %lld από τις υπηρεσίες σου"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "On %lld of your services"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "On %lld of your services"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En %lld de tus servicios"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En %lld de tus servicios"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En %lld de tus servicios"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sur %lld de vos services"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sur %lld de vos services"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sur %lld de vos services"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Em %lld dos seus serviços"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Em %lld dos seus serviços"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Em %lld dos seus serviços"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "On now, and matched to the five you just picked." : {
       "localizations" : {
         "de" : {
@@ -10264,6 +11096,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Disponíveis agora e combinando com os cinco que você acabou de escolher."
+          }
+        }
+      }
+    },
+    "On your %@" : {
+      "comment" : "Hero pill: the title streams on the user's own service(s), e.g. On your Netflix",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei deinem %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στο %@ σου"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En tu %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur votre %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No seu %@"
           }
         }
       }
@@ -10507,6 +11374,41 @@
         }
       }
     },
+    "Original title" : {
+      "comment" : "About card: the title in its original language",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Originaltitel"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πρωτότυπος τίτλος"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título original"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre original"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título original"
+          }
+        }
+      }
+    },
     "Out now" : {
       "comment" : "Release reminder notification title",
       "localizations" : {
@@ -10544,6 +11446,7 @@
     },
     "Parts of the collection" : {
       "comment" : "Subtitle: other films in the same series of films",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11097,6 +12000,76 @@
         }
       }
     },
+    "Rated %@" : {
+      "comment" : "Accessibility: an age rating such as TV-MA",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altersfreigabe %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καταλληλότητα %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clasificación %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classification %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classificação %@"
+          }
+        }
+      }
+    },
+    "Rated %@ out of 10" : {
+      "comment" : "Accessibility: a 0–10 rating",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewertet mit %@ von 10"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βαθμολογία %@ στα 10"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valoración: %@ de 10"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noté %@ sur 10"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota %@ de 10"
+          }
+        }
+      }
+    },
     "Rated reviews only" : {
       "localizations" : {
         "de" : {
@@ -11127,6 +12100,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Só avaliações com nota"
+          }
+        }
+      }
+    },
+    "Rating" : {},
+    "Ratings" : {
+      "comment" : "Details section title: season and episode ratings for a series",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewertungen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βαθμολογίες"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valoraciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avaliações"
           }
         }
       }
@@ -12024,6 +13033,7 @@
     },
     "Revenue" : {
       "comment" : "Details stat label: box office",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -12296,6 +13306,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Duração"
+          }
+        }
+      }
+    },
+    "S%lld" : {
+      "comment" : "Short season label on the ratings chart axis, e.g. S4. Keep it very short.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σ%lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T%lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T%lld"
+          }
+        }
+      }
+    },
+    "S%lld · E%lld" : {
+      "comment" : "Season and episode code, e.g. S4 · E5. Keep it very short.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%1$lld · F%2$lld"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σ%1$lld · Ε%2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T%1$lld · E%2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%1$lld · É%2$lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T%1$lld · E%2$lld"
           }
         }
       }
@@ -13069,6 +14149,41 @@
         }
       }
     },
+    "Season ratings" : {
+      "comment" : "Accessibility: the chart of ratings per season",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staffelbewertungen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βαθμολογίες σεζόν"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valoraciones por temporada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes par saison"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avaliações por temporada"
+          }
+        }
+      }
+    },
     "Seasons" : {
       "localizations" : {
         "de" : {
@@ -13138,6 +14253,7 @@
       }
     },
     "See all %lld reviews" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "variations" : {
@@ -13777,6 +14893,76 @@
         }
       }
     },
+    "Shows all episodes in this season" : {
+      "comment" : "Accessibility hint on the episode preview in the Ratings card",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt alle Folgen dieser Staffel"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δείχνει όλα τα επεισόδια της σεζόν"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra todos los episodios de esta temporada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche tous les épisodes de cette saison"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra todos os episódios desta temporada"
+          }
+        }
+      }
+    },
+    "Shows every way to watch" : {
+      "comment" : "Accessibility hint on the Available on row",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt alle Möglichkeiten, es anzusehen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δείχνει όλους τους τρόπους να το δεις"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra todas las formas de verlo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche toutes les façons de le regarder"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra todas as formas de assistir"
+          }
+        }
+      }
+    },
     "Shows popular titles in %@" : {
       "comment" : "Accessibility hint: genre chip",
       "localizations" : {
@@ -13808,6 +14994,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mostra títulos populares do gênero %@"
+          }
+        }
+      }
+    },
+    "Shows the full review" : {
+      "comment" : "Accessibility hint on a review card",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt die ganze Rezension"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφανίζει ολόκληρη την κριτική"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra la reseña completa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche la critique complète"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra a avaliação completa"
           }
         }
       }
@@ -16444,6 +17665,41 @@
         }
       }
     },
+    "Website" : {
+      "comment" : "About card: link to the title's official website",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Website"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ιστότοπος"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitio web"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site officiel"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site oficial"
+          }
+        }
+      }
+    },
     "Welcome to Watchnow" : {
       "localizations" : {
         "de" : {
@@ -16864,6 +18120,41 @@
         }
       }
     },
+    "Why you'll like it" : {
+      "comment" : "Movie Coach button: asks Coach why this title suits the user",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum es dir gefällt"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γιατί θα σου αρέσει"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por qué te gustará"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi ça va vous plaire"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por que você vai gostar"
+          }
+        }
+      }
+    },
     "Worth a watch" : {
       "comment" : "Movie Coach verdict headline",
       "localizations" : {
@@ -16935,6 +18226,7 @@
       }
     },
     "You might also like" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

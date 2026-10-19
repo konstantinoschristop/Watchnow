@@ -26,6 +26,8 @@ struct Episode: Codable, Hashable {
     /// Present on `last_episode_to_air` / `next_episode_to_air` payloads;
     /// the season-episodes endpoint implies it from the request instead.
     let season_number: Int?
+    /// Minutes.
+    var runtime: Int? = nil
 
     /// Parses `air_date` (yyyy-MM-dd) into a `Date`. Returns nil when the
     /// field is missing or unparseable.

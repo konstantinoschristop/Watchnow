@@ -75,6 +75,10 @@ struct MenuFeaturedView<Content: View>: View {
     /// someone is still reading it is the carousel's oldest failure, and it's
     /// worse for anyone who reads slowly or uses a screen reader.
     @State private var autoAdvancePaused = false
+    /// On screen — not covered by a pushed page, not scrolled away. Hidden,
+    /// the slideshow stands still: slides nobody sees would still animate
+    /// and re-render, on the main thread, under whatever *is* on screen.
+    @State private var isOnScreen = true
 
     private var isCarousel: Bool { results.count > 1 }
 
@@ -101,6 +105,9 @@ struct MenuFeaturedView<Content: View>: View {
         // hero no longer installs an outer DragGesture. That gesture used
         // to swallow vertical pans, blocking the parent ScrollView from
         // scrolling whenever the user's finger started on the hero.
+        .onAppear { isOnScreen = true }
+        .onDisappear { isOnScreen = false }
+        .onScrollVisibilityChange(threshold: 0.2) { isOnScreen = $0 }
         .task(id: autoAdvanceKey) {
             // Any change to scrollIndex / scenePhase / isDragging cancels the
             // in-flight sleep and re-enters this task with fresh state. That's
@@ -505,13 +512,13 @@ struct MenuFeaturedView<Content: View>: View {
     /// on their own. With nothing moving there is nothing to pause, which is
     /// why the control hides itself in that state.
     private var shouldAutoAdvance: Bool {
-        scenePhase == .active && !isDragging && isCarousel
+        scenePhase == .active && isOnScreen && !isDragging && isCarousel
             && !reduceMotion && !autoAdvancePaused
     }
 
     private var autoAdvanceKey: AutoAdvanceKey {
         AutoAdvanceKey(tab: scrollIndex ?? 0,
-                       isActive: scenePhase == .active,
+                       isActive: scenePhase == .active && isOnScreen,
                        isDragging: isDragging,
                        slideCount: results.count,
                        isPaused: autoAdvancePaused || reduceMotion)
@@ -632,7 +639,7 @@ extension UIImage {
     /// toward muddy grays, which read as "tired" in a hero wash; bumping
     /// saturation pulls the tint back toward the poster's personality
     /// without committing to a full dominant-hue extractor.
-    fileprivate var heroTint: UIColor? {
+    var heroTint: UIColor? {
         guard let avg = averageColor else { return nil }
 
         var hue: CGFloat = 0
