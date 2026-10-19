@@ -6,9 +6,9 @@
 //  the region-scoped catalogue of streaming services TMDB tracks. Powers
 //  the "Browse by streaming service" tile row on the Movies / Series tabs.
 //
-//  Each provider carries a `display_priority` per region; sorting by that
-//  field puts Netflix / Apple TV+ / Disney+ at the top and obscure niche
-//  services at the bottom.
+//  Which of them the app shows, and in what order, is
+//  `StreamingProviderCatalog`'s call — TMDB's `display_priority` ranks
+//  storefronts and niche services above some of the majors.
 //
 
 import Foundation
@@ -21,8 +21,9 @@ struct WatchProvider: Codable, Hashable, Identifiable {
     let provider_id: Int
     let provider_name: String
     let logo_path: String?
-    /// Lower = more prominent. TMDB returns this region-scoped, so the
-    /// same provider can have different priorities in different countries.
+    /// Lower = more prominent, by TMDB's reckoning. The top-level value is
+    /// the same in every region (Netflix 0, HBO Max 26), so it says little
+    /// about what a given country actually watches.
     let display_priority: Int?
 
     var id: Int { provider_id }

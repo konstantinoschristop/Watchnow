@@ -43,10 +43,15 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     @Published var topRated: ContentListResult?
     @Published var featuredResult: [Result]?
 
-    /// Region-scoped catalogue of streaming services, sorted by TMDB's
-    /// display priority (Netflix / Apple TV+ / Disney+ at the top, niche
-    /// services at the bottom). Capped at 20 — past that the row stops
-    /// being useful and starts surfacing services nobody recognises.
+    /// The region's streaming services, curated the same way as Settings
+    /// and onboarding (`StreamingProviderCatalog`): the subscriptions people
+    /// mean by "what I have", in a fixed order.
+    ///
+    /// TMDB's own `display_priority` used to decide this, capped at 20. That
+    /// ranking puts storefronts and niche services first — Plex, JustWatch
+    /// TV, Apple TV Store — and HBO Max (id 1899) 28th in Greece, 52nd in the
+    /// US, so it never made the row. It's only the fallback now, for a
+    /// region where none of the curated services exist.
     @Published var providers: [WatchProvider]?
 
     /// Currently picked streaming-service chip. Drives the inline
@@ -131,10 +136,13 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
         // tile row stays empty. We don't flip apiError, since the rest of the
         // feed is still fully usable without it.
         if let r = try? await pr {
-            providers = (r.results ?? [])
-                .sorted { ($0.display_priority ?? Int.max) < ($1.display_priority ?? Int.max) }
-                .prefix(20)
-                .map { $0 }
+            let curated = StreamingProviderCatalog.curated(from: r.results)
+            providers = curated.isEmpty
+                ? (r.results ?? [])
+                    .sorted { ($0.display_priority ?? Int.max) < ($1.display_priority ?? Int.max) }
+                    .prefix(20)
+                    .map { $0 }
+                : curated
 
             // Auto-select Netflix if it's available in the region; otherwise
             // fall back to whichever provider TMDB ranks highest. The inline
