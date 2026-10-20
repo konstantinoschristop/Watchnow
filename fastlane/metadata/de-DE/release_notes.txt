@@ -1,8 +1,11 @@
-Watchnow spricht jetzt deine Sprache.
+Jeder Film und jede Serie hat jetzt eine ganz neue Seite.
 
-• Die ganze App gibt es jetzt auf Deutsch, Spanisch, Portugiesisch (Brasilien), Französisch und Griechisch. Sie übernimmt die Sprache deines iPhone.
-• Lieber eine andere Sprache als auf deinem iPhone? Wähle sie unter Einstellungen → Sprache.
-• Auch Titel, Inhaltsangaben und Genres liefert TMDB jetzt in deiner Sprache. Was noch nicht übersetzt ist, erscheint auf Englisch.
-• „Jetzt im Kino“ und „Demnächst“ richten sich nun nach deiner Region.
-• Datumsangaben, Laufzeiten, Bewertungen und Preise erscheinen im Format deiner Region.
-• Movie Coach antwortet in deiner Sprache, sofern Apple Intelligence sie unterstützt.
+• Ein größerer, kinoreifer Kopfbereich in den Farben des Titels, mit Altersfreigabe und der Länge der Folgen.
+• Tippe auf „Trailer“, um ihn direkt oben auf der Seite anzusehen – mit allen Steuerelementen: Pause, Vorspulen, Ton, Untertitel und Vollbild.
+• Bei Serien zeigen Diagramme die Bewertungen jeder Staffel und jeder Folge. Wähle eine Staffel und tippe auf eine Folge, um sie dir genauer anzusehen.
+• Movie Coach hat ein neues Design und beantwortet kurze Fragen wie „Ist das langatmig?“ direkt auf der Seite.
+• Auf einen Blick siehst du, wo es läuft – deine eigenen Dienste sind abgehakt.
+• Besetzung, „Ähnliche Titel“, Rezensionen und Info sind neu gestaltet. Halte einen Titel unter „Ähnliche Titel“ gedrückt, um ihn für später zu speichern.
+• Teile einen Titel als Posterkarte, mit einem Link zu Watchnow.
+• HBO Max erscheint jetzt unter „Nach Dienst stöbern“.
+• Seiten laden schneller und flüssiger.
