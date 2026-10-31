@@ -21,12 +21,19 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     let viewSection: ViewSections
     let viewModel:   VM
 
-    /// Three rich rows per page; up to three pages (9 titles) the user can
-    /// swipe through horizontally. Three keeps each page from dwarfing the
-    /// poster carousels above, while paging lets the section surface far more
-    /// of the list than a single static trio.
+    /// Three rich rows per page, swiped through horizontally. Three keeps each
+    /// page from dwarfing the poster carousels above; paging is how the
+    /// section reaches the rest of the list.
+    ///
+    /// It used to stop at three pages — nine titles — with sixty films in
+    /// cinemas and twenty of them already fetched. Now it runs to the end of
+    /// the list, fetching TMDB's next page as the user nears the last one.
     private let pageSize: Int = 3
-    private let maxItems: Int = 9
+
+    /// At most this many dots. A list in cinemas runs to twenty pages, which
+    /// would run the dots off the row; past this they become a window that
+    /// slides with the page, its outer dots shrunk to say there's more.
+    private let maxDots: Int = 7
 
     @Namespace private var namespace
 
@@ -36,8 +43,13 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     @State private var pageID: Int? = 0
     private var currentPage: Int { pageID ?? 0 }
 
+    /// Every title loaded so far. Deduplicated because TMDB's pages can
+    /// overlap as its ordering shifts between requests, and a title shown
+    /// twice reads as a bug.
     private var visibleResults: [Result] {
-        Array(results.prefix(maxItems)).map { result in
+        var seen = Set<Int>()
+        return results.compactMap { result in
+            guard seen.insert(result.id ?? -1).inserted else { return nil }
             var r = result
             r.media_type = screenType == .movie ? "movie" : "tv"
             return r
@@ -45,7 +57,7 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     }
 
     /// `visibleResults` split into pages of `pageSize` (the last page may be
-    /// short when fewer than `maxItems` titles came back).
+    /// short).
     private var pages: [[Result]] {
         stride(from: 0, to: visibleResults.count, by: pageSize).map { start in
             Array(visibleResults[start ..< min(start + pageSize, visibleResults.count)])
@@ -95,6 +107,16 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: $pageID)
         .scrollIndicators(.hidden)
+        .onChange(of: currentPage) { _, page in loadMoreIfNeeded(at: page) }
+    }
+
+    /// Fetches TMDB's next page two swipes before the last one, so it has
+    /// usually landed by the time the user gets there. The view model drops
+    /// a repeat call while one is in flight.
+    private func loadMoreIfNeeded(at page: Int) {
+        guard page >= pages.count - 2,
+              viewModel.canLoadMoreContent(section: viewSection) else { return }
+        viewModel.loadMoreContent(section: viewSection)
     }
 
     /// One page: up to three rows, divided like the original static list.
@@ -130,14 +152,16 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     // MARK: - Page indicator
 
     /// Pill-style dots: the active page stretches into a short capsule in the
-    /// section tint. Tapping a dot scrolls to that page.
+    /// section tint. Tapping a dot scrolls to that page. Keyed by page, so as
+    /// the window moves the dots slide along rather than being redrawn.
     private var pageDots: some View {
         HStack(spacing: 6) {
-            ForEach(pages.indices, id: \.self) { i in
+            ForEach(Array(dotWindow), id: \.self) { i in
                 Capsule(style: .continuous)
                     .fill(i == currentPage ? viewSection.themeColor
                                            : Color.secondary.opacity(0.3))
                     .frame(width: i == currentPage ? 16 : 6, height: 6)
+                    .scaleEffect(hasMoreBeyond(i) ? 0.6 : 1)
                     .contentShape(Capsule())
                     .onTapGesture {
                         withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.8)) {
@@ -148,6 +172,22 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
         }
         .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.8), value: currentPage)
         .frame(maxWidth: .infinity)
+    }
+
+    /// The pages that get a dot: all of them up to `maxDots`, otherwise
+    /// `maxDots` of them centred on the current page where the ends allow.
+    private var dotWindow: Range<Int> {
+        let count = pages.count
+        guard count > maxDots else { return 0..<count }
+        let start = min(max(currentPage - maxDots / 2, 0), count - maxDots)
+        return start..<(start + maxDots)
+    }
+
+    /// An end dot of the window with more pages past it.
+    private func hasMoreBeyond(_ page: Int) -> Bool {
+        let window = dotWindow
+        return (page == window.lowerBound && window.lowerBound > 0)
+            || (page == window.upperBound - 1 && window.upperBound < pages.count)
     }
 }
 

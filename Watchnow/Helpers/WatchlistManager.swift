@@ -138,8 +138,18 @@ struct SavedProvider: Codable, Hashable {
 
 @MainActor
 enum WatchlistManager {
-    
-    @UserDefault("watchlist", defaultValue: []) static var watchlist: [Result]
+
+    /// Posted on this device after the saved list, the services remembered
+    /// for it, or the watched marks are written — from anywhere: a details
+    /// screen refreshing its entry, a save, a removal. The watchlist catches
+    /// up then, while a details screen is still over it, rather than as it
+    /// comes back into view: redrawn mid-way through the swipe back, its
+    /// covers cancelled the zoom they were being dismissed into.
+    static let didChange = Notification.Name("WatchlistManagerDidChange")
+
+    @UserDefault("watchlist", defaultValue: []) static var watchlist: [Result] {
+        didSet { NotificationCenter.default.post(name: didChange, object: nil) }
+    }
 
     /// TMDB-id (as String) → when the title was saved (epoch seconds).
     /// Lets Movie Coach say "you saved this a few months ago". Only titles
@@ -150,7 +160,9 @@ enum WatchlistManager {
     /// TMDB id (as String) → the service the title streams on, captured the
     /// last time its details screen was open. Absent means "we don't know",
     /// never "nowhere".
-    @UserDefault("watchlistProviders", defaultValue: [:]) static var providers: [String: SavedProvider]
+    @UserDefault("watchlistProviders", defaultValue: [:]) static var providers: [String: SavedProvider] {
+        didSet { NotificationCenter.default.post(name: didChange, object: nil) }
+    }
 
     /// When `id` was added to the watchlist, if we recorded it.
     static func addedDate(forID id: Int) -> Date? {

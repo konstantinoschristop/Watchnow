@@ -67,6 +67,16 @@ enum StreamingProviderCatalog {
             .sorted { (rank[$0.provider_id] ?? .max) < (rank[$1.provider_id] ?? .max) }
     }
 
+    /// `providers` with the services the user has (`subscribed`) moved to the
+    /// front. Stable on both sides of the split, so each half keeps the order
+    /// it came in — someone with Disney+ and Netflix sees Netflix, Disney+,
+    /// the same order as everywhere else, just ahead of what they don't have.
+    nonisolated static func prioritized(_ providers: [WatchProvider],
+                                        subscribed: Set<Int>) -> [WatchProvider] {
+        providers.filter { subscribed.contains($0.provider_id) }
+            + providers.filter { !subscribed.contains($0.provider_id) }
+    }
+
     /// The region's curated services. Soft-fails to an empty list: a screen
     /// that can't offer the question just doesn't ask it.
     static func load(region: String,

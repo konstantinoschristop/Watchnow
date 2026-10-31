@@ -22,7 +22,14 @@ enum StreamingPreferences {
     /// run) or the compact pre-filled row with an Edit affordance.
     static var hasMadeSelection: Bool { !providerIDs.isEmpty }
 
+    /// Posted after `save(_:)`, for screens that order things by the user's
+    /// services. The feed puts theirs first in its chip bar, and Settings —
+    /// where they change them — is a sheet over the feed, which gets no
+    /// appear event when it closes.
+    static let didChange = Notification.Name("StreamingPreferencesDidChange")
+
     static func save(_ ids: Set<Int>) {
         providerIDs = Array(ids).sorted()
+        NotificationCenter.default.post(name: didChange, object: nil)
     }
 }

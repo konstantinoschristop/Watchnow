@@ -266,7 +266,7 @@ struct SkeletonContentView: View {
         VStack(spacing: 0) {
             // Hero placeholder
             Color(.systemGray5)
-                .containerRelativeFrame(.vertical) { h, _ in h * 0.75 }
+                .containerRelativeFrame(.vertical) { h, _ in h * FeaturedHeroMetrics.heightFraction }
                 .ignoresSafeArea(edges: .top)
 
             // Genre chip row

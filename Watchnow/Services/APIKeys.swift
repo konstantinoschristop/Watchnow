@@ -94,6 +94,9 @@ enum API {
         /// details hero, where a 16:9 still is cropped at the sides to fill
         /// a strip ~1.3:1 and 780px would be visibly soft at 3x.
         case heroBackdrop = "w1280"
+        /// A title's logo on a hero: at most ~280pt wide, so 500px is sharp
+        /// at 2x and close at 3x for lettering that's mostly flat colour.
+        case logo = "w500"
         /// The master. Only for something being viewed at full size.
         case original
     }
@@ -161,6 +164,13 @@ enum API {
             return "\(API.baseURL)/\(type)/\(id)/changes?api_key=\(API.key)&start_date=\(startDate)&end_date=\(endDate)"
         }
 
+        /// A title's images — logos, posters, stills — in `languageCode`,
+        /// English, or with no text in them, the order `TitleLogoStore`
+        /// prefers them in.
+        static func logos(type: String, id: Int, languageCode: String) -> String {
+            return "\(API.baseURL)/\(type)/\(id)/images?api_key=\(API.key)&include_image_language=\(languageCode),en,null"
+        }
+
         /// Region-scoped catalogue of streaming services TMDB knows about,
         /// used to populate the "Browse by streaming service" tile row.
         static func providersList(type: String, region: String) -> String {
@@ -170,8 +180,34 @@ enum API {
         /// Discover endpoint filtered to titles available on a specific
         /// streaming service in the user's region. `flatrate` restricts
         /// to subscription content (no rent / buy / ads).
-        static func discoverByProvider(type: String, providerID: Int, region: String, page: Int = 1) -> String {
-            return "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&watch_region=\(region)&with_watch_providers=\(providerID)&with_watch_monetization_types=flatrate&sort_by=popularity.desc&page=\(page)"
+        ///
+        /// The feed's row only ever asks for the most popular titles; the
+        /// rest is for the provider's "See all" screen. Every filter is
+        /// appended only when set, so the row's URL is the one it always was.
+        ///
+        /// - Parameter releasedOnOrBefore: yyyy-MM-dd. Caps the release date
+        ///   (a film's or a series' first air date), so sorting by newest
+        ///   doesn't lead with titles a service has announced but not yet put up.
+        static func discoverByProvider(type: String,
+                                       providerID: Int,
+                                       region: String,
+                                       genreID: Int? = nil,
+                                       sortBy: String = "popularity.desc",
+                                       voteCountGTE: Int? = nil,
+                                       releasedOnOrBefore: String? = nil,
+                                       page: Int = 1) -> String {
+            var url = "\(API.baseURL)/discover/\(type)?api_key=\(API.key)&language=\(API.language)&watch_region=\(region)&with_watch_providers=\(providerID)&with_watch_monetization_types=flatrate&sort_by=\(sortBy)"
+            if let genreID {
+                url += "&with_genres=\(genreID)"
+            }
+            if let voteCountGTE {
+                url += "&vote_count.gte=\(voteCountGTE)"
+            }
+            if let releasedOnOrBefore {
+                let field = type == ScreenTypes.tv.rawValue ? "first_air_date" : "primary_release_date"
+                url += "&\(field).lte=\(releasedOnOrBefore)"
+            }
+            return url + "&page=\(page)"
         }
 
         /// Movie Night's candidate query. Genre IDs are OR'd (`a|b`),

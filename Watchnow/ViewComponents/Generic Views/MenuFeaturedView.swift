@@ -9,12 +9,24 @@ import SwiftUI
 import Kingfisher
 import CoreImage
 
-/// Featured hero carousel used on the home and details screens.
+/// The heroes on the Movies and Series tabs and a streaming service's
+/// catalogue: their leading titles, one at a time.
 ///
-/// Multi-slide mode renders an Apple-TV-style paging scroll view: rounded
-/// cards, peek of the neighbors on each side, and a scale + opacity fade on
-/// the non-centered slides. Single-slide mode stays full-bleed (no inset, no
-/// rounded corners) so the details-screen hero keeps its cinematic look.
+/// A slide holds the title's best film still (`StillsArt`), under the
+/// title's official logo. The art runs edge to edge under the status bar
+/// and the title, meets the page at its foot (see `dissolvesIntoPage`), and
+/// drifts at a third of the page's speed as it scrolls; pulled down, it
+/// stretches. Titles change every six seconds or by a swipe, the art
+/// blending from one into the next rather than sliding; the dots under the
+/// copy count down to the next and pause all of it.
+///
+/// Laid out like a title card, centred: the badge, the logo large, one line
+/// of facts, then Trailer and Watch Later. Under the copy the picture
+/// darkens (`scrims`), so the copy always sits on shadow, whatever the
+/// still behind it is.
+///
+/// Chosen over two other takes trialled side by side — the logo tucked
+/// behind the poster's subject, and the copy on a Liquid Glass panel.
 /// Shared metrics for the featured hero, so the view and whatever supplies
 /// its overlay agree on the same numbers.
 ///
@@ -22,54 +34,79 @@ import CoreImage
 /// content, and Swift allows no static stored properties there.
 enum FeaturedHeroMetrics {
 
-    /// Vertical room the centred page indicator occupies at the bottom of a
-    /// slide, measured from the card's bottom edge: the pill's own content
-    /// (the dots, or the taller pause control) plus its bottom padding.
-    ///
-    /// A caller's overlay uses this to keep its copy clear of the indicator.
-    /// Without it the genre pills and the indicator shared one band and only
-    /// looked separate because the pills were short and leading-aligned — one
-    /// long genre name, or one step up in text size, and they collided.
-    static let indicatorReserve: CGFloat = 46
+    /// How much of its container the hero takes. Three-quarters left the
+    /// genre chips and Movie Night below the fold, and 0.6 left no room for
+    /// a title card with actions under it; at this the hero leads the page
+    /// and the genre chips still show beneath it. The loading skeleton
+    /// reads it too, so the page doesn't jump when content lands.
+    static let heightFraction: CGFloat = 0.7
 }
 
 struct MenuFeaturedView<Content: View>: View {
     var results: [Result]
+    /// The copy for one slide: what it is, its title, meta and genres. Set
+    /// in white over the hero's own scrims, so it brings no background.
     var overlayContent: (Result) -> Content
     let screenType: ScreenTypes
-    /// When `true`, tapping a slide navigates to its details screen. Set to
-    /// `false` when this view is *already* the hero of a details screen — in
-    /// that case the tap would push a duplicate details view onto itself.
+    /// When `true`, tapping a slide navigates to its details screen.
     var isTappable: Bool = true
 
     /// Height of the scroll container this hero sits in, when the caller can
     /// measure it. `containerRelativeFrame(.vertical)` resolves against a
     /// `ScrollView` but has nothing to resolve against inside a `List` row,
     /// where it collapses the hero to nothing — so the feed measures the
-    /// container itself and hands the number down. Callers still inside a
-    /// plain `ScrollView` (the details hero) leave this nil.
+    /// container itself and hands the number down.
     var containerHeight: CGFloat? = nil
+
+    /// The colour of the page under the hero, which on a light page meets
+    /// the picture on a rounded edge (`pageEdge`) and has to match exactly.
+    var pageColor: Color = Color(.background)
 
     /// Seconds each slide dwells before auto-advancing. A user swipe (or a
     /// scene-phase change) restarts this countdown from zero, so viewers
     /// always get a full window to read the slide they just landed on.
-    private let slideDwell: Duration = .seconds(6)
+    private var slideDwell: Duration { .seconds(dwellSeconds) }
+    /// How long each title stays before the next. Nine and a half seconds
+    /// read as the hero being stuck.
     private let dwellSeconds: Double = 6
 
-    // Card treatment — only applied when there is more than one slide.
-    private let cardCornerRadius: CGFloat = AppRadius.hero
-    private let cardInset: CGFloat = 10      // side padding; drives peek width
-    private let cardSpacing: CGFloat = 8
+    /// The dissolve into the page at the hero's foot: long and eased, so
+    /// there's no line where the picture stops. It was 72pt and nearly
+    /// linear, which read as an edge with a blur on it.
+    private let fadeHeight: CGFloat = 120
+    /// How far up from the hero's foot the page dots sit, with the copy
+    /// above them: about twenty points above the light page's edge
+    /// (`pageEdge`), low enough that the dots close the hero rather than
+    /// float in it.
+    private let copyLift: CGFloat = 44
 
     @State private var scrollIndex: Int? = 0
     @State private var isDragging: Bool = false
     @State private var selectedResult: Result?
-    /// Cached dominant tint per slide index. Filled asynchronously when
-    /// Kingfisher hands back a decoded `UIImage`; reads cheaply on every
-    /// body re-render afterwards.
+    /// Each slide's own colour, taken from its poster once it has loaded —
+    /// the wash the picture dissolves into.
     @State private var slideTints: [Int: Color] = [:]
+    /// Each slide's stills, textless poster and logo, by title id, once
+    /// fetched.
+    @State private var arts: [Int: TitleArt] = [:]
+    /// Every slide's art has been asked for and answered, or failed: a
+    /// slide still without any isn't waiting for it any more.
+    @State private var artsSettled = false
+
+    /// How the stills move — not at all, unless another take is picked in
+    /// Settings' debug section; see `StillsMotion`. Release builds hold
+    /// each title's still.
+    @AppStorage(StillsMotion.storageKey) private var stillsMotionSetting = StillsMotion.still.rawValue
+    private var stillsMotion: StillsMotion {
+        #if DEBUG
+        StillsMotion(rawValue: stillsMotionSetting) ?? .still
+        #else
+        .still
+        #endif
+    }
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     /// User-controlled stop for the rotation. Auto-rotating content has to be
     /// stoppable — a slide that moves on its own every six seconds while
     /// someone is still reading it is the carousel's oldest failure, and it's
@@ -80,34 +117,59 @@ struct MenuFeaturedView<Content: View>: View {
     /// and re-render, on the main thread, under whatever *is* on screen.
     @State private var isOnScreen = true
 
-    private var isCarousel: Bool { results.count > 1 }
+    /// The trailer sheet, while it's up.
+    @State private var trailer: HeroTrailerLink?
+    /// The title whose trailer is being asked for — its button spins, and
+    /// the slideshow holds so the button still belongs to it when it lands.
+    @State private var loadingTrailerID: Int?
+    /// Each title's trailer once asked for: `.some(nil)` means it has none.
+    @State private var trailerURLs: [Int: URL?] = [:]
 
-    /// The hero at three-quarters of its container, sized the only way each
-    /// context allows. Exactly one of these runs — applying both stacks two
-    /// heights on the same view and leaves a gap under the artwork.
+    /// Something the viewer started is in front of the slideshow, or about
+    /// to be: it waits for them, as it does for the pause button.
+    private var isHeld: Bool {
+        autoAdvancePaused || trailer != nil || loadingTrailerID != nil
+    }
+
+    private var isCarousel: Bool { results.count > 1 }
+    private var currentIndex: Int { min(max(scrollIndex ?? 0, 0), max(results.count - 1, 0)) }
+
+    /// The hero at `FeaturedHeroMetrics.heightFraction` of its container,
+    /// sized the only way each context allows. Exactly one of these runs —
+    /// applying both stacks two heights on the same view and leaves a gap
+    /// under the artwork.
     @ViewBuilder
     private var sizedHero: some View {
         if let containerHeight {
             heroContent
-                .stretchy()
-                .frame(height: containerHeight * 0.75, alignment: .top)
+                .frame(height: containerHeight * FeaturedHeroMetrics.heightFraction, alignment: .top)
         } else {
             heroContent
-                .stretchy()
-                .containerRelativeFrame(.vertical, alignment: .top) { height, _ in height * 0.75 }
+                .containerRelativeFrame(.vertical, alignment: .top) { height, _ in
+                    height * FeaturedHeroMetrics.heightFraction
+                }
         }
     }
 
     var body: some View {
         sizedHero
-        // Note: dragging detection is wired up inside `carouselView` via
-        // `onScrollPhaseChange` on the horizontal ScrollView itself, so the
-        // hero no longer installs an outer DragGesture. That gesture used
-        // to swallow vertical pans, blocking the parent ScrollView from
-        // scrolling whenever the user's finger started on the hero.
         .onAppear { isOnScreen = true }
         .onDisappear { isOnScreen = false }
         .onScrollVisibilityChange(threshold: 0.2) { isOnScreen = $0 }
+        // Every slide's title logo, asked for together as the hero appears,
+        // so each is known before its slide comes round.
+        .task(id: results.compactMap(\.id)) {
+            let keys = results.compactMap { $0.id.map { TitleLogoStore.Key(id: $0, screenType: screenType) } }
+            // Read now, so the first slide's still is fetched at the size
+            // the connection allows.
+            _ = NetworkConditions.shared
+            artsSettled = false
+            fillArts(keys)
+            await TitleLogoStore.shared.prefetch(keys)
+            fillArts(keys)
+            artsSettled = true
+            await prefetchTrailers()
+        }
         .task(id: autoAdvanceKey) {
             // Any change to scrollIndex / scenePhase / isDragging cancels the
             // in-flight sleep and re-enters this task with fresh state. That's
@@ -128,9 +190,8 @@ struct MenuFeaturedView<Content: View>: View {
         .modifier(TapToNavigateModifier(
             isEnabled: isTappable,
             onTap: {
-                let index = scrollIndex ?? 0
-                guard results.indices.contains(index) else { return }
-                selectedResult = results[index]
+                guard results.indices.contains(currentIndex) else { return }
+                selectedResult = results[currentIndex]
             }
         ))
         .navigationDestination(item: $selectedResult) { result in
@@ -138,371 +199,409 @@ struct MenuFeaturedView<Content: View>: View {
             let vm = ContentDetailsViewModel(model: model)
             ContentDetailsView(detailsViewModel: vm)
         }
+        // The same sheet the details screen opens its full trailer in.
+        .sheet(item: $trailer) { link in
+            WebViewSheet(url: link.url)
+        }
         // Title, meta and genre pills are set *on* the artwork inside a slide
-        // sized to 75% of the screen. Past the first accessibility size that
+        // sized to most of the screen. Past the first accessibility size that
         // copy starts covering the image it is captioning. The details screen
         // one tap away carries the same text with no ceiling.
         .artworkTypeClamp()
     }
 
-    // Page indicator lives inside the card now — no reserved space needed.
-    private let pageIndicatorReserve: CGFloat = 0
-
     // MARK: - Hero content
 
-    /// Multi-slide uses the Apple-TV-style paging carousel with an ambient
-    /// blurred backdrop filling the peek area on both sides. Single-slide
-    /// (details-screen hero) takes the direct image path — no ScrollView, no
-    /// LazyHStack — so the full-bleed framing matches the original cinematic
-    /// look exactly.
+    /// The art (pages and scrims) and the copy over it, against a
+    /// `GeometryReader`-resolved frame. Relying on `.aspectRatio(.fill)` and
+    /// `.frame(maxHeight: .infinity)` instead let the laid-out height drift
+    /// past the hero's bounds.
     ///
-    /// Both branches size against a `GeometryReader`-resolved frame. Relying
-    /// on `.aspectRatio(.fill) + .frame(maxHeight: .infinity)` is not
-    /// sufficient — the laid-out height drifts past the hero bounds and the
-    /// bottom overlay (title / meta / genres) gets pushed onto the primary
-    /// action row below.
-    @ViewBuilder
+    /// Only the art stretches, as on the details screen: scaled along with
+    /// it, a 30pt title would be hauled up the screen by the pull.
     private var heroContent: some View {
         GeometryReader { proxy in
-            if isCarousel {
-                carouselView(size: proxy.size)
-            } else {
-                singleSlideView(size: proxy.size)
-            }
-        }
-    }
+            ZStack(alignment: .bottomLeading) {
+                ZStack {
+                    colourWash(height: proxy.size.height)
+                        .allowsHitTesting(false)
 
-    // MARK: - Single-slide
-
-    private func singleSlideView(size: CGSize) -> some View {
-        getImage(for: 0)
-            .aspectRatio(contentMode: .fill)
-            .frame(width: size.width, height: size.height)
-            .clipped()
-            .overlay { overlayContent(results[0]) }
-    }
-
-    // MARK: - Carousel
-
-    private func carouselView(size: CGSize) -> some View {
-        let cardWidth = size.width - cardInset * 2
-        let cardHeight = max(0, size.height - pageIndicatorReserve)
-
-        return ZStack(alignment: .bottom) {
-            ambientBackdrop(size: size)
-
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: cardSpacing) {
-                    ForEach(results.indices, id: \.self) { index in
-                        card(for: index, width: cardWidth, height: cardHeight)
-                            .id(index)
+                    ZStack {
+                        stage(size: proxy.size)
+                        scrims(height: proxy.size.height)
+                            .allowsHitTesting(false)
                     }
+                    // The art fades itself out at its foot rather than having
+                    // the page colour painted over it, so it blends into
+                    // whatever is behind — its own colour first, then the
+                    // page — not into a colour that has to match it.
+                    .mask { fadeMask(height: proxy.size.height) }
                 }
-                .scrollTargetLayout()
-            }
-            .scrollIndicators(.hidden)
-            .scrollTargetBehavior(.viewAligned)
-            .scrollPosition(id: $scrollIndex)
-            .safeAreaPadding(.horizontal, cardInset)
-            .scrollClipDisabled()
-            // `onScrollPhaseChange` observes the inner horizontal scroll
-            // *non-intrusively* — it doesn't intercept the gesture, so
-            // vertical pans on this view fall through to the parent
-            // ScrollView. We only need to know when the carousel is being
-            // actively touched/dragged so the auto-advance task pauses.
-            .onScrollPhaseChange { _, newPhase in
-                isDragging = (newPhase == .interacting || newPhase == .tracking)
-            }
-            .frame(width: size.width, height: size.height)
-            // Indicator sits inside the card, above the spotlight overlay,
-            // centred — the platform-standard placement for page position.
-            //
-            // It shares the bottom band with the slide's own bottom-leading
-            // copy, so the *copy* reserves room for it rather than the
-            // indicator dodging sideways: see `indicatorReserve` and the
-            // matching bottom padding in the caller's overlay.
-            .overlay(alignment: .bottom) {
-                pageIndicator
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
+                .stretchy()
+
+                if !dissolvesIntoPage {
+                    pageEdge
+                        .allowsHitTesting(false)
+                }
+
+                swipeSurface(size: proxy.size)
+
+                copyBlock(height: proxy.size.height)
             }
         }
     }
 
-    private func card(for index: Int, width: CGFloat, height: CGFloat) -> some View {
-        getImage(for: index)
-            .aspectRatio(contentMode: .fill)
-            .frame(width: width, height: height)
-            .clipped()
-            .overlay { overlayContent(results[index]) }
-            .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
-            // compositingGroup() flattens the card + shadow into a single
-            // layer before scrollTransition applies opacity. Without it the
-            // shadow renders at full strength even when the card is faded,
-            // producing a ghost artefact behind transitioning slides.
-            .compositingGroup()
-            .shadow(color: .black.opacity(0.35), radius: 6, y: 10)
-            .scrollTransition(axis: .horizontal) { content, phase in
-                content
-                    .scaleEffect(phase.isIdentity ? 1.0 : 0.9)
-                    .opacity(phase.isIdentity ? 1.0 : 0.45)
+    /// Copies whatever art the store has for these slides into view state.
+    private func fillArts(_ keys: [TitleLogoStore.Key]) {
+        for key in keys {
+            if let art = TitleLogoStore.shared.cachedArt(key), arts[key.id] != art {
+                arts[key.id] = art
             }
+        }
     }
 
-    // MARK: - Ambient backdrop
-    //
-    // Heavily blurred copy of the current slide's image filling the whole
-    // hero. Fills the peek gutters left/right of the centered card (and the
-    // strip under the card reserved for the page indicator) with color that
-    // tracks the active slide — same trick Apple TV and Apple Music use to
-    // make the hero feel less empty.
-    //
-    // Two `.frame(…).clipped()` passes are deliberate: the first contains
-    // the aspect-fill overflow before blurring, the second contains the
-    // blur halo (which otherwise extends ~45pt beyond the hero and lands on
-    // top of the "🔥 Hot Right Now" section header stacked directly below).
+    // MARK: - Slides
 
-    private func ambientBackdrop(size: CGSize) -> some View {
-        let safeIndex = min(max(scrollIndex ?? 0, 0), results.count - 1)
-        let tint = slideTints[safeIndex] ?? .black
+    /// The slide on screen. A new title blends in over the last — the
+    /// outgoing one fading while the next comes up — rather than sliding
+    /// across. The art drifts down a third as far as the page scrolls up,
+    /// as the details hero's does.
+    private func stage(size: CGSize) -> some View {
+        let scrollParallax: CGFloat = reduceMotion ? 0 : 0.35
 
-        return KFImage.url(results[safeIndex].getResultPosterURL())
-            .onSuccess { result in
-                // Dominant-tint extraction runs off the main actor because
-                // CIAreaAverage + context render is blocking; pushing it to
-                // a detached task keeps the carousel snappy during swipes.
-                cacheTintIfNeeded(for: safeIndex, image: result.image)
+        return ZStack {
+            ForEach([currentIndex], id: \.self) { index in
+                if results.indices.contains(index) {
+                    slideArt(for: index, size: size)
+                        .frame(width: size.width, height: size.height)
+                        .transition(.opacity)
+                }
             }
-            .loadImmediately()
-            .fromMemoryCacheOrRefresh()
-            .cacheOriginalImage()
-            .backgroundDecode()
-            .fade(duration: 0.35)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(width: size.width, height: size.height)
-            .clipped()
-            .blur(radius: 45)
-            // Colour wash pulled from the slide itself — same trick Spotify
-            // and Apple Music use on "Now Playing" backgrounds, but layered
-            // over the blurred poster (not replacing it) so the texture of
-            // the image still shows through the tint.
-            .overlay(tint.opacity(0.45))
-            .overlay(Color.black.opacity(0.25))
-            // Left edge vignette — fades the backdrop into darkness at the
-            // card's left boundary so the gap between card and backdrop reads
-            // as a smooth darkening rather than a hard image edge / seam line.
-            .overlay(alignment: .leading) {
-                LinearGradient(
-                    colors: [.black.opacity(0.75), .clear],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .frame(width: cardInset + 14)
-                .allowsHitTesting(false)
-            }
-            // Right edge vignette — mirrors the left treatment.
-            .overlay(alignment: .trailing) {
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.75)],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .frame(width: cardInset + 14)
-                .allowsHitTesting(false)
-            }
-            // Top scrim — the ambient backdrop bleeds behind the nav bar and
-            // status bar. A soft top-to-transparent vignette keeps system UI
-            // legible over whatever colour the backdrop happens to be.
-            .overlay(alignment: .top) {
-                LinearGradient(
-                    stops: [
-                        .init(color: .black.opacity(0.55), location: 0.0),
-                        .init(color: .black.opacity(0.15), location: 0.5),
-                        .init(color: .clear,               location: 1.0)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 120)
-                .allowsHitTesting(false)
-            }
-            // Bottom fader — dissolves the tinted ambient backdrop into the
-            // app's scroll background, so the first section below the hero
-            // (e.g. "Trending Movies") grows out of the tint rather than
-            // starting after a tinted-to-base-bg tone cut. Eased over four
-            // stops to avoid a perceptible ramp line.
-            .overlay(alignment: .bottom) {
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear,                               location: 0.0),
-                        .init(color: Color(.background).opacity(0.18),     location: 0.35),
-                        .init(color: Color(.background).opacity(0.6),      location: 0.72),
-                        .init(color: Color(.background),                   location: 1.0)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 90)
-                .allowsHitTesting(false)
-            }
-            .frame(width: size.width, height: size.height)
-            .clipped()
-            .allowsHitTesting(false)
-            .animation(.easeInOut(duration: AppMotion.slow), value: tint)
-            .animation(.easeInOut(duration: AppMotion.emphasis), value: safeIndex)
+        }
+        .frame(width: size.width, height: size.height)
+        .animation(.easeInOut(duration: reduceMotion ? AppMotion.standard : 0.9), value: currentIndex)
+        .visualEffect { content, geometry in
+            let scrolled = max(0, -geometry.frame(in: .scrollView(axis: .vertical)).minY)
+            return content.offset(y: scrolled * scrollParallax)
+        }
+        .accessibilityHidden(true)
     }
 
-    /// Computes a hero tint from the decoded poster once per slide and
-    /// memoizes it in `slideTints`. Image decoding already happened on
-    /// Kingfisher's worker; we still push the CoreImage average render
-    /// off the main actor because it's blocking.
+    /// Takes the swipes. A native paging scroll view, so a horizontal swipe
+    /// changes title and a vertical one still scrolls the page — but with
+    /// nothing in it to see: what it moves is `scrollIndex`, and the stage
+    /// behind blends to the new title. A gesture of our own here used to
+    /// swallow the page's vertical scrolling.
+    private func swipeSurface(size: CGSize) -> some View {
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: 0) {
+                ForEach(results.indices, id: \.self) { index in
+                    Color.clear
+                        .frame(width: size.width, height: size.height)
+                        .contentShape(Rectangle())
+                        .id(index)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollIndicators(.hidden)
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $scrollIndex)
+        .scrollDisabled(!isCarousel)
+        // A scroll view whose top edge sits under the status bar draws its
+        // own soft edge effect there on iOS 26 — a haze over the art below.
+        .modifier(TopScrollEdgeEffectHidden(hidden: true))
+        // Only needed to hold the auto-advance while a finger is on it.
+        .onScrollPhaseChange { _, newPhase in
+            isDragging = (newPhase == .interacting || newPhase == .tracking)
+        }
+        .frame(width: size.width, height: size.height)
+        .accessibilityHidden(true)
+    }
+
+    /// Where the dissolve at the foot starts, as a fraction of the hero's
+    /// height.
+    private func fadeStart(height: CGFloat) -> CGFloat {
+        max(0.4, 1 - fadeHeight / max(height, 1))
+    }
+
+    /// On a dark page the picture's shadow dissolves into it, and there's
+    /// no telling where the hero ends. On a light one any dissolve from that
+    /// shadow to white passes through grey — the "muddy" stretch — so the
+    /// picture stays whole to its foot, and the page meets it on an edge.
+    private var dissolvesIntoPage: Bool { colorScheme == .dark }
+
+    /// The top of the light page, laid over the picture's foot with rounded
+    /// corners, as if the page were a sheet drawn up over the hero. The
+    /// picture shows in the corners, so the hero reads as running on under
+    /// the page rather than being cut off.
+    private var pageEdge: some View {
+        UnevenRoundedRectangle(topLeadingRadius: AppRadius.surface,
+                               topTrailingRadius: AppRadius.surface,
+                               style: .continuous)
+            .fill(pageColor)
+            .frame(height: AppRadius.surface)
+            .frame(maxWidth: .infinity)
+    }
+
+    /// Where the darkening behind the copy begins and where it's at full
+    /// strength, as fractions of the hero's height — measured up from the
+    /// foot, because the copy is: it starts well above the badge and is
+    /// whole by the logo.
+    private func shadeRange(height: CGFloat) -> (start: CGFloat, full: CGFloat) {
+        let h = max(height, 1)
+        let start = max(0.2, 1 - 440 / h)
+        return (start, max(start + 0.1, 1 - 250 / h))
+    }
+
+    /// Two layers, after the details hero's: a shade under the status bar
+    /// and the tab's title, and a darkening behind the copy. The dissolve
+    /// into the page, where there is one, is the mask's (`fadeMask`).
+    ///
+    /// The darkening comes in along a smoothstep, sampled so no stop shows
+    /// as a band, and is dark enough by the logo for white copy on the
+    /// brightest still — the still stays sharp under it, as a frosting
+    /// here made the hero read as out of focus. Where the hero dissolves it
+    /// eases off through the dissolve; where it meets the page on an edge it
+    /// holds to the edge.
+    private func scrims(height: CGFloat) -> some View {
+        let fadeStart = fadeStart(height: height)
+        let tail = 1 - fadeStart
+        let shade = shadeRange(height: height)
+        let easeIn: [Gradient.Stop] = (0...10).map { step in
+            let t = Double(step) / 10
+            return .init(color: .black.opacity(0.62 * t * t * (3 - 2 * t)),
+                         location: shade.start + (shade.full - shade.start) * t)
+        }
+        let foot: [Gradient.Stop] = dissolvesIntoPage
+            ? [.init(color: .black.opacity(0.66), location: fadeStart),
+               .init(color: .black.opacity(0.3), location: fadeStart + tail * 0.5),
+               .init(color: .clear, location: fadeStart + tail * 0.85)]
+            : [.init(color: .black.opacity(0.72), location: 1)]
+
+        return ZStack {
+            LinearGradient(colors: [.black.opacity(0.55), .black.opacity(0.15), .clear],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: 170)
+                .frame(maxHeight: .infinity, alignment: .top)
+
+            LinearGradient(stops: easeIn + foot, startPoint: .top, endPoint: .bottom)
+        }
+    }
+
+    /// The slide's own colour, showing through where the picture dissolves:
+    /// the art fades into a wash of itself before it reaches the page, and
+    /// the wash turns to the next slide's colour as the slides change. The
+    /// hero's foot belongs to whatever it's showing.
+    private func colourWash(height: CGFloat) -> some View {
+        let start = fadeStart(height: height)
+        let tail = 1 - start
+        let tint = slideTints[currentIndex] ?? .clear
+        // Strongest low in the dissolve, where the picture has mostly gone:
+        // higher up the art hides it, and lower down the page takes over.
+        // There, the foot reads as the picture's glow rather than grey.
+        return LinearGradient(stops: [.init(color: tint.opacity(0), location: max(0, start - 0.08)),
+                                      .init(color: tint.opacity(0.4), location: start + tail * 0.4),
+                                      .init(color: tint.opacity(0.75), location: start + tail * 0.72),
+                                      .init(color: tint.opacity(0), location: 1)],
+                              startPoint: .top, endPoint: .bottom)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.9), value: tint)
+    }
+
+    /// Takes a slide's colour from its decoded poster, once per slide. The
+    /// average is a blocking CoreImage render, so it runs off the main actor.
     private func cacheTintIfNeeded(for index: Int, image: UIImage) {
         guard slideTints[index] == nil else { return }
-        Task.detached(priority: .userInitiated) {
-            let uiColor = image.heroTint
-            guard let uiColor else { return }
-            await MainActor.run {
-                slideTints[index] = Color(uiColor)
+        Task.detached(priority: .utility) {
+            guard let tint = image.heroTint else { return }
+            await MainActor.run { slideTints[index] = Color(tint) }
+        }
+    }
+
+    /// Opaque down to the dissolve, then fading to clear along a smoothstep
+    /// cubed, sampled at sixteen points: flat at both ends, so neither the
+    /// top nor the foot of the fade shows as a line, and faint through its
+    /// upper half, so the copy can sit low without the page washing it out.
+    /// A gradient runs in straight lines between stops; with only a few, the
+    /// eye catches the corners as bands.
+    ///
+    /// None at all on a light page: see `dissolvesIntoPage`.
+    private func fadeMask(height: CGFloat) -> some View {
+        guard dissolvesIntoPage else {
+            return LinearGradient(colors: [.black], startPoint: .top, endPoint: .bottom)
+        }
+        let start = fadeStart(height: height)
+        let eased: [Gradient.Stop] = (0...16).map { step in
+            let t = Double(step) / 16
+            let smooth = t * t * (3 - 2 * t)
+            return .init(color: .black.opacity(1 - smooth * smooth * smooth),
+                         location: start + (1 - start) * t)
+        }
+        return LinearGradient(stops: [.init(color: .black, location: 0)] + eased,
+                              startPoint: .top, endPoint: .bottom)
+    }
+
+    // MARK: - Copy
+
+    /// A slide's picture: the title's best still, framed on its subject (see
+    /// `HeroStillProcessor`), moving only if the debug section says so.
+    private func slideArt(for index: Int, size: CGSize) -> some View {
+        StillsArt(urls: pictures(for: results[index]),
+                         isActive: index == currentIndex && isOnScreen
+                             && scenePhase == .active && !isHeld,
+                         motion: stillsMotion) { image in
+            cacheTintIfNeeded(for: index, image: image)
+        }
+    }
+
+    /// What a slide can show, best first: the title's own textless stills.
+    /// While they're being asked for, nothing — a moment of the hero's black
+    /// rather than a stand-in swapped out a beat later; the poster used to
+    /// stand in, title and all, under the logo. Only for a title with no
+    /// stills, once that's known, its backdrop, then its textless poster,
+    /// then its poster.
+    private func pictures(for result: Result) -> [URL] {
+        let art = result.id.flatMap { arts[$0] }
+        if let art, !art.stillPaths.isEmpty {
+            return art.stillPaths.compactMap(HeroStill.url(path:))
+        }
+        guard art != nil || artsSettled else { return [] }
+        if let backdrop = result.backdrop_path, let url = HeroStill.url(path: backdrop) {
+            return [url]
+        }
+        return [art?.cleanPoster ?? result.getResultPosterURL()]
+    }
+
+    /// The slide's copy, then the actions and the dots — all centred, the
+    /// copy rising in with each slide and the rest staying put, so the
+    /// buttons are where the thumb left them when the title moves on. Fades
+    /// over the first half of the hero's height as the page scrolls, so it
+    /// doesn't pass under the bars at full strength.
+    private func copyBlock(height: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            slideCopy
+            if results.indices.contains(currentIndex) {
+                actionRow(for: results[currentIndex])
+                    .padding(.top, 20)
+            }
+            if isCarousel {
+                pageIndicator
+                    .padding(.top, 18)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, copyLift)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .visualEffect { content, geometry in
+            let scrolled = max(0, -geometry.frame(in: .scrollView(axis: .vertical)).minY)
+            return content.opacity(1 - min(1, scrolled / max(1, height * 0.5)))
+        }
+    }
+
+    /// Trailer, the one thing worth doing before deciding, and Watch Later,
+    /// the one thing worth doing after. Everything else is a tap on the
+    /// picture away, on the details screen.
+    private func actionRow(for result: Result) -> some View {
+        HStack(spacing: 12) {
+            HeroTrailerButton(isLoading: loadingTrailerID != nil && loadingTrailerID == result.id,
+                              hasTrailer: !isKnownToHaveNoTrailer(result)) {
+                playTrailer(for: result)
+            }
+            HeroWatchlistButton(result: result, screenType: screenType, isOnScreen: isOnScreen)
+                // A fresh button per title, so one title's saved state
+                // never animates into the next one's.
+                .id(result.id)
+        }
+        .environment(\.colorScheme, .dark)
+    }
+
+    // MARK: - Trailer
+
+    /// Asks for every slide's trailer as the hero appears, so a slide with
+    /// none says so on its button before it's tapped rather than after.
+    private func prefetchTrailers() async {
+        let screenType = screenType
+        let ids = results.compactMap(\.id).filter { trailerURLs[$0] == nil }
+        await withTaskGroup(of: (id: Int, url: URL?, answered: Bool).self) { group in
+            for id in ids {
+                group.addTask {
+                    let videos = try? await ServiceInvocation().fetchVideos(screenType: screenType, id: String(id))
+                    return (id, videos?.getVideoURL(), videos != nil)
+                }
+            }
+            // Only an answer is remembered; a failed request asks again on tap.
+            for await answer in group where answer.answered {
+                trailerURLs[answer.id] = .some(answer.url)
             }
         }
     }
 
-    // MARK: - Page indicator
+    /// TMDB has answered for this title, and it has no trailer.
+    private func isKnownToHaveNoTrailer(_ result: Result) -> Bool {
+        guard let id = result.id, let known = trailerURLs[id] else { return false }
+        return known == nil
+    }
+
+    /// Opens the title's trailer, asking TMDB for it the first time.
+    private func playTrailer(for result: Result) {
+        guard let id = result.id, loadingTrailerID == nil else { return }
+        if let known = trailerURLs[id] {
+            openTrailer(known, for: result)
+            return
+        }
+        loadingTrailerID = id
+        let screenType = screenType
+        Task {
+            let videos = try? await ServiceInvocation().fetchVideos(screenType: screenType, id: String(id))
+            // Only an answer is remembered; a failed request asks again.
+            if let videos { trailerURLs[id] = .some(videos.getVideoURL()) }
+            loadingTrailerID = nil
+            openTrailer(videos?.getVideoURL(), for: result)
+        }
+    }
+
+    /// The trailer where there is one. Where there isn't — or it couldn't
+    /// be asked for — the details screen, which is where the tap was going
+    /// anyway: the title, its services and everything else about it.
+    private func openTrailer(_ url: URL?, for result: Result) {
+        if let url {
+            trailer = HeroTrailerLink(url: url)
+        } else {
+            selectedResult = result
+        }
+    }
+
+    private var slideCopy: some View {
+        ZStack(alignment: .bottom) {
+            if results.indices.contains(currentIndex) {
+                overlayContent(results[currentIndex])
+                    .id(currentIndex)
+                    .transition(copyTransition)
+            }
+        }
+        .animation(.default, value: currentIndex)
+    }
 
     private var pageIndicator: some View {
-        HStack(spacing: 6) {
-            ForEach(results.indices, id: \.self) { index in
-                let isActive = index == (scrollIndex ?? 0)
-                Group {
-                    if isActive {
-                        ProgressCapsule(duration: dwellSeconds,
-                                        isRunning: shouldAutoAdvance)
-                    } else {
-                        Capsule()
-                            .fill(Color.white.opacity(0.35))
-                            .frame(width: 6, height: 6)
-                    }
-                }
-                // Force recreation when a dot transitions active ↔ inactive
-                // so ProgressCapsule's .onAppear always fires on a fresh view.
-                .id("\(index)-\(isActive)")
-                .animation(.easeInOut(duration: AppMotion.standard), value: scrollIndex)
-            }
-            // Dots are decoration; the position is announced once, as a
-            // sentence, on the row itself.
-            .accessibilityHidden(true)
-
-            if isCarousel, !reduceMotion {
-                pauseControl
-            }
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .modifier(PageIndicatorBackground())
-        .padding(.bottom, 18)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Slide \((scrollIndex ?? 0) + 1) of \(results.count)", comment: "Accessibility: featured carousel position"))
+        HeroPageIndicator(count: results.count,
+                          current: currentIndex,
+                          dwell: dwellSeconds,
+                          isRunning: shouldAutoAdvance,
+                          isPaused: $autoAdvancePaused)
     }
 
-    /// Stop/start for the rotation, tucked into the indicator's existing
-    /// glass pill so it costs no new chrome. The glyph is small; the tap
-    /// area is not.
-    private var pauseControl: some View {
-        Button {
-            autoAdvancePaused.toggle()
-        } label: {
-            Image(systemName: autoAdvancePaused ? "play.fill" : "pause.fill")
-                .appFont(9, weight: .bold, relativeTo: .caption2)
-                .foregroundStyle(.white.opacity(0.9))
-                .frame(width: 28, height: 28)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        // Extends past the pill rather than inflating it — the visible pill
-        // keeps its proportions while the target reaches 44pt.
-        .frame(width: 44, height: 44)
-        .contentShape(Rectangle())
-        .padding(.leading, -8)
-        .padding(.vertical, -8)
-        .accessibilityLabel(autoAdvancePaused ? "Play slideshow" : "Pause slideshow")
-    }
-
-    // MARK: - Progress capsule
-
-    /// A 28 × 6 pt capsule that fills left-to-right over `duration` seconds.
-    ///
-    /// Two gotchas the animation has to survive:
-    /// 1. On reappear, `progress` may still be at 1.0 from a previous cycle.
-    ///    A naive `withAnimation { progress = 1.0 }` sees no state change and
-    ///    skips the animation entirely — the fill appears instantly full.
-    /// 2. While the app is backgrounded, SwiftUI snaps in-flight animations
-    ///    to their final state. When the app returns to `.active`, the parent
-    ///    carousel's auto-advance `.task` restarts with a fresh `dwellSeconds`
-    ///    wait, but this view isn't recreated, so without intervention the
-    ///    capsule stays stuck at full for the next dwell.
-    ///
-    /// The fix: reset `progress` to 0 inside a transaction with animations
-    /// disabled, then start the linear fill on the next runloop tick so the
-    /// reset has committed before the animated change is read. `scenePhase`
-    /// observation retriggers the same reset-then-animate cycle on resume.
-    private struct ProgressCapsule: View {
-        let duration: Double
-        /// False when the rotation is paused or Reduce Motion is on. The
-        /// capsule then sits still instead of counting down to an advance
-        /// that isn't coming.
-        let isRunning: Bool
-        @State private var progress: CGFloat = 0
-        @Environment(\.scenePhase) private var scenePhase
-
-        var body: some View {
-            ZStack(alignment: .leading) {
-                // Track
-                Capsule()
-                    .fill(Color.white.opacity(0.3))
-                    .frame(width: 28, height: 6)
-                // Animated fill
-                Capsule()
-                    .fill(Color.white.opacity(0.95))
-                    .frame(width: 28, height: 6)
-                    .scaleEffect(x: progress, anchor: .leading)
-            }
-            .frame(width: 28, height: 6)
-            .clipShape(Capsule())
-            .onAppear { restartAnimation() }
-            .onChange(of: scenePhase) { _, newPhase in
-                if newPhase == .active {
-                    restartAnimation()
-                }
-            }
-            .onChange(of: isRunning) { _, _ in
-                restartAnimation()
-            }
-        }
-
-        private func restartAnimation() {
-            // Snap back to 0 with animations explicitly disabled so the
-            // reset is instantaneous, not part of the previous animation.
-            var resetTx = Transaction()
-            resetTx.disablesAnimations = true
-            withTransaction(resetTx) {
-                progress = 0
-            }
-            // Defer the animated change to the next runloop tick so SwiftUI
-            // commits the reset first. Without this, both mutations coalesce
-            // and the animation starts from whatever `progress` was before,
-            // not from 0.
-            guard isRunning else {
-                // Paused: show the slide as "held" rather than mid-countdown.
-                var holdTx = Transaction()
-                holdTx.disablesAnimations = true
-                withTransaction(holdTx) { progress = 1.0 }
-                return
-            }
-            DispatchQueue.main.async {
-                withAnimation(.linear(duration: duration)) {
-                    progress = 1.0
-                }
-            }
-        }
+    /// The outgoing copy leaves fast and the incoming copy rises in just
+    /// after it, so the two titles are never on screen at once — crossfaded
+    /// together, they stacked into an unreadable double exposure mid-swipe.
+    private var copyTransition: AnyTransition {
+        .asymmetric(
+            insertion: .opacity
+                .combined(with: .offset(y: reduceMotion ? 0 : 18))
+                .animation(reduceMotion ? .easeIn(duration: AppMotion.standard).delay(0.12)
+                                        : .spring(response: 0.55, dampingFraction: 0.85).delay(0.12)),
+            removal: .opacity.animation(.easeOut(duration: 0.12)))
     }
 
     // MARK: - Auto-advance plumbing
@@ -513,7 +612,7 @@ struct MenuFeaturedView<Content: View>: View {
     /// why the control hides itself in that state.
     private var shouldAutoAdvance: Bool {
         scenePhase == .active && isOnScreen && !isDragging && isCarousel
-            && !reduceMotion && !autoAdvancePaused
+            && !reduceMotion && !isHeld
     }
 
     private var autoAdvanceKey: AutoAdvanceKey {
@@ -521,7 +620,7 @@ struct MenuFeaturedView<Content: View>: View {
                        isActive: scenePhase == .active && isOnScreen,
                        isDragging: isDragging,
                        slideCount: results.count,
-                       isPaused: autoAdvancePaused || reduceMotion)
+                       isPaused: isHeld || reduceMotion)
     }
 
     private struct AutoAdvanceKey: Equatable {
@@ -531,47 +630,550 @@ struct MenuFeaturedView<Content: View>: View {
         let slideCount: Int
         let isPaused: Bool
     }
-
-    // MARK: - Image
-
-    func getImage(for index: Int) -> some View {
-        KFImage.url(results[index].getResultPosterURL())
-            .placeholder {
-                // A spinner in the middle of a full-bleed hero reads as an
-                // error more than as loading — it is a small grey mark on a
-                // large empty rectangle. A plain surface plus the slide's own
-                // copy underneath says "artwork coming" without the
-                // misdirection, and matches the skeleton language the rest of
-                // the app uses.
-                Rectangle()
-                    .fill(Color(.secondarySystemBackground))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .loadImmediately()
-            .loadDiskFileSynchronously()
-            .fromMemoryCacheOrRefresh()
-            .cacheOriginalImage()
-            .backgroundDecode()
-            .fade(duration: 0.25)
-            .resizable()
-            .tag(index)
-    }
-
 }
 
-// MARK: - PageIndicatorBackground
+// MARK: - HeroSlideCopy
 
-/// Capsule surface behind the hero page-indicator dots. On iOS 26 uses
-/// the system liquid-glass material; pre-iOS 26 falls back to
-/// `.ultraThinMaterial` — the same surface it always had.
-private struct PageIndicatorBackground: ViewModifier {
+/// One hero slide's copy, the same on every hero, centred: a badge, the
+/// title, and one line of facts — rating, year and up to two genres. Set in
+/// white with no background or shadow of its own — the hero's scrims
+/// carry its legibility, and a shadow redrawn under every slide's
+/// entrance stuttered it.
+///
+/// The kicker is a slot: the feed's ranks the title in the row it comes
+/// from, a streaming service's names the service and switches between them.
+struct HeroSlideCopy<Kicker: View>: View {
+    let result: Result
+    /// Movies or series — which catalogue the title's logo is looked up in.
+    let screenType: ScreenTypes
+    let kicker: Kicker
+
+    init(result: Result, screenType: ScreenTypes, @ViewBuilder kicker: () -> Kicker) {
+        self.result = result
+        self.screenType = screenType
+        self.kicker = kicker()
+    }
+
+    var body: some View {
+        VStack(spacing: 14) {
+            kicker
+
+            HeroTitleArt(result: result, screenType: screenType)
+
+            facts
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Rating, year, genres, on one line with a dot between each — a
+    /// caption under the logo rather than a row of chips competing with it.
+    private var facts: some View {
+        let rating = result.vote_average.flatMap { $0 > 0 ? $0 : nil }
+        let year = result.getReleaseDate(addSeparator: false)
+        let genres = (result.genre_ids ?? []).prefix(2).compactMap(GenreNames.shared.name)
+        let words = ([year] + genres).filter { !$0.isEmpty }
+
+        return HStack(spacing: 8) {
+            if let rating {
+                HStack(spacing: 3) {
+                    Image(systemName: "star.fill")
+                        .appFont(11, relativeTo: .caption2)
+                        .foregroundStyle(RatingStyle.tint(for: rating))
+                    Text(rating.ratingText)
+                }
+            }
+            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                if rating != nil || index > 0 {
+                    Circle()
+                        .fill(.white.opacity(0.5))
+                        .frame(width: 3, height: 3)
+                }
+                Text(verbatim: word)
+            }
+        }
+        .appFont(14, weight: .medium, relativeTo: .subheadline)
+        .foregroundStyle(.white.opacity(0.88))
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - HeroTitleArt
+
+/// A slide's title: the title's own logo where TMDB has one, its name in
+/// our type where it doesn't.
+///
+/// Holds its place, invisibly, while the answer is on its way — up to the
+/// better part of a second, then the name — so a slide never shows its name
+/// and then swaps it for the logo. A logo too dark for the hero's scrim is
+/// drawn in white.
+struct HeroTitleArt: View {
+    let result: Result
+    let screenType: ScreenTypes
+
+    private enum Phase: Equatable {
+        case pending
+        case logo(TitleLogo)
+        case name
+    }
+
+    @State private var phase: Phase
+    @State private var logoShown = false
+    @State private var logoIsDark = false
+
+    /// The widest and tallest a logo is drawn. Large — it's the slide's
+    /// headline, and the art behind it is the only thing bigger.
+    private let maxLogoWidth: CGFloat = 300
+    private let maxLogoHeight: CGFloat = 108
+
+    init(result: Result, screenType: ScreenTypes) {
+        self.result = result
+        self.screenType = screenType
+        let key = TitleLogoStore.Key(id: result.id ?? 0, screenType: screenType)
+        switch TitleLogoStore.shared.cached(key) {
+        case .some(.some(let logo)): _phase = State(initialValue: .logo(logo))
+        case .some(.none):           _phase = State(initialValue: .name)
+        case .none:                  _phase = State(initialValue: .pending)
+        }
+    }
+
+    private var key: TitleLogoStore.Key {
+        TitleLogoStore.Key(id: result.id ?? 0, screenType: screenType)
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            switch phase {
+            case .pending:
+                name.hidden()
+            case .name:
+                name
+            case .logo(let logo):
+                logoArt(logo)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(result.getResultTitle()))
+        .accessibilityAddTraits(.isHeader)
+        .task(id: key) {
+            guard phase == .pending else { return }
+            // Long enough for a cold request; past it, the name rather than
+            // a gap where the title should be.
+            let fallback = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(800))
+                if !Task.isCancelled, phase == .pending { phase = .name }
+            }
+            let logo = await TitleLogoStore.shared.logo(for: key)
+            fallback.cancel()
+            guard phase == .pending else { return }
+            phase = logo.map(Phase.logo) ?? .name
+        }
+    }
+
+    private var name: some View {
+        Text(result.getResultTitle())
+            .appFont(34, weight: .heavy, relativeTo: .largeTitle)
+            .tracking(-0.4)
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.75)
+    }
+
+    private func logoArt(_ logo: TitleLogo) -> some View {
+        let ratio = max(logo.aspectRatio, 0.5)
+        let width = min(maxLogoWidth, maxLogoHeight * ratio)
+        return KFImage.url(logo.url)
+            .onSuccess { result in
+                let image = result.image
+                Task.detached(priority: .userInitiated) {
+                    let isDark = (image.inkLuminance ?? 1) < 0.32
+                    await MainActor.run {
+                        logoIsDark = isDark
+                        logoShown = true
+                    }
+                }
+            }
+            // A logo that won't load leaves the name, not a blank.
+            .onFailure { _ in phase = .name }
+            .loadImmediately()
+            .cacheOriginalImage()
+            .backgroundDecode()
+            .renderingMode(logoIsDark ? .template : .original)
+            .resizable()
+            .foregroundStyle(.white)
+            .aspectRatio(ratio, contentMode: .fit)
+            .frame(width: width, height: width / ratio, alignment: .bottom)
+            .opacity(logoShown ? 1 : 0)
+            .animation(.easeOut(duration: AppMotion.standard), value: logoShown)
+    }
+}
+
+/// The feed hero's badge: where the title ranks in the row it leads, in
+/// the same gold, silver and bronze `#N` chip as that row's cards just
+/// below, then the row's name.
+struct HeroRankKicker: View {
+    /// 1-based.
+    let rank: Int
+    let label: String
+    let isSeries: Bool
+
+    var body: some View {
+        HStack(spacing: 7) {
+            HStack(spacing: 1) {
+                Text(verbatim: "#")
+                    .appFont(10, weight: .bold, relativeTo: .caption2, design: .rounded)
+                    .opacity(0.8)
+                Text(verbatim: "\(rank)")
+                    .appFont(12, weight: .heavy, relativeTo: .caption, design: .rounded)
+            }
+            // Dark on the metals: white on silver all but disappears at
+            // this size.
+            .foregroundStyle(rank <= 3 ? Color.black.opacity(0.82) : .white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(RankTint.color(for: rank, isSeries: isSeries), in: Capsule())
+
+            Text(verbatim: label.uppercased(with: .current))
+                .heroKickerStyle()
+                .lineLimit(1)
+        }
+        .heroBadge(leading: 5)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Number \(rank) in \(label)",
+                                 comment: "Accessibility: the hero's badge, e.g. Number 2 in Hot Right Now"))
+    }
+}
+
+extension View {
+    /// The kicker's type, for a kicker built from more than text.
+    func heroKickerStyle() -> some View {
+        self
+            .appFont(11, weight: .semibold, relativeTo: .caption)
+            .tracking(1.2)
+            .foregroundStyle(.white.opacity(0.92))
+    }
+
+    /// A hero's badge: the kicker in a capsule of glass over the picture.
+    /// `leading` is tighter where the badge opens on a chip or a logo, so
+    /// the round shape inside sits evenly in the round end.
+    func heroBadge(leading: CGFloat = 12) -> some View {
+        self
+            .padding(.leading, leading)
+            .padding(.trailing, 12)
+            .padding(.vertical, 5)
+            .modifier(HeroBadgeBackground())
+    }
+}
+
+/// Liquid glass on iOS 26, a dark thin material with a hairline before.
+/// Dark either way: the badge sits on the picture, not on the page.
+private struct HeroBadgeBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        Group {
+            if #available(iOS 26.0, *) {
+                content.glassEffect(.regular, in: Capsule())
+            } else {
+                content
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+            }
+        }
+        .environment(\.colorScheme, .dark)
+    }
+}
+
+// MARK: - Hero actions
+
+/// A trailer to show in a sheet.
+private struct HeroTrailerLink: Identifiable {
+    let url: URL
+    var id: String { url.absoluteString }
+}
+
+/// The hero's lead action: a solid white pill, the one opaque thing on the
+/// picture, so it's the first thing the eye and the thumb find. Spins in
+/// place while the trailer is being found. For a title with no trailer it
+/// says where it goes instead — the details screen — rather than promising
+/// a trailer and opening that.
+private struct HeroTrailerButton: View {
+    let isLoading: Bool
+    var hasTrailer = true
+    let action: () -> Void
+
+    private var label: String {
+        hasTrailer ? String(localized: "Trailer", comment: "Button: play the trailer")
+                   : String(localized: "More info")
+    }
+
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 50
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                ZStack {
+                    Image(systemName: hasTrailer ? "play.fill" : "info.circle.fill")
+                        .appFont(15, weight: .bold, relativeTo: .body)
+                        .foregroundStyle(Color.accentColor)
+                        .contentTransition(.symbolEffect(.replace))
+                        .opacity(isLoading ? 0 : 1)
+                    if isLoading {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(.black)
+                    }
+                }
+                Text(label)
+                    .appFont(17, weight: .semibold, relativeTo: .body)
+                    .foregroundStyle(.black)
+                    .lineLimit(1)
+                    .contentTransition(.interpolate)
+            }
+            .padding(.horizontal, 26)
+            .frame(minWidth: 172)
+            .frame(height: height)
+            .background(.white, in: Capsule())
+            .contentShape(Capsule())
+        }
+        .buttonStyle(HeroPressStyle())
+        .animation(.snappy, value: hasTrailer)
+        .accessibilityLabel(Text(label))
+    }
+}
+
+/// Watch Later, as a glass circle beside Trailer: the bookmark the details
+/// screen saves with, filling with the accent once the title is saved.
+private struct HeroWatchlistButton: View {
+    let result: Result
+    let screenType: ScreenTypes
+    /// The hero is on screen. Coming back to it — from a details screen, say
+    /// — the title may have been saved or removed there; it's read again.
+    let isOnScreen: Bool
+
+    @State private var isSaved = false
+    @ScaledMetric(relativeTo: .body) private var size: CGFloat = 50
+
+    var body: some View {
+        Button(action: toggle) {
+            Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                .appFont(18, weight: .semibold, relativeTo: .body)
+                .foregroundStyle(.white)
+                .contentTransition(.symbolEffect(.replace.downUp))
+                .frame(width: size, height: size)
+                .modifier(HeroCircleBackground(isOn: isSaved))
+                .contentShape(Circle())
+        }
+        .buttonStyle(HeroPressStyle())
+        .onAppear(perform: readSaved)
+        .onChange(of: isOnScreen) { _, onScreen in
+            if onScreen { readSaved() }
+        }
+        .accessibilityLabel(isSaved
+                            ? Text("Remove from Watchlist")
+                            : Text(String(localized: "Watch Later", comment: "Button: add the title to the watchlist")))
+    }
+
+    private func readSaved() {
+        isSaved = WatchlistManager.existsInWatchList(result: saveable)
+    }
+
+    /// The title as the watchlist keeps it. Rows from a service's catalogue
+    /// come without a `media_type`, which the watchlist needs to tell a
+    /// movie from a series with the same id.
+    private var saveable: Result {
+        var item = result
+        if item.media_type == nil {
+            item.media_type = screenType == .tv ? "tv" : "movie"
+        }
+        return item
+    }
+
+    private func toggle() {
+        let item = saveable
+        if isSaved {
+            WatchlistManager.removeFromWatchList(result: item)
+            isSaved = false
+        } else {
+            let added = WatchlistManager.addToWatchList(result: item)
+            isSaved = true
+            if added {
+                // As saving from anywhere else: the first save is the moment
+                // to offer alerts, and a save counts towards a review ask.
+                Task { await NotificationPermission.shared.offerAfterSave() }
+                ReviewRequestManager.recordWatchlistAdd()
+                ReviewRequestManager.requestReview(for: .savedTitle)
+            }
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+}
+
+/// Glass on iOS 26, tinted with the accent while on; the dark thin
+/// material before, filled with the accent while on.
+private struct HeroCircleBackground: ViewModifier {
+    let isOn: Bool
+
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
-            content
-                .glassEffect(.regular, in: Capsule())
+            content.glassEffect(isOn ? .regular.tint(.accentColor).interactive() : .regular.interactive(),
+                                in: Circle())
         } else {
             content
-                .background(.ultraThinMaterial, in: Capsule())
+                .background {
+                    ZStack {
+                        Circle().fill(.ultraThinMaterial)
+                        if isOn { Circle().fill(Color.accentColor) }
+                    }
+                }
+                .overlay(Circle().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+        }
+    }
+}
+
+/// A squeeze on touch-down, let go with a little spring.
+private struct HeroPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            // On under Reduce Motion too, as `PressableCardStyle`: a press
+            // confined to the control under the finger is response, not
+            // motion.
+            .animation(AppMotion.springSnappy, value: configuration.isPressed)
+    }
+}
+
+// MARK: - HeroPageIndicator
+
+/// A hero's page indicator: dots, the current one a capsule that fills over
+/// its slide's dwell, and a button that stops and starts the rotation.
+/// Shared by the feed's hero and a streaming service's catalogue, so the
+/// two count down the same way. Bare, on the hero's shade: in a glass
+/// pill of their own they were one more surface under the buttons.
+struct HeroPageIndicator: View {
+    let count: Int
+    let current: Int
+    /// Seconds a slide shows before the next — what the current dot counts.
+    let dwell: Double
+    /// The countdown is live: on screen, not paused, no finger on it.
+    let isRunning: Bool
+    @Binding var isPaused: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// The dots and the countdown capsule. Small on purpose: the pill says
+    /// where you are and that it's moving, and the slide is what's worth
+    /// looking at.
+    private static let dot: CGFloat = 6
+    fileprivate static let capsuleWidth: CGFloat = 22
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<count, id: \.self) { index in
+                let isActive = index == current
+                Group {
+                    if isActive {
+                        ProgressCapsule(duration: dwell, isRunning: isRunning)
+                    } else {
+                        Capsule()
+                            .fill(Color.white.opacity(0.35))
+                            .frame(width: Self.dot, height: Self.dot)
+                    }
+                }
+                // Recreated when a dot turns active or inactive, so the
+                // capsule's `onAppear` fires on a fresh view.
+                .id("\(index)-\(isActive)")
+                .animation(.easeInOut(duration: AppMotion.standard), value: current)
+            }
+            // Dots are decoration; the position is announced once, as a
+            // sentence, on the row itself.
+            .accessibilityHidden(true)
+
+            // Reduce Motion stops the rotation outright, so there's nothing
+            // to pause.
+            if count > 1, !reduceMotion {
+                pauseControl
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text("Slide \(current + 1) of \(count)",
+                                 comment: "Accessibility: featured carousel position"))
+    }
+
+    /// Stop/start for the rotation, tucked into the pill so it costs no new
+    /// chrome. The glyph is small; the tap area is not.
+    private var pauseControl: some View {
+        Button {
+            isPaused.toggle()
+        } label: {
+            Image(systemName: isPaused ? "play.fill" : "pause.fill")
+                .appFont(8, weight: .bold, relativeTo: .caption2)
+                .foregroundStyle(.white.opacity(0.9))
+                .frame(width: 20, height: 20)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        // Extends past the pill rather than inflating it — the visible pill
+        // keeps its proportions while the target reaches 44pt.
+        .frame(width: 44, height: 44)
+        .contentShape(Rectangle())
+        .padding(.leading, -12)
+        .padding(.trailing, -10)
+        .padding(.vertical, -12)
+        .accessibilityLabel(isPaused ? "Play slideshow" : "Pause slideshow")
+    }
+
+    /// A 22 × 6 pt capsule that fills left to right over `duration` seconds.
+    ///
+    /// Two things the animation has to survive:
+    /// 1. On reappear, `progress` may still be at 1 from a previous cycle; a
+    ///    plain `withAnimation { progress = 1 }` sees no change and skips it.
+    /// 2. Backgrounding snaps in-flight animations to their end. When the app
+    ///    comes back the rotation restarts its wait, but this view isn't
+    ///    recreated, so it would sit full for the next dwell.
+    ///
+    /// So: reset to 0 with animations disabled, then start the linear fill on
+    /// the next runloop tick, once the reset has committed — and again when
+    /// the scene comes back to the foreground.
+    private struct ProgressCapsule: View {
+        let duration: Double
+        /// False when the rotation is paused or Reduce Motion is on: the
+        /// capsule then shows full, as held, instead of counting down to an
+        /// advance that isn't coming.
+        let isRunning: Bool
+        @State private var progress: CGFloat = 0
+        @Environment(\.scenePhase) private var scenePhase
+
+        var body: some View {
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.white.opacity(0.3))
+                Capsule()
+                    .fill(Color.white.opacity(0.95))
+                    .scaleEffect(x: progress, anchor: .leading)
+            }
+            .frame(width: HeroPageIndicator.capsuleWidth, height: HeroPageIndicator.dot)
+            .clipShape(Capsule())
+            .onAppear { restartAnimation() }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active { restartAnimation() }
+            }
+            .onChange(of: isRunning) { _, _ in restartAnimation() }
+        }
+
+        private func restartAnimation() {
+            var reset = Transaction()
+            reset.disablesAnimations = true
+            withTransaction(reset) { progress = 0 }
+            guard isRunning else {
+                var hold = Transaction()
+                hold.disablesAnimations = true
+                withTransaction(hold) { progress = 1 }
+                return
+            }
+            DispatchQueue.main.async {
+                withAnimation(.linear(duration: duration)) { progress = 1 }
+            }
         }
     }
 }
@@ -593,11 +1195,9 @@ private struct TapToNavigateModifier: ViewModifier {
 
 // MARK: - Hero tint extraction
 //
-// Colour-sampling helper used by `ambientBackdrop` so the blurred poster
-// can be tinted with its own dominant hue — same trick Spotify and
-// Apple Music use on "Now Playing" backgrounds. Lives in this file
-// (rather than a standalone helper) so no Xcode project wiring is
-// needed to pick it up; only `MenuFeaturedView` consumes it today.
+// Colour sampling for the details screen, which takes its page colour from
+// the hero artwork. Lived here when the feed hero tinted a blurred backdrop
+// with it too; that backdrop is gone, the helper stays put.
 
 extension UIImage {
 

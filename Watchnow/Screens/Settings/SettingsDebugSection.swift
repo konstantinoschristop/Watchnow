@@ -23,9 +23,19 @@ struct SettingsDebugSection: View {
     @State private var status: String?
     @State private var lines: [String] = []
     @State private var isWorking = false
+    /// How the heroes' stills move, while the takes are compared — see
+    /// `StillsMotion`.
+    @AppStorage(StillsMotion.storageKey) private var stillsMotion = StillsMotion.still.rawValue
 
     var body: some View {
         Section {
+            Picker(selection: $stillsMotion) {
+                ForEach(StillsMotion.allCases) { motion in
+                    Text(verbatim: motion.debugName).tag(motion.rawValue)
+                }
+            } label: {
+                Text(verbatim: "Stills motion")
+            }
             Button(debug: "Run refresh + plan now") { run(runRefresh) }
             Button(debug: "Show planned alerts") { run(showPlan) }
             Button(debug: "Show pending notifications") { run(showPending) }

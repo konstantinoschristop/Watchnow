@@ -39,10 +39,6 @@ struct WatchlistView: View {
     /// return; the folder itself already exists either way.
     @State private var draftName = ""
     @State private var moveTarget: Result?
-    /// Read once and held, not asked per cover — see the note on
-    /// `WatchlistGridView.watchedIDs`.
-    @State private var watchedIDs: Set<Int> = []
-    @ObservedObject private var syncStatus = SyncStatus.shared
     @Namespace private var navigationNamespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -57,7 +53,7 @@ struct WatchlistView: View {
     var body: some View {
         VStack(spacing: 0) {
             content
-            syncFooter
+            WatchlistSyncFooter()
         }
         .background(Color(.background))
         .navigationBarTitleDisplayMode(.inline)
@@ -68,16 +64,11 @@ struct WatchlistView: View {
                 }
             }
         }
-        .onAppear {
-            watchlistViewModel.refreshDataIfNeeded()
-            watchedIDs = WatchedStore.watchedIDs
-        }
-        // A title marked watched on another device, or on its own details
-        // screen, should be marked here too by the time you look.
-        .onReceive(NotificationCenter.default.publisher(for: CloudSync.didMergeRemoteChanges)) { note in
-            let keys = note.userInfo?[CloudSync.changedKeysKey] as? [String] ?? []
-            if keys.contains("watchedAtDates") { watchedIDs = WatchedStore.watchedIDs }
-        }
+        // Nothing is redrawn here: `onAppear` fires as the swipe back from
+        // a details screen begins, `onDisappear` once one has finished
+        // covering the watchlist — see `WatchlistViewModel.isOnScreen`.
+        .onAppear { watchlistViewModel.screenAppeared() }
+        .onDisappear { watchlistViewModel.screenDisappeared() }
         .toast(isPresenting: $watchlistViewModel.showRemovedAlert) {
             AlertToast(displayMode: .alert,
                        type: .error(.red),
@@ -239,7 +230,7 @@ struct WatchlistView: View {
                               streamingProvider: streamingBadgeProvider,
                               onMoveToFolder: { moveTarget = $0 },
                               onRemove: { removeFromGrid($0) },
-                              watchedIDs: watchedIDs,
+                              watchedIDs: watchlistViewModel.watchedIDs,
                               onToggleWatched: { toggleWatched($0) },
                               namespace: navigationNamespace,
                               contentID: watchlistViewModel.selectedFilter,
@@ -306,7 +297,7 @@ struct WatchlistView: View {
         var nowWatched = false
         withAnimation(reduceMotion ? nil : AppMotion.crossfade) {
             nowWatched = WatchedStore.toggle(id)
-            if nowWatched { watchedIDs.insert(id) } else { watchedIDs.remove(id) }
+            watchlistViewModel.setWatched(id, nowWatched)
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         if nowWatched { ReviewRequestManager.requestReview(for: .markedWatched) }
@@ -590,37 +581,6 @@ struct WatchlistView: View {
         }
     }
 
-    // MARK: - iCloud sync footer
-
-    /// Quiet "Synced via iCloud" caption, pinned below the content. Shown
-    /// only when the device is actually signed into iCloud, so it never
-    /// claims a sync that isn't happening.
-    @ViewBuilder
-    private var syncFooter: some View {
-        if syncStatus.isAvailable {
-            HStack(spacing: 5) {
-                Image(systemName: "checkmark.icloud")
-                    .appFont(11, weight: .medium, relativeTo: .caption2)
-                Text(syncCaption)
-                    .appFont(12, relativeTo: .caption)
-            }
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-        }
-    }
-
-    private var syncCaption: String {
-        guard let date = syncStatus.lastSyncedAt else { return String(localized: "Synced via iCloud") }
-        if Date().timeIntervalSince(date) < 5 {
-            return String(localized: "Synced via iCloud · just now")
-        }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        let ago = formatter.localizedString(for: date, relativeTo: Date())
-        return String(localized: "Synced via iCloud · \(ago)", comment: "Watchlist footer; how long ago, e.g. 5 min. ago")
-    }
-
     // MARK: - Data shaping
 
     private var filteredItems: [Result] {
@@ -629,5 +589,58 @@ struct WatchlistView: View {
 
     private var isGlobalEmpty: Bool {
         watchlistViewModel.savedAll.isEmpty
+    }
+}
+
+// MARK: - Equatable
+
+/// `ContentView` re-renders whenever any tab's view model publishes, and
+/// `onBrowse` — a closure, which SwiftUI can't compare — made every one of
+/// those renders look like a new watchlist and redraw every cover. Mid-way
+/// through the swipe back from a details screen, that cancels the zoom back
+/// into them. The view model is the only input that can change what's
+/// shown; `onBrowse` only ever switches tabs. Changes to anything this view
+/// observes still update it as before.
+extension WatchlistView: @MainActor Equatable {
+    static func == (lhs: WatchlistView, rhs: WatchlistView) -> Bool {
+        lhs.watchlistViewModel === rhs.watchlistViewModel
+    }
+}
+
+// MARK: - iCloud sync footer
+
+/// Quiet "Synced via iCloud" caption, pinned below the content. Shown only
+/// when the device is actually signed into iCloud, so it never claims a
+/// sync that isn't happening.
+///
+/// A view of its own, so a sync redraws the caption and nothing else —
+/// observed by the watchlist itself, one landing during the swipe back from
+/// a details screen redrew every cover and cancelled the zoom.
+private struct WatchlistSyncFooter: View {
+    @ObservedObject private var syncStatus = SyncStatus.shared
+
+    var body: some View {
+        if syncStatus.isAvailable {
+            HStack(spacing: 5) {
+                Image(systemName: "checkmark.icloud")
+                    .appFont(11, weight: .medium, relativeTo: .caption2)
+                Text(caption)
+                    .appFont(12, relativeTo: .caption)
+            }
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var caption: String {
+        guard let date = syncStatus.lastSyncedAt else { return String(localized: "Synced via iCloud") }
+        if Date().timeIntervalSince(date) < 5 {
+            return String(localized: "Synced via iCloud · just now")
+        }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        let ago = formatter.localizedString(for: date, relativeTo: Date())
+        return String(localized: "Synced via iCloud · \(ago)", comment: "Watchlist footer; how long ago, e.g. 5 min. ago")
     }
 }

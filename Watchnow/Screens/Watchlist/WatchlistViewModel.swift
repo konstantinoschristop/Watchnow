@@ -13,6 +13,10 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     @Published private var model:       WatchlistModel
     @Published var showRemovedAlert = false
     @Published var showAddedAlert   = false
+    /// Ids marked watched, for the covers' badges. Held here, not asked of
+    /// `WatchedStore` per cover — that's a `@UserDefault`, a full decode a
+    /// time — and refreshed with the list, under the same rules.
+    @Published private(set) var watchedIDs: Set<Int> = []
 
     /// Plain reference to the folder singleton. The view observes
     /// `FolderManager.shared` itself via `@ObservedObject` to react to
@@ -33,14 +37,75 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
         ) { [weak self] _ in
             Task { @MainActor in self?.refreshDataIfNeeded() }
         }
+        // And when it changes on this device — a details screen refreshing
+        // its entry, a save from another tab — once it's out of sight.
+        NotificationCenter.default.addObserver(
+            forName: WatchlistManager.didChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.storageChanged() }
+        }
+    }
+
+    // MARK: - Refreshing
+
+    /// The stored list and its services as last read, so a refresh that
+    /// finds them unchanged publishes nothing.
+    private var loadedStorage: [Data?] = []
+
+    /// The watchlist is on screen — or on its way on or off it: from its
+    /// `onAppear`, which fires as a swipe back to it begins, to its
+    /// `onDisappear`, which fires once a pushed details screen has finished
+    /// covering it. Redrawing the covers anywhere in there breaks the zoom
+    /// between them and the details screen — mid-push it flashed the screen
+    /// black, mid-swipe-back it cancelled the swipe. Plain properties, not
+    /// published: setting them must not redraw anything either.
+    private var isOnScreen = false
+    /// A change landed while the watchlist was on screen; applied once it
+    /// isn't.
+    private var refreshPending = false
+
+    func screenAppeared() {
+        isOnScreen = true
+    }
+
+    func screenDisappeared() {
+        isOnScreen = false
+        if refreshPending {
+            refreshPending = false
+            refreshDataIfNeeded()
+        }
+    }
+
+    /// Changes made while the watchlist is on screen are its own — a
+    /// removal, a reorder — and those refresh it themselves, straight away.
+    /// What arrives from elsewhere waits until it's covered or away.
+    private func storageChanged() {
+        if isOnScreen {
+            refreshPending = true
+        } else {
+            refreshDataIfNeeded()
+        }
     }
 
     private func fetchResultsFromWatchList() {
-        self.results = WatchlistManager.watchlist
+        let storage = ["watchlist", "watchlistProviders"].map { UserDefaults.standard.data(forKey: $0) }
+        if results == nil || storage != loadedStorage {
+            loadedStorage = storage
+            self.results = WatchlistManager.watchlist
+        }
+        let watched = WatchedStore.watchedIDs
+        if watched != watchedIDs { watchedIDs = watched }
     }
 
     func refreshDataIfNeeded() {
         fetchResultsFromWatchList()
+    }
+
+    /// The watchlist marked one itself — its own change, shown at once.
+    func setWatched(_ id: Int, _ watched: Bool) {
+        if watched { watchedIDs.insert(id) } else { watchedIDs.remove(id) }
     }
 
     // MARK: - Data derivation
@@ -56,8 +121,10 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     /// album row, once for the empty check, and once more per folder card.
     /// On a list of any size that was the "changing folder is laggy":
     /// half a dozen complete decodes per frame. `results` is refreshed by
-    /// `fetchResultsFromWatchList()` on init, on appear, after a removal or
-    /// reorder, and on an iCloud merge — every path that can change it.
+    /// `fetchResultsFromWatchList()` on init, after a removal or reorder, on
+    /// an iCloud merge, and on any other change on this device once the
+    /// watchlist is out of sight (`storageChanged()`) — every path that can
+    /// change it.
     var savedAll: [Result] {
         Array((results ?? []).reversed())
     }

@@ -52,11 +52,20 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     /// TV, Apple TV Store — and HBO Max (id 1899) 28th in Greece, 52nd in the
     /// US, so it never made the row. It's only the fallback now, for a
     /// region where none of the curated services exist.
+    ///
+    /// The services the user has (`StreamingPreferences`) come first.
     @Published var providers: [WatchProvider]?
 
+    /// `providers` before the user's own services are moved to the front.
+    /// Kept so a change to theirs re-sorts from the curated order rather
+    /// than from the last sort — a service they drop goes back to its place
+    /// instead of lingering at the front.
+    private var regionProviders: [WatchProvider] = []
+
     /// Currently picked streaming-service chip. Drives the inline
-    /// results row underneath the chip bar. Auto-populated to Netflix
-    /// (or the first provider in the region) when `loadContent` finishes.
+    /// results row underneath the chip bar. Auto-populated to the user's
+    /// first service (or Netflix, or the region's first) when `loadContent`
+    /// finishes.
     @Published var selectedProvider: WatchProvider?
 
     /// Titles available on `selectedProvider`. Refreshed every time the
@@ -65,6 +74,9 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
     /// "selected but loading" (results.isEmpty + isLoadingProviderResults).
     @Published var providerResults: [Result] = []
     @Published var isLoadingProviderResults: Bool = false
+    /// How many titles TMDB lists for `selectedProvider` — the size of the
+    /// whole catalogue the row is the first page of. nil until it's known.
+    @Published var providerResultsTotal: Int?
 
     /// True while the section can still load more pages from the
     /// discover endpoint. Flips to false once we've appended an empty
@@ -137,17 +149,19 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
         // feed is still fully usable without it.
         if let r = try? await pr {
             let curated = StreamingProviderCatalog.curated(from: r.results)
-            providers = curated.isEmpty
+            regionProviders = curated.isEmpty
                 ? (r.results ?? [])
                     .sorted { ($0.display_priority ?? Int.max) < ($1.display_priority ?? Int.max) }
                     .prefix(20)
                     .map { $0 }
                 : curated
+            providers = StreamingProviderCatalog.prioritized(regionProviders,
+                                                             subscribed: Set(StreamingPreferences.providerIDs))
 
-            // Auto-select Netflix if it's available in the region; otherwise
-            // fall back to whichever provider TMDB ranks highest. The inline
-            // results row should never look "empty" when we could have shown
-            // something useful by default.
+            // Auto-select the user's first service; otherwise Netflix, or
+            // whichever provider leads the list. The inline results row
+            // should never look "empty" when we could have shown something
+            // useful by default.
             await autoSelectProvider()
         }
 
@@ -156,17 +170,32 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
 
     // MARK: - Streaming services
 
-    /// Picks an initial provider on tab load. Netflix has provider_id 8
-    /// across both movie and TV catalogues on TMDB and is the most likely
-    /// service users have a subscription to globally, so we prefer it.
-    /// Anywhere it isn't carried, we fall back to the highest-priority
-    /// provider in the region.
+    /// Picks an initial provider on tab load: the first of the user's own
+    /// services, which lead the chip bar — preselecting anything else would
+    /// open the row on a chip halfway along it. Without any, Netflix: it
+    /// has provider_id 8 across both movie and TV catalogues on TMDB and is
+    /// the most likely subscription globally. Anywhere it isn't carried,
+    /// the first provider in the list.
     private func autoSelectProvider() async {
         guard let providers, selectedProvider == nil else { return }
-        let netflix = providers.first { $0.provider_id == 8 }
-        if let target = netflix ?? providers.first {
+        let subscribed = Set(StreamingPreferences.providerIDs)
+        let target = providers.first { subscribed.contains($0.provider_id) }
+            ?? providers.first { $0.provider_id == 8 }
+            ?? providers.first
+        if let target {
             await selectProvider(target)
         }
+    }
+
+    /// Re-sorts the chip bar after the user changes their services — in
+    /// Settings, or on another device via iCloud. The selection stays put:
+    /// the row they're looking at shouldn't swap under them because they
+    /// ticked a box somewhere else.
+    func applySubscribedOrder() {
+        guard providers != nil else { return }
+        let ordered = StreamingProviderCatalog.prioritized(regionProviders,
+                                                           subscribed: Set(StreamingPreferences.providerIDs))
+        if ordered != providers { providers = ordered }
     }
 
     /// Switches the inline streaming-services row to a new provider and
@@ -178,6 +207,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
         if selectedProvider?.id == provider.id, !providerResults.isEmpty { return }
         selectedProvider = provider
         providerResults = []
+        providerResultsTotal = nil
         providerResultsPage = 1
         canLoadMoreProviderResults = false
         isLoadingProviderResults = true
@@ -195,6 +225,7 @@ class BaseContentViewModel: ObservableObject, BaseViewModelProtocol {
                 r.media_type = screenType == .movie ? "movie" : "tv"
                 return r
             }
+            providerResultsTotal = response.total_results
             canLoadMoreProviderResults = !providerResults.isEmpty
                                           && 1 < (response.total_pages ?? 1)
         } catch {

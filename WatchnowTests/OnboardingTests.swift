@@ -159,6 +159,31 @@ final class StreamingProviderCatalogTests: XCTestCase {
         XCTAssertTrue(StreamingProviderCatalog.curated(from: nil).isEmpty)
         XCTAssertTrue(StreamingProviderCatalog.curated(from: []).isEmpty)
     }
+
+    // MARK: The user's services first
+
+    private var region: [WatchProvider] {
+        [provider(8, "Netflix"), provider(9, "Prime Video"), provider(337, "Disney Plus"),
+         provider(350, "Apple TV"), provider(1899, "HBO Max")]
+    }
+
+    /// Both halves keep the curated order: Disney+ and HBO Max, in that
+    /// order, ahead of everything else, also in order.
+    func testTheUsersServicesComeFirstInTheirUsualOrder() {
+        let ordered = StreamingProviderCatalog.prioritized(region, subscribed: [1899, 337])
+        XCTAssertEqual(ordered.map(\.provider_id), [337, 1899, 8, 9, 350])
+    }
+
+    func testNoServicesLeavesTheOrderAlone() {
+        XCTAssertEqual(StreamingProviderCatalog.prioritized(region, subscribed: []).map(\.provider_id),
+                       [8, 9, 337, 350, 1899])
+    }
+
+    /// A service the user has but the region doesn't carry adds nothing.
+    func testAServiceTheRegionLacksIsIgnored() {
+        XCTAssertEqual(StreamingProviderCatalog.prioritized(region, subscribed: [15, 350]).map(\.provider_id),
+                       [350, 8, 9, 337, 1899])
+    }
 }
 
 // MARK: - Onboarding state & Coach counting

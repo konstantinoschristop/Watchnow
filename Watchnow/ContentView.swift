@@ -246,6 +246,8 @@ extension ContentView {
         NavigationStack {
             WatchlistView(watchlistViewModel: watchlistViewModel,
                           onBrowse: { selectedTab = .movies })
+                // Re-run only for its own changes — see `WatchlistView: Equatable`.
+                .equatable()
                 .background(Color(.background))
                 .navigationTitle("Watchlist")
                 .toolbar {

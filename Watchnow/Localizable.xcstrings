@@ -7,41 +7,6 @@
     " " : {
       "shouldTranslate" : false
     },
-    "Loading trailer" : {
-      "comment" : "Accessibility: spinner while the trailer loads at the top of the page",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trailer wird geladen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Φόρτωση τρέιλερ"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cargando tráiler"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement de la bande-annonce"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carregando trailer"
-          }
-        }
-      }
-    },
     "·" : {
       "shouldTranslate" : false
     },
@@ -4655,6 +4620,41 @@
         }
       }
     },
+    "Clear" : {
+      "comment" : "Accessibility: clears the search field",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καθαρισμός"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar"
+          }
+        }
+      }
+    },
     "Clear All" : {
       "localizations" : {
         "de" : {
@@ -6007,7 +6007,9 @@
         }
       }
     },
-    "Episode" : {},
+    "Episode" : {
+
+    },
     "Episode %lld" : {
       "comment" : "An episode with no name, by its number",
       "localizations" : {
@@ -6246,6 +6248,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "É o que todo mundo quer assistir."
+          }
+        }
+      }
+    },
+    "Everything on %@" : {
+      "comment" : "Section title: a streaming service's whole catalogue; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles bei %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλοι οι τίτλοι στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout le catalogue %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo em %@"
+          }
+        }
+      }
+    },
+    "Explore all of %@" : {
+      "comment" : "Banner under Browse by Streaming that opens a service's whole catalogue; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles bei %@ entdecken"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εξερεύνησε όλο το %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explora todo %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorer tout %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explore tudo em %@"
           }
         }
       }
@@ -6596,7 +6668,9 @@
         }
       }
     },
-    "Floor" : {},
+    "Floor" : {
+
+    },
     "Folder" : {
       "comment" : "Accessibility: name of a folder icon",
       "localizations" : {
@@ -8501,6 +8575,41 @@
         }
       }
     },
+    "Loading trailer" : {
+      "comment" : "Accessibility: spinner while the trailer loads at the top of the page",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer wird geladen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φόρτωση τρέιλερ"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando tráiler"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la bande-annonce"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando trailer"
+          }
+        }
+      }
+    },
     "Loading your services…" : {
       "localizations" : {
         "de" : {
@@ -9791,6 +9900,41 @@
         }
       }
     },
+    "Newest" : {
+      "comment" : "Streaming service catalogue sort option: most recently released first",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neueste"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νεότερα"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más recientes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus récents"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais recentes"
+          }
+        }
+      }
+    },
     "News" : {
       "comment" : "Genre",
       "localizations" : {
@@ -10448,6 +10592,76 @@
         }
       }
     },
+    "Not on %@" : {
+      "comment" : "Search section: matches a streaming service doesn't carry; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht bei %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όχι στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No está en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas sur %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não está em %@"
+          }
+        }
+      }
+    },
+    "Not streaming in your region" : {
+      "comment" : "Search row: no subscription service streams this title in the user's country",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In deiner Region nicht im Stream"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν προβάλλεται στην περιοχή σου"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No disponible en tu región"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponible dans votre région"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponível na sua região"
+          }
+        }
+      }
+    },
     "Nothing came back for this genre. Try another one." : {
       "localizations" : {
         "de" : {
@@ -10516,6 +10730,41 @@
         }
       }
     },
+    "Nothing here on %@" : {
+      "comment" : "Streaming service catalogue empty state; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts gefunden bei %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίποτα εδώ στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada por aquí en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien ici sur %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada por aqui em %@"
+          }
+        }
+      }
+    },
     "Nothing matching this filter" : {
       "localizations" : {
         "de" : {
@@ -10546,6 +10795,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada encontrado com este filtro"
+          }
+        }
+      }
+    },
+    "Nothing on this service matches these filters in your region." : {
+      "comment" : "Streaming service catalogue empty state description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei diesem Dienst passt in deiner Region nichts zu diesen Filtern."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίποτα σε αυτή την υπηρεσία δεν ταιριάζει με αυτά τα φίλτρα στην περιοχή σου."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada en esta plataforma coincide con estos filtros en tu región."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien sur cette plateforme ne correspond à ces filtres dans votre région."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada neste serviço corresponde a esses filtros na sua região."
           }
         }
       }
@@ -10859,6 +11143,17 @@
         }
       }
     },
+    "Number %lld in %@" : {
+      "comment" : "Accessibility: the hero's badge, e.g. Number 2 in Hot Right Now",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Number %1$lld in %2$@"
+          }
+        }
+      }
+    },
     "Number %lld, %@" : {
       "comment" : "Accessibility: a title's position in a top 10",
       "localizations" : {
@@ -10931,6 +11226,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mais antigas"
+          }
+        }
+      }
+    },
+    "On %@" : {
+      "comment" : "Search section: matches a streaming service carries; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponível em %@"
           }
         }
       }
@@ -11790,6 +12120,41 @@
         }
       }
     },
+    "Popular" : {
+      "comment" : "Streaming service catalogue sort option",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beliebt"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δημοφιλή"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Populares"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Populaires"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Populares"
+          }
+        }
+      }
+    },
     "Premieres %@." : {
       "comment" : "Season not aired yet; its premiere date",
       "localizations" : {
@@ -12104,7 +12469,9 @@
         }
       }
     },
-    "Rating" : {},
+    "Rating" : {
+
+    },
     "Ratings" : {
       "comment" : "Details section title: season and episode ratings for a series",
       "localizations" : {
@@ -13965,6 +14332,41 @@
         }
       }
     },
+    "Search in %@" : {
+      "comment" : "Placeholder: search inside one streaming service; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ durchsuchen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναζήτηση στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher sur %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar em %@"
+          }
+        }
+      }
+    },
     "Searching" : {
       "localizations" : {
         "de" : {
@@ -14556,6 +14958,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mostrar todos"
+          }
+        }
+      }
+    },
+    "Show All Genres" : {
+      "comment" : "Button: clears the genre filter on a streaming service's catalogue",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Genres anzeigen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλα τα είδη"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todos los géneros"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher tous les genres"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todos os gêneros"
           }
         }
       }
@@ -15635,6 +16072,76 @@
         }
       }
     },
+    "Streaming on %@" : {
+      "comment" : "Search row: a title's on another streaming service; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läuft bei %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαθέσιμο στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponible en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponible sur %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assista em %@"
+          }
+        }
+      }
+    },
+    "Streaming Service" : {
+      "comment" : "Menu title: switch which streaming service's catalogue is shown",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streamingdienst"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Υπηρεσία streaming"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plataforma de streaming"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plateforme de streaming"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serviço de streaming"
+          }
+        }
+      }
+    },
     "Suggestions like %@" : {
       "comment" : "Accessibility hint: an example search",
       "localizations" : {
@@ -16568,6 +17075,41 @@
         }
       }
     },
+    "Top 10 on %@" : {
+      "comment" : "Section title: the ten most popular titles on a streaming service; the service's name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 10 bei %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 10 στο %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 10 en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 10 sur %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top 10 em %@"
+          }
+        }
+      }
+    },
     "Top of the titles you kept." : {
       "localizations" : {
         "de" : {
@@ -16598,6 +17140,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O destaque entre os títulos que você escolheu."
+          }
+        }
+      }
+    },
+    "Top Rated" : {
+      "comment" : "Streaming service catalogue sort option",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestbewertet"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κορυφαία"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor valorados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mieux notés"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais bem avaliados"
           }
         }
       }

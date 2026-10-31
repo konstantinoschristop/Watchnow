@@ -29,7 +29,10 @@ enum WatchedStore {
 
     /// TMDB id (as String) → when it was marked (epoch seconds).
     @UserDefault("watchedAtDates", defaultValue: [:])
-    private static var watchedAt: [String: Double]
+    private static var watchedAt: [String: Double] {
+        // The watchlist shows these marks — see `WatchlistManager.didChange`.
+        didSet { NotificationCenter.default.post(name: WatchlistManager.didChange, object: nil) }
+    }
 
     // MARK: - Reading
 

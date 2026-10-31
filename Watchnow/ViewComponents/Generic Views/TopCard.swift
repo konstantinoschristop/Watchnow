@@ -111,20 +111,8 @@ struct TopCard: View {
         .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
     }
 
-    /// Gold / silver / bronze for the podium; media-type colour beyond.
-    /// The podium colours use hand-picked hex rather than `.yellow` /
-    /// `.gray` / `.brown` so they actually read as metals against the
-    /// backdrop — system yellow especially tends to wash out.
     private var rankTint: Color {
-        switch rank {
-        case 1: return Color(red: 1.00, green: 0.80, blue: 0.20) // gold
-        case 2: return Color(red: 0.80, green: 0.80, blue: 0.85) // silver
-        case 3: return Color(red: 0.80, green: 0.50, blue: 0.20) // bronze
-        default:
-            // Mirrors `MediaTypeBadge` in the search/watchlist row so the
-            // chip colour and the media-type colour line up.
-            return content.getMediaType() == "TV Series" ? .purple : .accentColor
-        }
+        RankTint.color(for: rank, isSeries: content.getMediaType() == "TV Series")
     }
 
     // MARK: - Metadata
@@ -257,5 +245,28 @@ struct StatusPill: View {
             .background(status.tint, in: Capsule())
             .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 0.5))
             .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
+    }
+}
+
+// MARK: - Rank tint
+
+/// The colour of a `#N` rank chip, on the trending cards and on the hero
+/// that leads with the same titles, so a title ranks in one colour on both.
+enum RankTint {
+
+    /// Gold / silver / bronze for the podium; media-type colour beyond.
+    /// The podium colours use hand-picked hex rather than `.yellow` /
+    /// `.gray` / `.brown` so they actually read as metals against the
+    /// backdrop — system yellow especially tends to wash out.
+    static func color(for rank: Int, isSeries: Bool) -> Color {
+        switch rank {
+        case 1: return Color(red: 1.00, green: 0.80, blue: 0.20) // gold
+        case 2: return Color(red: 0.80, green: 0.80, blue: 0.85) // silver
+        case 3: return Color(red: 0.80, green: 0.50, blue: 0.20) // bronze
+        default:
+            // Mirrors `MediaTypeBadge` in the search/watchlist row so the
+            // chip colour and the media-type colour line up.
+            return isSeries ? .purple : .accentColor
+        }
     }
 }

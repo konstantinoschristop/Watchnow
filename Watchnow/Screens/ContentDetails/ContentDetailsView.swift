@@ -36,6 +36,9 @@ struct ContentDetailsView: View {
     @State private var sectionSheetUp = false
     /// The trailer is playing in the hero; the Trailer action closes it.
     @State private var heroTrailerPlaying = false
+    /// The hero is (mostly) on screen, under the status bar and nav buttons.
+    /// While it is, it shades them itself — see the bar modifiers on `body`.
+    @State private var heroInView = true
     @Namespace private var namespace
 
     /// True while this screen has nothing of its own to draw yet.
@@ -75,11 +78,22 @@ struct ContentDetailsView: View {
                         InlineBannerSection()
                             .padding(.top, 4)
                     }
+                    // As on the Movies and Series tabs: the hero runs up under
+                    // the status bar and nav buttons and shades them itself, so
+                    // while it's there the bars' soft edge effect would only
+                    // frost a band across the top of the artwork, stretching
+                    // with it when pulled. It comes back once the hero has
+                    // scrolled away and the page is passing under the bars.
+                    .modifier(TopScrollEdgeEffectHidden(hidden: heroInView))
                 }
             }
             .ignoresSafeArea(edges: .top)
         }
         .background(Color(.background))
+        .toolbarBackground(heroInView ? .hidden : .automatic, for: .navigationBar)
+        // The nav buttons sit on the hero's dark scrim: light, until the
+        // hero has gone and the page is behind them.
+        .toolbarColorScheme(heroInView ? .dark : nil, for: .navigationBar)
         .navigationBarTitleDisplayMode(.inline)
         .hideBackButtonOptionally()
         .toolbar {
@@ -169,6 +183,7 @@ extension ContentDetailsView {
                             isCovered: videoPresented || isSeasonsSheetPresented || sectionSheetUp,
                             trailerPlaying: $heroTrailerPlaying,
                             onFullTrailer: { videoPresented = true })
+                .onScrollVisibilityChange(threshold: 0.3) { heroInView = $0 }
 
             primaryActionRow
                 .padding(.top, -DetailsHeroView.actionOverlap)

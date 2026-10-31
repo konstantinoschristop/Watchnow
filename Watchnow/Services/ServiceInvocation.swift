@@ -15,6 +15,7 @@ import Foundation
 final class ServiceInvocation: BaseNetworkService,
                               DetailServiceProtocol,
                               SearchDiscoveryServiceProtocol,
+                              ProviderCatalogServiceProtocol,
                               @unchecked Sendable {
 
     func fetchCredits(screenType: ScreenTypes, id: String) async throws -> ResultCreditsResponse {
@@ -136,6 +137,22 @@ final class ServiceInvocation: BaseNetworkService,
                                                        region: region,
                                                        page: page)
         return try await request(urlString: urlString)
+    }
+
+    /// A title's logos, for the heroes' title art.
+    func fetchImages(screenType: ScreenTypes, id: Int) async throws -> TitleImagesResponse {
+        try await request(urlString: API.Common.logos(type: screenType.rawValue, id: id,
+                                                      languageCode: API.languageCode))
+    }
+
+    // MARK: - ProviderCatalogServiceProtocol
+
+    /// One page of a streaming service's catalogue, filtered and sorted —
+    /// the "See all" screen behind the Browse by Streaming row.
+    func fetchProviderCatalog(_ query: ProviderCatalogQuery,
+                              region: String,
+                              page: Int) async throws -> GenericResultResponse {
+        try await request(urlString: query.urlString(region: region, page: page))
     }
 
     /// Films in cinemas right now in the device's region.

@@ -36,6 +36,9 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
     /// inside a `List` row draws a system disclosure chevron, so the feed's
     /// cards report the tap upward instead.
     var onSelect: (Result) -> Void
+    /// Opens the selected service's whole catalogue — the row only ever
+    /// shows its most popular titles.
+    var onExploreAll: (WatchProvider) -> Void
 
     // Overscroll-to-load-more state, mirrored from the BottomView /
     // TopView pattern. The progress tracker is an ObservableObject
@@ -86,6 +89,13 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
                     // empty / error so the page below doesn't shift when
                     // the user taps a different chip.
                     .frame(height: slotHeight)
+            }
+
+            if let provider = viewModel.selectedProvider {
+                ExploreProviderBanner(provider: provider,
+                                      total: viewModel.providerResultsTotal) {
+                    onExploreAll(provider)
+                }
             }
         }
         // The result row is pinned to `slotHeight` with a 165pt poster inside
@@ -266,6 +276,82 @@ struct StreamingServicesSection<VM: BaseContentViewModel>: View {
             }
             Spacer()
         }
+    }
+}
+
+// MARK: - ExploreProviderBanner
+
+/// The way into a service's whole catalogue: a full-width banner under the
+/// row, in the service's own colour, naming it and how much is on it. The
+/// row is only its most popular twenty; this says there's more and how much.
+///
+/// Recolours with a crossfade when the user picks another chip, so the
+/// banner follows the selection rather than snapping between brands.
+private struct ExploreProviderBanner: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    let provider: WatchProvider
+    let total: Int?
+    let action: () -> Void
+
+    private var brand: Color { ProviderBrand.color(for: provider.provider_id) }
+    private var onBrand: Color { ProviderBrand.foreground(for: provider.provider_id) }
+    private var glow: Color { ProviderBrand.glow(for: provider.provider_id) }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                ProviderLogo(provider: provider, size: 38)
+                    .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Explore all of \(provider.provider_name)",
+                         comment: "Banner under Browse by Streaming that opens a service's whole catalogue; the service's name")
+                        .appFont(16, weight: .bold, relativeTo: .headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    if let total {
+                        Text("\(total) titles")
+                            .appFont(13, weight: .medium, relativeTo: .footnote)
+                            .opacity(0.85)
+                            .contentTransition(.numericText(value: Double(total)))
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .appFont(13, weight: .bold, relativeTo: .footnote)
+                    .frame(width: 30, height: 30)
+                    .background(Circle().fill(onBrand.opacity(0.18)))
+            }
+            .foregroundStyle(onBrand)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background {
+                LinearGradient(colors: [brand.mix(with: .white, by: 0.1),
+                                        brand.mix(with: .black, by: 0.3)],
+                               startPoint: .topLeading,
+                               endPoint: .bottomTrailing)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous)
+                    .strokeBorder(.white.opacity(0.16), lineWidth: 0.5)
+            }
+            .shadow(color: glow.opacity(0.35), radius: 12, y: 6)
+            .contentShape(RoundedRectangle(cornerRadius: AppRadius.hero, style: .continuous))
+        }
+        .buttonStyle(CarouselPressStyle())
+        .padding(.horizontal, 16)
+        .padding(.top, 2)
+        // The carousels above leave ~32pt under their cards before the next
+        // section; the banner matches that, or it crowds the header below.
+        .padding(.bottom, 30)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: provider)
+        .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.standard), value: total)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
     }
 }
 

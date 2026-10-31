@@ -39,6 +39,23 @@ struct SoftScrollEdgeEffectStyleModifier: ViewModifier {
     }
 }
 
+/// Hides the top scroll edge effect on iOS 26 while `hidden`.
+///
+/// For screens whose header art runs up under the bars and shades them
+/// itself: over the art, the effect only frosts a band across the top of
+/// the picture.
+struct TopScrollEdgeEffectHidden: ViewModifier {
+    var hidden: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.scrollEdgeEffectHidden(hidden, for: .top)
+        } else {
+            content
+        }
+    }
+}
+
 /// Soft edges top *and* bottom.
 ///
 /// Onboarding's grids scroll between a bare status bar and a bare footer, so

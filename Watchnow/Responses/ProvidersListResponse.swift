@@ -17,7 +17,8 @@ struct ProvidersListResponse: Codable {
     let results: [WatchProvider]?
 }
 
-struct WatchProvider: Codable, Hashable, Identifiable {
+/// `Sendable` stated rather than inferred, for the reason `Result` gives.
+struct WatchProvider: Codable, Hashable, Identifiable, Sendable {
     let provider_id: Int
     let provider_name: String
     let logo_path: String?

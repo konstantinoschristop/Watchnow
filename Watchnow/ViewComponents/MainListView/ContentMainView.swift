@@ -97,6 +97,23 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         var transitionID: CardTransitionID { CardTransitionID(result, in: section) }
     }
 
+    /// The streaming service whose "See all" the user tapped.
+    @State private var browsedProvider: ProviderSelection?
+
+    /// A service, and whether the tab it was opened from is Movies or Series
+    /// — the catalogue starts on the same one.
+    struct ProviderSelection: Hashable {
+        let provider: WatchProvider
+        let screenType: ScreenTypes
+    }
+
+    /// The hero is (mostly) on screen, under the status bar and title.
+    @State private var heroInView = true
+
+    private var showsHeroUnderBars: Bool {
+        heroInView && viewModel.featuredResult != nil
+    }
+
     /// Currently active genre filter. nil = "All" (no filter).
     @State private var selectedGenreID: Int? = nil
 
@@ -156,6 +173,7 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                                          overlayContent: { result in overlayContent(for: result) },
                                          screenType: isMovieTab ? .movie : .tv,
                                          containerHeight: container.size.height)
+                            .onScrollVisibilityChange(threshold: 0.3) { heroInView = $0 }
                             .feedRow()
                     }
 
@@ -194,9 +212,27 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
                     ContentDetailsView(detailsViewModel: ContentDetailsViewModel(model: model))
                         .navigationTransition(.zoom(sourceID: selection.transitionID, in: cardNamespace))
                 }
+                .navigationDestination(item: $browsedProvider) { browse in
+                    ProviderBrowseView(providers: viewModel.providers ?? [],
+                                       provider: browse.provider,
+                                       screenType: browse.screenType,
+                                       region: viewModel.currentRegion)
+                }
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
+                // The hero runs up under the status bar and the tab's title
+                // and shades them itself. While it's there, the bars' soft
+                // edge effect would only frost the artwork — a band across
+                // the top of the picture, stretching with it when pulled. It
+                // comes back once the hero has scrolled away and the feed is
+                // passing under the bars instead.
+                .modifier(TopScrollEdgeEffectHidden(hidden: showsHeroUnderBars))
+                .toolbarBackground(showsHeroUnderBars ? .hidden : .automatic, for: .navigationBar)
+                // The title and status bar sit on the hero's dark scrim, so
+                // they're set light, as the details screen's buttons are,
+                // until the hero has gone and the page is behind them.
+                .toolbarColorScheme(showsHeroUnderBars ? .dark : nil, for: .navigationBar)
                 // Rows are content, not table cells: no implicit minimum
                 // height, so a section that collapses to nothing takes no room.
                 .environment(\.defaultMinListRowHeight, 0)
@@ -208,6 +244,15 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
         .animation(reduceMotion ? nil : .easeInOut(duration: AppMotion.emphasis), value: viewModel.finishedLoadingContent)
         .ignoresSafeArea(edges: .top)
         .onLoad { Task { await viewModel.loadContent(resetFirst: true) } }
+        // The user's services lead the streaming chip bar. Settings, where
+        // they change them, is a sheet over this view, and iCloud can change
+        // them from another device; either way, re-sort when they do.
+        .onReceive(NotificationCenter.default.publisher(for: StreamingPreferences.didChange)) { _ in
+            viewModel.applySubscribedOrder()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: CloudSync.didMergeRemoteChanges)) { _ in
+            viewModel.applySubscribedOrder()
+        }
         .toolbarTitleDisplayMode(.inlineLarge)
         .fullScreenCover(isPresented: $movieNightPresented) {
             MovieNightView()
@@ -226,7 +271,11 @@ struct ContentMainView<VM: BaseContentViewModel>: View {
             StreamingServicesSection(viewModel: viewModel,
                                      viewSection: section,
                                      namespace: cardNamespace,
-                                     onSelect: { select($0, in: section) })
+                                     onSelect: { select($0, in: section) },
+                                     onExploreAll: { provider in
+                                         browsedProvider = ProviderSelection(provider: provider,
+                                                                             screenType: section.screenType)
+                                     })
         } else if let results = filteredResults(for: section) {
             if section.isTopView {
                 TopView(results: results,
@@ -579,94 +628,20 @@ struct PopularGenre: Identifiable {
 
 extension ContentMainView {
 
-    @ViewBuilder
+    /// One hero slide's copy: where it ranks in the trending row it comes
+    /// from, then the shared title, meta and genres.
     func overlayContent(for content: Result) -> some View {
-        ZStack(alignment: .bottom) {
-            // Cinematic bottom gradient — stronger than before so text
-            // stays legible on bright/pale posters.
-            LinearGradient(
-                stops: [
-                    .init(color: .clear,               location: 0.25),
-                    .init(color: .black.opacity(0.35),  location: 0.55),
-                    .init(color: .black.opacity(0.75),  location: 1.0)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            VStack(alignment: .leading, spacing: 6) {
-
-                // Title
-                Text(content.getResultTitle())
-                    .appFont(22, weight: .bold, relativeTo: .title2)
-                    .foregroundStyle(.white)
-                    .lineLimit(2)
-                    .shadow(color: .black.opacity(0.6), radius: 4)
-
-                // Meta: rating · year
-                HStack(spacing: 6) {
-                    if let rating = content.vote_average, rating > 0 {
-                        HStack(spacing: 3) {
-                            Image(systemName: "star.fill")
-                                .appFont(10, relativeTo: .caption2)
-                                .foregroundStyle(RatingStyle.tint(for: rating))
-                            Text(rating.ratingText)
-                        }
-                        Text("·").opacity(0.6)
-                    }
-                    let year = content.getReleaseDate(addSeparator: false)
-                    if !year.isEmpty {
-                        Text(year)
-                    }
-                }
-                .appFont(13, weight: .medium, relativeTo: .footnote)
-                .foregroundStyle(.white.opacity(0.9))
-                .shadow(color: .black.opacity(0.5), radius: 2)
-
-                // Genre tags — up to 2, resolved from genre_ids
-                let genres = resolvedGenres(for: content)
-                if !genres.isEmpty {
-                    HStack(spacing: 6) {
-                        ForEach(genres, id: \.self) { name in
-                            heroPill(name: name)
-                        }
-                    }
-                }
+        let rank = viewModel.featuredResult?.firstIndex(of: content)
+        return HeroSlideCopy(result: content, screenType: isMovieTab ? .movie : .tv) {
+            if let rank {
+                HeroRankKicker(rank: rank + 1, label: heroKicker, isSeries: !isMovieTab)
             }
-            .padding(.horizontal, 16)
-            // Clears the centred page indicator instead of sharing its band.
-            // Only the carousel uses this overlay — the details hero is a
-            // single slide with no indicator, and keeps its own lower, more
-            // cinematic placement.
-            .padding(.bottom, FeaturedHeroMetrics.indicatorReserve + 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    /// Maps up to 2 genre IDs on a `Result` to their display names.
-    private func resolvedGenres(for content: Result) -> [String] {
-        guard let ids = content.genre_ids else { return [] }
-        return ids.prefix(2).compactMap(GenreNames.shared.name)
-    }
-
-    /// Display-only genre tag on the home-feed hero image. On iOS 26
-    /// uses liquid glass; pre-iOS 26 uses `.ultraThinMaterial`.
-    @ViewBuilder
-    private func heroPill(name: String) -> some View {
-        if #available(iOS 26.0, *) {
-            Text(name)
-                .appFont(11, weight: .semibold, relativeTo: .caption2)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4)
-                .glassEffect(.regular, in: Capsule())
-        } else {
-            Text(name)
-                .appFont(11, weight: .semibold, relativeTo: .caption2)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4)
-                .background(.ultraThinMaterial, in: Capsule())
-        }
+    /// The hero's kicker: the trending row's own name, since that's what the
+    /// slides are — "Hot Right Now" on Movies, "Binge-Worthy Today" on Series.
+    private var heroKicker: String {
+        (isMovieTab ? ViewSections.trendingMovies : ViewSections.trendingSeries).cleanTitle
     }
 }
