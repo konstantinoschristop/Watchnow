@@ -1,11 +1,6 @@
-Cada filme e cada série agora têm uma página totalmente nova.
+Cada serviço de streaming agora tem uma página só dele.
 
-• Um cabeçalho maior e com cara de cinema, nas cores do título, com a classificação indicativa e a duração dos episódios.
-• Toque em “Trailer” para assistir no topo da página, com todos os controles: pausar, avançar, som, legendas e tela cheia.
-• Nas séries, gráficos mostram as notas de cada temporada e de cada episódio. Escolha uma temporada e toque em um episódio para ver de perto.
-• O Movie Coach ganhou um visual novo e responde a perguntas rápidas como “É arrastado?” na própria página.
-• Veja num relance onde assistir, com os seus serviços marcados.
-• Elenco, “Títulos parecidos”, Avaliações e Sobre foram redesenhados. Toque e segure um título em “Títulos parecidos” para salvar para depois.
-• Compartilhe um título como um cartão com o pôster e um link para baixar o Watchnow.
-• O HBO Max agora aparece em “Explore por streaming”.
-• As páginas carregam mais rápido e com mais fluidez.
+• Em “Explore por streaming”, toque em “Explore tudo” para ver tudo o que um serviço tem: o Top 10, Filmes ou Séries, cada gênero, em ordem de Populares, Mais bem avaliados ou Mais recentes.
+• Busque dentro de um serviço e veja onde assistir ao que ele não tem. Os seus serviços agora aparecem primeiro.
+• Um cabeçalho novo em Filmes e Séries: o logo de cada título sobre uma cena dele, com “Trailer” e “Assistir depois” à mão.
+• Mais títulos têm trailer, e voltar para a “Minha lista” ficou mais fluido.

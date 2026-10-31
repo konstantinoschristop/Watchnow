@@ -1,11 +1,6 @@
-Cada película y cada serie tienen ahora una página totalmente nueva.
+Cada plataforma de streaming tiene ahora su propia página.
 
-• Un encabezado más grande y de cine, con los colores del título, la clasificación por edad y la duración de los episodios.
-• Toca «Tráiler» para verlo en la parte superior de la página, con todos los controles: pausa, avance, sonido, subtítulos y pantalla completa.
-• En las series, unas gráficas muestran las calificaciones de cada temporada y de cada episodio. Elige una temporada y toca un episodio para verlo de cerca.
-• Movie Coach estrena diseño y responde preguntas rápidas como «¿Es lenta?» en la misma página.
-• Ve de un vistazo dónde está disponible, con tus plataformas marcadas.
-• Reparto, «Más títulos similares», Reseñas e Información tienen un diseño nuevo. Mantén presionado un título en «Más títulos similares» para guardarlo para después.
-• Comparte un título como una tarjeta con su póster y un enlace para descargar Watchnow.
-• HBO Max ya aparece en «Explora por plataforma».
-• Las páginas cargan más rápido y con más fluidez.
+• En «Explora por plataforma», toca «Explora todo» para ver todo lo que ofrece una plataforma: su Top 10, Películas o Series, cada género y orden por Populares, Mejor valorados o Más recientes.
+• Busca dentro de una plataforma y descubre dónde ver lo que no tiene. Tus plataformas aparecen ahora primero.
+• Nuevo encabezado en Películas y Series: el logotipo de cada título sobre un fotograma, con «Tráiler» y «Ver más tarde» a la mano.
+• Más títulos tienen tráiler, y volver a «Mi lista» es más fluido.

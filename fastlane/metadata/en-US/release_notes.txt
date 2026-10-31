@@ -1,11 +1,6 @@
-Every movie and series has a brand-new page.
+Every streaming service now has a page of its own.
 
-• A bigger, cinematic header in the title’s own colors, with the age rating and how long episodes run.
-• Tap Trailer to watch it right at the top of the page, with full controls: pause, skip ahead, sound, captions and full screen.
-• For series, charts show the ratings of every season and episode. Pick a season, then tap an episode for a closer look.
-• Movie Coach has a new look, and answers quick questions like “Is it slow?” right on the page.
-• See where it streams at a glance, with your own services ticked.
-• Cast, More like this, Reviews and About are redesigned. Touch and hold a title in More like this to save it for later.
-• Share a title as a poster card, with a link to get Watchnow.
-• HBO Max now appears in Browse by Streaming.
-• Pages load faster and more smoothly.
+• In Browse by Streaming, tap Explore all to see everything on a service: its Top 10, Movies or Series, every genre, sorted by Popular, Top Rated or Newest.
+• Search within a service, and see where anything it doesn’t have is streaming instead. Your own services now come first.
+• A new header on Movies and Series: each title’s own logo over a still from it, with Trailer and Watch Later right there.
+• More titles have trailers, and going back to your Watchlist is smoother.

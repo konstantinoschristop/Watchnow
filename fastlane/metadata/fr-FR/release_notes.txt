@@ -1,11 +1,6 @@
-Chaque film et chaque série ont désormais une toute nouvelle page.
+Chaque plateforme de streaming a désormais sa propre page.
 
-• Un en-tête plus grand, digne du cinéma, aux couleurs du titre, avec la classification par âge et la durée des épisodes.
-• Touchez « Bande-annonce » pour la regarder en haut de la page, avec toutes les commandes : pause, avance, son, sous-titres et plein écran.
-• Pour les séries, des graphiques montrent les notes de chaque saison et de chaque épisode. Choisissez une saison, puis touchez un épisode pour le voir de plus près.
-• Movie Coach fait peau neuve et répond à des questions rapides comme « Le rythme est lent ? » directement sur la page.
-• Voyez d’un coup d’œil où le regarder, avec vos services cochés.
-• Distribution, « Dans le même genre », Critiques et À propos ont été repensés. Maintenez le doigt sur un titre dans « Dans le même genre » pour le garder pour plus tard.
-• Partagez un titre sous forme de carte avec son affiche et un lien pour télécharger Watchnow.
-• HBO Max apparaît désormais dans « Explorer par plateforme ».
-• Les pages se chargent plus vite et plus en douceur.
+• Dans « Explorer par plateforme », touchez « Explorer tout » pour voir tout ce que propose une plateforme : son Top 10, Films ou Séries, chaque genre, triés par Populaires, Mieux notés ou Plus récents.
+• Cherchez dans une plateforme et voyez où regarder ce qu’elle n’a pas. Vos services passent désormais en premier.
+• Un nouvel en-tête dans Films et Séries : le logo de chaque titre sur une image qui en est tirée, avec « Bande-annonce » et « À voir plus tard » à portée de main.
+• Davantage de titres ont une bande-annonce, et le retour à « Ma liste » est plus fluide.
