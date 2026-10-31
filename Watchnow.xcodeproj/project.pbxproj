@@ -414,7 +414,6 @@
 				49EC2D51DA0AEE493979717F /* ProviderBrowseViewModel.swift */,
 				11B3D0B78284EDE9D05AE37F /* ProviderBrowseView.swift */,
 			);
-			name = ProviderBrowse;
 			path = ProviderBrowse;
 			sourceTree = "<group>";
 		};
@@ -1247,7 +1246,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.3;
+				MARKETING_VERSION = 2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1280,7 +1279,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.3;
+				MARKETING_VERSION = 2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = k.christopoulos.Watchnow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
