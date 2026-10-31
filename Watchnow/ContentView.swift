@@ -29,12 +29,27 @@ enum ScreenshotMode {
     }
 }
 
+/// The tabs' view models, made once and kept for the app's lifetime without
+/// `ContentView` observing them. Held as four `@StateObject`s, every publish
+/// from any of them — a search keystroke, a feed page landing, a provider
+/// row loading — re-rendered the whole tab view, every other tab with it.
+/// Each tab's own view observes its model; this holder publishes nothing,
+/// so the root no longer re-renders for theirs.
+@MainActor
+private final class TabModels: ObservableObject {
+    let movies = MoviesViewModel(model: MoviesModel())
+    let series = SeriesViewModel(model: SeriesModel())
+    let search = SearchViewModel(model: SearchModel())
+    let watchlist = WatchlistViewModel(model: WatchlistModel())
+}
+
 struct ContentView: View {
 
-    @StateObject private var moviesViewModel = MoviesViewModel(model: MoviesModel())
-    @StateObject private var seriesViewModel = SeriesViewModel(model: SeriesModel())
-    @StateObject private var searchViewModel = SearchViewModel(model: SearchModel())
-    @StateObject private var watchlistViewModel = WatchlistViewModel(model: WatchlistModel())
+    @StateObject private var tabs = TabModels()
+    private var moviesViewModel: MoviesViewModel { tabs.movies }
+    private var seriesViewModel: SeriesViewModel { tabs.series }
+    private var searchViewModel: SearchViewModel { tabs.search }
+    private var watchlistViewModel: WatchlistViewModel { tabs.watchlist }
     @StateObject private var router = DeepLinkRouter.shared
     /// Shared (like the router) so the DEBUG test bench can drive the same
     /// instance this view presents from.

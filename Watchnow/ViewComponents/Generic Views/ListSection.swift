@@ -57,14 +57,17 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     }
 
     /// `visibleResults` split into pages of `pageSize` (the last page may be
-    /// short).
+    /// short). Each read dedups the whole list, so `body` reads it once and
+    /// hands the pages down.
     private var pages: [[Result]] {
-        stride(from: 0, to: visibleResults.count, by: pageSize).map { start in
-            Array(visibleResults[start ..< min(start + pageSize, visibleResults.count)])
+        let visible = visibleResults
+        return stride(from: 0, to: visible.count, by: pageSize).map { start in
+            Array(visible[start ..< min(start + pageSize, visible.count)])
         }
     }
 
     var body: some View {
+        let pages = self.pages
         // A plain stack, not a `Section`. In the `List` the feed scrolls on,
         // a section header is pinned to the top while its rows pass under it
         // and is restyled to the list's secondary grey — neither of which the
@@ -79,9 +82,9 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
             )
 
             VStack(spacing: 12) {
-                pager
+                pager(pages)
                 if pages.count > 1 {
-                    pageDots
+                    pageDots(pageCount: pages.count)
                 }
             }
         }
@@ -93,7 +96,7 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     /// every page up front, which pins the section's height to the tallest
     /// page — so the feed below it doesn't jump as the user swipes between
     /// pages whose rows wrap to different heights.
-    private var pager: some View {
+    private func pager(_ pages: [[Result]]) -> some View {
         ScrollView(.horizontal) {
             HStack(alignment: .top, spacing: 0) {
                 ForEach(Array(pages.enumerated()), id: \.offset) { index, pageItems in
@@ -107,14 +110,14 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: $pageID)
         .scrollIndicators(.hidden)
-        .onChange(of: currentPage) { _, page in loadMoreIfNeeded(at: page) }
+        .onChange(of: currentPage) { _, page in loadMoreIfNeeded(at: page, pageCount: pages.count) }
     }
 
     /// Fetches TMDB's next page two swipes before the last one, so it has
     /// usually landed by the time the user gets there. The view model drops
     /// a repeat call while one is in flight.
-    private func loadMoreIfNeeded(at page: Int) {
-        guard page >= pages.count - 2,
+    private func loadMoreIfNeeded(at page: Int, pageCount: Int) {
+        guard page >= pageCount - 2,
               viewModel.canLoadMoreContent(section: viewSection) else { return }
         viewModel.loadMoreContent(section: viewSection)
     }
@@ -154,14 +157,15 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
     /// Pill-style dots: the active page stretches into a short capsule in the
     /// section tint. Tapping a dot scrolls to that page. Keyed by page, so as
     /// the window moves the dots slide along rather than being redrawn.
-    private var pageDots: some View {
-        HStack(spacing: 6) {
-            ForEach(Array(dotWindow), id: \.self) { i in
+    private func pageDots(pageCount: Int) -> some View {
+        let window = dotWindow(pageCount: pageCount)
+        return HStack(spacing: 6) {
+            ForEach(Array(window), id: \.self) { i in
                 Capsule(style: .continuous)
                     .fill(i == currentPage ? viewSection.themeColor
                                            : Color.secondary.opacity(0.3))
                     .frame(width: i == currentPage ? 16 : 6, height: 6)
-                    .scaleEffect(hasMoreBeyond(i) ? 0.6 : 1)
+                    .scaleEffect(hasMoreBeyond(i, in: window, pageCount: pageCount) ? 0.6 : 1)
                     .contentShape(Capsule())
                     .onTapGesture {
                         withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.8)) {
@@ -176,18 +180,16 @@ struct ListSection<VM: BaseViewModelProtocol>: View {
 
     /// The pages that get a dot: all of them up to `maxDots`, otherwise
     /// `maxDots` of them centred on the current page where the ends allow.
-    private var dotWindow: Range<Int> {
-        let count = pages.count
+    private func dotWindow(pageCount count: Int) -> Range<Int> {
         guard count > maxDots else { return 0..<count }
         let start = min(max(currentPage - maxDots / 2, 0), count - maxDots)
         return start..<(start + maxDots)
     }
 
     /// An end dot of the window with more pages past it.
-    private func hasMoreBeyond(_ page: Int) -> Bool {
-        let window = dotWindow
-        return (page == window.lowerBound && window.lowerBound > 0)
-            || (page == window.upperBound - 1 && window.upperBound < pages.count)
+    private func hasMoreBeyond(_ page: Int, in window: Range<Int>, pageCount: Int) -> Bool {
+        (page == window.lowerBound && window.lowerBound > 0)
+            || (page == window.upperBound - 1 && window.upperBound < pageCount)
     }
 }
 

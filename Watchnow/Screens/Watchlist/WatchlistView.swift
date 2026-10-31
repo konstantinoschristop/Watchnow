@@ -594,12 +594,14 @@ struct WatchlistView: View {
 
 // MARK: - Equatable
 
-/// `ContentView` re-renders whenever any tab's view model publishes, and
-/// `onBrowse` — a closure, which SwiftUI can't compare — made every one of
-/// those renders look like a new watchlist and redraw every cover. Mid-way
-/// through the swipe back from a details screen, that cancels the zoom back
-/// into them. The view model is the only input that can change what's
-/// shown; `onBrowse` only ever switches tabs. Changes to anything this view
+/// `ContentView` no longer observes the tabs' view models (see `TabModels`),
+/// but it still re-renders for its own state — a deep link, a sheet, the
+/// notification explainer that follows a first save on a details screen.
+/// `onBrowse` — a closure, which SwiftUI can't compare — made each of those
+/// renders look like a new watchlist and redraw every cover; mid-way through
+/// the swipe back from a details screen, that cancels the zoom back into
+/// them. The view model is the only input that can change what's shown;
+/// `onBrowse` only ever switches tabs. Changes to anything this view
 /// observes still update it as before.
 extension WatchlistView: @MainActor Equatable {
     static func == (lhs: WatchlistView, rhs: WatchlistView) -> Bool {

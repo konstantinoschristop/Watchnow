@@ -70,8 +70,11 @@ struct ProviderCatalogQuery: Hashable, Sendable {
     }
 
     /// The Discover URL for one page. `today` caps the release date when
-    /// sorting by newest; it's a parameter so a test can pin it.
-    func urlString(region: String, page: Int, today: Date = .now) -> String {
+    /// sorting by newest — the user's today, in their time zone: ISO 8601
+    /// alone formats in UTC, which put the cap a day out around midnight,
+    /// dropping today's releases east of Greenwich and letting tomorrow's in
+    /// west of it. Both are parameters so a test can pin them.
+    func urlString(region: String, page: Int, today: Date = .now, timeZone: TimeZone = .current) -> String {
         API.Common.discoverByProvider(type: screenType.rawValue,
                                       providerID: providerID,
                                       region: region,
@@ -79,7 +82,7 @@ struct ProviderCatalogQuery: Hashable, Sendable {
                                       sortBy: sortBy,
                                       voteCountGTE: voteCountGTE,
                                       releasedOnOrBefore: sort == .newest
-                                          ? today.formatted(.iso8601.year().month().day())
+                                          ? today.formatted(Date.ISO8601FormatStyle(timeZone: timeZone).year().month().day())
                                           : nil,
                                       page: page)
     }

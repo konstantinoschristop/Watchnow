@@ -119,8 +119,14 @@ final class ProviderBrowseViewModel: ObservableObject {
     func select(provider: WatchProvider) {
         self.provider = provider
         apply { $0.providerID = provider.provider_id }
-        // The same words mean a different answer on another service.
-        if isSearching { scheduleSearch(debounce: false) }
+        // The same words mean a different answer on another service. The
+        // last answer goes now rather than when the next lands: its split
+        // into "On" and "Not on" is the old service's, and the headings
+        // would already name the new one.
+        if isSearching {
+            searchResults = nil
+            scheduleSearch(debounce: false)
+        }
     }
 
     func select(screenType: ScreenTypes) {
@@ -213,14 +219,18 @@ final class ProviderBrowseViewModel: ObservableObject {
                 guard isCurrent(query) else { return }
                 // A first page that fails is the whole screen failing — the
                 // dimmed titles of the previous filter go with it, rather
-                // than standing in for an answer that never came. A later
-                // page leaves the grid as it was; the next scroll to the
-                // bottom tries the same page again.
-                if next == 1 {
+                // than standing in for an answer that never came. So is a
+                // later one that fails with nothing yet listed: the first
+                // page added nothing, and this was its read-on. A later page
+                // under titles already listed leaves the grid as it was; the
+                // next scroll to the bottom tries the same page again.
+                if next == 1 || results.isEmpty {
                     results = []
                     seenIDs = []
                     isRefreshing = false
+                    canLoadMore = false
                     phase = .failed
+                    if next == 1 { dropHeroIfStale(for: query) }
                 }
                 isLoadingMore = false
                 return
@@ -254,16 +264,30 @@ final class ProviderBrowseViewModel: ObservableObject {
 
     /// Takes the hero's titles from a first page when it's for a service or
     /// media type the hero isn't showing yet, or when it's the unfiltered
-    /// popular list — the service's own headline. A genre or sort applied on
-    /// top leaves the hero alone.
+    /// popular list — the service's own headline — or when the hero has
+    /// nothing up. A genre or sort applied on top leaves the hero alone.
     private func updateHero(from response: GenericResultResponse, for query: ProviderCatalogQuery) {
         let key = HeroKey(providerID: query.providerID, screenType: query.screenType)
         let isHeadline = query.genreID == nil && query.sort == .popular
-        guard key != heroKey || isHeadline else { return }
+        guard key != heroKey || isHeadline || heroTitles.isEmpty else { return }
         let leaders = response.results.filter { $0.poster_path != nil }.prefix(6)
-        guard !leaders.isEmpty else { return }
+        guard !leaders.isEmpty else {
+            dropHeroIfStale(for: query)
+            return
+        }
         heroTitles = Array(leaders)
         heroKey = key
+    }
+
+    /// Takes the hero down when the service or media type has changed and
+    /// there's nothing of the new one's to put up — an empty first page, or
+    /// one that failed. Left up, the last service's titles cycled under the
+    /// new service's name.
+    private func dropHeroIfStale(for query: ProviderCatalogQuery) {
+        let key = HeroKey(providerID: query.providerID, screenType: query.screenType)
+        guard key != heroKey, !heroTitles.isEmpty else { return }
+        heroTitles = []
+        heroKey = nil
     }
 
     // MARK: - Search

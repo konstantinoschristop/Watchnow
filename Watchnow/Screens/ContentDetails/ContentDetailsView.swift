@@ -41,6 +41,18 @@ struct ContentDetailsView: View {
     @State private var heroInView = true
     @Namespace private var namespace
 
+    /// Something failed before there was anything to show.
+    private var isShowingError: Bool {
+        detailsViewModel.apiError && !detailsViewModel.viewModelFinishedFetching
+    }
+
+    /// The hero is drawn and on screen under the bars. Not while the error
+    /// or the skeleton stands in for the page: neither has a hero, and the
+    /// bars set light for one would sit light-on-light over them.
+    private var showsHeroUnderBars: Bool {
+        heroInView && !isShowingError && !isAwaitingFirstContent
+    }
+
     /// True while this screen has nothing of its own to draw yet.
     ///
     /// A tap from a list hands over the whole `Result`, so the redaction
@@ -64,7 +76,7 @@ struct ContentDetailsView: View {
         // inside the `ignoresSafeArea` scope reports an inset of zero.
         GeometryReader { proxy in
             Group {
-                if detailsViewModel.apiError && !detailsViewModel.viewModelFinishedFetching {
+                if isShowingError {
                     ContentUnavailableView("Couldn't load content",
                                            systemImage: "exclamationmark.triangle",
                                            description: Text("Check your connection and try again."))
@@ -90,10 +102,10 @@ struct ContentDetailsView: View {
             .ignoresSafeArea(edges: .top)
         }
         .background(Color(.background))
-        .toolbarBackground(heroInView ? .hidden : .automatic, for: .navigationBar)
+        .toolbarBackground(showsHeroUnderBars ? .hidden : .automatic, for: .navigationBar)
         // The nav buttons sit on the hero's dark scrim: light, until the
         // hero has gone and the page is behind them.
-        .toolbarColorScheme(heroInView ? .dark : nil, for: .navigationBar)
+        .toolbarColorScheme(showsHeroUnderBars ? .dark : nil, for: .navigationBar)
         .navigationBarTitleDisplayMode(.inline)
         .hideBackButtonOptionally()
         .toolbar {

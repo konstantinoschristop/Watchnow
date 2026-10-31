@@ -89,9 +89,13 @@ struct MenuFeaturedView<Content: View>: View {
     /// Each slide's stills, textless poster and logo, by title id, once
     /// fetched.
     @State private var arts: [Int: TitleArt] = [:]
-    /// Every slide's art has been asked for and answered, or failed: a
-    /// slide still without any isn't waiting for it any more.
+    /// Every slide's art has been asked for and answered, or failed, or
+    /// `artPatience` has run out: a slide still without any isn't waiting
+    /// for it any more.
     @State private var artsSettled = false
+    /// How long the slides wait for their art before showing their backdrop
+    /// or poster instead.
+    private let artPatience: Duration = .milliseconds(1500)
 
     /// How the stills move — not at all, unless another take is picked in
     /// Settings' debug section; see `StillsMotion`. Release builds hold
@@ -165,8 +169,7 @@ struct MenuFeaturedView<Content: View>: View {
             _ = NetworkConditions.shared
             artsSettled = false
             fillArts(keys)
-            await TitleLogoStore.shared.prefetch(keys)
-            fillArts(keys)
+            await fetchArts(keys)
             artsSettled = true
             await prefetchTrailers()
         }
@@ -249,6 +252,40 @@ struct MenuFeaturedView<Content: View>: View {
                 swipeSurface(size: proxy.size)
 
                 copyBlock(height: proxy.size.height)
+            }
+        }
+    }
+
+    /// Asks for every slide's art together and shows each slide's as it
+    /// lands. Shown only once the slowest had answered, one stalled request
+    /// held every slide on black until it gave up — a minute, on a bad
+    /// connection. Past `artPatience`, the slides still waiting settle for
+    /// what they have; art that lands after that dissolves in over it.
+    private func fetchArts(_ keys: [TitleLogoStore.Key]) async {
+        guard !keys.isEmpty else { return }
+        let store = TitleLogoStore.shared
+        let patience = artPatience
+        await withTaskGroup(of: TitleLogoStore.Key?.self) { group in
+            group.addTask {
+                try? await Task.sleep(for: patience)
+                return nil
+            }
+            for key in keys {
+                group.addTask {
+                    _ = await store.art(for: key)
+                    return key
+                }
+            }
+            var waiting = keys.count
+            for await key in group {
+                guard let key else {
+                    artsSettled = true
+                    continue
+                }
+                fillArts([key])
+                waiting -= 1
+                // All answered: nothing left for the patience timer to cut short.
+                if waiting == 0 { group.cancelAll() }
             }
         }
     }

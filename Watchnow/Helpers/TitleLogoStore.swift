@@ -103,16 +103,6 @@ final class TitleLogoStore {
         return art
     }
 
-    /// Resolves a hero's slides together, so each one's art is known before
-    /// its slide comes round.
-    func prefetch(_ keys: [Key]) async {
-        await withTaskGroup(of: Void.self) { group in
-            for key in keys {
-                group.addTask { _ = await self.art(for: key) }
-            }
-        }
-    }
-
     /// Images with no language — TMDB's mark for art with no text on it —
     /// best first.
     nonisolated static func textless(_ images: [TitleLogoImage], width: API.ImageWidth) -> [URL] {
@@ -170,24 +160,32 @@ extension UIImage {
     nonisolated var inkLuminance: Double? {
         guard let cgImage else { return nil }
         let side = 24
-        var pixels = [UInt8](repeating: 0, count: side * side * 4)
-        guard let context = CGContext(data: &pixels, width: side, height: side,
+        // The context allocates and owns its pixels. Handing it `&array`
+        // would give it a pointer valid only for the initializer call, which
+        // `draw` then writes through after it has returned.
+        guard let context = CGContext(data: nil, width: side, height: side,
                                       bitsPerComponent: 8, bytesPerRow: side * 4,
                                       space: CGColorSpace(name: CGColorSpace.sRGB)!,
                                       bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: side, height: side))
+        guard let data = context.data else { return nil }
+        let rowBytes = context.bytesPerRow
+        let pixels = data.bindMemory(to: UInt8.self, capacity: rowBytes * side)
 
         var weighted = 0.0
         var coverage = 0.0
-        for i in stride(from: 0, to: pixels.count, by: 4) {
-            let alpha = Double(pixels[i + 3]) / 255
-            guard alpha > 0.05 else { continue }
-            // Premultiplied: divide the alpha back out to get the ink's colour.
-            let r = Double(pixels[i]) / 255 / alpha
-            let g = Double(pixels[i + 1]) / 255 / alpha
-            let b = Double(pixels[i + 2]) / 255 / alpha
-            weighted += (0.2126 * r + 0.7152 * g + 0.0722 * b) * alpha
-            coverage += alpha
+        for y in 0..<side {
+            for x in 0..<side {
+                let i = y * rowBytes + x * 4
+                let alpha = Double(pixels[i + 3]) / 255
+                guard alpha > 0.05 else { continue }
+                // Premultiplied: divide the alpha back out to get the ink's colour.
+                let r = Double(pixels[i]) / 255 / alpha
+                let g = Double(pixels[i + 1]) / 255 / alpha
+                let b = Double(pixels[i + 2]) / 255 / alpha
+                weighted += (0.2126 * r + 0.7152 * g + 0.0722 * b) * alpha
+                coverage += alpha
+            }
         }
         return coverage > 0 ? weighted / coverage : nil
     }

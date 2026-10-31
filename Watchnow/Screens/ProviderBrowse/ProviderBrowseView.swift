@@ -127,7 +127,10 @@ struct ProviderBrowseView: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         // Status bar and back button sit on the hero's dark art until the
         // filter bar pins; set light until then, as on the feed and details.
-        .toolbarColorScheme(isCollapsed ? nil : .dark, for: .navigationBar)
+        // Not over the placeholder that holds the hero's place — loading,
+        // or for good when the catalogue fails or comes back empty: that's
+        // a pale wash, and light bars would vanish into it.
+        .toolbarColorScheme(isCollapsed || viewModel.heroTitles.isEmpty ? nil : .dark, for: .navigationBar)
         .navigationTitle(providerName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -541,20 +544,27 @@ struct ProviderBrowseView: View {
 
     private var loadedCatalogue: some View {
         let leading = showsTopTen ? 10 : 0
+        // The cells index into this copy, never into the view model's live
+        // list: a cell built after a filter change shrank the list, from the
+        // ForEach of the render before, would index past its end.
+        let results = viewModel.results
         return VStack(alignment: .leading, spacing: 28) {
             if showsTopTen {
-                topTen(Array(viewModel.results.prefix(10)))
+                topTen(Array(results.prefix(10)))
             }
 
             VStack(alignment: .leading, spacing: 14) {
                 gridHeading
 
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
-                    ForEach(Array(viewModel.results.dropFirst(leading).enumerated()), id: \.element) { offset, result in
-                        posterButton(result, place: .grid)
-                            .modifier(CascadeIn(isRevealed: gridRevealed, order: offset, isEnabled: !reduceMotion))
+                    // By position, not by copying the list into an enumerated
+                    // array: that rebuilt every title in the catalogue — it
+                    // runs to thousands — on each publish, page loads included.
+                    ForEach(leading..<max(leading, results.count), id: \.self) { index in
+                        posterButton(results[index], place: .grid)
+                            .modifier(CascadeIn(isRevealed: gridRevealed, order: index - leading, isEnabled: !reduceMotion))
                             .modifier(RiseOnScroll(isEnabled: !reduceMotion))
-                            .onAppear { viewModel.loadMoreIfNeeded(at: leading + offset) }
+                            .onAppear { viewModel.loadMoreIfNeeded(at: index) }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -865,7 +875,7 @@ private struct ProviderPicker: View {
 
     var body: some View {
         Picker(String(localized: "Streaming Service", comment: "Menu title: switch which streaming service's catalogue is shown"),
-               selection: Binding(get: { provider }, set: onSelect)) {
+               selection: Binding(get: { provider }, set: { onSelect($0) })) {
             ForEach(providers) { provider in
                 Text(provider.provider_name).tag(provider)
             }

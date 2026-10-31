@@ -39,14 +39,31 @@ final class ProviderCatalogQueryTests: XCTestCase {
         let day = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-31T12:00:00Z"))
 
         let movies = ProviderCatalogQuery(providerID: 8, screenType: .movie, sort: .newest)
-            .urlString(region: "GR", page: 1, today: day)
+            .urlString(region: "GR", page: 1, today: day, timeZone: .gmt)
         XCTAssertTrue(movies.contains("sort_by=primary_release_date.desc"))
         XCTAssertTrue(movies.contains("&primary_release_date.lte=2026-10-31"))
 
         let series = ProviderCatalogQuery(providerID: 8, screenType: .tv, sort: .newest)
-            .urlString(region: "GR", page: 1, today: day)
+            .urlString(region: "GR", page: 1, today: day, timeZone: .gmt)
         XCTAssertTrue(series.contains("sort_by=first_air_date.desc"))
         XCTAssertTrue(series.contains("&first_air_date.lte=2026-10-31"))
+    }
+
+    /// The cap is the user's today, not UTC's: half past eleven on 31 October
+    /// in UTC is already 1 November in Athens, and still 30 October's evening
+    /// in Los Angeles four hours earlier.
+    func testNewestCapsAtTheUsersOwnToday() throws {
+        let query = ProviderCatalogQuery(providerID: 8, screenType: .movie, sort: .newest)
+
+        let lateInUTC = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-31T23:30:00Z"))
+        let athens = try XCTUnwrap(TimeZone(identifier: "Europe/Athens"))
+        XCTAssertTrue(query.urlString(region: "GR", page: 1, today: lateInUTC, timeZone: athens)
+            .contains("&primary_release_date.lte=2026-11-01"))
+
+        let earlyInUTC = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-31T03:00:00Z"))
+        let losAngeles = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        XCTAssertTrue(query.urlString(region: "US", page: 1, today: earlyInUTC, timeZone: losAngeles)
+            .contains("&primary_release_date.lte=2026-10-30"))
     }
 
     func testPopularHasNoVoteFloor() {
@@ -240,6 +257,7 @@ final class ProviderBrowseViewModelTests: XCTestCase {
 
     private let netflix = WatchProvider(provider_id: 8, provider_name: "Netflix", logo_path: nil, display_priority: 0)
     private let disney = WatchProvider(provider_id: 337, provider_name: "Disney Plus", logo_path: nil, display_priority: 1)
+    private let apple = WatchProvider(provider_id: 350, provider_name: "Apple TV", logo_path: nil, display_priority: 2)
 
     private func viewModel(_ service: StubCatalogService) -> ProviderBrowseViewModel {
         ProviderBrowseViewModel(providers: [netflix, disney], provider: netflix,
@@ -266,12 +284,16 @@ final class ProviderBrowseViewModelTests: XCTestCase {
         XCTAssertTrue(vm.canLoadMore)
     }
 
-    /// The unfiltered page answers slowly; by the time it lands, the user has
-    /// picked a genre. The grid must end up showing the genre.
+    /// The unfiltered page answers late: the user has picked a genre, and
+    /// the genre's page has landed, before it does. The grid must end up
+    /// showing the genre. The order is pinned with a gate rather than raced
+    /// with sleeps, which could let the late page land after the assertion
+    /// and pass whether or not it was dropped.
     func testAResponseForAnEarlierFilterIsDropped() async throws {
+        let gate = Gate()
         let service = StubCatalogService { query, _ in
             if query.genreID == nil {
-                try await Task.sleep(for: .milliseconds(150))
+                await gate.wait()
                 return page1([fixture(1)])
             }
             return page1([fixture(9)])
@@ -281,17 +303,25 @@ final class ProviderBrowseViewModelTests: XCTestCase {
         vm.loadIfNeeded()
         vm.select(genreID: 35)
         await settle { vm.phase == .loaded }
-        try await Task.sleep(for: .milliseconds(250))
+        XCTAssertEqual(vm.results.compactMap(\.id), [9])
+
+        // Only now does the earlier filter's page come back.
+        gate.open()
+        await settle { gate.passed == 1 }
+        // It's back; give the view model its turn on the main actor to act on it.
+        try await Task.sleep(for: .milliseconds(50))
 
         XCTAssertEqual(vm.results.compactMap(\.id), [9])
+        XCTAssertEqual(vm.resultsQuery.genreID, 35)
     }
 
     /// A filter tap keeps the current titles up, flagged as refreshing,
     /// until the new first page replaces them in one go.
     func testAFilterChangeKeepsTheOldTitlesUntilTheNewOnesLand() async {
+        let gate = Gate()
         let service = StubCatalogService { query, _ in
             if query.genreID == 35 {
-                try await Task.sleep(for: .milliseconds(120))
+                await gate.wait()
                 return page1([fixture(9)])
             }
             return page1([fixture(1), fixture(2)])
@@ -306,6 +336,7 @@ final class ProviderBrowseViewModelTests: XCTestCase {
         XCTAssertEqual(vm.results.compactMap(\.id), [1, 2])
         XCTAssertNil(vm.resultsQuery.genreID, "results still answer the old query")
 
+        gate.open()
         await settle { !vm.isRefreshing }
         XCTAssertEqual(vm.results.compactMap(\.id), [9])
         XCTAssertEqual(vm.resultsQuery.genreID, 35)
@@ -332,6 +363,37 @@ final class ProviderBrowseViewModelTests: XCTestCase {
         XCTAssertEqual(vm.heroTitles.compactMap(\.id), [33736])
     }
 
+    /// A service with nothing to put up, or whose first page fails, takes the
+    /// last service's titles down with it rather than leaving them cycling
+    /// under its own name.
+    func testAServiceWithNothingToShowTakesTheHeroDown() async {
+        let service = StubCatalogService { query, _ in
+            switch query.providerID {
+            case 8:   return page1([fixture(801)])
+            case 337: return page1([])
+            default:  throw URLError(.notConnectedToInternet)
+            }
+        }
+        let vm = ProviderBrowseViewModel(
+            providers: [netflix, disney, apple], provider: netflix,
+            screenType: .movie, region: "GR", service: service)
+        vm.loadIfNeeded()
+        await settle { vm.phase == .loaded }
+        XCTAssertEqual(vm.heroTitles.compactMap(\.id), [801])
+
+        vm.select(provider: disney)
+        await settle { vm.phase == .empty }
+        XCTAssertTrue(vm.heroTitles.isEmpty)
+
+        vm.select(provider: netflix)
+        await settle { vm.phase == .loaded }
+        XCTAssertEqual(vm.heroTitles.compactMap(\.id), [801])
+
+        vm.select(provider: apple)
+        await settle { vm.phase == .failed }
+        XCTAssertTrue(vm.heroTitles.isEmpty)
+    }
+
     func testAFailedFirstPageFailsTheScreen() async {
         let vm = viewModel(StubCatalogService { _, _ in throw URLError(.notConnectedToInternet) })
 
@@ -339,6 +401,60 @@ final class ProviderBrowseViewModelTests: XCTestCase {
         await settle { vm.phase != .loading }
 
         XCTAssertEqual(vm.phase, .failed)
+    }
+
+    /// The first page adds nothing (no posters), so the view model reads on
+    /// — and that read fails. With nothing listed, that's the screen failing,
+    /// not a skeleton left up for good or an empty grid.
+    func testAReadOnThatFailsWithNothingListedFailsTheScreen() async {
+        let vm = viewModel(StubCatalogService { _, page in
+            guard page == 1 else { throw URLError(.timedOut) }
+            return page1([fixture(1, poster: false)], totalPages: 3)
+        })
+
+        vm.loadIfNeeded()
+        await settle { vm.phase != .loading }
+
+        XCTAssertEqual(vm.phase, .failed)
+        XCTAssertFalse(vm.canLoadMore)
+    }
+
+    /// The same under a filter change, where the previous titles were up:
+    /// they go, and the screen fails rather than showing an empty grid.
+    func testAReadOnThatFailsDuringARefreshFailsTheScreen() async {
+        let vm = viewModel(StubCatalogService { query, page in
+            guard query.genreID == 35 else { return page1([fixture(1), fixture(2)]) }
+            guard page == 1 else { throw URLError(.timedOut) }
+            return page1([fixture(9, poster: false)], totalPages: 3)
+        })
+        vm.loadIfNeeded()
+        await settle { vm.phase == .loaded }
+
+        vm.select(genreID: 35)
+        await settle { vm.phase != .loaded }
+
+        XCTAssertEqual(vm.phase, .failed)
+        XCTAssertFalse(vm.isRefreshing)
+        XCTAssertTrue(vm.results.isEmpty)
+    }
+
+    /// Switching service mid-search drops the last service's answer at once:
+    /// its split into "On" and "Not on" belongs to the old service.
+    func testSwitchingServiceMidSearchDropsTheOldServicesAnswer() async {
+        let service = StubCatalogService(search: [fixture(1, mediaType: "movie")],
+                                         streaming: [1: [8]]) { _, _ in page1([]) }
+        let vm = viewModel(service)
+        vm.updateSearch("anything")
+        vm.scheduleSearch(debounce: false)
+        await settle { vm.searchResults != nil }
+        XCTAssertEqual(vm.searchResults?.onService.compactMap(\.id), [1])
+
+        vm.select(provider: disney)
+        XCTAssertNil(vm.searchResults)
+
+        await settle { vm.searchResults != nil }
+        XCTAssertEqual(vm.searchResults?.onService.count, 0)
+        XCTAssertEqual(vm.searchResults?.elsewhere.first?.streamingOn?.provider_id, 8)
     }
 
     /// Matches split by whether the service carries them, each half in TMDB's
@@ -403,6 +519,29 @@ private func fixture(_ id: Int, poster: Bool = true, mediaType: String? = nil, b
 
 private func page1(_ results: [Result], totalPages: Int = 1) -> GenericResultResponse {
     GenericResultResponse(results: results, total_pages: totalPages, total_results: results.count)
+}
+
+/// Holds a stub's answer until the test lets it through, so the order two
+/// responses land in is pinned by the test instead of raced on the clock.
+@MainActor
+private final class Gate {
+    private var isOpen = false
+    private var waiting: [CheckedContinuation<Void, Never>] = []
+    /// How many answers it has let through.
+    private(set) var passed = 0
+
+    func wait() async {
+        if !isOpen {
+            await withCheckedContinuation { waiting.append($0) }
+        }
+        passed += 1
+    }
+
+    func open() {
+        isOpen = true
+        waiting.forEach { $0.resume() }
+        waiting = []
+    }
 }
 
 /// Answers the catalogue from a closure and search from fixtures. Everything

@@ -63,8 +63,19 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     /// published: setting them must not redraw anything either.
     private var isOnScreen = false
     /// A change landed while the watchlist was on screen; applied once it
-    /// isn't.
+    /// isn't, or once `transitionAllowance` has passed.
     private var refreshPending = false
+    private var pendingFlush: Task<Void, Never>?
+
+    /// How long a change that lands on screen is held back: longer than a
+    /// push or a swipe back takes. A push that finishes sooner applies it
+    /// sooner, from `onDisappear`. Still on screen once it's passed, there's
+    /// no transition left to protect — the user is looking at the list, or
+    /// at a sheet over it, which fires no disappear — so it's applied then.
+    /// Held until the next disappear instead, a write landing just after a
+    /// swipe back (a details fetch finishing late) stayed hidden for as long
+    /// as the user stayed on the tab.
+    private let transitionAllowance: Duration = .seconds(1)
 
     func screenAppeared() {
         isOnScreen = true
@@ -72,21 +83,34 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
 
     func screenDisappeared() {
         isOnScreen = false
-        if refreshPending {
-            refreshPending = false
+        applyPendingRefresh()
+    }
+
+    /// Changes made while the watchlist is on screen are mostly its own — a
+    /// removal, a reorder — and those refresh it themselves, straight away;
+    /// for them this finds nothing new. What arrives from elsewhere waits
+    /// out `transitionAllowance`, or until the list is covered or away.
+    private func storageChanged() {
+        guard isOnScreen else {
             refreshDataIfNeeded()
+            return
+        }
+        refreshPending = true
+        guard pendingFlush == nil else { return }
+        let allowance = transitionAllowance
+        pendingFlush = Task { [weak self] in
+            try? await Task.sleep(for: allowance)
+            guard !Task.isCancelled else { return }
+            self?.applyPendingRefresh()
         }
     }
 
-    /// Changes made while the watchlist is on screen are its own — a
-    /// removal, a reorder — and those refresh it themselves, straight away.
-    /// What arrives from elsewhere waits until it's covered or away.
-    private func storageChanged() {
-        if isOnScreen {
-            refreshPending = true
-        } else {
-            refreshDataIfNeeded()
-        }
+    private func applyPendingRefresh() {
+        pendingFlush?.cancel()
+        pendingFlush = nil
+        guard refreshPending else { return }
+        refreshPending = false
+        refreshDataIfNeeded()
     }
 
     private func fetchResultsFromWatchList() {
@@ -123,8 +147,8 @@ class WatchlistViewModel: ObservableObject, BaseSwipeActionsProtocol {
     /// half a dozen complete decodes per frame. `results` is refreshed by
     /// `fetchResultsFromWatchList()` on init, after a removal or reorder, on
     /// an iCloud merge, and on any other change on this device once the
-    /// watchlist is out of sight (`storageChanged()`) — every path that can
-    /// change it.
+    /// watchlist is out of sight or past any transition (`storageChanged()`)
+    /// — every path that can change it.
     var savedAll: [Result] {
         Array((results ?? []).reversed())
     }

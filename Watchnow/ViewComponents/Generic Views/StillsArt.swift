@@ -165,14 +165,27 @@ struct StillsArt: UIViewRepresentable {
         private func show(at index: Int, animated: Bool) {
             guard urls.indices.contains(index) else { return }
             let url = urls[index]
+            let isCropped = motion == .still
             var options: KingfisherOptionsInfo = [.cacheOriginalImage]
-            if motion == .still { options.append(.processor(HeroStillProcessor())) }
+            if isCropped { options.append(.processor(HeroStillProcessor())) }
             KingfisherManager.shared.retrieveImage(with: url, options: options) { [weak self] result in
                 guard case .success(let value) = result else { return }
                 let image = value.image
                 // Kingfisher calls back on the main queue.
-                MainActor.assumeIsolated { self?.present(image, from: url, at: index, animated: animated) }
+                MainActor.assumeIsolated {
+                    guard let self, self.isStillWanted(url, at: index, cropped: isCropped) else { return }
+                    self.present(image, from: url, at: index, animated: animated)
+                }
             }
+        }
+
+        /// Whether a still that's just been fetched is still the one to
+        /// show. The stills, the rotation or the crop can all have moved on
+        /// while it was on its way, and a late answer laid over a newer one
+        /// would put the older picture back.
+        private func isStillWanted(_ url: URL, at index: Int, cropped: Bool) -> Bool {
+            index == self.index && urls.indices.contains(index) && urls[index] == url
+                && (motion == .still) == cropped
         }
 
         private func present(_ image: UIImage, from url: URL, at index: Int, animated: Bool) {
@@ -191,9 +204,16 @@ struct StillsArt: UIViewRepresentable {
                 }
                 return
             }
-            // The next still comes up over the current one, already moving,
-            // and the two swap roles once it's covered it.
+            // The next still comes up over the current one, already moving.
+            // The two swap roles as the dissolve starts, not when it ends: a
+            // second dissolve begun inside the first then takes the layer
+            // that's going, not the one still coming up — swapped at the
+            // end, both dissolves took the same layer, and the second's end
+            // hid the only still showing.
             let incoming = spare
+            let outgoing = current
+            current = incoming
+            spare = outgoing
             incoming.frame = bounds
             incoming.setStill(image, url: url, motion: motion)
             incoming.alpha = 0
@@ -203,10 +223,10 @@ struct StillsArt: UIViewRepresentable {
             UIView.animate(withDuration: dissolve, delay: 0, options: [.curveEaseInOut]) {
                 incoming.alpha = 1
             } completion: { _ in
-                self.current.stop()
-                self.current.alpha = 0
-                self.spare = self.current
-                self.current = incoming
+                // Unless a later dissolve has brought it back up meanwhile.
+                guard outgoing !== self.current else { return }
+                outgoing.stop()
+                outgoing.alpha = 0
             }
         }
     }
@@ -432,10 +452,22 @@ extension SpatialStill {
 /// over nearly two thousand — the softness that made some heroes look off.
 /// The full size is eight times the download, which is why it waits for
 /// Wi-Fi.
+///
+/// A still keeps the size it was first asked for at, for the session. The
+/// heroes ask for their URLs in `body`, so if the size followed the
+/// connection, the first re-render after leaving Wi-Fi gave every slide a
+/// new URL — the same still fetched again at the other size, and dissolved
+/// in over itself.
+@MainActor
 enum HeroStill {
+    private static var chosen: [String: URL] = [:]
+
     static func url(path: String) -> URL? {
+        if let known = chosen[path] { return known }
         let width: API.ImageWidth = NetworkConditions.shared.isUnmetered ? .original : .heroBackdrop
-        return URL(string: API.Common.imageUrl(imageId: path, width: width))
+        let url = URL(string: API.Common.imageUrl(imageId: path, width: width))
+        chosen[path] = url
+        return url
     }
 }
 
